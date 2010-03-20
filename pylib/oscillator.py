@@ -9,9 +9,7 @@ import numpy as np
 #     cmath.polar(1, cmath.pi*x/period)
 
 class Osc:
-    """
-    Oscillator class
-    """
+    """Oscillator class"""
     roots = dict()
     
     def __init__(self, ratio):
