@@ -37,8 +37,8 @@ class Osc:
         
         if not Osc.roots.has_key(self.period):
             Osc.roots[self.period] = self.table_roots() # self.gen_roots(self.nth_root)
-        self.roots = Osc.roots[self.period]
-        self.roots = self.ord_roots()
+        # self.roots = Osc.roots[self.period]
+        # self.roots = self.ord_roots()
     
     @classmethod
     def freq(self, freq):
@@ -46,15 +46,15 @@ class Osc:
         ratio = Fraction.from_float(float(freq)/Sampler.rate).limit_denominator(Sampler.rate)
         return Osc(ratio)
     
-    def _order_index(self, ratio):
-        order, period = ratio.numerator, ratio.denominator
-        return np.array(range(period)) * order % period
-        
-    def ord_roots(self):
+    def _root_order(self):
+        return np.array(range(self.period)) * self.order % self.period
+    
+    @property
+    def roots(self):
         if self.order == 1:
-            return self.roots
+            return Osc.roots[self.period]
         else:
-            return self.roots[self._order_index(self.ratio)]
+            return Osc.roots[self.period][self._root_order()]
     
     def normalize_fraction(self, n):
         n %= self.period
