@@ -19,7 +19,7 @@ class OscInitTest(unittest.TestCase):
     
     def testSize(self):
         """Test size of roots"""
-        self.assertEqual(8, Osc(1,8).roots.size)
+        self.assertEqual(8, Osc(1,8).samples.size)
     
     def testInitWithAliasing(self):
         Osc.prevent_aliasing = False
@@ -54,16 +54,16 @@ class OscRootsTest(unittest.TestCase):
     def testRootFuncSanity(self):
         """It should give sane values."""
         wi = 2 * pi * 1j
-        a = Osc(1,8).roots
+        a = Osc(1,8).samples
         b = np.array([
             +1+0j, exp(wi*1/8),
             +0+1j, exp(wi*3/8),
             -1+0j, exp(wi*5/8),
             -0-1j, exp(wi*7/8),
         ])
-        assert np.allclose(a.real, b.real, atol=2e-15), \
+        assert np.allclose(a.real, b.real, atol=2e-12), \
             "real %s is not close to\n\t\t%s" % (a, b)
-        assert np.allclose(a.imag, b.imag, atol=2e-15), \
+        assert np.allclose(a.imag, b.imag, atol=2e-12), \
             "imag %s is not close to\n\t\t%s" % (a, b)
     
     def testPhasors(self):
@@ -83,7 +83,7 @@ class OscRootsTest(unittest.TestCase):
 
 class OscAliasingTest(unittest.TestCase):
     """Test (preventing the) aliasing of frequencies: f < 0, f > sample rate"""
-    silence = Osc(0, 1)
+    silence = Osc()
     
     def testFrequenciesOverNyquistRate(self):
         """Is should (not) produce silence if ratio > 1/2"""
