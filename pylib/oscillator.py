@@ -37,7 +37,7 @@ class Osc:
         
     @classmethod
     def freq(cls, freq):
-        """Oscillator can be initialized using a frequency, which can be a float."""
+        """Oscillator can be initialized using a frequency. Can be a float."""
         ratio = Fraction.from_float(float(freq)/Sampler.rate).limit_denominator(Sampler.rate)
         return cls(ratio)
     
@@ -100,7 +100,7 @@ class Osc:
     ### Sampling ###
     
     def _root_order(self):
-        return np.array(range(self.period)) * self.order % self.period
+        return np.arange(self.period) * self.order % self.period
         
     @property
     def samples(self):
@@ -115,23 +115,22 @@ class Osc:
     def __getitem__(self, item):
         """Slicing support. If given a slice the behaviour will be:
         
-        Stepping is wrapped modulo period.
-        Negative and missing start value defaults to 0.
-        Stop value is multiplied with wrapped step to give expected number of samples.
+        # Step defaults to 1, is wrapped modulo period, and can't be zero!
+        # Start defaults to 0, is wrapped modulo period
+        # Number of elements returned is the absolute differerence of 
+        # stop - start (or period and 0 if either value is missing)
+        # Element count is multiplied with step to produce the same 
+        # number of elements for different step values.
         """
         if isinstance(item, slice):
-            # Step defaults to 1, is wrapped mod period, and can't be zero!
             step = ((item.step or 1) % self.period or 1)
-            # None or negative start is 0
-            start = max(item.start, 0)
-            # Default to period
-            stop = (item.stop or self.period) * step
-            sl = slice(start, stop, step)
-            indices = np.arange(*(sl.indices(sl.stop)))
-            print indices[-1] % self.period # Could be used as cursor
-            return self.samples[indices % self.period]
-        else:
-            return self.samples[np.array(item) % self.period]
+            start = ((item.start or 0) % self.period)
+            element_count = abs((item.stop or self.period) - (item.start or 0))
+            stop = start + (element_count * step)
+            # Construct an array of indices.
+            item = np.arange(*(slice(start, stop, step).indices(stop)))
+            # print item[-1] % self.period # Could be used as cursor
+        return self.samples[np.array(item) % self.period]
     
     ### Representation ###
     
@@ -146,7 +145,7 @@ class Osc:
         
     def to_phasors(self):
         return np.array(map(to_phasor, self.samples))
-        
+    
     ### Arithmetic ###
     # 
     # See fractions.Fraction._operator_fallbacks() for automagic
@@ -172,9 +171,8 @@ class Osc:
         else:
             return NotImplemented
     __rmul__ = __mul__
-    # def __rmul__(self, other):
-    #     return self.__mul__(other)
-        
+
+
 if __name__ == '__main__':
     o = Osc(Fraction(1, 8))
     print o.roots

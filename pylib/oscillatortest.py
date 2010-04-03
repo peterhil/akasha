@@ -4,9 +4,9 @@
 Unit tests for oscillator.py
 """
 
+import unittest
 from oscillator import *
 from fractions import Fraction
-import unittest
 
 class OscInitTest(unittest.TestCase):
     def testInit(self):
@@ -81,12 +81,27 @@ class OscRootsTest(unittest.TestCase):
                 "%s is not close to\n\t\t%s" % (a, b)
 
 
+class OscSlicingTest(unittest.TestCase):
+    def setUp(self):
+        self.o = Osc(1, 6)
+        self.p = Osc(3, 8)
+    
+    def testListAccess(self):
+        self.assertEqual(*self.o[-1,5,11])
+        self.assertEqual(*self.o[0,6,12])
+    
+    def testSliceAccess(self):
+        assert np.equal(self.p[::], self.p.samples).all()
+        assert np.allclose(self.o[:3:2], Osc(1, 3).samples)
+        assert np.equal(self.p[-1:8:3], self.p[7,2,5,0,3,6,1,4,7]).all()
+
+
 class OscAliasingTest(unittest.TestCase):
     """Test (preventing the) aliasing of frequencies: f < 0, f > sample rate"""
     silence = Osc()
     
     def testFrequenciesOverNyquistRate(self):
-        """Is should (not) produce silence if ratio > 1/2"""
+        """It should (not) produce silence if ratio > 1/2"""
         Osc.prevent_aliasing = True
         self.assertEqual(Osc(9, 14), self.silence)
         
@@ -115,6 +130,7 @@ class OscAliasingTest(unittest.TestCase):
         ratio = Fraction(-1, 7)
         o = Osc(ratio)
         self.assertEqual(o.frequency, float((ratio * Sampler.rate) % Sampler.rate))
+
 
 if __name__ == "__main__":
     unittest.main()
