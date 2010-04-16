@@ -1,0 +1,20 @@
+Resonance TODO list:
+
+* Make extensive tests for Osc slicing and 
+maybe use slicing for ordering also -- [::3] = order(3)!
+
+* Make playing sound work
+
+* Harmonics have symbolic ratios for overtones.
+OR a generating function!
+(remember to make some limit, because 20 Hz * 1024 = 20480 Hz)
+
+overtones = [2,3,4,5,6,7]
+overtones = 1.5 * n
+
+* Make some plots or images with matplotlib
+Refresh rate = 1/30s. 44100 Hz / 30 = 1470 samples per buffer
+
+* Experiment with harmoics and scales
+
+* Experiment with noises

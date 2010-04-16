@@ -1,6 +1,7 @@
 syntax: glob
 *.pyc
 *~
+pylib/sounds
 
 syntax: regexp
 \.DS_Store$

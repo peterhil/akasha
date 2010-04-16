@@ -7,6 +7,7 @@ import numpy as np
 import types
 from numbers import Number
 
+np.set_printoptions(precision=4, suppress=True)
 
 def to_phasor(x):
     return (abs(x), (phase(x) / (2 * pi) * 360))
@@ -17,7 +18,21 @@ class Sampler:
 
 
 class Osc:
-    """Oscillator class"""
+    """Oscillator class
+    
+    Viewing complex samples as pairs of reals:
+    
+    o = Osc(1,8)
+    a = o.samples.copy()
+    a
+    b = a.view(np.float64).reshape(8,2)
+    b *= np.array([2,0.5])
+    b
+    c = b.view(np.complex128)
+    c
+    b.transpose()
+    b.transpose()[0]
+    """
     
     # Settings
     prevent_aliasing = True
@@ -32,7 +47,10 @@ class Osc:
         self.ratio = Osc.limit_ratio(Fraction(*args))
         
         if not Osc.roots.has_key(self.period):
-            Osc.roots[self.period] = self.table_roots() #self.gen_roots(self.nth_root)
+            # Osc.roots[self.period] = self.gen_roots(self.func_root)   # 0.927 s
+            # Osc.roots[self.period] = self.gen_roots(self.nth_root)    # 0.731 s
+            # Osc.roots[self.period] = self.table_roots() # 0.057 s
+            Osc.roots[self.period] = self.np_exp() # 0.042 s
         # self.roots = Osc.roots[self.period][self._root_order()]
         
     @classmethod
@@ -96,6 +114,11 @@ class Osc:
         w = 2 * pi
         nth_root = lambda n: rect(1, w * Fraction(n, Sampler.rate))
         return np.array(map(nth_root, range(0, Sampler.rate)))
+        
+    def np_exp(self):
+        """Fastest generating method so far. Uses numpy.exp with linspace for angles.
+        Could be made still faster by using conjugate for half of the samples."""
+        return np.exp(np.linspace(0, 2 * pi, self.period + 1) * 1j)[:-1]
     
     ### Sampling ###
     
