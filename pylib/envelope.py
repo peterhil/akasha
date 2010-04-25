@@ -25,3 +25,11 @@ class Exponential:
             item = np.arange(*(item.indices(item.stop)))
         # convert time to frames
         return self.exponential(item)
+    
+    def __repr__(self):
+        return "Exponential(%s, %s)" % (self.decay, self.amp)
+    
+    def __str__(self):
+        return "<Exponential: decay=%s, amp=%s>" % (self.decay, self.amp)
+
+    

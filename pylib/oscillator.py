@@ -7,7 +7,7 @@ import numpy as np
 import types
 from numbers import Number
 
-np.set_printoptions(precision=4, suppress=True)
+# np.set_printoptions(precision=4, suppress=True)
 
 def to_phasor(x):
     return (abs(x), (phase(x) / (2 * pi) * 360))

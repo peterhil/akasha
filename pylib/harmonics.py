@@ -8,7 +8,7 @@ from scikits.audiolab import play, wavwrite
 from envelope import Exponential
 from oscillator import Osc
 
-np.set_printoptions(precision=4, suppress=True)
+# np.set_printoptions(precision=4, suppress=True)
 
 class Harmonic:
     """Harmonical overtones"""
