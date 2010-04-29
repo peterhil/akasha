@@ -2,9 +2,24 @@ Resonance TODO list:
 
 * Make tests for harmonics
 
+* Implement event scheduling with twisted-osc:
+    0 - Use timeit.default_timer for timestamping events
+        
+        Getting frames from times:
+        clock = timeit.default_timer
+        start = clock()
+        clock() - start
+        
+        Frame indexes for stream chunks:
+        now = clock() - start; print now, last; last = now
+        
+    1 - Make adding sound events to timeline/outputstream possible
+        In streaming, add sound events when they occur, and keep playing them in chunks.
+    2 - Make input client for keyboard (and later for mouse, wacom tablet, midi)
+
 * Implement keyboard input with isomorphic Wicki layout
 
-* Implement tuning systems
+* Implement tuning systems and Instrument class (has tuning and input)
 
 * Make some plots or images with matplotlib
 Refresh rate = 1/30s. 44100 Hz / 30 = 1470 samples per buffer

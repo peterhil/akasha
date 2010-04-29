@@ -6,15 +6,12 @@ from cmath import rect, polar, phase, pi, exp
 import numpy as np
 import types
 from numbers import Number
+from timing import Sampler
 
 # np.set_printoptions(precision=4, suppress=True)
 
 def to_phasor(x):
     return (abs(x), (phase(x) / (2 * pi) * 360))
-
-
-class Sampler:
-    rate = 44100
 
 
 class Osc:
