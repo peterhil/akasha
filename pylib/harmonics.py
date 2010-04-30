@@ -18,7 +18,6 @@ class Harmonic:
         self.func = func
         self.limit = n
         self.overtones = np.array(map(func, np.arange(0, n, dtype=float)))
-        # Set envelopes for overtones
     
     def sample(self, freq, iter):
         oscs = Osc.freq(freq) * self.overtones
@@ -36,5 +35,4 @@ class Harmonic:
         if isinstance(item, slice):
             # Construct an array of indices.
             item = np.arange(*(item.indices(item.stop)))
-        # convert time to frames
         return self.sample(item)
