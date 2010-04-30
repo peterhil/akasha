@@ -5,8 +5,9 @@ Unit tests for envelope.py
 """
 
 import unittest
-from envelope import *
 import math
+from envelope import *
+
 
 class ExponentialTest(unittest.TestCase):
     def testInit(self):
@@ -15,24 +16,24 @@ class ExponentialTest(unittest.TestCase):
         e = Exponential(rate, amp)
         self.assertEqual(e.rate, rate)
         self.assertEqual(e.amp, amp)
-    
+
     def testExponentialDecay(self):
         e = Exponential(-1, 1.0)
-        self.assertEqual(1.0/math.e, e.exponential(44100))
+        self.assertEqual(1.0/math.e, e.sample(44100))
         f = Exponential(-2, 1.0)
-        self.assertEqual(1.0/math.e**2, f.exponential(44100))
-    
+        self.assertEqual(1.0/math.e**2, f.sample(44100))
+
     def testExponentialGrowth(self):
         e = Exponential(1, 1.0)
-        self.assertEqual(math.e, e.exponential(44100))
+        self.assertEqual(math.e, e.sample(44100))
         f = Exponential(5, 1.0)
-        self.assertAlmostEqual(math.e**5, f.exponential(44100))
-    
+        self.assertAlmostEqual(math.e**5, f.sample(44100))
+
     def testZeroExponential(self):
         amp = 1.0
         z = Exponential(0, amp)
         assert np.equal(amp, z[:44100]).all()
-    
+
     def test_len(self):
         """Test that __len__() reports correct length."""
         min_float = minfloat(1)[0]
@@ -52,21 +53,21 @@ class ExponentialTest(unittest.TestCase):
         for rate, amp in testdata:
             e = Exponential(rate, amp)
             i = len(e)
-            
+
             # There should be at least one non-zero item
             non_zero_before_end = False
             end = e[i-window:i-1]
             if np.not_equal(0, end).any():
                 non_zero_before_end = True
                 msg = "too long: Only zeroes found before end."
-            
+
             # Every item after end should be zero
             all_zero_after_end = False
             after_end = e[i:i+window]
             if np.equal(0, after_end).all():
                 all_zero_after_end = True
                 msg = "too short: Not all zero after end."
-            
+
             self.assert_((all_zero_after_end or non_zero_before_end), """%s\n
 Length %d %s\n
 Before:\n%s\n

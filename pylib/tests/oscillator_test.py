@@ -5,8 +5,9 @@ Unit tests for oscillator.py
 """
 
 import unittest
-from oscillator import *
 from fractions import Fraction
+from oscillator import *
+
 
 class OscInitTest(unittest.TestCase):
     def testInit(self):
@@ -16,11 +17,11 @@ class OscInitTest(unittest.TestCase):
         self.assertEqual(o.order, 1)
         self.assertEqual(o.period, 8)
         self.assertEqual(o.ratio, Fraction(1,8))
-    
+
     def testSize(self):
         """Test size of roots"""
         self.assertEqual(8, Osc(1,8).samples.size)
-    
+
     def testInitWithAliasing(self):
         Osc.prevent_aliasing = False
         Osc.negative_frequencies = True
@@ -35,12 +36,12 @@ class OscFrequencyTest(unittest.TestCase):
         o = Osc.freq(440)
         assert(isinstance(o, Osc))
         assert(isinstance(o.frequency, float))
-    
+
     def testFrequency440(self):
         """It should return correct frequency for 440 Hz."""
         o = Osc.freq(440)
         self.assertEqual(o.frequency, 440)
-    
+
     def testFloatFrequency(self):
         """It should return close frequency from float."""
         o = Osc.freq(440.899)
@@ -50,7 +51,7 @@ class OscFrequencyTest(unittest.TestCase):
 class OscRootsTest(unittest.TestCase):
     """Test root generating functions."""
     from cmath import exp
-    
+
     def testRootFuncSanity(self):
         """It should give sane values."""
         wi = 2 * pi * 1j
@@ -65,7 +66,7 @@ class OscRootsTest(unittest.TestCase):
             "real %s is not close to\n\t\t%s" % (a, b)
         assert np.allclose(a.imag, b.imag, atol=2e-12), \
             "imag %s is not close to\n\t\t%s" % (a, b)
-    
+
     def testPhasors(self):
         """It should be accurate.
         Uses angles to make testing easier.
@@ -85,11 +86,11 @@ class OscSlicingTest(unittest.TestCase):
     def setUp(self):
         self.o = Osc(1, 6)
         self.p = Osc(3, 8)
-    
+
     def testListAccess(self):
         self.assertEqual(*self.o[-1,5,11])
         self.assertEqual(*self.o[0,6,12])
-    
+
     def testSliceAccess(self):
         assert np.equal(self.p[::], self.p.samples).all()
         assert np.allclose(self.o[:3:2], Osc(1, 3).samples)
@@ -99,32 +100,32 @@ class OscSlicingTest(unittest.TestCase):
 class OscAliasingTest(unittest.TestCase):
     """Test (preventing the) aliasing of frequencies: f < 0, f > sample rate"""
     silence = Osc()
-    
+
     def testFrequenciesOverNyquistRate(self):
         """It should (not) produce silence if ratio > 1/2"""
         Osc.prevent_aliasing = True
         self.assertEqual(Osc(9, 14), self.silence)
-        
+
         Osc.prevent_aliasing = False
         self.assertEqual(Osc(9,14).ratio, Fraction(9, 14))
-    
+
     def testFrequenciesOverSamplingRate(self):
         Osc.prevent_aliasing = True
         self.assertEqual(Osc(9, 7), self.silence)
-        
+
         Osc.prevent_aliasing = False    # but still wraps when ratio > 1
         self.assertEqual(Osc(9, 7).ratio, Fraction(2, 7))
-    
+
     def testNegativeFrequencies(self):
         """It should handle negative preferences according to preferences."""
         Osc.prevent_aliasing = True
         Osc.negative_frequencies = False
         self.assertEqual(Osc(-1, 7), self.silence)
-        
+
         Osc.prevent_aliasing = False
         Osc.negative_frequencies = True
         self.assertEqual(Osc(-1, 7), Osc(6, 7))
-        
+
         Osc.prevent_aliasing = True
         Osc.negative_frequencies = True
         ratio = Fraction(-1, 7)

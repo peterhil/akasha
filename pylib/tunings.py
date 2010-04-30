@@ -4,8 +4,10 @@
 import numpy as np
 from fractions import Fraction
 
+
 def reduce(fraction):
-    
+    pass
+
 
 class RegularTuning:
     def init(self, generators)

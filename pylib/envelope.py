@@ -1,13 +1,16 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
-from fractions import Fraction
-from cmath import rect, polar, phase, pi, exp
 import math
 import numpy as np
+from cmath import rect, polar, phase, pi, exp
+from fractions import Fraction
+# My modules
+from generators import Generator
 from oscillator import Sampler
 
-# Following two methods are from:
+
+# Following two methods are modified from:
 # http://seun-python.blogspot.com/2009/06/floating-point-min-max.html
 
 def minfloat(guess):
@@ -25,7 +28,8 @@ def maxfloat(guess = 1.0):
         i += 1
     return guess, i
 
-class Exponential:
+
+class Exponential(Generator):
     """Exponential decay and growth for envelopes."""
 
     def __init__(self, rate, amp=1.0):
@@ -36,19 +40,11 @@ class Exponential:
     def half_life(self):
         return math.log(2.0) / -self.rate * Sampler.rate
 
-    def exponential(self, iterable):
+    def sample(self, iterable):
         # Convert frame numbers to time (ie. 44100 => 1.0)
         frames = np.array(iterable) / float(Sampler.rate)
         return self.amp * np.exp(self.rate * frames)
 
-    def __getitem__(self, item):
-        """Slicing support."""
-        if isinstance(item, slice):
-            # Construct an array of indices.
-            item = np.arange(*(item.indices(item.stop)))
-        # convert time to frames
-        return self.exponential(item)
-    
     def __len__(self):
         if self.rate == 0:
             raise ValueError("Length is infinite.")
@@ -63,7 +59,7 @@ class Exponential:
             raise ValueError("Exponential functions with infinite values \
                 cause overflows too easily.")
         return length
-    
+
     def __repr__(self):
         return "Exponential(%s, %s)" % (self.rate, self.amp)
 

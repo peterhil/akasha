@@ -3,13 +3,14 @@
 
 from timeit import default_timer as clock
 
+
 class Sampler:
     rate = 44100
 
 @staticmethod
 def times_at(frames):
     """Convert frame numbers to time.
-    
+
     >>> time_at(44100)
     1.0
     """

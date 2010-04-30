@@ -5,21 +5,16 @@ import numpy as np
 from cmath import rect, polar, phase, pi, exp
 from envelope import Exponential
 from scikits.audiolab import play, wavwrite
+from generators import Generator
 
 np.set_printoptions(precision=4, suppress=True)
 
-class Noise:
+
+class Noise(Generator):
     """Noise generator"""
 
     def __init__(self, function='white'):
         self.function = function
-
-    def __getitem__(self, item):
-        """Slicing support."""
-        if isinstance(item, slice):
-            # Construct an array of indices.
-            item = np.arange(*(item.indices(item.stop)))
-        return self.sample(item)
 
     def sample(self, iter, e = Exponential(-2, amp=0.25)):
         amps = np.random.random(len(iter))
@@ -30,57 +25,11 @@ class Noise:
         return noise[iter] * e[iter]
 
 
-class Mandelbrot:
-
-    @staticmethod
-    def random_phasor():
-        return rect(np.random.random(), 2 * pi * np.random.random())
-
-    def __init__(self, c=None, random=False):
-        if c:
-            self.c = c
-        else:
-            self.c = rect(np.random.random(), 2 * pi * np.random.random() * 1.0/8.0)
-        if random:
-            self.seed()
-        else:
-            self.z = 0
-
-    def next(self):
-        self.z = self.mandelbrot(self.z)
-        if abs(self.z) > 1.0:
-            self.z = rect(1.0/abs(self.z), phase(self.z))
-        return self.z
-
-    def seed(self):
-        self.z = random_phasor
-
-    def __iter__(self):
-        return self
-
-    def __contains__(self, z):
-        if abs(z) < 1.0:
-            return True
-        else:
-            return False
-
-    def mandelbrot(self,z):
-        # mandel = np.poly1d([1, 0, self.c])
-        return z**2 + self.c
-
-
-class Chaos:
+class Chaos(Generator):
     """Chaos generator"""
 
     def __init__(self):
-        self.gen = Mandelbrot()
-
-    def __getitem__(self, item):
-        """Slicing support."""
-        if isinstance(item, slice):
-            # Construct an array of indices.
-            item = np.arange(*(item.indices(item.stop)))
-        return self.sample(item)
+        self.gen = self.Mandelbrot()
 
     def sample(self, iter, e = Exponential(0, amp=0.5)):
         chaos = np.fromiter(self.gen, count=len(iter), dtype=complex)
@@ -88,3 +37,43 @@ class Chaos:
 
     def __repr__(self):
         return "Mandelbrot: c=%s, z=%s" % (self.gen.c, self.gen.z)
+
+
+    # Generator function class for Chaos
+    class Mandelbrot:
+
+        @staticmethod
+        def random_phasor():
+            return rect(np.random.random(), 2 * pi * np.random.random())
+
+        def __init__(self, c=None, random=False):
+            if c:
+                self.c = c
+            else:
+                self.c = rect(np.random.random(), 2 * pi * np.random.random() * 1.0/8.0)
+            if random:
+                self.seed()
+            else:
+                self.z = 0
+
+        def next(self):
+            self.z = self.mandelbrot(self.z)
+            if abs(self.z) > 1.0:
+                self.z = rect(1.0/abs(self.z), phase(self.z))
+            return self.z
+
+        def seed(self):
+            self.z = random_phasor
+
+        def __iter__(self):
+            return self
+
+        def __contains__(self, z):
+            if abs(z) < 1.0:
+                return True
+            else:
+                return False
+
+        def mandelbrot(self,z):
+            # mandel = np.poly1d([1, 0, self.c])
+            return z**2 + self.c

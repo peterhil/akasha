@@ -7,18 +7,20 @@ from scikits.audiolab import play, wavwrite
 
 from envelope import Exponential
 from oscillator import Osc
+from generators import Generator
 
 # np.set_printoptions(precision=4, suppress=True)
 
-class Harmonic:
+
+class Harmonic(Generator):
     """Harmonical overtones"""
-    
+
     def __init__(self, func=lambda x: 1+x, n=8):
         # Set overtones
         self.func = func
         self.limit = n
         self.overtones = np.array(map(func, np.arange(0, n, dtype=float)))
-    
+
     def sample(self, freq, iter):
         oscs = Osc.freq(freq) * self.overtones
         oscs = np.ma.masked_array(oscs, np.equal(oscs, Osc(0, 1)), None).compressed()
@@ -29,10 +31,3 @@ class Harmonic:
             e = Exponential(-o.frequency/100.0) # sine waves
             frames += o[iter] * e[iter]
         return frames / max( abs(max(frames)), len(oscs), 1.0 )
-    
-    def __getitem__(self, item):
-        """Slicing support."""
-        if isinstance(item, slice):
-            # Construct an array of indices.
-            item = np.arange(*(item.indices(item.stop)))
-        return self.sample(item)

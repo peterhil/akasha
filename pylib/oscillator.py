@@ -1,11 +1,13 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
-from fractions import Fraction
-from cmath import rect, polar, phase, pi, exp
 import numpy as np
 import types
+from cmath import rect, polar, phase, pi, exp
+from fractions import Fraction
 from numbers import Number
+# My modules
+from generators import PeriodicGenerator
 from timing import Sampler
 
 # np.set_printoptions(precision=4, suppress=True)
@@ -14,7 +16,7 @@ def to_phasor(x):
     return (abs(x), (phase(x) / (2 * pi) * 360))
 
 
-class Osc:
+class Osc(PeriodicGenerator):
     """Oscillator class
 
     Viewing complex samples as pairs of reals:
@@ -128,29 +130,6 @@ class Osc:
             return Osc.roots[self.period]
         else:
             return Osc.roots[self.period][self._root_order()]
-
-    def __len__(self):
-        return self.period
-
-    def __getitem__(self, item):
-        """Slicing support. If given a slice the behaviour will be:
-
-        # Step defaults to 1, is wrapped modulo period, and can't be zero!
-        # Start defaults to 0, is wrapped modulo period
-        # Number of elements returned is the absolute differerence of 
-        # stop - start (or period and 0 if either value is missing)
-        # Element count is multiplied with step to produce the same 
-        # number of elements for different step values.
-        """
-        if isinstance(item, slice):
-            step = ((item.step or 1) % self.period or 1)
-            start = ((item.start or 0) % self.period)
-            element_count = abs((item.stop or self.period) - (item.start or 0))
-            stop = start + (element_count * step)
-            # Construct an array of indices.
-            item = np.arange(*(slice(start, stop, step).indices(stop)))
-            # print item[-1] % self.period # Could be used as cursor
-        return self.samples[np.array(item) % self.period]
 
     ### Representation ###
 
