@@ -21,8 +21,12 @@ class Harmonic(Generator):
         self.limit = n
         self.overtones = np.array(map(func, np.arange(0, n, dtype=float)))
 
-    def sample(self, freq, iter):
-        oscs = Osc.freq(freq) * self.overtones
+    def __call__(self, freq):
+        self.freq = freq
+        return self
+
+    def sample(self, iter):
+        oscs = Osc.freq(self.freq) * self.overtones
         oscs = np.ma.masked_array(oscs, np.equal(oscs, Osc(0, 1)), None).compressed()
         frames = np.zeros(len(iter), dtype=complex)
         for o in oscs:
