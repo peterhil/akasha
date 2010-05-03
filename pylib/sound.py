@@ -15,21 +15,22 @@ class Sound(defaultdict):
     """Sound groups."""
 
     def __init__ (self):
-        defaultdict.__init__(self, object)
+        self.sounds = defaultdict.__init__(self, object)
 
-    def sample(self, *args):
+    def sample(self, iter):
         '''Pass parameters to all sound objects and update states.'''
-        for sndobj in self:
-            frames = sndobj.sample(*args)
-            self[sndobj] = frames
+        sound = np.zeros(len(iter), dtype=complex)
+        for sndobj in self.sounds:
+            sound += sndobj.sample(iter)
+        return sound / max( abs(max(sound)), len(sound), 1.0 )
 
     def add(self, sndobj, offset=0):
         '''Add a new sndobj to self.'''
-        self[sndobj] = None
+        self.sounds[sndobj] = sndobj
 
     def stat(self):
         '''Return a tuple containing the state of each sound object.'''
-        return tuple(self.values())
+        return tuple(self.sounds.values())
 
     def __getitem__(self, item):
         """Slicing support."""
