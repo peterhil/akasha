@@ -7,7 +7,7 @@ from cmath import rect, polar, phase, pi, exp
 from fractions import Fraction
 # My modules
 from generators import Generator
-from oscillator import Sampler
+from timing import Sampler
 
 
 # Following two methods are modified from:
