@@ -1,7 +1,7 @@
 syntax: glob
 *.pyc
 *~
-pylib/data
+data
 
 syntax: regexp
 \.DS_Store$

@@ -19,7 +19,11 @@ class Harmonic(Generator):
         # Set overtones
         self.func = func
         self.limit = n
-        self.overtones = np.array(map(func, np.arange(0, n, dtype=float)))
+        if n <= 20:
+            self.overtones = np.array(map(func, np.arange(0, n, dtype=float)))
+        else:
+            # numpy.apply_along_axis is faster than map for larger n
+            self.overtones = np.apply_along_axis(func,0,np.arange(0,n,dtype=float))
 
     def __call__(self, freq):
         self.freq = freq

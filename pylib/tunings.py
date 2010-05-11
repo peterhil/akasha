@@ -5,12 +5,22 @@ import numpy as np
 from fractions import Fraction
 
 
-def reduce(fraction):
-    pass
+def cents(*args):
+    """Calculate cents from interval or frequency ratio(s).
+    When using frequencies, give greater frequencies first."""
+    return 1200 * np.log2(args)
 
+def interval(*cnt):
+    """Calculate interval ratio from cents."""
+    return np.power(2, cnt) /1200.0
+
+def freq_plus_cents(f, cnt):
+    """Calculate freq1 + cents = freq2"""
+    return f * interval(cnt)
 
 class RegularTuning:
-    def init(self, generators)
+    def init(self, generators):
+        pass
 
 # In [128]: sorted(Fraction(3,2) ** np.array(map(Fraction.from_float, xrange(28))) % Fraction(3,2) + Fraction(1))
 # Out[128]: 

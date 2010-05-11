@@ -117,7 +117,7 @@ class Osc(PeriodicGenerator):
     def np_exp(self):
         """Fastest generating method so far. Uses numpy.exp with linspace for angles.
         Could be made still faster by using conjugate for half of the samples."""
-        return np.exp(np.linspace(0, 2 * pi, self.period + 1) * 1j)[:-1]
+        return np.exp(np.linspace(0, 2 * pi, self.period, endpoint=False) * 1j)
 
     ### Sampling ###
 
