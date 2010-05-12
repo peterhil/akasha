@@ -12,7 +12,7 @@ from generators import Generator
 
 # np.set_printoptions(precision=4, suppress=True)
 
-class Sound(Generator):
+class Sound(object, Generator):
     """Sound groups."""
 
     def __init__ (self, *args):

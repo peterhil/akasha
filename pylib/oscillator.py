@@ -16,7 +16,7 @@ def to_phasor(x):
     return (abs(x), (phase(x) / (2 * pi) * 360))
 
 
-class Osc(PeriodicGenerator):
+class Osc(object, PeriodicGenerator):
     """Oscillator class
 
     Viewing complex samples as pairs of reals:
@@ -43,7 +43,7 @@ class Osc(PeriodicGenerator):
     # This could be __new__ if Osc would extend Fraction or be immutable
     def __init__(self, *args):
         # Set ratio and limit between 0/1 and 1/1
-        self.ratio = Osc.limit_ratio(Fraction(*args))
+        self._ratio = Osc.limit_ratio(Fraction(*args))
 
         if not Osc.roots.has_key(self.period):
             # Osc.roots[self.period] = self.gen_roots(self.func_root)   # 0.927 s
@@ -70,7 +70,11 @@ class Osc(PeriodicGenerator):
 
     @property
     def ratio(self):
-        return self.ratio
+        return self._ratio
+    
+    @ratio.setter
+    def ratio(self, value):
+        self._ratio = value
 
     @property
     def period(self):
@@ -132,9 +136,12 @@ class Osc(PeriodicGenerator):
             return Osc.roots[self.period][self._root_order()]
 
     ### Representation ###
-
+    
     def __eq__(self, other):
         return self.ratio == other.ratio
+    
+    def __ne__(self, other):
+        return not self == other
 
     def __repr__(self):
         return "Osc(%s, %s)" % (self.order, self.period)
@@ -156,8 +163,10 @@ class Osc(PeriodicGenerator):
             return Osc.freq(self.frequency + other)
         elif isinstance(other, Number):
             return Osc(self.ratio + other)
+        elif isinstance(other, np.ndarray) and isinstance(other[0], np.number):
+            return np.array(map(Osc.freq, self.frequency + other), dtype=np.object)
         else:
-            return NotImplemented
+            raise NotImplementedError("Self: %s, other: %s", (self, other))
     __radd__ = __add__
 
     def __mul__(self, other):
@@ -167,8 +176,10 @@ class Osc(PeriodicGenerator):
             return Osc.freq(self.frequency * other)
         elif isinstance(other, Number):
             return Osc(self.ratio * other)
+        elif isinstance(other, np.ndarray) and isinstance(other[0], np.number):
+            return np.array(map(Osc.freq, self.frequency * other), dtype=np.object)
         else:
-            return NotImplemented
+            raise NotImplementedError("Self: %s, other: %s", (self, other))
     __rmul__ = __mul__
 
 

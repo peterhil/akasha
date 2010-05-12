@@ -4,7 +4,7 @@
 from timeit import default_timer as clock
 
 
-class Sampler:
+class Sampler(object):
     rate = 44100
 
 @staticmethod
@@ -21,8 +21,8 @@ def frames_at(times):
     """Convert time to frame numbers (ie. 1.0 => 44100)"""
     time2frame = lambda t: int(round(t * Sampler.rate))
 
-class Timeline:
+class Timeline(object):
     pass
 
-class OutputStream:
+class OutputStream(object):
     pass

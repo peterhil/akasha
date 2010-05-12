@@ -43,7 +43,7 @@ def freq_plus_cents(f, cnt):
     """Calculate freq1 + cents = freq2"""
     return f * interval(cnt)
 
-class RegularTuning:
+class RegularTuning(object):
     def init(self, generators):
         pass
 

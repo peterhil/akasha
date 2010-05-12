@@ -12,7 +12,7 @@ from generators import Generator
 # np.set_printoptions(precision=4, suppress=True)
 
 
-class Harmonic(Generator):
+class Harmonic(object, Generator):
     """Harmonical overtones"""
 
     def __init__(self, func=lambda x: 1+x, n=8):
@@ -20,19 +20,20 @@ class Harmonic(Generator):
         self.func = func
         self.limit = n
         if n <= 20:
-            self.overtones = np.array(map(func, np.arange(0, n, dtype=float)))
+            self.overtones = np.array(map(func, np.arange(0, n)), dtype=np.float32)
         else:
             # numpy.apply_along_axis is faster than map for larger n
-            self.overtones = np.apply_along_axis(func, 0, np.arange(0, n, dtype=float))
+            self.overtones = np.apply_along_axis(func, 0, np.arange(0, n, dtype=np.float32))
 
     def __call__(self, freq):
         self.freq = freq
         return self
 
     def sample(self, iter):
+        # import pdb; pdb.set_trace()
         oscs = Osc.freq(self.freq) * self.overtones
-        # oscs = np.array(map(Osc.freq, (self.overtones * self.freq)), dtype=object)    # Alternative
-        oscs = np.ma.masked_array(oscs, np.equal(oscs, Osc(0, 1)), None).compressed()
+        # oscs = np.ma.masked_array(oscs, np.equal(oscs, Osc(0, 1)), None).compressed()
+        oscs = filter(lambda x: x!=Osc(0,1), oscs)  # Quick hack to prevent problems with numpy broadcasting and new style classes
         frames = np.zeros(len(iter), dtype=complex)
         for o in oscs:
             # e = Exponential(0, amp=float(self.freq)/o.frequency*float(self.freq)) # square waves

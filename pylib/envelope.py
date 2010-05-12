@@ -29,7 +29,7 @@ def maxfloat(guess = 1.0):
     return guess, i
 
 
-class Exponential(Generator):
+class Exponential(object, Generator):
     """Exponential decay and growth for envelopes."""
 
     def __init__(self, rate, amp=1.0):
