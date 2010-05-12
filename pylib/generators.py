@@ -7,6 +7,10 @@ from PIL import Image
 
 
 class Generator:
+    # Could be new style class, but this causes many problems because numpy 
+    # uses obj[0] (arrays first element) to determine it's type and then 
+    # automatically broadcasts oscs to their complex samples!
+    # This could maybe be prevented by using custom __get* methods or descriptors.
 
     def __getitem__(self, item):
         """Slicing support."""

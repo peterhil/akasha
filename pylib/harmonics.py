@@ -23,7 +23,7 @@ class Harmonic(Generator):
             self.overtones = np.array(map(func, np.arange(0, n, dtype=float)))
         else:
             # numpy.apply_along_axis is faster than map for larger n
-            self.overtones = np.apply_along_axis(func,0,np.arange(0,n,dtype=float))
+            self.overtones = np.apply_along_axis(func, 0, np.arange(0, n, dtype=float))
 
     def __call__(self, freq):
         self.freq = freq
@@ -31,6 +31,7 @@ class Harmonic(Generator):
 
     def sample(self, iter):
         oscs = Osc.freq(self.freq) * self.overtones
+        # oscs = np.array(map(Osc.freq, (self.overtones * self.freq)), dtype=object)    # Alternative
         oscs = np.ma.masked_array(oscs, np.equal(oscs, Osc(0, 1)), None).compressed()
         frames = np.zeros(len(iter), dtype=complex)
         for o in oscs:
