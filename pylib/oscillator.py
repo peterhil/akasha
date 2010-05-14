@@ -1,57 +1,48 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import division
+
+# Math
 import numpy as np
-import types
-from cmath import rect, polar, phase, pi, exp
+from cmath import rect, pi, exp
 from fractions import Fraction
+
+# Types
+import types
+import quantities as pq
 from numbers import Number
+
 # My modules
 from generators import PeriodicGenerator
 from timing import Sampler
 
-# np.set_printoptions(precision=4, suppress=True)
+# Utils
+from utils.decorators import memoized
+from utils.math import to_phasors
 
-def to_phasor(x):
-    return (abs(x), (phase(x) / (2 * pi) * 360))
+# Settings
+np.set_printoptions(precision=16, suppress=True)
+pq.markup.config.use_unicode = True  # Use unicode units representation
 
 
 class Osc(object, PeriodicGenerator):
-    """Oscillator class
-
-    Viewing complex samples as pairs of reals:
-
-    o = Osc(1,8)
-    a = o.samples.copy()
-    a
-    b = a.view(np.float64).reshape(8,2)
-    b *= np.array([2,0.5])
-    b
-    c = b.view(np.complex128)
-    c
-    b.transpose()
-    b.transpose()[0]
-    """
-
+    """Oscillator class"""
+    
     # Settings
     prevent_aliasing = True
     negative_frequencies = False
-
-    # Root cache is a dictionary
-    roots = dict()
-
-    # This could be __new__ if Osc would extend Fraction or be immutable
+    
     def __init__(self, *args):
         # Set ratio and limit between 0/1 and 1/1
         self._ratio = Osc.limit_ratio(Fraction(*args))
-
-        if not Osc.roots.has_key(self.period):
-            # Osc.roots[self.period] = self.gen_roots(self.func_root)   # 0.927 s
-            # Osc.roots[self.period] = self.gen_roots(self.nth_root)    # 0.731 s
-            # Osc.roots[self.period] = self.table_roots() # 0.057 s
-            Osc.roots[self.period] = self.np_exp() # 0.042 s
-        # self.roots = Osc.roots[self.period][self._root_order()]
-
+        
+        # Generate roots
+        # self.roots = self.func_roots        # 0.108 s
+        self.roots = self.table_roots       # 0.057 s
+        # self.roots = self.np_exp
+        self.roots(self.ratio)
+        
     @classmethod
     def freq(cls, freq):
         """Oscillator can be initialized using a frequency. Can be a float."""
@@ -67,97 +58,75 @@ class Osc(object, PeriodicGenerator):
         # wrap roots: 9/8 == 1/8 in Osc! This also helps with numeric accuracy.
         n = f.numerator % f.denominator
         return Fraction(n, f.denominator)
-
+        
+    ### Properties ###
+    
     @property
-    def ratio(self):
-        return self._ratio
+    def ratio(self): return self._ratio
     
     @ratio.setter
     def ratio(self, value):
         self._ratio = value
-
+    
     @property
-    def period(self):
-        return self.ratio.denominator
-
+    def period(self): return self.ratio.denominator
+    
     @property
-    def order(self):
-        return self.ratio.numerator
-
+    def order(self): return self.ratio.numerator
+    
     @property
     def frequency(self):
         return float(self.ratio * Sampler.rate)
-
+        
     ### Generating functions ###
-
-    def normalize_fraction(self, n):
-        n %= self.period
-        return Fraction(n, self.period)
-
-    def nth_root(self, n):
-        w = 2 * pi
-        return rect(1, w * self.normalize_fraction(n))
-
-    def func_root(self, n):
-        wi = 2 * pi * 1j
-        return exp(wi * self.normalize_fraction(n))
-
-    def gen_roots(self, func):
-        return np.array(
-            map( func, range(0, self.period) ),
-            dtype=complex
-        )
-
-    def table_roots(self):
-        if not Osc.roots.has_key(Sampler.rate):
-            Osc.roots[Sampler.rate] = self.gen_table_roots()
-        return Osc.roots[Sampler.rate][0:self.period] ** (Sampler.rate / float(self.period))
-
-    def gen_table_roots(self):
-        w = 2 * pi
-        nth_root = lambda n: rect(1, w * Fraction(n, Sampler.rate))
-        return np.array(map(nth_root, range(0, Sampler.rate)))
-
-    def np_exp(self):
+    
+    @memoized
+    def np_exp(ratio):
         """Fastest generating method so far. Uses numpy.exp with linspace for angles.
         Could be made still faster by using conjugate for half of the samples."""
-        return np.exp(np.linspace(0, 2 * pi, self.period, endpoint=False) * 1j)
-
+        if ratio == 0:
+            return np.exp(np.array([0j]))
+        pi2 = 2 * pi
+        # return np.exp(1j * np.linspace(0, pi2, ratio.denominator, endpoint=False))
+        return np.exp(ratio.numerator * 1j * pi2 * np.arange(0, 1, 1.0/ratio.denominator))  # 53.3 us per loop
+        
+    # Older alternative (and sometimes more precise) ways to generate roots
+    
+    @memoized
+    def func_roots(ratio):
+        wi = 2 * pi * 1j
+        return np.exp(wi * ratio * np.arange(0, ratio.denominator))
+    
+    def table_roots(self, ratio):
+        roots = self.np_exp(Fraction(1, Sampler.rate))
+        return roots[0:ratio.denominator] ** (Sampler.rate / float(ratio.denominator))
+        
     ### Sampling ###
-
-    def _root_order(self):
-        return np.arange(self.period) * self.order % self.period
-
+    
     @property
-    def samples(self):
-        if self.order == 1:
-            return Osc.roots[self.period]
-        else:
-            return Osc.roots[self.period][self._root_order()]
-
+    def sample(self):
+        return self.np_exp(self.ratio)
+        
     ### Representation ###
     
-    def __eq__(self, other):
-        return self.ratio == other.ratio
+    def __cmp__(self, other):
+        if isinstance(other, self.__class__):
+            return cmp(self.ratio, other.ratio)
+        else:
+            return cmp(other, self.ratio)
     
-    def __ne__(self, other):
-        return not self == other
-
     def __repr__(self):
         return "Osc(%s, %s)" % (self.order, self.period)
 
     def __str__(self):
         return "<Osc: %s Hz>" % self.frequency
 
-    def to_phasors(self):
-        return np.array(map(to_phasor, self.samples))
-
     ### Arithmetic ###
     # 
     # See fractions.Fraction._operator_fallbacks() for automagic
     # generation of forward and backward operator functions
     def __add__(self, other):
-        if isinstance(other, Osc):
+        if isinstance(other, self.__class__):
             return Osc(self.ratio + other.ratio)
         elif isinstance(other, float):
             return Osc.freq(self.frequency + other)
@@ -170,7 +139,7 @@ class Osc(object, PeriodicGenerator):
     __radd__ = __add__
 
     def __mul__(self, other):
-        if isinstance(other, Osc):
+        if isinstance(other, self.__class__):
             return Osc(self.ratio * other.ratio)
         elif isinstance(other, float):
             return Osc.freq(self.frequency * other)
@@ -185,6 +154,5 @@ class Osc(object, PeriodicGenerator):
 
 if __name__ == '__main__':
     o = Osc(Fraction(1, 8))
-    print o.roots
-    print o.to_phasors()
-    print Osc.roots.keys()
+    print o.np_exp(o.period)
+    print to_phasors(o.sample)

@@ -7,6 +7,8 @@ Unit tests for oscillator.py
 import unittest
 from fractions import Fraction
 from oscillator import *
+# Utils
+from utils.math import to_phasors
 
 
 class OscInitTest(unittest.TestCase):
@@ -20,7 +22,7 @@ class OscInitTest(unittest.TestCase):
 
     def testSize(self):
         """Test size of roots"""
-        self.assertEqual(8, Osc(1,8).samples.size)
+        self.assertEqual(8, Osc(1,8).sample.size)
 
     def testInitWithAliasing(self):
         Osc.prevent_aliasing = False
@@ -55,16 +57,16 @@ class OscRootsTest(unittest.TestCase):
     def testRootFuncSanity(self):
         """It should give sane values."""
         wi = 2 * pi * 1j
-        a = Osc(1,8).samples
+        a = Osc(1,8).sample
         b = np.array([
             +1+0j, exp(wi*1/8),
             +0+1j, exp(wi*3/8),
             -1+0j, exp(wi*5/8),
             -0-1j, exp(wi*7/8),
         ])
-        assert np.allclose(a.real, b.real, atol=2e-12), \
+        assert np.allclose(a.real, b.real, atol=1e-13), \
             "real %s is not close to\n\t\t%s" % (a, b)
-        assert np.allclose(a.imag, b.imag, atol=2e-12), \
+        assert np.allclose(a.imag, b.imag, atol=1e-13), \
             "imag %s is not close to\n\t\t%s" % (a, b)
 
     def testPhasors(self):
@@ -76,7 +78,7 @@ class OscRootsTest(unittest.TestCase):
             fractional_angle = lambda n: float(Fraction(n, period) % 1) * 360
             angles = np.array( map( fractional_angle, range(0,period) ) )
             angles = 180 - ( (180 - angles) % 360) # wrap 'em to -180..180!
-            a = o.to_phasors()
+            a = to_phasors(o.sample)
             b = np.array( zip( [1] * period,  angles ) )
             assert np.allclose(a, b), \
                 "%s is not close to\n\t\t%s" % (a, b)
@@ -92,8 +94,8 @@ class OscSlicingTest(unittest.TestCase):
         self.assertEqual(*self.o[0,6,12])
 
     def testSliceAccess(self):
-        assert np.equal(self.p[::], self.p.samples).all()
-        assert np.allclose(self.o[:3:2], Osc(1, 3).samples)
+        assert np.equal(self.p[::], self.p.sample).all()
+        assert np.allclose(self.o[:3:2], Osc(1, 3).sample)
         assert np.equal(self.p[-1:8:3], self.p[7,2,5,0,3,6,1,4,7]).all()
 
 
@@ -117,7 +119,7 @@ class OscAliasingTest(unittest.TestCase):
         self.assertEqual(Osc(9, 7).ratio, Fraction(2, 7))
 
     def testNegativeFrequencies(self):
-        """It should handle negative preferences according to preferences."""
+        """It should handle negative frequencies according to preferences."""
         Osc.prevent_aliasing = True
         Osc.negative_frequencies = False
         self.assertEqual(Osc(-1, 7), self.silence)

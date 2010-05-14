@@ -100,8 +100,7 @@ class PeriodicGenerator(Generator):
             stop = start + (element_count * step)
             # Construct an array of indices.
             item = np.arange(*(slice(start, stop, step).indices(stop)))
-            # print item[-1] % self.period # Could be used as cursor
-        return self.samples[np.array(item) % self.period]
+        return self.sample[np.array(item) % self.period]
 
     def __len__(self):
         return self.period

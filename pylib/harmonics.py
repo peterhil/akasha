@@ -30,10 +30,9 @@ class Harmonic(object, Generator):
         return self
 
     def sample(self, iter):
-        # import pdb; pdb.set_trace()
         oscs = Osc.freq(self.freq) * self.overtones
-        # oscs = np.ma.masked_array(oscs, np.equal(oscs, Osc(0, 1)), None).compressed()
-        oscs = filter(lambda x: x!=Osc(0,1), oscs)  # Quick hack to prevent problems with numpy broadcasting and new style classes
+        oscs = np.ma.masked_array(oscs, np.equal(oscs, Osc(0, 1)), None).compressed()
+        # oscs = filter(lambda x: x!=Osc(0,1), oscs)  # Quick hack to prevent problems with numpy broadcasting and new style classes
         frames = np.zeros(len(iter), dtype=complex)
         for o in oscs:
             # e = Exponential(0, amp=float(self.freq)/o.frequency*float(self.freq)) # square waves
