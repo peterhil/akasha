@@ -3,10 +3,11 @@
 
 from __future__ import division
 
-# Math
+# Math &c.
 import numpy as np
 from cmath import rect, pi, exp
 from fractions import Fraction
+from scikits.audiolab import play
 
 # Types
 import types
@@ -39,8 +40,8 @@ class Osc(object, PeriodicGenerator):
         
         # Generate roots
         # self.roots = self.func_roots        # 0.108 s
-        self.roots = self.table_roots       # 0.057 s
-        # self.roots = self.np_exp
+        # self.roots = self.table_roots       # 0.057 s
+        self.roots = self.np_exp
         self.roots(self.ratio)
         
     @classmethod
