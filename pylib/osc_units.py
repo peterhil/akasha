@@ -7,7 +7,6 @@ from __future__ import division
 import numpy as np
 from cmath import rect, pi, exp
 from fractions import Fraction
-from scikits.audiolab import play
 
 # Types
 import types
@@ -21,6 +20,7 @@ from timing import Sampler
 # Utils
 from utils.decorators import memoized
 from utils.math import to_phasors
+from utils import play, wavwrite
 
 # Settings
 np.set_printoptions(precision=16, suppress=True)

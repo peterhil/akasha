@@ -3,6 +3,7 @@
 
 import numpy as np
 import cmath
+from fractions import Fraction
 
 # Viewing complex samples as pairs of reals:
 # 
@@ -23,3 +24,6 @@ def to_phasor(x):
 
 def to_phasors(samples):
     return np.array(map(to_phasor, samples))
+
+def nth_root(n):
+    return np.exp(1j * 2 * np.pi * 1.0/n)

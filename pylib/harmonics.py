@@ -3,11 +3,11 @@
 
 import numpy as np
 from fractions import Fraction
-from scikits.audiolab import play, wavwrite
 
 from envelope import Exponential
 from oscillator import Osc
 from generators import Generator
+from utils import play, wavwrite
 
 # np.set_printoptions(precision=4, suppress=True)
 
@@ -40,3 +40,10 @@ class Harmonic(object, Generator):
             e = Exponential(-o.frequency/100.0) # sine waves
             frames += o[iter] * e[iter]
         return frames / max( abs(max(frames)), len(oscs), 1.0 )
+    
+    def __repr__(self):
+        object_str = u''
+        for obj in self.sounds:
+            objects_str += repr(obj)
+        return "Harmonic(%s)" % (object_str)
+    

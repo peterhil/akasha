@@ -7,7 +7,6 @@ from __future__ import division
 import numpy as np
 from cmath import rect, pi, exp
 from fractions import Fraction
-from scikits.audiolab import play
 
 # Types
 import types
@@ -20,7 +19,9 @@ from timing import Sampler
 
 # Utils
 from utils.decorators import memoized
-from utils.math import to_phasors
+from utils.math import *
+from utils.graphing import *
+from utils import play, wavwrite
 
 # Settings
 np.set_printoptions(precision=16, suppress=True)
@@ -49,7 +50,7 @@ class Osc(object, PeriodicGenerator):
         """Oscillator can be initialized using a frequency. Can be a float."""
         ratio = Fraction.from_float(float(freq)/Sampler.rate).limit_denominator(Sampler.rate)
         return cls(ratio)
-
+    
     @staticmethod
     def limit_ratio(f):
         if Osc.prevent_aliasing and abs(f) > Fraction(1,2):
@@ -155,5 +156,6 @@ class Osc(object, PeriodicGenerator):
 
 if __name__ == '__main__':
     o = Osc(Fraction(1, 8))
+    t = slice(0, Sampler.rate)
     print o.np_exp(o.period)
     print to_phasors(o.sample)

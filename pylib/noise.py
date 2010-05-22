@@ -4,8 +4,8 @@
 import numpy as np
 from cmath import rect, polar, phase, pi, exp
 from envelope import Exponential
-from scikits.audiolab import play, wavwrite
 from generators import Generator
+from utils import play, wavwrite
 
 np.set_printoptions(precision=4, suppress=True)
 

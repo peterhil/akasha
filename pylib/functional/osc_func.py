@@ -7,7 +7,6 @@ from cmath import rect, polar, phase, pi, exp
 from fractions import Fraction
 # My modules
 # from generators import PeriodicGenerator
-from timing import Sampler
 
 import itertools as itr
 import functools as fun
@@ -23,6 +22,9 @@ np.set_printoptions(8,1000,10,suppress=True)
 # 4. ?
 
 ### Time related functions ###
+class Sampler(object):
+    rate = 44100
+
 from datetime import timedelta
 
 td = np.timedelta64
