@@ -1,0 +1,29 @@
+#!/usr/local/bin/python
+# -*- coding: utf-8 -*-
+
+import numpy as np
+import cmath
+from fractions import Fraction
+
+# Viewing complex samples as pairs of reals:
+# 
+# o = Osc(1,8)
+# a = o.samples.copy()
+# a
+# b = a.view(np.float64).reshape(8,2)
+# b *= np.array([2,0.5])
+# b
+# c = b.view(np.complex128).reshape(8,)
+# c
+# b.transpose()
+# b.transpose()[0]
+
+def to_phasor(x):
+    """Convert complex number to phasor tuple with magnitude and angle (in degrees)."""
+    return (abs(x), (cmath.phase(x) / (2 * cmath.pi) * 360))
+
+def to_phasors(samples):
+    return np.array(map(to_phasor, samples))
+
+def nth_root(n):
+    return np.exp(1j * 2 * np.pi * 1.0/n)
