@@ -1,12 +1,18 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
+# Math
 import numpy as np
 from fractions import Fraction
 
-from envelope import Exponential
-from oscillator import Osc
-from generators import Generator
+# My modules
+from physical.envelope import Exponential
+from physical.oscillator import Osc
+from physical.generators import Generator
+
+# Utils
 from utils import play, wavwrite
 
 # np.set_printoptions(precision=4, suppress=True)
@@ -63,9 +69,9 @@ class Harmonic(object, Generator):
             frames += o[iter] * e[iter]
         return frames / max( abs(max(frames)), len(oscs), 1.0 )
     
-    def __repr__(self):
-        object_str = u''
-        for obj in self.sounds:
-            objects_str += repr(obj)
-        return "Harmonic(%s)" % (object_str)
+    # def __repr__(self):
+    #     object_str = u''
+    #     for obj in self.sounds:
+    #         objects_str += repr(obj)
+    #     return "Harmonic(%s)" % (object_str)
     

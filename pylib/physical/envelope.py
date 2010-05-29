@@ -1,13 +1,16 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 import math
 import numpy as np
 from cmath import rect, polar, phase, pi, exp
 from fractions import Fraction
+
 # My modules
-from generators import Generator
-from timing import Sampler
+from .generators import Generator
+from .timing import Sampler
 
 
 # Following two methods are modified from:

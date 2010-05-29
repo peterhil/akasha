@@ -1,7 +1,8 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
-from __future__ import division, absolute_import
+from __future__ import absolute_import
+from __future__ import division
 
 # Math &c.
 import numpy as np
@@ -14,8 +15,8 @@ import quantities as pq
 from numbers import Number
 
 # My modules
-from generators import Generator
-from timing import Sampler, times_at, stime
+from .generators import Generator
+from .timing import Sampler, times_at, stime
 
 # Utils
 from utils.decorators import memoized
