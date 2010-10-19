@@ -10,7 +10,7 @@ def play(sndobj, time=slice(0, Sampler.rate), axis='imag', fs=Sampler.rate):
     # fs = fs or Sampler.rate
     audiolab.play(getattr(sndobj[time], axis), fs)
 
-def wavwrite(*arg, **kwargs):
+def wavwrite(*args, **kwargs):
     audiolab.wavwrite(*args, **kwargs)
 # def wavwrite(sound, dir='../data/Sounds/', fs=Sampler.rate, enc='pcm16')
 #     filename
