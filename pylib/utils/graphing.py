@@ -5,6 +5,11 @@ import numpy as np
 from timing import Sampler
 from PIL import Image
 
+try:
+    import matplotlib.pyplot as plt
+    import matplotlib.image as mpimg
+except:
+    pass
 
 def normalize(signal):
     return signal / np.max(np.abs(signal))  # FIXME ZeroDivision if max=0!
@@ -48,7 +53,7 @@ def fast_graph(samples, size=1000, framerate=30):
     image = Image.fromarray(img, 'RGBA')
     image.show()
 
-def graph(samples, size=1000, framerate=30):
+def graph(samples, size=1000, framerate=30, plot=False):
     """Graph of the complex sound signal."""
     # See http://jehiah.cz/archive/creating-images-with-numpy
     
@@ -58,8 +63,9 @@ def graph(samples, size=1000, framerate=30):
     # for start in indices:
     # samples = self[start:start+buffersize-1:buffersize] # TODO: Make this cleaner
     
-    img = np.zeros((size+1,size+1,4), np.uint8) # Note: y, x
-    
+    img = np.zeros((size+1,size+1,4), np.uint8)             # Note: y, x    
+    img[size/2.0,:] = img[:,size/2.0] = [51,204,204,127]    # Draw axis
+
     # Scale to size and interpret values as pixel centers
     samples = ((clip(samples) + 1+1j) / 2.0 * (size - 1) + (0.5+0.5j))    # 0.5 to 599.5
     
@@ -79,11 +85,18 @@ def graph(samples, size=1000, framerate=30):
     img[(size-1) - bases[1], bases[0]+1, :] += np.repeat((values_10 * 255), 4).reshape(len(samples),4)
     img[(size-1) - (bases[1]+1), bases[0], :] += np.repeat((values_01 * 255), 4).reshape(len(samples),4)
     img[(size-1) - (bases[1]+1), bases[0]+1, :] += np.repeat((values_00 * 255), 4).reshape(len(samples),4)
-    
-    img[size/2.0,:] = img[:,size/2.0] = [51,204,204,127]    # Draw axis
-    
+        
     # Cast floats to integers
     img = np.cast['uint8'](img)
     
-    image = Image.fromarray(img, 'RGBA')
-    image.show()
+    if (plot and plt):
+        imgplot = plt.imshow(img[:,:,0])
+        imgplot.set_cmap('hot')
+    else:
+        image = Image.fromarray(img, 'RGBA')
+        image.show()
+
+def plot(samples):
+    "Plot samples using matplotlib"
+    imgplot = plt.imshow([samples.real, samples.imag])
+    imgplot.set_cmap('hot')
