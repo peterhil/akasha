@@ -7,7 +7,7 @@ from fractions import Fraction
 from envelope import Exponential
 from oscillator import Osc
 from generators import Generator
-from utils import play, wavwrite
+from utils import play, write
 
 # np.set_printoptions(precision=4, suppress=True)
 
@@ -19,6 +19,7 @@ class Harmonic(object, Generator):
         # Set overtones
         self.func = func
         self.limit = n
+        self.damping = lambda f, a=1.0: (-f/100.0, a/(f/h.freq))   # Sine waves
         if n <= 20:
             self.overtones = np.array(map(func, np.arange(0, n)), dtype=np.float32)
         else:
@@ -29,7 +30,7 @@ class Harmonic(object, Generator):
         self.freq = freq
         return self
 
-    def sample(self, iter):
+    def sample_old(self, iter):
         oscs = Osc.freq(self.freq) * self.overtones
         oscs = np.ma.masked_array(oscs, np.equal(oscs, Osc(0, 1)), None).compressed()
         # oscs = filter(lambda x: x!=Osc(0,1), oscs)  # Quick hack to prevent problems with numpy broadcasting and new style classes
@@ -40,10 +41,24 @@ class Harmonic(object, Generator):
             e = Exponential(-o.frequency/100.0) # sine waves
             frames += o[iter] * e[iter]
         return frames / max( abs(max(frames)), len(oscs), 1.0 )
+
+    def sample(self, iter):
+        oscs = Osc.freq(self.freq) * self.overtones
+        oscs = np.ma.masked_array(oscs, np.equal(oscs, Osc(0, 1)), None).compressed()
+        # oscs = filter(lambda x: x!=Osc(0,1), oscs)  # Quick hack to prevent problems with numpy broadcasting and new style classes
+        frames = np.zeros(len(iter), dtype=complex)
+        for o in oscs:
+            # e = Exponential(0, amp=float(self.freq)/o.frequency*float(self.freq)) # square waves
+            # e = Exponential(0, amp=float(self.freq)**2/o.frequency**2*float(self.freq)) # triangle waves
+            e = Exponential(self.damping(o.frequency)) # sine waves
+            frames += o[iter] * e[iter]
+        return frames / max( abs(max(frames)), len(oscs), 1.0 )
     
     def __repr__(self):
-        object_str = u''
-        for obj in self.sounds:
-            objects_str += repr(obj)
-        return "Harmonic(%s)" % (object_str)
+        if hasattr(self, 'freq'):
+            freq = self.freq
+        else:
+            freq = None
+        return "<Harmonic(%s): func = %s; limit = %s; overtones = %s; damping = %s>" % \
+                (freq, self.func, self.limit, self.overtones, self.damping)
     

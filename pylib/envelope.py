@@ -33,8 +33,11 @@ class Exponential(object, Generator):
     """Exponential decay and growth for envelopes."""
 
     def __init__(self, rate, amp=1.0):
-        self.rate = rate
-        self.amp = amp
+        if isinstance(rate, tuple):
+            self.rate, self.amp = rate
+        else:
+            self.rate = rate
+            self.amp = amp
 
     @property
     def half_life(self):
