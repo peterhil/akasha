@@ -30,7 +30,7 @@ def hist_graph(samples, size=1000):
     image = Image.fromarray(np.array(hist / hist.mean() * 255, dtype=np.uint8),'L')
     image.show()
 
-def fast_graph(samples, size=1000, framerate=30):
+def fast_graph(samples, size=1000, framerate=30, plot=False):
     """Graph of the complex sound signal."""
     # See http://jehiah.cz/archive/creating-images-with-numpy
     

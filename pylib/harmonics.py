@@ -19,7 +19,7 @@ class Harmonic(object, Generator):
         # Set overtones
         self.func = func
         self.limit = n
-        self.damping = lambda f, a=1.0: (-f/100.0, a/(f/h.freq))   # Sine waves
+        self.damping = lambda f, a=1.0: (-f/100.0, a/(f/self.freq))   # Sine waves
         if n <= 20:
             self.overtones = np.array(map(func, np.arange(0, n)), dtype=np.float32)
         else:

@@ -8,6 +8,7 @@ from fractions import Fraction
 # My modules
 from envelope import Exponential
 from oscillator import Osc
+from harmonics import Harmonic
 from generators import Generator
 from utils import play, write
 
