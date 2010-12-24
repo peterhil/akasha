@@ -11,6 +11,7 @@ from oscillator import Osc
 from harmonics import Harmonic
 from generators import Generator
 from utils import play, write
+from utils.graphing import *
 
 # np.set_printoptions(precision=4, suppress=True)
 

@@ -15,11 +15,11 @@ from utils import play, write
 class Harmonic(object, Generator):
     """Harmonical overtones"""
 
-    def __init__(self, func=lambda x: 1+x, n=8):
+    def __init__(self, freq=220, func=lambda x: 1+x, damping=None, n=8):
         # Set overtones
         self.func = func
         self.limit = n
-        self.damping = lambda f, a=1.0: (-f/100.0, a/(f/self.freq))   # Sine waves
+        self.damping = damping or (lambda f, a=1.0: (-f/100.0, a/(f/self.freq)))   # Sine waves
         if n <= 20:
             self.overtones = np.array(map(func, np.arange(0, n)), dtype=np.float32)
         else:

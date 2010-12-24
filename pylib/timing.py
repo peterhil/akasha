@@ -6,6 +6,7 @@ from timeit import default_timer as clock
 
 class Sampler(object):
     rate = 44100
+    videorate = 30
 
 @staticmethod
 def times_at(frames):
