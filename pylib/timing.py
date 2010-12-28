@@ -8,7 +8,7 @@ class Sampler(object):
     rate = 44100
     videorate = 30
 
-@staticmethod
+# @staticmethod
 def times_at(frames):
     """Convert frame numbers to time.
 
@@ -17,10 +17,10 @@ def times_at(frames):
     """
     return frames / float(Sampler.rate)
 
-@staticmethod
+# @staticmethod
 def frames_at(times):
     """Convert time to frame numbers (ie. 1.0 => 44100)"""
-    time2frame = lambda t: int(round(t * Sampler.rate))
+    return int(round(times * Sampler.rate))
 
 class Timeline(object):
     pass

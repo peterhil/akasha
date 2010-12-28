@@ -4,7 +4,7 @@
 import numpy as np
 from utils.graphing import *
 import utils
-
+from sys import maxint
 
 class Generator:
     # Could be new style class, but this causes many problems because numpy 
@@ -14,9 +14,9 @@ class Generator:
 
     def __getitem__(self, item):
         """Slicing support."""
-        if isinstance(item, slice):
-            # Construct an array of indices.
-            item = np.arange(*(item.indices(item.stop)))
+        #if isinstance(item, slice):
+        #    # Construct an array of indices.
+        #    item = np.arange(*(item.indices(item.stop)))
         return self.sample(item)
     
     def __call__(self, slice):
@@ -48,4 +48,5 @@ class PeriodicGenerator(Generator):
         return self.sample[np.array(item) % self.period]
 
     def __len__(self):
-        return self.period
+        return maxint
+        #return self.period
