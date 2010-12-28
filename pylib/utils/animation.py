@@ -28,8 +28,10 @@ def anim(snd = None):
         freq=230
         h = Harmonic(freq, damping=lambda f, a=1.0: (-f/100.0, a/(f/freq)), n = 20)(230)
         c = Chaos()
-        o = Osc.freq(220)
-        s = Sound(h, o)
+        o2 = Osc.freq(220)
+        o4 = Osc.freq(440)
+        o3 = Osc.freq(330)
+        s = Sound(h, o2, o3, o4)
         return s
     
     snd = snd or make_test_sound()
