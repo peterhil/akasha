@@ -25,13 +25,16 @@ class Sound(object, Generator):
         
     def sample(self, iter):
         """Pass parameters to all sound objects and update states."""
-        sound = np.zeros((iter.stop - iter.start), dtype=complex)
+        start = iter.start or 0
+        stop = iter.stop
+        
+        sound = np.zeros((stop - start), dtype=complex)
         for (start, stop) in self.sounds:
             sl = (start, stop)
             print "Slice start %s, stop %s" % sl
             for sndobj in self.sounds[sl]:
                 print "Sound object %s" % sndobj
-                if (start <= iter.start or stop <= iter.stop):
+                if (start <= start or stop <= stop):
                     print "Sndobj: %s" % (sndobj, )
                     sound += sndobj[iter]
         return sound / max( len(self), 1.0 )
@@ -50,15 +53,21 @@ class Sound(object, Generator):
     
     def add(self, sndobj, start=0, dur=None):
         """Add a new sndobj to self."""
-        stop  = start + (dur or len(sndobj))
-        sl = (start, stop)
+        if dur:
+            end = start + dur
+        elif hasattr(sndobj, "len"):
+            end = start + len(sndobj)
+        else:
+            end = None
+        
+        sl = (start, end)
 
         if (self.sounds.has_key(sl)):
             self.sounds[sl].append(sndobj)
         else:
             self.sounds[sl] = [sndobj]
         return self
-    
+
     # def stat(self):
     #     '''Return a tuple containing the state of each sound object.'''
     #     return tuple(self.sounds.values())
