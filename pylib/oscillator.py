@@ -48,17 +48,20 @@ class Acc(object, PeriodicGenerator):
     ### Properties ###
     
     @property
-    def ratio(self): return self._ratio
+    def ratio(self):
+        return self._ratio
     
     @ratio.setter
     def ratio(self, value):
         self._ratio = value
     
     @property
-    def period(self): return self.ratio.denominator
+    def period(self):
+        return self.ratio.denominator
     
     @property
-    def order(self): return self.ratio.numerator
+    def order(self):
+        return self.ratio.numerator
     
     @property
     def frequency(self):
@@ -125,6 +128,7 @@ class Osc(object, PeriodicGenerator):
         
     ### Generating functions ###
     
+    @staticmethod
     @memoized
     def np_exp(ratio):
         """Fastest generating method so far. Uses numpy.exp with linspace for angles.
@@ -137,6 +141,7 @@ class Osc(object, PeriodicGenerator):
         
     # Older alternative (and sometimes more precise) ways to generate roots
     
+    @staticmethod
     @memoized
     def func_roots(ratio):
         wi = 2 * pi * 1j
