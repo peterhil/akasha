@@ -2,16 +2,20 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+from scipy.signal import hilbert
+
 from collections import defaultdict
 from fractions import Fraction
+from numbers import Number
 
 # My modules
 from envelope import Exponential
 from oscillator import Osc
 from harmonics import Harmonic
 from generators import Generator
-from utils import play, write
+from utils import play, write, read
 from utils.graphing import *
+from utils.animation import *
 
 # np.set_printoptions(precision=4, suppress=True)
 
@@ -25,18 +29,21 @@ class Sound(object, Generator):
         
     def sample(self, iter):
         """Pass parameters to all sound objects and update states."""
-        start = iter.start or 0
-        stop = iter.stop
+        if isinstance(iter, Number):
+            # FIXME should return scalar, not array!
+            start = int(iter)
+            stop = start + 1
+        else:
+            start = iter.start or 0
+            stop = iter.stop
+        sl = (start, stop)
         
         sound = np.zeros((stop - start), dtype=complex)
-        for (start, stop) in self.sounds:
-            sl = (start, stop)
+        for sl in self.sounds:
             print "Slice start %s, stop %s" % sl
             for sndobj in self.sounds[sl]:
                 print "Sound object %s" % sndobj
-                if (start <= start or stop <= stop):
-                    print "Sndobj: %s" % (sndobj, )
-                    sound += sndobj[iter]
+                sound += sndobj[iter]
         return sound / max( len(self), 1.0 )
 
     def __len__(self):

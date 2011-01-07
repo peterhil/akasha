@@ -1,15 +1,26 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
-import numpy as np
 import string
 import os
+from itertools import tee, izip
+
+import numpy as np
+from scipy.signal import hilbert
 from scikits import audiolab
+
 from timing import Sampler
 
+# itertools recipes -- http://docs.python.org/library/itertools.html#recipes
 def take(n, iterable):
     "Return first n items of the iterable as a Numpy Array"
-    return np.fromiter(islice(iterable, n))
+    return np.fromiter(islice(iterable, n), dtype=iterable.dtype)
+
+def pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = tee(iterable)
+    next(b, None)
+    return izip(a, b)
 
 # Audiolab read, write and play
 
@@ -34,9 +45,8 @@ def write(sndobj, filename='test_sound', axis='imag', format='aiff', enc='pcm16'
     func = getattr(audiolab, format + 'write')
     return func(getattr(sndobj[time], axis), sdir + filename +'_'+ axis +'.'+ format, fs, enc)
 
-def read(filename,
-          dur=1.0, start=0, time=False, 
-          sdir='../../Sounds/_Music samples/', *args, **kwargs):
+def read(filename, dur=1.0, start=0, time=False, complex=True,
+         sdir='../../Sounds/_Music samples/', *args, **kwargs):
     """Reading function. Useful for doing some analysis. Audiolab has the same read as write functions!"""
     
     if filename[0] != '/':    # Relative path
@@ -53,4 +63,14 @@ def read(filename,
     
     # Get and call appropriate reader function
     func = getattr(audiolab, format + 'read')
-    return func(filename, last=time.stop, first=start)   # returns (data, fs, enc)
+    
+    # Read data
+    (data, fs, enc) = func(filename, last=time.stop, first=start)   # returns (data, fs, enc)
+    # TODO if fs or enc differs from default do some conversion?
+    data = data.transpose()[0]  # Make mono
+    
+    # Complex or real samples?
+    if complex:
+        data = hilbert(data)
+    
+    return data

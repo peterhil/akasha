@@ -19,6 +19,8 @@ from noise import Chaos
 from oscillator import Osc
 
 from graphing import *
+# from itertools import *
+from utils import pairwise
 
 def make_test_sound():
     freq=230
@@ -33,67 +35,51 @@ def make_test_sound():
 def blocksize():
     return int(round(Sampler.rate / float(Sampler.videorate)))
 
-def anim(snd = None):
-    if (snd == None): snd = self.make_test_sound()
-    
-    if 'numpy' in surfarray.get_arraytypes(): surfarray.use_arraytype('numpy')
-    else: raise ImportError('Numpy array package is not installed')
-
-    pygame.init()
-    print ('Using %s' % surfarray.get_arraytype().capitalize())
-    
-    def surfdemo_show(array_img, name):
-        "displays a surface, waits for user to continue"
-        array_img = array_img[:,:,:-1]  # Drop alpha
-        
-        screen = pygame.display.set_mode(array_img.shape[:2], 0, 32)
-        surfarray.blit_array(screen, array_img)
-        pygame.display.flip()
-        pygame.display.set_caption(name)
-
-        # clock = pygame.time.Clock()        
-        pygame.time.set_timer(pygame.USEREVENT+1, int(1.0/Sampler.videorate))
-        while 1:
-            #check for quit'n events
-            # event = pygame.event.wait()
-            for event in pygame.event.get():
-                if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-                    return 'quit'
-                    # pygame.quit()
-                elif event.type == pygame.USEREVENT+1:
-                    """Do both mechanics and screen update"""
-                    return
-                elif event.type == MOUSEBUTTONDOWN:
-                    return
-
-                # elif event.type == KEYDOWN and event.key == K_s:
-                #     pass
-                #     main_dir = os.path.split(os.path.abspath(__file__))[0]
-                #     pygame.image.save(screen, main_dir + name + '.png')
-        
-                #cap the framerate
-                # clock.tick(1.0/Sampler.videorate)
-
-    #allblack
-    # allblack = np.zeros((128, 128), np.int32)
-    # surfdemo_show(allblack, 'allblack')
-    
-    print snd
-
+def indices(snd):
     if hasattr(snd, "size"):
         size = snd.size
     else:
         size = 44100
-    
-    for i in xrange(0, size, int(blocksize())):
-        end = min(i + blocksize() * 4, size) - 1
-        sl = slice(i, end)
-        print sl
+    return np.append(np.arange(0, size, blocksize()), size)
 
-        img = draw(normalize(snd[sl]), size=1200)
-        res = surfdemo_show(img, 'harmonics')
-        if res == 'quit':
-            break
+def show(snd, size=1200, name="Resonance"):
+    "Show a slice of the signal"
+    img = draw(snd, size, antialias=True)
+    img = img[:,:,:-1]  # Drop alpha
+    
+    screen = pygame.display.set_mode(img.shape[:2], 0, 32)
+    surfarray.blit_array(screen, img)
+    pygame.display.flip()
+    pygame.display.set_caption(name)
+    return False
+
+def anim(snd = None, name="Resonance"):
+    if (snd == None): snd = self.make_test_sound()
+    
+    if 'numpy' in surfarray.get_arraytypes():
+        surfarray.use_arraytype('numpy')
+    else:
+        raise ImportError('Numpy array package is not installed')
+    pygame.init()
+    print ('Using %s' % surfarray.get_arraytype().capitalize())
+    
+    it = pairwise(indices(snd))
+    # clock = pygame.time.Clock()
+    
+    pygame.time.set_timer(pygame.USEREVENT, 1.0/Sampler.videorate*1000)
+    while 1:
+        event = pygame.event.wait()
+        #check for quit'n events
+        if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+            pygame.quit()
+        elif event.type in [pygame.USEREVENT, MOUSEBUTTONDOWN]:
+            """Do both mechanics and screen update"""
+            show(snd[slice(*it.next())], size=600, name=name)
+
+        #cap the framerate
+        # clock.tick(int(1.0/Sampler.videorate*1000))
+
+    print snd
     
     #alldone
     pygame.quit()
