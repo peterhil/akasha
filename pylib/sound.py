@@ -12,6 +12,7 @@ from numbers import Number
 from envelope import Exponential
 from oscillator import Osc
 from harmonics import Harmonic
+from dtmf import DTMF
 from generators import Generator
 from utils import play, write, read
 from utils.graphing import *

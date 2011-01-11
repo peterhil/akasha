@@ -82,7 +82,7 @@ class Osc(object, PeriodicGenerator):
     negative_frequencies = False
     
     def __init__(self, ratio, superness=2):
-        print "Ratio: %s, Superness: %s" % (ratio, superness)
+        # print "Ratio: %s, Superness: %s" % (ratio, superness)
         # Set ratio and limit between 0/1 and 1/1
         self._ratio = Osc.limit_ratio(Fraction(*[ratio]))
         

@@ -7,6 +7,7 @@ import os
 try:
     import pygame
     from pygame import surfarray
+    from pygame import sndarray, mixer
     from pygame.locals import *
 except ImportError:
     raise ImportError('Error Importing Pygame/surfarray')
@@ -42,31 +43,44 @@ def indices(snd):
         size = 44100
     return np.append(np.arange(0, size, blocksize()), size)
 
-def show(snd, size=1200, name="Resonance"):
+def show(screen, snd, size=800, name="Resonance", antialias=True):
     "Show a slice of the signal"
-    img = draw(snd, size, antialias=True)
+    img = draw(snd, size, antialias=antialias)
     img = img[:,:,:-1]  # Drop alpha
     
-    screen = pygame.display.set_mode(img.shape[:2], 0, 32)
-    surf = surfarray.blit_array(screen, img)
+    # screen = pygame.display.set_mode(img.shape[:2], 0, 32)
+    surfarray.blit_array(screen, img)
     pygame.display.flip()
     pygame.display.set_caption(name)
-    del img, screen, surf
+    del img
     return False
 
-def anim(snd = None, size="600", name="Resonance"):
+def anim(snd = None, size=800, name="Resonance", antialias=True):
     if (snd == None): snd = self.make_test_sound()
     
     if 'numpy' in surfarray.get_arraytypes():
         surfarray.use_arraytype('numpy')
     else:
         raise ImportError('Numpy array package is not installed')
-    pygame.init()
     print ('Using %s' % surfarray.get_arraytype().capitalize())
+    
+    pygame.init()
+    mixer.quit()
+    mixset = mixer.init(frequency=Sampler.rate, size=-16, channels=1, buffer=blocksize())
+    print mixer.get_init()
     
     it = pairwise(indices(snd))
     # clock = pygame.time.Clock()
-    show(snd[slice(*it.next())], size=size, name=name)
+    
+    resolution = (size+1, size+1) # FIXME get resolution some other way. This was: img.shape[:2]
+    screen = pygame.display.set_mode(resolution, 0, 32)
+    show(screen, snd[slice(*it.next())], size=size, name=name, antialias=antialias)
+        
+    sndarr = np.cast['int32'](snd.imag * (2**16/2.0-1))
+    print sndarr
+    print np.max(sndarr), np.min(sndarr)
+    pgsnd = sndarray.make_sound(sndarr)
+    pgsnd.play()
     
     pygame.time.set_timer(pygame.USEREVENT, int(round(1.0/Sampler.videorate*1000)))
     while 1:
@@ -78,9 +92,10 @@ def anim(snd = None, size="600", name="Resonance"):
         elif event.type in [pygame.USEREVENT, MOUSEBUTTONDOWN]:
             """Do both mechanics and screen update"""
             try:
-                show(snd[slice(*it.next())], size=size, name=name)
+                samples = snd[slice(*it.next())]
+                show(screen, samples, size=size, name=name, antialias=antialias)
             except StopIteration:
-                pygame.time.delay(2000)
+                # pygame.time.delay(2000)
                 break
 
         #cap the framerate
@@ -89,6 +104,7 @@ def anim(snd = None, size="600", name="Resonance"):
     print snd
     
     #alldone
+    mixer.quit()
     pygame.quit()
 
 if __name__ == '__main__':

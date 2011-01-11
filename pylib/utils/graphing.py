@@ -49,8 +49,9 @@ def hsv2rgb(hsv):
     rgb[1] = int(round( (1 - hsv[1] + hsv[1] * sat[1]) * hsv[2] ))
     rgb[2] = int(round( (1 - hsv[1] + hsv[1] * sat[2]) * hsv[2] ))
     
+    #alpha
     if (len(hsv) == 4):
-        rgb[3] = hsv[3]
+        rgb.append(hsv[3])
     
     return rgb
     
@@ -83,13 +84,14 @@ def rgb2hsv(rgb):
         
     hsv = map(lambda a: int(round(a)), hsv)
     
+    #alpha
     if (len(rgb) == 4):
-        hsv[3] = rgb[3] #alpha
+        hsv.append(rgb[3])
         
     return hsv
 
 def angle2hsv(deg):
-    return [deg, 0, 255, 255]
+    return [deg % 360, 1, 255, 255]
 
 def hist_graph(samples, size=1000):
     """Uses numpy histogram2d to make an image from complex signal."""
@@ -121,13 +123,23 @@ def draw(samples, size=1000, antialias=True):
     
     img = get_canvas(size)
     points = get_points(samples, size)
-
-    # Angles for hues
-    angles = (np.array(map(phase, -samples)) * (360.0 / 2 * np.pi)) % 360
-    angles = (angles - np.append(0, angles[:-1])) * 2
+    
+    ## Angles for hues
+    
+    # Get angles from points
+    angles = np.array(map(phase, samples)) + np.pi
+    # print repr(angles[:100])
+    
+    # Get diffs & convert to degrees 0..240 (red..blue)
+    angles = np.abs(np.append(0, angles[:-1]) - angles) % (2.0 * np.pi)  # 0..2*pi
+    # print repr(angles[:100])
+    
+    # Convert rad to deg
+    angles = angles / np.pi * 240.0
+    # print repr(angles[:100])
 
     # Draw axis
-    img[size/2.0,:] = img[:,size/2.0] = [51,204,204,127]
+    img[size/2.0,:] = img[:,size/2.0] = [42,42,42,127]
 
     if antialias:
         # Draw with antialising
@@ -149,7 +161,7 @@ def draw(samples, size=1000, antialias=True):
         points = np.cast['uint64'](points)  # 0 to 599
         
         # Draw image
-        img[(size - 1) - points[1], points[0]] = map(angle2hsv, angles)     #[255,255,255,255]
+        img[(size - 1) - points[1], points[0]] = map(lambda c: hsv2rgb(angle2hsv(c)), angles)     #[255,255,255,255]
         
     return img
 
