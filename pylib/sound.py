@@ -33,6 +33,9 @@ class Sound(object, Generator):
             # FIXME should return scalar, not array!
             start = int(iter)
             stop = start + 1
+        elif isinstance(iter, np.ndarray):
+            start = 0
+            stop = len(iter)
         else:
             start = iter.start or 0
             stop = iter.stop

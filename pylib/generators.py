@@ -14,9 +14,9 @@ class Generator:
 
     def __getitem__(self, item):
         """Slicing support."""
-        #if isinstance(item, slice):
-        #    # Construct an array of indices.
-        #    item = np.arange(*(item.indices(item.stop)))
+        if isinstance(item, slice):
+           # Construct an array of indices.
+           item = np.arange(*(item.indices(item.stop)))
         return self.sample(item)
     
     def __call__(self, slice):

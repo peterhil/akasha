@@ -82,7 +82,7 @@ class Chaos(object, Generator):
             return self.z
 
         def seed(self):
-            self.z = random_phasor
+            self.z = self.random_phasor()
 
         def __iter__(self):
             return self

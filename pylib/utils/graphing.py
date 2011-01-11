@@ -2,8 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+from cmath import phase
 from timing import Sampler
 from PIL import Image
+
+from utils.math import normalize, clip
 
 try:
     import matplotlib.pyplot as plt
@@ -11,16 +14,82 @@ try:
 except:
     pass
 
-def normalize(signal):
-    return signal / np.max(np.abs(signal))  # FIXME ZeroDivision if max=0!
+# Colour conversions from: http://local.wasp.uwa.edu.au/~pbourke/texture_colour/convert/
 
-def clip(signal, inplace=False):
-    """Clips complex samples to unit area (-1-1j, +1+1j)."""
-    if not inplace:
-        signal = signal.copy()
-    reals = signal.view(np.float)
-    np.clip(reals, a_min=-1, a_max=1, out=reals)    # Uses out=reals to transform in-place!
-    return signal
+# /*
+#    Calculate RGB from HSV, reverse of RGB2HSV()
+#    Hue is in degrees
+#    Lightness is between 0 and 1
+#    Saturation is between 0 and 1
+# */
+def hsv2rgb(hsv):
+    rgb = [0, 0, 0] # Could be a dict {}
+    sat = [0, 0, 0]
+    
+    hsv[0] = hsv[0] % 360
+    
+    if (hsv[0] < 120):
+        sat[0] = (120 - hsv[0]) / 60.0
+        sat[1] = hsv[0] / 60.0
+        sat[2] = 0
+    elif (hsv[0] < 240):
+        sat[0] = 0
+        sat[1] = (240 - hsv[0]) / 60.0
+        sat[2] = (hsv[0] - 120) / 60.0
+    else:
+        sat[0] = (hsv[0] - 240) / 60.0
+        sat[1] = 0
+        sat[2] = (360 - hsv[0]) / 60.0
+    
+    sat[0] = min(sat[0], 1)
+    sat[1] = min(sat[1], 1)
+    sat[2] = min(sat[2], 1)
+    
+    rgb[0] = int(round( (1 - hsv[1] + hsv[1] * sat[0]) * hsv[2] ))
+    rgb[1] = int(round( (1 - hsv[1] + hsv[1] * sat[1]) * hsv[2] ))
+    rgb[2] = int(round( (1 - hsv[1] + hsv[1] * sat[2]) * hsv[2] ))
+    
+    if (len(hsv) == 4):
+        rgb[3] = hsv[3]
+    
+    return rgb
+    
+# /*
+#    Calculate HSV from RGB
+#    Hue is in degrees
+#    Lightness is betweeen 0 and 1
+#    Saturation is between 0 and 1
+# */
+def rgb2hsv(rgb):
+    hsv = [0, 0, 0] # Could be a dict {}
+    
+    themin = np.min(rgb)
+    themax = np.max(rgb)
+    delta = float(themax - themin)
+    hsv[2] = themax # value
+    hsv[1] = 0      # saturation
+    if (themax > 0):
+        hsv[1] = delta / themax
+        
+    hsv[0] = 0      # hue
+    if (delta > 0):
+        if (themax == rgb[0] and themax != rgb[1]):
+            hsv[0] += (rgb[1] - rgb[0]) / delta
+        if (themax == rgb[1] and themax != rgb[2]):
+            hsv[0] += (2.0 + (rgb[2] - rgb[0]) / delta)
+        if (themax == rgb[2] and themax != rgb[0]):
+            hsv[0] += (4.0 + (rgb[0] - rgb[1]) / delta)
+        hsv[0] *= 60.0
+        
+    hsv = map(lambda a: int(round(a)), hsv)
+    
+    if (len(rgb) == 4):
+        hsv[3] = rgb[3] #alpha
+        
+    return hsv
+
+def angle2hsv(deg):
+    return [deg, 0, 255, 255]
 
 def hist_graph(samples, size=1000):
     """Uses numpy histogram2d to make an image from complex signal."""
@@ -53,7 +122,12 @@ def draw(samples, size=1000, antialias=True):
     img = get_canvas(size)
     points = get_points(samples, size)
 
-    img[size/2.0,:] = img[:,size/2.0] = [51,204,204,127]    # Draw axis
+    # Angles for hues
+    angles = (np.array(map(phase, -samples)) * (360.0 / 2 * np.pi)) % 360
+    angles = (angles - np.append(0, angles[:-1])) * 2
+
+    # Draw axis
+    img[size/2.0,:] = img[:,size/2.0] = [51,204,204,127]
 
     if antialias:
         # Draw with antialising
@@ -73,9 +147,9 @@ def draw(samples, size=1000, antialias=True):
     else:
         # Cast floats to integers
         points = np.cast['uint64'](points)  # 0 to 599
-    
+        
         # Draw image
-        img[(size - 1) - points[1], points[0]] = [255,255,255,255]
+        img[(size - 1) - points[1], points[0]] = map(angle2hsv, angles)     #[255,255,255,255]
         
     return img
 

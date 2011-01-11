@@ -48,12 +48,13 @@ def show(snd, size=1200, name="Resonance"):
     img = img[:,:,:-1]  # Drop alpha
     
     screen = pygame.display.set_mode(img.shape[:2], 0, 32)
-    surfarray.blit_array(screen, img)
+    surf = surfarray.blit_array(screen, img)
     pygame.display.flip()
     pygame.display.set_caption(name)
+    del img, screen, surf
     return False
 
-def anim(snd = None, name="Resonance"):
+def anim(snd = None, size="600", name="Resonance"):
     if (snd == None): snd = self.make_test_sound()
     
     if 'numpy' in surfarray.get_arraytypes():
@@ -65,16 +66,22 @@ def anim(snd = None, name="Resonance"):
     
     it = pairwise(indices(snd))
     # clock = pygame.time.Clock()
+    show(snd[slice(*it.next())], size=size, name=name)
     
-    pygame.time.set_timer(pygame.USEREVENT, 1.0/Sampler.videorate*1000)
+    pygame.time.set_timer(pygame.USEREVENT, int(round(1.0/Sampler.videorate*1000)))
     while 1:
         event = pygame.event.wait()
         #check for quit'n events
         if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-            pygame.quit()
+            # pygame.quit()
+            break
         elif event.type in [pygame.USEREVENT, MOUSEBUTTONDOWN]:
             """Do both mechanics and screen update"""
-            show(snd[slice(*it.next())], size=600, name=name)
+            try:
+                show(snd[slice(*it.next())], size=size, name=name)
+            except StopIteration:
+                pygame.time.delay(2000)
+                break
 
         #cap the framerate
         # clock.tick(int(1.0/Sampler.videorate*1000))
