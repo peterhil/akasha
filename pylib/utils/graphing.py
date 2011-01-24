@@ -22,7 +22,7 @@ except:
 #    Lightness is between 0 and 1
 #    Saturation is between 0 and 1
 # */
-def hsv2rgb(hsv):
+def hsv2rgb(hsv, alpha=None):
     rgb = [0, 0, 0] # Could be a dict {}
     sat = [0, 0, 0]
     
@@ -52,6 +52,8 @@ def hsv2rgb(hsv):
     #alpha
     if (len(hsv) == 4):
         rgb.append(hsv[3])
+    elif alpha:
+        rgb.append(alpha)
     
     return rgb
     

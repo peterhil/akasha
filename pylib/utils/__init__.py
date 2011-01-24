@@ -45,7 +45,7 @@ def write(sndobj, filename='test_sound', axis='imag', format='aiff', enc='pcm16'
     func = getattr(audiolab, format + 'write')
     return func(getattr(sndobj[time], axis), sdir + filename +'_'+ axis +'.'+ format, fs, enc)
 
-def read(filename, dur=5.0, start=0, time=False, complex=True,
+def read(filename, fs=Sampler.rate, dur=5.0, start=0, time=False, complex=True,
          sdir='../../Sounds/_Music samples/', *args, **kwargs):
     """Reading function. Useful for doing some analysis. Audiolab has the same read as write functions!"""
     
@@ -67,7 +67,8 @@ def read(filename, dur=5.0, start=0, time=False, complex=True,
     # Read data
     (data, fs, enc) = func(filename, last=time.stop, first=start)   # returns (data, fs, enc)
     # TODO if fs or enc differs from default do some conversion?
-    data = data.transpose()[0]  # Make mono
+    if data.ndim > 1:
+        data = data.transpose()[-1]  # Make mono, take left [0] or right [-1] channel.
     
     # Complex or real samples?
     if complex:

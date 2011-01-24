@@ -55,7 +55,7 @@ def show(screen, snd, size=800, name="Resonance", antialias=True):
     del img
     return False
 
-def anim(snd = None, size=800, name="Resonance", antialias=True):
+def anim(snd = None, size=800, name="Resonance", antialias=True, lines=False):
     if (snd == None): snd = self.make_test_sound()
     
     if 'numpy' in surfarray.get_arraytypes():
@@ -66,23 +66,23 @@ def anim(snd = None, size=800, name="Resonance", antialias=True):
     
     pygame.init()
     mixer.quit()
-    mixset = mixer.init(frequency=Sampler.rate, size=-16, channels=1, buffer=blocksize())
+    mixset = mixer.init(frequency=Sampler.rate, size=-16, channels=1, buffer=blocksize()*4)
     print mixer.get_init()
     
     it = pairwise(indices(snd))
     # clock = pygame.time.Clock()
     
     resolution = (size+1, size+1) # FIXME get resolution some other way. This was: img.shape[:2]
-    screen = pygame.display.set_mode(resolution, 0, 32)
+    screen = pygame.display.set_mode(resolution) #, flags=pygame.SRCALPHA, depth=32)
     show(screen, snd[slice(*it.next())], size=size, name=name, antialias=antialias)
-        
+    
     sndarr = np.cast['int32'](snd.imag * (2**16/2.0-1))
     print sndarr
     print np.max(sndarr), np.min(sndarr)
     pgsnd = sndarray.make_sound(sndarr)
     pgsnd.play()
     
-    pygame.time.set_timer(pygame.USEREVENT, int(round(1.0/Sampler.videorate*1000)))
+    pygame.time.set_timer(pygame.USEREVENT, 1.0/Sampler.videorate*1000)
     while 1:
         event = pygame.event.wait()
         #check for quit'n events
@@ -93,7 +93,13 @@ def anim(snd = None, size=800, name="Resonance", antialias=True):
             """Do both mechanics and screen update"""
             try:
                 samples = snd[slice(*it.next())]
-                show(screen, samples, size=size, name=name, antialias=antialias)
+                if lines:
+                    # surfarray.blit_array(screen, img)
+                    screen.fill([0,0,0,255])
+                    pygame.draw.aalines(screen, [255,255,255,0.15], False, get_points(samples).transpose())
+                    pygame.display.flip()
+                else:
+                    show(screen, samples, size=size, name=name, antialias=antialias)
             except StopIteration:
                 # pygame.time.delay(2000)
                 break
