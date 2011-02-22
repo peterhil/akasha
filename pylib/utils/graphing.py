@@ -14,6 +14,8 @@ try:
 except:
     pass
 
+lowest_audible_hz = 16.35
+
 # Colour conversions from: http://local.wasp.uwa.edu.au/~pbourke/texture_colour/convert/
 
 # /*
@@ -133,11 +135,16 @@ def draw(samples, size=1000, antialias=True):
     # print repr(angles[:100])
     
     # Get diffs & convert to degrees 0..240 (red..blue)
-    angles = np.abs(np.append(0, angles[:-1]) - angles) % (2.0 * np.pi)  # 0..2*pi
+    angles = (np.abs(np.append(angles[-1], angles[:-1]) - angles) % (2.0 * np.pi))  # Fixme! First samples should not be handled differently!
+    # print repr(angles[:100])
+    
+    angles =  angles / (2.0 * np.pi) * Sampler.rate  # 0..Fs/2
     # print repr(angles[:100])
     
     # Convert rad to deg
-    angles = angles / np.pi * 240.0
+    low = np.log2(lowest_audible_hz)
+    angles = ((np.log2(np.abs(angles)+1) - low) * 24) % 360   # (np.log2(f)-low) / 10 * 240  red..violet
+    # angles = angles * 240.0     # red..violet
     # print repr(angles[:100])
 
     # Draw axis
