@@ -11,18 +11,30 @@ np.set_printoptions(precision=4, suppress=True)
 
 
 class Noise(object, Generator):
-    """Noise generator"""
+    """Round (magnitude 0..1 with random angle) or polar noise generator"""
 
-    def __init__(self, function='white'):
-        self.function = function
-
-    def sample(self, iter, e = Exponential(-2, amp=0.25)):
-        amps = np.random.random(len(iter))
-        angles = np.random.random(len(iter)) * 1j * 2.0 * pi
+    def __init__(self, domain_fn=None, random_fn=np.random.random):
+        self.function = domain_fn or self.unit_disc
+        self.randomizer = random_fn
+    
+    @staticmethod
+    def unit_disc(iter, randomizer, *args, **kwargs):
+        amps = randomizer(*args, size=len(iter), **kwargs)
+        angles = randomizer(*args, size=len(iter), **kwargs) * 1j * 2.0 * pi
         noise = amps * np.exp(angles)
         # noise = (2.0 * amps - 1.0) * 1j   # flat
-        # e = Exponential(0, amp=float(freq)/o.frequency*float(freq)) # square waves
-        return noise[iter] * e[iter]
+        return noise[iter]
+        
+    @staticmethod
+    def unit_square(iter, randomizer, *args, **kwargs):
+        x = 2 * randomizer(*args, size=len(iter), **kwargs) - 1.0
+        y = 2j * randomizer(*args, size=len(iter), **kwargs) - 1.0j
+        noise = x + y
+        print noise, type(noise)
+        return noise[iter]
+    
+    def sample(self, iter):
+        return self.function(iter, self.randomizer)
 
 
 class Rustle(object, Generator):
