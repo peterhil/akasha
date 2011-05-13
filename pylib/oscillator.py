@@ -101,11 +101,19 @@ class Osc(object, PeriodicGenerator):
         # self.roots = self.table_roots       # 0.057 s
         self.roots = self.np_exp
         self.roots(self.ratio)
-        
+    
+    @staticmethod
+    def limit(f, max=44100):
+        return Fraction(int(round(f * max)), max)
+    
     @classmethod
-    def freq(cls, freq, superness=2):
+    def freq(cls, freq, superness=2, rounding='native'):
         """Oscillator can be initialized using a frequency. Can be a float."""
-        ratio = Fraction.from_float(float(freq)/Sampler.rate).limit_denominator(Sampler.rate)
+        ratio = Fraction.from_float(float(freq)/Sampler.rate)
+        if rounding == 'native':
+            ratio = ratio.limit_denominator(Sampler.rate)
+        else:
+            ratio = cls.limit(ratio, Sampler.rate)
         return cls(ratio, superness)
     
     @staticmethod
