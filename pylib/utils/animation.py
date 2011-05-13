@@ -43,7 +43,7 @@ def indices(snd):
         size = 44100
     return np.append(np.arange(0, size, blocksize()), size)
 
-def show(screen, snd, size=800, name="Resonance", antialias=True):
+def show_slice(screen, snd, size=800, name="Resonance", antialias=True):
     "Show a slice of the signal"
     img = draw(snd, size, antialias=antialias)
     img = img[:,:,:-1]  # Drop alpha
@@ -74,7 +74,7 @@ def anim(snd = None, size=800, name="Resonance", antialias=True, lines=False):
     
     resolution = (size+1, size+1) # FIXME get resolution some other way. This was: img.shape[:2]
     screen = pygame.display.set_mode(resolution) #, flags=pygame.SRCALPHA, depth=32)
-    show(screen, snd[slice(*it.next())], size=size, name=name, antialias=antialias)
+    show_slice(screen, snd[slice(*it.next())], size=size, name=name, antialias=antialias)
     
     sndarr = np.cast['int32'](snd.imag * (2**16/2.0-1))
     print sndarr
@@ -99,7 +99,7 @@ def anim(snd = None, size=800, name="Resonance", antialias=True, lines=False):
                     pygame.draw.aalines(screen, [255,255,255,0.15], False, get_points(samples).transpose())
                     pygame.display.flip()
                 else:
-                    show(screen, samples, size=size, name=name, antialias=antialias)
+                    show_slice(screen, samples, size=size, name=name, antialias=antialias)
             except StopIteration:
                 # pygame.time.delay(2000)
                 break
