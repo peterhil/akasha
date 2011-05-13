@@ -14,7 +14,7 @@ from utils.math import to_phasors
 class OscInitTest(unittest.TestCase):
     def testInit(self):
         """Test initialization"""
-        o = Osc(1,8)
+        o = Osc(Fraction(1, 8))
         assert(isinstance(o, Osc))
         self.assertEqual(o.order, 1)
         self.assertEqual(o.period, 8)
@@ -22,13 +22,13 @@ class OscInitTest(unittest.TestCase):
 
     def testSize(self):
         """Test size of roots"""
-        self.assertEqual(8, Osc(1,8).sample.size)
+        self.assertEqual(8, Osc(Fraction(1, 8)).sample.size)
 
     def testInitWithAliasing(self):
         Osc.prevent_aliasing = False
         Osc.negative_frequencies = True
-        self.assertEqual(Osc(1,8), Osc(9,8))
-        self.assertEqual(Osc(7,8), Osc(-1,8))
+        self.assertEqual(Osc(Fraction(1, 8)), Osc(Fraction(9, 8)))
+        self.assertEqual(Osc(Fraction(7, 8)), Osc(Fraction(-1, 8)))
 
 
 class OscFrequencyTest(unittest.TestCase):
@@ -57,7 +57,7 @@ class OscRootsTest(unittest.TestCase):
     def testRootFuncSanity(self):
         """It should give sane values."""
         wi = 2 * pi * 1j
-        a = Osc(1,8).sample
+        a = Osc(Fraction(1, 8)).sample
         b = np.array([
             +1+0j, exp(wi*1/8),
             +0+1j, exp(wi*3/8),
@@ -86,8 +86,8 @@ class OscRootsTest(unittest.TestCase):
 
 class OscSlicingTest(unittest.TestCase):
     def setUp(self):
-        self.o = Osc(1, 6)
-        self.p = Osc(3, 8)
+        self.o = Osc(Fraction(1, 6))
+        self.p = Osc(Fraction(3, 8))
 
     def testListAccess(self):
         self.assertEqual(*self.o[-1,5,11])
@@ -95,38 +95,38 @@ class OscSlicingTest(unittest.TestCase):
 
     def testSliceAccess(self):
         assert np.equal(self.p[::], self.p.sample).all()
-        assert np.allclose(self.o[:3:2], Osc(1, 3).sample)
+        assert np.allclose(self.o[:3:2], Osc(Fraction(1, 3)).sample)
         assert np.equal(self.p[-1:8:3], self.p[7,2,5,0,3,6,1,4,7]).all()
 
 
 class OscAliasingTest(unittest.TestCase):
     """Test (preventing the) aliasing of frequencies: f < 0, f > sample rate"""
-    silence = Osc()
+    silence = Osc(0)
 
     def testFrequenciesOverNyquistRate(self):
         """It should (not) produce silence if ratio > 1/2"""
         Osc.prevent_aliasing = True
-        self.assertEqual(Osc(9, 14), self.silence)
+        self.assertEqual(Osc(Fraction(9, 14)), self.silence)
 
         Osc.prevent_aliasing = False
-        self.assertEqual(Osc(9,14).ratio, Fraction(9, 14))
+        self.assertEqual(Osc(Fraction(9, 14)).ratio, Fraction(9, 14))
 
     def testFrequenciesOverSamplingRate(self):
         Osc.prevent_aliasing = True
-        self.assertEqual(Osc(9, 7), self.silence)
+        self.assertEqual(Osc(Fraction(9, 7)), self.silence)
 
         Osc.prevent_aliasing = False    # but still wraps when ratio > 1
-        self.assertEqual(Osc(9, 7).ratio, Fraction(2, 7))
+        self.assertEqual(Osc(Fraction(9, 7)).ratio, Fraction(2, 7))
 
     def testNegativeFrequencies(self):
         """It should handle negative frequencies according to preferences."""
         Osc.prevent_aliasing = True
         Osc.negative_frequencies = False
-        self.assertEqual(Osc(-1, 7), self.silence)
+        self.assertEqual(Osc(Fraction(-1, 7)), self.silence)
 
         Osc.prevent_aliasing = False
         Osc.negative_frequencies = True
-        self.assertEqual(Osc(-1, 7), Osc(6, 7))
+        self.assertEqual(Osc(Fraction(-1, 7)), Osc(Fraction(6, 7)))
 
         Osc.prevent_aliasing = True
         Osc.negative_frequencies = True
