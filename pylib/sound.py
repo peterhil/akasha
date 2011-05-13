@@ -9,9 +9,10 @@ from fractions import Fraction
 from numbers import Number
 
 # My modules
-from envelope import Exponential
+from envelope import Attack, Exponential
 from oscillator import Osc
 from harmonics import Harmonic
+from noise import *
 from dtmf import DTMF
 from generators import Generator
 from utils import play, write, read
