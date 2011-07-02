@@ -11,7 +11,7 @@ sample_rate = Sampler.rate
 euler = np.e
 
 # Viewing complex samples as pairs of reals:
-# 
+#
 # o = Osc(1,8)
 # a = o.samples.copy()
 # a
@@ -55,6 +55,10 @@ def roots_counts(base, limit=44100.0):
     ex = np.floor(logn(limit,base))
     return roots_periods(base, limit)/base**float(ex)
 
+# Random
+
+def rand_between(min, max, size=1):
+    return (max - min) * np.random.random(size) + min
 
 # Primes
 
