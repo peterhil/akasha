@@ -6,7 +6,7 @@ import cmath
 from fractions import Fraction
 
 # Viewing complex samples as pairs of reals:
-# 
+#
 # o = Osc(1,8)
 # a = o.samples.copy()
 # a

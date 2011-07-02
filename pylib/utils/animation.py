@@ -47,7 +47,7 @@ def show_slice(screen, snd, size=800, name="Resonance", antialias=True):
     "Show a slice of the signal"
     img = draw(snd, size, antialias=antialias)
     img = img[:,:,:-1]  # Drop alpha
-    
+
     # screen = pygame.display.set_mode(img.shape[:2], 0, 32)
     surfarray.blit_array(screen, img)
     pygame.display.flip()
@@ -57,31 +57,31 @@ def show_slice(screen, snd, size=800, name="Resonance", antialias=True):
 
 def anim(snd = None, size=800, name="Resonance", antialias=True, lines=False):
     if (snd == None): snd = self.make_test_sound()
-    
+
     if 'numpy' in surfarray.get_arraytypes():
         surfarray.use_arraytype('numpy')
     else:
         raise ImportError('Numpy array package is not installed')
     print ('Using %s' % surfarray.get_arraytype().capitalize())
-    
+
     pygame.init()
     mixer.quit()
     mixset = mixer.init(frequency=Sampler.rate, size=-16, channels=1, buffer=blocksize()*4)
     print mixer.get_init()
-    
+
     it = pairwise(indices(snd))
     # clock = pygame.time.Clock()
-    
+
     resolution = (size+1, size+1) # FIXME get resolution some other way. This was: img.shape[:2]
     screen = pygame.display.set_mode(resolution) #, flags=pygame.SRCALPHA, depth=32)
     show_slice(screen, snd[slice(*it.next())], size=size, name=name, antialias=antialias)
-    
+
     sndarr = np.cast['int32'](snd.imag * (2**16/2.0-1))
     print sndarr
     print np.max(sndarr), np.min(sndarr)
     pgsnd = sndarray.make_sound(sndarr)
     pgsnd.play()
-    
+
     pygame.time.set_timer(pygame.USEREVENT, 1.0/Sampler.videorate*1000)
     while 1:
         event = pygame.event.wait()
@@ -108,7 +108,7 @@ def anim(snd = None, size=800, name="Resonance", antialias=True, lines=False):
         # clock.tick(int(1.0/Sampler.videorate*1000))
 
     print snd
-    
+
     #alldone
     mixer.quit()
     pygame.quit()

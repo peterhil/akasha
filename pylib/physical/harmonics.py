@@ -29,14 +29,14 @@ def _findvars(*funcs):
     return nfuncs
 
 class fn(object):
-    
+
     def __init__(self, *funcs, **nfuncs):
         self.__dict__ = nfuncs
-    
+
     def __call__(self, *args, **kwargs):
         for vars, func in self.__dict__:
             func(*args, **kwargs)
-    
+
     def __repr__(self):
         return repr(self.__dict__)
 
@@ -68,10 +68,9 @@ class Harmonic(object, Generator):
             e = Exponential(-o.frequency/100.0) # sine waves
             frames += o[iter] * e[iter]
         return frames / max( abs(max(frames)), len(oscs), 1.0 )
-    
+
     # def __repr__(self):
     #     object_str = u''
     #     for obj in self.sounds:
     #         objects_str += repr(obj)
     #     return "Harmonic(%s)" % (object_str)
-    

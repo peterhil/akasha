@@ -16,7 +16,7 @@ np.set_printoptions(precision=16, suppress=True)
 
 
 # In [495]: np.linspace(0,1,44100,endpoint=False)
-# Out[495]: 
+# Out[495]:
 # array([ 0.        ,  0.00002268,  0.00004535,  0.00006803,  0.0000907 ,
 #         0.00011338,  0.00013605,  0.00015873,  0.00018141,  0.00020408,
 #        ...,  0.99977324,  0.99979592,  0.99981859,  0.99984127,
@@ -28,8 +28,8 @@ def stime(start, end, rate=Sampler.rate):
 
 
 class Generator:
-    # Could be new style class, but this causes many problems because numpy 
-    # uses obj[0] (arrays first element) to determine it's type and then 
+    # Could be new style class, but this causes many problems because numpy
+    # uses obj[0] (arrays first element) to determine it's type and then
     # automatically broadcasts oscs to their complex samples!
     # This could maybe be prevented by using custom __get* methods or descriptors.
 

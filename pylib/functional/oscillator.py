@@ -23,7 +23,6 @@ from xoltar.functional import *
 # Settings
 np.set_printoptions(precision=16, suppress=True)
 
-
 def accumulator(n):
     """Function object using closure, see:
     http://en.wikipedia.org/wiki/Function_object#In_Python"""
@@ -32,7 +31,6 @@ def accumulator(n):
         return inc.n
     inc.n = n
     return inc
-
 
 def osc(freq):
     def osc(times):
@@ -43,7 +41,6 @@ def osc(freq):
         return osc.freq / float(Sampler.rate)
     osc.ratio = ratio
     return osc
-
 
 def exp(rate):
     def exp(times):

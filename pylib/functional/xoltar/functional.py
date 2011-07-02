@@ -42,7 +42,7 @@ try:
     import new
     def closure(func, locs = {}):
         """
-        Returns a function whose global namespace is a **copy of** *func*'s 
+        Returns a function whose global namespace is a **copy of** *func*'s
         globals, augmented with the local variables of the calling function.
         This is a common requirement for functional programming. This can
         be duplicated in standard Python using default arguments, but it
@@ -53,7 +53,7 @@ try:
 
         #A function which returns a function which returns 1 if an item is
         #in *sequence*, 0 otherwise
-        def contained(sequence):    
+        def contained(sequence):
             def contained_helper(x):
                 return x in sequence
             return closure(contained_helper)
@@ -80,7 +80,7 @@ try:
         >>>printAndInc()
         0
         >>>printAndInc()
-        1    
+        1
         >>>
 
         So callCount is preserved across function invocations, but is not taking
@@ -102,7 +102,7 @@ if sys.version_info[0] >= 2 and sys.version_info[1] >= 1:
     del closure
     def closure(func, locs = None):
         return func
-    
+
 class Ref:
     """
     A simple class to hold a value. Useful when one wishes to share a value
@@ -183,7 +183,7 @@ class FuncMethUnion:
                         self._methcode = self.MethCode(self._func.im_func.func_code)
                     return self._methcode
                 else:
-                    return self._func.im_func.func_code                
+                    return self._func.im_func.func_code
             return getattr(self._func.im_func, name)
         raise AttributeError, name
 
@@ -312,7 +312,7 @@ class wrap(Functor):
     """
     def __call__(self, *args, **kwargs):
         return self._func(*args, **kwargs)
-    
+
 class curry(Functor):
     """
     A curried function (named after the person who pioneered the idea,
@@ -388,7 +388,7 @@ class curry(Functor):
     required before the function is executed. For example:
 
     >>> def defaultTest(x, y, z, q = 4):
-    ... 	return x, y, z, q
+    ...   return x, y, z, q
     ...
     >>> c = curry(defaultTest, 1, 2, 3)
     >>> c()
@@ -409,7 +409,7 @@ class curry(Functor):
         Functor.__init__(self, func)
         self._args = args
         self._kwargs = kwargs
-        
+
     def getArgCount(self):
         basic = Functor.getArgCount(self)
         filterArgs = filter(lambda x:not x is Blank, self._args)
@@ -458,7 +458,7 @@ class rcurry(Functor):
     with default or open ended (*args, **kwargs) arguments.
     For example:
     >>> def threeArgs(x, y, z):
-    ... 	return x, y, z
+    ...   return x, y, z
     ...
     >>> rc = rcurry(threeArgs, 2, 3)
     >>> rc(1)
@@ -503,7 +503,7 @@ class rcurry(Functor):
                 names.append(name)
         return tuple(names)
 
-    def getDefaults(self):        
+    def getDefaults(self):
         defs = Functor.getDefaults(self)
         if defs:
             defs = defs[:len(defs) - len(filter(lambda x:not x is Blank, self._args))]
@@ -532,7 +532,7 @@ class rcurry(Functor):
             return cur
         else:
             return apply(self._func, tuple(buildArgs), buildKwargs)
-        
+
 class compose(Functor):
     """
     Takes any number of functions, and when called, applies them in
@@ -571,12 +571,12 @@ class applycompose(compose):
         for func in self._funcs[1:]:
             ret = self.__fixret(func(*ret))
         return ret
-    
+
     def __fixret(self, ret, TupleType=type(())):
         if type(ret) is not TupleType:
             ret = (ret,)
         return ret
-  
+
 class joinfuncs(Functor):
     """
     Takes a number of functions, and returns a function which, when called,
@@ -834,7 +834,7 @@ class error_handler(Functor):
     >>> safediv2 = error_handler(div, sys.maxint)
     >>> safediv2(1, 0)
     2147483647
-    
+
     """
 
     def __init__(self, func, errorfunc = None):
@@ -852,7 +852,7 @@ class error_handler(Functor):
                 if callable(self._errorfunc):
                     return self._errorfunc(exc_info)
                 else:
-                    return self._errorfunc                
+                    return self._errorfunc
             except:
                 raise exc_info[0], exc_info[1], exc_info[2]
 
@@ -867,7 +867,7 @@ def trap_error(func, on_error = None):
     'Yup'
     >>> trap_error(lambda:1/0, lambda x: x[1])
     <exceptions.ZeroDivisionError instance at 007A73FC>
-    >>>    
+    >>>
     """
     try:
         return func()
@@ -877,7 +877,7 @@ def trap_error(func, on_error = None):
         else:
             return on_error
 
-    
+
 class attempt(Functor):
     """
     Given a function sequence, attempt to call and return each in turn. The
@@ -1020,7 +1020,7 @@ class Bindings:
     RuntimeError: Binding cannot be re-bound.
     >>>
     """
-    
+
     def __setattr__(self, name, value):
         if self.__dict__.has_key('__hidden_' + name):
             raise BindingError, "Binding '%s' cannot be modified." % name
@@ -1032,7 +1032,7 @@ class Bindings:
             return self.__dict__['__hidden_' + name]
         else:
             raise AttributeError
-            
+
 def namespace(bindings):
     """
     Given a Bindings object, return a dictionary with a snapshot of the current
@@ -1050,7 +1050,7 @@ def mapdict(itemfunc, dictionary):
     the dictionary.
     """
     return dict(map(itemfunc, dictionary.items()))
-    
+
 
 def filterdict(itemfunc, dictionary):
     """
@@ -1105,7 +1105,7 @@ def error(err, arg = None, trace = None):
       File "functional.py", line 874, in error
         raise err
     RuntimeError
-    >>>    
+    >>>
     """
     if trace:
         raise err, arg, trace
@@ -1125,11 +1125,11 @@ def do(*args):
     """
     Returns the last argument passed to it. This is useful because
     arguments are evaluated from left to right before a function call.
-    This can enable "imperative" style in a lambda expression. For example:    
+    This can enable "imperative" style in a lambda expression. For example:
     """
     return args[-1]
-    
-        
+
+
 class dispatch(Functor):
     """
     Given a name, find and call a method with that name on a passed-in argument.
@@ -1145,6 +1145,3 @@ class dispatch(Functor):
         if not self._func:
             self.bind(args[0])
         Functor.__call__(self, args[1:], **kwargs)
-        
-        
-                

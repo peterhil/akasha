@@ -31,7 +31,7 @@ release the lock.
 06/01/01:
     This is a maintenance release:
     Updated to reflect changes in lazy.py.
-    
+
 Changes:
 11/4/2000:
     Thread pools can be set to use daemon threads or not by passing a one or
@@ -43,7 +43,7 @@ Changes:
     it's doing that job. Calling *thread*.getAssociatedData() will return it.
     This could be useful for associating some sort of security information with
     the task, for instance.
-    
+
 10/25/2000:
     Fixed import from wrong module.
 10/18/2000:

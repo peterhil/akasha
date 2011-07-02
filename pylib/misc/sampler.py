@@ -22,7 +22,7 @@ class Singleton(type):
 
 class Sampler_(object):
     __metaclass__ = Singleton
-    
+
     def __init__(self, rate=44100):
         self.rate = rate
 
@@ -39,14 +39,14 @@ class SampleRate(object):
     """
     __metaclass__ = Singleton
     default_rate = 44100
-    
+
     def __init__(self, value=None):
         self.rate = value
-    
+
     def __get__(self, obj, objtype):
         print "Self: %s, Obj: %s, Object type: %s" % (self.rate, obj, objtype)
         return self.rate or self.__set__(objtype, self.default_rate)
-    
+
     def __set__(self, obj, val):
         print "Setting sampling rate %s for %s" % (val, obj)
         self.rate = val

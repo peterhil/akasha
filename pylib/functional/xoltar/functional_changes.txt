@@ -17,7 +17,7 @@ Changes:
     nested function is a closure.
 
     New Features:
-        
+
     Added operators for Functor, and wrap(), which wraps a function in a
     Functor, to enable those same operators... The operators are:
 
@@ -32,18 +32,18 @@ Changes:
     lookup. Also, added applycompose, a version of compose which unpacks tuples
     before calling the next function in line (patch from Ben Wolfson)
 
-        
+
     02/26/2000 - Version 1.0
 
     Added Bindings, a class with write-once attributes, useful for ensuring
     variable bindings don't change unexpectedly. Also added namespace()
     function, which extracts the attributes off a Bindings object into
     a dictionary, suitable for eval()'ing with.
-    
+
     Changed name of with_error to error_handler to help make clear the fact
     that it's generating a new function which handles its own errors, not
     trying to call a function now and dealing with any errors it may raise.
-    
+
     Added trap_error for those sorts of situations. Both allow the second
     argument to be non-callable. If that argument is not callable, then in
     the case of an error, the error is silently discarded, and the supplied
@@ -56,7 +56,7 @@ Changes:
     and manipulating dictionaries in a way similar to using map and filter
     on lists. I'll get around to reducedict if anyone else can figure out
     something they'd like to use it for. :-)
-    
+
     Fixed Functor to report __name__ and __doc__ of the function properly
     instead of raising an AttributeError.
 
@@ -68,10 +68,10 @@ Changes:
     curry for those cases, since it allows more explicit control of partial
     application. This change was made because it was difficult to establish
     non-surprising behavior for rcurry in these situations.
-    
+
     First removed closure function, since Python 2.1 supports them directly, then
     put it back, when the winds shifted against nested scopes.
-    
+
     Converted test suite to use PyUnit. Wrote more tests.
 
     11/4/2000 - Version 0.8

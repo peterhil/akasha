@@ -61,11 +61,11 @@ def sample(iterable, *times):
 ### Generating functions ###
 
 # In [69]: v_root = np.frompyfunc(nth_root, 1,1)
-# 
+#
 # In [70]: l = nth_root(np.arange(1,20))
-# 
+#
 # In [71]: l
-# Out[71]: 
+# Out[71]:
 # array([  1.00000000e+00 -2.44929360e-16j,
 #         -1.00000000e+00 +1.22464680e-16j,
 #         -5.00000000e-01 +8.66025404e-01j,
@@ -84,7 +84,7 @@ def sample(iterable, *times):
 #          9.23879533e-01 +3.82683432e-01j,
 #          9.32472229e-01 +3.61241666e-01j,
 #          9.39692621e-01 +3.42020143e-01j,   9.45817242e-01 +3.24699469e-01j])
-# 
+#
 # In [72]: %timeit l = np.fromiter(imap(v_root, np.arange(1,1000)), dtype=np.complex)
 # 10 loops, best of 3: 52.8 ms per loop
 
@@ -92,32 +92,32 @@ def angfreq(f):
     return 2 * pi * f
 
 class oscf(Functor):
-    
+
     def __call__(self, *args):
         return np.exp( 1j*2*pi * (args % 1.0))
 
 def oscillate(phases):
     """
     In [18]: oscillate(np.arange(0,8) * 1.0/44100 * 5512.5)
-    Out[18]: 
+    Out[18]:
     array([ 1.00000000+0.j        ,  0.70710678+0.70710678j,
             0.00000000+1.j        , -0.70710678+0.70710678j,
            -1.00000000+0.j        , -0.70710678-0.70710678j,
            -0.00000000-1.j        ,  0.70710678-0.70710678j])
-    
+
     In [20]: 5512.5/44100.0
     Out[20]: 0.125
-    
+
     In [21]: 5512.5 * 1.0/44100.0
     Out[21]: 0.125
-    
+
     In [35]: 5512.5/44100.0
     Out[35]: 0.125
-    
-    
+
+
     np.exp( 1j*2*pi * 5512.5 * Fraction(1,44100) * np.arange(0,8))
     np.exp( 1j*2*pi * (np.linspace(0,1,8,endpoint=False) % 1.0))
-    
+
     """
     return np.exp( 1j*2*pi * (phases % 1.0))
 

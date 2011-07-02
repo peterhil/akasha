@@ -9,7 +9,6 @@ from fractions import Fraction
 from generators import Generator
 from timing import Sampler
 
-
 # Following two methods are modified from:
 # http://seun-python.blogspot.com/2009/06/floating-point-min-max.html
 
@@ -27,7 +26,6 @@ def maxfloat(guess = 1.0):
         guess = guess * 2
         i += 1
     return guess, i
-
 
 class Exponential(object, Generator):
     """Exponential decay and growth for envelopes."""
@@ -71,7 +69,7 @@ class Exponential(object, Generator):
 
 class Attack(Exponential):
     """Exponential attack (reversed decay/growth) envelope"""
-    
+
     def __init__(self, rate=0.0, amp=1.0, *args, **kwargs):
         super(Attack, self).__init__(rate, amp, *args, **kwargs)
 

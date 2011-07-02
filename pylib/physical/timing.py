@@ -16,7 +16,7 @@ def stime(start, end, rate=Sampler.rate):
 
 def times_at(*args):
     """Convert frame numbers to time.
-    
+
     Examples:
     >>> Sampler.rate
     44100

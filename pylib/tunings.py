@@ -8,13 +8,13 @@ from fractions import Fraction
 def cents(*args):
     """Calculate cents from interval or frequency ratio(s).
     When using frequencies, give greater frequencies first.
-    
+
     >>> cents(float(Fraction(5,4)))
     array([ 386.31371386])
-    
+
     >>> cents(440/27.5)
     array([ 4800.])     # equals four octaves
-    
+
     >>> cents(np.arange(8)/16.0+1)
     array([[   0.        ,  104.9554095 ,  203.91000173,  297.51301613,
              386.31371386,  470.78090733,  551.31794236,  628.27434727]])
@@ -23,13 +23,13 @@ def cents(*args):
 
 def interval(*cnt):
     """Calculate interval ratio from cents.
-    
+
     >>> interval(100)
     array([ 1.05946309])    # one equal temperament semitone
-    
+
     >>> interval(386.31371386)
     array([ 1.25])          # 5:4, perfect fifth
-    
+
     >> [map(Fraction.limit_denominator, map(Fraction.from_float, i)) for i in interval(np.arange(5) * 386.31371386)]
     [[Fraction(1, 1),
       Fraction(5, 4),
@@ -48,7 +48,7 @@ class RegularTuning(object):
         pass
 
 # In [128]: sorted(Fraction(3,2) ** np.array(map(Fraction.from_float, xrange(28))) % Fraction(3,2) + Fraction(1))
-# Out[128]: 
+# Out[128]:
 # [1.0,
 #  1.09375,
 #  1.12890625,

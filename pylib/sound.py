@@ -24,12 +24,12 @@ from utils.animation import *
 
 class Sound(object, Generator):
     """Sound groups."""
-    
+
     def __init__ (self, *args):
         self.sounds = {}
         for s in args:
             self.add(s)
-        
+
     def sample(self, iter):
         """Pass parameters to all sound objects and update states."""
         if isinstance(iter, Number):
@@ -43,7 +43,7 @@ class Sound(object, Generator):
             start = iter.start or 0
             stop = iter.stop
         sl = (start, stop)
-        
+
         sound = np.zeros((stop - start), dtype=complex)
         for sl in self.sounds:
             print "Slice start %s, stop %s" % sl
@@ -60,10 +60,10 @@ class Sound(object, Generator):
     #     for obj in self.sounds:
     #         components += repr(obj)
     #     return "Sound(%s)" % (components)
-    
+
     # Use s.sounds.append(sndobj)
     # s.sounds.index(sndobj)
-    
+
     def add(self, sndobj, start=0, dur=None):
         """Add a new sndobj to self."""
         if dur:
@@ -72,7 +72,7 @@ class Sound(object, Generator):
             end = start + len(sndobj)
         else:
             end = None
-        
+
         sl = (start, end)
 
         if (self.sounds.has_key(sl)):

@@ -10,39 +10,39 @@ class DTMF(object, Generator):
     """Dual-tone Multifrequency Tones
 
     DTMF keypad frequencies:
-    
+
     Hz   1209  1336  1477  1633
     697     1     2     3     A
     770     4     5     6     B
     852     7     8     9     C
     941     *     0     #     D
-    
+
     - - -
     Special tones:
-    
+
     Event        Low frequency  High frequency
     Busy signal         480 Hz  620 Hz
     Ringback tone (US)  440 Hz  480 Hz
     Dial tone           350 Hz  440 Hz
-    
+
     - - -
     Special Information Tones (AT&T/Bellcore SIT)
-    
+
     Segment durations:
     Short duration = 276 ms
     Long duration = 380 ms
-    
+
     Frequencies for use in SITs:
-    First segment	    Second segment	    Third segment
-    (high) 985.2 Hz	    (high) 1428.5 Hz
-    (low) 913.8 Hz	    (low) 1370.6 Hz     (low) 1776.7 Hz
-    
+    First segment       Second segment      Third segment
+    (high) 985.2 Hz     (high) 1428.5 Hz
+    (low) 913.8 Hz      (low) 1370.6 Hz     (low) 1776.7 Hz
+
     The interval between the segments of SITs is between 0 and 4 ms.
-    To minimize the number of callers who may abandon the call without 
-    listening to the announcement, the nominal time gap between the 
-    third tone segment and the beginning of the announcement is set as 
+    To minimize the number of callers who may abandon the call without
+    listening to the announcement, the nominal time gap between the
+    third tone segment and the beginning of the announcement is set as
     close to zero as possible, with an allowed maximum of 100 ms.
-    
+
     - - -
     A standard telephone keypad
 
@@ -62,19 +62,19 @@ class DTMF(object, Generator):
     """
     sp = [ 350,  440,  480,  620]
     lo = [ 697,  770,  852,  941]
-    hi = [1209, 1336, 1477, 1633]    
-    
+    hi = [1209, 1336, 1477, 1633]
+
     nkeys = '123A' + \
             '456B' + \
             '789C' + \
             '*0#D'
-    
+
     table = dict()
 
     for i in xrange(len(nkeys)):
         l, h = divmod(i, 4)
         table[nkeys[i]] = (lo[l], hi[h])
-    
+
     alphabet_trans = string.maketrans(
         ''.join(['ABC','DEF','GHI','JKL','MNO','PQRS','TUV','WXYZ',' ','-']),
         ''.join(['222','333','444','555','666','7777','888','9999','0','-'])
@@ -85,16 +85,16 @@ class DTMF(object, Generator):
         self.pulselength = pulselength
         self.pause = pause
         return None
-    
+
     @property
     def number(self):
         return self.string.upper().translate(self.alphabet_trans)
-    
+
     def sample(self, iter):
         """Make DTML dialing tone."""
         #snd = Sound()
         #snd.add()
         pass
-        
+
     def __len__(self):
         int(round(len(self.number) * (self.pulselength + self.pause) * Sampler.rate - self.pause))

@@ -76,7 +76,7 @@ class Worker(threading.Thread):
         return self._job
 
     def getAssociatedValue(self):
-        return self._job[2]    
+        return self._job[2]
 
     def run(self):
         while 1:
@@ -283,7 +283,7 @@ class ThreadPool(Queue.Queue):
 
     def isDaemon(self):
         return self._daemon
-    
+
 
     def getThreads(self):
         """
@@ -345,8 +345,3 @@ class ThreadPool(Queue.Queue):
         rv = ReturnValue()
         Queue.Queue.put(self, (item, rv, associated), block)
         return rv
-
-
-
-
-

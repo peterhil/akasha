@@ -11,9 +11,9 @@ Changes:
 06/01/01 - Version 0.8:
 
     Thanks to Steven Cleary for bug reports and suggestions.
-    
+
     Changed class hierarchy as follows:
-        
+
                  LazyExpr
                 /
         Lazy---|                 LazyTuple
@@ -27,8 +27,8 @@ Changes:
     at an unknown length is now explicit. As a result of changing the
     class hierarchy, LazyTuple now takes far fewer constructor arguments.
 
-    Change to PyUnit for testing.    
-        
+    Change to PyUnit for testing.
+
 10/18/2000 - Version 0.7:
     Lazy has become its own module now, since functional was growing
     somewhat large.

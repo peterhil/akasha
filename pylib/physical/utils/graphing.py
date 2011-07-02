@@ -28,20 +28,20 @@ def hist_graph(samples, size=1000):
 def fast_graph(samples, size=1000, framerate=30):
     """Graph of the complex sound signal."""
     # See http://jehiah.cz/archive/creating-images-with-numpy
-    
+
     img = np.zeros((size,size,4), np.uint8) # Note: y, x
-    
+
     # Clip complex samples inside unit square and
     # view as real number coordinate pairs.
     clipped = clip(samples)
     coords = clipped.view(np.float).reshape(len(samples), 2).transpose()
-    
+
     # Scale to size
     samples = (samples + 1+1j) / 2.0 * (size - 1)
-    
+
     # Cast to integers
     coords = np.cast['uint64'](coords)
-    
+
     # Draw image
     img[size/2.0,:] = img[:,size/2.0] = [51,204,204,255]    # Draw axis
     img[size - coords[1], coords[0]] = [255,255,255,255]
@@ -51,39 +51,39 @@ def fast_graph(samples, size=1000, framerate=30):
 def graph(samples, size=1000, framerate=30):
     """Graph of the complex sound signal."""
     # See http://jehiah.cz/archive/creating-images-with-numpy
-    
+
     # TODO: Buffering with frame rate for animations or realtime signal view.
     # buffersize = int(round(float(Sampler.rate) / framerate))    # 44100.0/30 = 1470
     # indices = np.arange(*(slice(item.start, item.stop, buffersize).indices(item.stop)))
     # for start in indices:
     # samples = self[start:start+buffersize-1:buffersize] # TODO: Make this cleaner
-    
+
     img = np.zeros((size+1,size+1,4), np.uint8) # Note: y, x
-    
+
     # Scale to size and interpret values as pixel centers
     samples = ((clip(samples) + 1+1j) / 2.0 * (size - 1) + (0.5+0.5j))    # 0.5 to 599.5
-    
+
     # Convert complex samples to real number coordinate points
     points = samples.view(np.float).reshape(len(samples), 2).transpose()    # 0.5 to 599.5
-    
+
     centers = np.round(points)  # 1.0 to 600.0
     bases = np.cast['uint64'](centers) - 1   # 0 to 599
     deltas = points - bases - 0.5
-    
+
     values_00 = deltas[1] * deltas[0]
     values_01 = deltas[1] * (1.0 - deltas[0])
     values_10 = (1.0 - deltas[1]) * deltas[0]
     values_11 = (1.0 - deltas[1]) * (1.0 - deltas[0])
-    
+
     img[(size-1) - bases[1], bases[0], :] += np.repeat((values_11 * 255), 4).reshape(len(samples),4)
     img[(size-1) - bases[1], bases[0]+1, :] += np.repeat((values_10 * 255), 4).reshape(len(samples),4)
     img[(size-1) - (bases[1]+1), bases[0], :] += np.repeat((values_01 * 255), 4).reshape(len(samples),4)
     img[(size-1) - (bases[1]+1), bases[0]+1, :] += np.repeat((values_00 * 255), 4).reshape(len(samples),4)
-    
+
     img[size/2.0,:] = img[:,size/2.0] = [51,204,204,127]    # Draw axis
-    
+
     # Cast floats to integers
     img = np.cast['uint8'](img)
-    
+
     image = Image.fromarray(img, 'RGBA')
     image.show()

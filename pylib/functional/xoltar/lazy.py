@@ -15,17 +15,12 @@
 ## License along with this library; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-
 from types import *
 from functional import *
 import sys
 
-
 __version__ = '0.8.0'
 
-
-
-        
 def isLazy(thing):
     """
     Returns 1 if *thing* is a Lazy expression, 0 otherwise.
@@ -393,13 +388,13 @@ class LazyExpr(Lazy):
         Will cause evaluation.
         """
         return self.eval() < other
-        
+
     def __gt__(self, other):
         """
         Will cause evaluation.
         """
         return self.eval() > other
-    
+
     def __getattr__(self, name):
         """
         Does **not** cause evaluation.
@@ -483,7 +478,7 @@ class LazySequence(Lazy):
             val = val + ", .."
 
         return "%s (%s)" % (self.__class__.__name__, val)
-        
+
     def __mul__(self, other):
         #TODO: Should this and __add__ play nicely with lazy values?
         if not self.isTerminating():
@@ -585,7 +580,7 @@ class LazyTuple(LazySequence):
         LazyTuple. A *length* of -1 indicates a (possibly) infinite tuple,
         a -2 value indicates a tuple which will eventually terminate, but
         its exact length is not known at this time.
-        
+
         Storage space is never duplicated for LazyTuples and slices taken
         from them.
         """
@@ -593,7 +588,7 @@ class LazyTuple(LazySequence):
         self._memo = []
         self._evaluated = 0
         self._length = length
-        
+
     def isTerminating(self):
         """
         Return 1 if this is a finite tuple, 0 if it is infinitely long.
@@ -608,7 +603,7 @@ class LazyTuple(LazySequence):
             #the tuple to be completely evaluated if its length isn't
             #already known. Taking the len() of an infinite tuple
             #will cause an error.
-            i = len(self) + i            
+            i = len(self) + i
         if len(self._memo) > i:
             val = self._memo[i]
             if not val is Uncomputed:
@@ -679,7 +674,7 @@ class LazyTuple(LazySequence):
         #the original memo.
         self._memo = tuple(self._memo)
         return self._memo
-    
+
 
 class LazySlice(LazySequence):
     def __init__(self, source, start, end):
@@ -689,7 +684,7 @@ class LazySlice(LazySequence):
         self._end = end
         self._source = source
         self._evaluated = 0
-        
+
     def isTerminating(self):
         """
         Return 1 if this is a finite tuple, 0 if it is infinitely long.
@@ -718,22 +713,22 @@ class LazySlice(LazySequence):
                     return self._source[i + self._start]
                 else:
                     raise IndexError, i
-                
+
     def __getslice__(self, i, j):
         print "LS getslice", i, j
         newStart = self._start + i
         if j == sys.maxint:
-            print "Max slice, end is:", self._end            
+            print "Max slice, end is:", self._end
             newEnd = self._end
         elif self._end >= 0 and j > self._end:
             raise IndexError, j
         else:
             if j >= 0:
-                newEnd = self._start + j               
+                newEnd = self._start + j
             else:
                 newEnd = self._end + j
         return LazySlice(self._source, newStart, newEnd)
-        
+
 
     def __len__(self):
         if not self.isTerminating():
@@ -764,7 +759,7 @@ class LazySlice(LazySequence):
                     self._end = i
                     break
         return tuple(self._source._memo[self._start:self._end])
-        
+
 
 
 
@@ -814,7 +809,7 @@ def lazyfilter(func, seq):
             self.seqIndex = seqIndex
             self.func = func
 
-        def __call__(self, index, sequence):            
+        def __call__(self, index, sequence):
             while 1:
                 val = self.seq[self.seqIndex]
                 self.seqIndex = self.seqIndex + 1
@@ -860,8 +855,8 @@ def when(expr, truepart, falsepart = None, force = 0):
     evaluated, call with *force* = 1 Example:
 
     >>> def printAndReturn(arg):
-    ... 	print arg
-    ... 	return arg
+    ...   print arg
+    ...   return arg
     ...
     >>> when(0, printAndReturn(0), printAndReturn(1))
     0

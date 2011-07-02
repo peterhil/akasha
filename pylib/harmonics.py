@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+/local/bin/python
 # -*- coding: utf-8 -*-
 
 import numpy as np
@@ -15,10 +15,10 @@ from utils import play, write
 
 class Harmonic(object, Generator):
     """Harmonical overtones"""
-    
+
     # Settings
     rand_angles = False
-    
+
     def __init__(self, freq=220, func=lambda x: 1+x, damping=None, n=8, superness=2, rounding='native'):
         # Set overtones
         self.freq = freq
@@ -51,7 +51,7 @@ class Harmonic(object, Generator):
             else:
                 frames += o[iter] * e[iter]
         return frames / max( abs(max(frames)), len(oscs), 1.0 )
-    
+
     def __repr__(self):
         if hasattr(self, 'freq'):
             freq = self.freq
@@ -59,4 +59,3 @@ class Harmonic(object, Generator):
             freq = None
         return "<Harmonic(%s): superness = %s;\n\tovertones = %s;limit = %s;\n\tfunc = %s;\n\tdamping = %s>" % \
                 (freq, self.superness, self.overtones, self.limit, self.func, self.damping)
-

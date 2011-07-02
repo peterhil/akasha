@@ -17,4 +17,3 @@ import quantities as pq
 ### Units
 Qt = pq.Quantity
 Hz = pq.Hz
-
