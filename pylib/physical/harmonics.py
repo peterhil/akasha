@@ -13,7 +13,7 @@ from physical.oscillator import Osc
 from physical.generators import Generator
 
 # Utils
-from utils import play, wavwrite
+from utils.audio import play, write
 
 # np.set_printoptions(precision=4, suppress=True)
 

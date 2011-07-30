@@ -15,7 +15,7 @@ from harmonics import Harmonic
 from noise import *
 from dtmf import DTMF
 from generators import Generator
-from utils import play, write, read
+from utils.audio import play, write, read
 from utils.math import *
 from utils.graphing import *
 from utils.animation import *

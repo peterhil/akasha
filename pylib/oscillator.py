@@ -21,7 +21,7 @@ from timing import Sampler
 from utils.decorators import memoized
 from utils.math import *
 from utils.graphing import *
-from utils import play, write
+from utils.audio import play, write
 
 # Settings
 np.set_printoptions(precision=16, suppress=True)

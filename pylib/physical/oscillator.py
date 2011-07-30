@@ -22,7 +22,7 @@ from .timing import Sampler, times_at, stime
 from utils.decorators import memoized
 from utils.math import *
 from utils.graphing import *
-from utils import play, wavwrite
+from utils.audio import play, write
 
 # Settings
 np.set_printoptions(precision=16, suppress=True)

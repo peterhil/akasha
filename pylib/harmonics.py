@@ -8,7 +8,7 @@ from cmath import rect, pi
 from envelope import Exponential
 from oscillator import Osc
 from generators import Generator
-from utils import play, write
+from utils.audio import play, write
 
 # np.set_printoptions(precision=4, suppress=True)
 

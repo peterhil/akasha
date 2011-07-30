@@ -9,7 +9,7 @@ from fractions import Fraction
 from envelope import Exponential
 from oscillator import Osc
 from generators import Generator
-from utils import play, wavwrite
+from utils.audio import play, write
 
 # np.set_printoptions(precision=4, suppress=True)
 

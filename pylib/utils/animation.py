@@ -20,8 +20,7 @@ from noise import Chaos
 from oscillator import Osc
 
 from graphing import *
-# from itertools import *
-from utils import pairwise
+from functional import pairwise
 
 def make_test_sound():
     freq=230

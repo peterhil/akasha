@@ -3,24 +3,13 @@
 
 import string
 import os
-from itertools import tee, izip
 
 import numpy as np
 from scipy.signal import hilbert
 from scikits import audiolab
+from scikits.audiolab import Format, Sndfile
 
 from timing import Sampler
-
-# itertools recipes -- http://docs.python.org/library/itertools.html#recipes
-def take(n, iterable):
-    "Return first n items of the iterable as a Numpy Array"
-    return np.fromiter(islice(iterable, n), dtype=iterable.dtype)
-
-def pairwise(iterable):
-    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
-    a, b = tee(iterable)
-    next(b, None)
-    return izip(a, b)
 
 # Audiolab read, write and play
 

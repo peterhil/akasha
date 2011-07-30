@@ -12,7 +12,7 @@ from timing import Sampler, stime
 # Utils
 from utils.math import *
 from utils.graphing import *
-from utils import play, wavwrite
+from utils.audio import play, write
 
 # Functional
 import itertools as itr
