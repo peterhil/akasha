@@ -1,12 +1,23 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+import numpy as np
 from timeit import default_timer as clock
+import math
+
+# from utils import Sampler
+# from generators import Generator
+
+np.set_printoptions(precision=9)
 
 
 class Sampler(object):
     rate = 44100
     videorate = 25
+
+def timecode(t, precision=1000000):
+    """t = time.clock(); t; int(math.floor(t)); int(round((t % 1.0) * 1000000))"""
+    return (int(math.floor(t)), int(round((t % 1.0) * precision)))
 
 # @staticmethod
 def times_at(frames):
@@ -22,8 +33,22 @@ def frames_at(times):
     """Convert time to frame numbers (ie. 1.0 => 44100)"""
     return int(round(times * Sampler.rate))
 
-class Timeline(object):
-    pass
+
+class Timeslice(object):
+    def __init__(self, start=0, stop=None):
+        if not stop:
+            start, stop = (0, start)
+        self.start = start
+        self.stop = stop
+
+    @property
+    def sample(self):
+        #return np.array(np.linspace(self.start, self.stop, Sampler.rate, endpoint=False) * Sampler.rate, dtype=int)
+        return np.array(np.arange(self.start * Sampler.rate, self.stop * Sampler.rate), dtype=int)
+
+    def __repr__(self):
+        return "<%s: start = %s, stop = %s>" % (self.__class__.__name__, self.start, self.stop)
+
 
 class OutputStream(object):
     pass
