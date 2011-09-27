@@ -54,7 +54,7 @@ def show_slice(screen, snd, size=800, name="Resonance", antialias=True):
     del img
     return False
 
-def anim(snd = None, size=800, name="Resonance", antialias=True, lines=False):
+def anim(snd = None, size=800, name="Resonance", antialias=False, lines=False):
     if (snd == None): snd = self.make_test_sound()
 
     if 'numpy' in surfarray.get_arraytypes():

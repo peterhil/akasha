@@ -115,7 +115,7 @@ def get_points(samples, size=1000):
     # Convert complex samples to real number coordinate points
     return samples.view(np.float).reshape(len(samples), 2).transpose()    # 0.5 to 599.5
 
-def draw(samples, size=1000, antialias=True):
+def draw(samples, size=1000, antialias=False):
     """Draw the complex sound signal into specified size image."""
     # See http://jehiah.cz/archive/creating-images-with-numpy
 
@@ -189,7 +189,7 @@ def show(img, plot=False):
 def fast_graph(samples, size=1000, plot=False):
     return graph(samples, size, plot, antialias=False)
 
-def graph(samples, size=1000, plot=False, antialias=True):
+def graph(samples, size=1000, plot=False, antialias=False):
     img = draw(samples, size, antialias)
     show(img, plot)
     return False
