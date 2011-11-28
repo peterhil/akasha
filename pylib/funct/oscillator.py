@@ -9,12 +9,12 @@ import operator
 from fractions import Fraction
 
 # My modules
-from timing import Sampler, stime
+from timing import Sampler, samples, times
 
 # Utils
 # from utils.math import *
 # from utils.graphing import *
-# from utils.audio import play, write
+from utils.audio import play, write
 
 # Functional
 import itertools as itr
@@ -87,7 +87,7 @@ def wrap(f, modulo=1):
 def limit_resolution(f, max=Sampler.rate):
     return Fraction(int(round(f * max)), max)
 
-def hz(f, fs=Sampler.rate, rounding='natdive'):
+def hz(f, fs=Sampler.rate, rounding='native'):
     """Return normalized frequency (as a Fraction) from physical frequency.
 
     Examples:
@@ -112,8 +112,8 @@ def hz(f, fs=Sampler.rate, rounding='natdive'):
     if rounding == 'native':
         ratio = ratio.limit_denominator(fs)
     else:
-        ratio = limit_resolution(ratio, fs)
-    return ratio
+        ratio = limit_resolution(ratio, fs).limit_denominator(fs)
+    return np.array(ratio)
 
 
 ### Generators
