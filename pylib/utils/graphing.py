@@ -105,8 +105,12 @@ def hist_graph(samples, size=1000):
     image = Image.fromarray(np.array(hist / hist.mean() * 255, dtype=np.uint8),'L')
     image.show()
 
-def get_canvas(size=1000):
-    return np.zeros((size+1,size+1,4), np.uint8)             # Note: y, x
+def get_canvas(size=1000, axis=True):
+    img = np.zeros((size+1,size+1,4), np.uint8)             # Note: y, x
+    if axis:
+        # Draw axis
+        img[size/2.0,:] = img[:,size/2.0] = [42,42,42,127]
+    return img
 
 def get_points(samples, size=1000):
     # Scale to size and interpret values as pixel centers
@@ -115,23 +119,11 @@ def get_points(samples, size=1000):
     # Convert complex samples to real number coordinate points
     return samples.view(np.float).reshape(len(samples), 2).transpose()    # 0.5 to 599.5
 
-def draw(samples, size=1000, antialias=False):
-    """Draw the complex sound signal into specified size image."""
-    # See http://jehiah.cz/archive/creating-images-with-numpy
-
-    # TODO: Buffering with frame rate for animations or realtime signal view.
-    # buffersize = int(round(float(Sampler.rate) / framerate))    # 44100.0/30 = 1470
-    # indices = np.arange(*(slice(item.start, item.stop, buffersize).indices(item.stop)))
-    # for start in indices:
-    # samples = self[start:start+buffersize-1:buffersize] # TODO: Make this cleaner
-
-    img = get_canvas(size)
-    points = get_points(samples, size)
-
-    ## Angles for hues
+def phase2hues(cx_samples):
+    """Converts angles of complex samples into hues"""
 
     # Get angles from points
-    angles = np.array(map(phase, samples)) + np.pi
+    angles = np.array(map(phase, cx_samples)) + np.pi
     # print repr(angles[:100])
 
     # Get diffs & convert to degrees 0..240 (red..blue)
@@ -147,13 +139,30 @@ def draw(samples, size=1000, antialias=False):
     # angles = angles * 240.0     # red..violet
     # print repr(angles[:100])
 
-    # Draw axis
-    img[size/2.0,:] = img[:,size/2.0] = [42,42,42,127]
+    return angles
+    
+def draw(samples, size=1000, antialias=False, axis=True, img=None):
+    """Draw the complex sound signal into specified size image."""
+    # See http://jehiah.cz/archive/creating-images-with-numpy
+
+    # TODO: Buffering with frame rate for animations or realtime signal view.
+    # buffersize = int(round(float(Sampler.rate) / framerate))    # 44100.0/30 = 1470
+    # indices = np.arange(*(slice(item.start, item.stop, buffersize).indices(item.stop)))
+    # for start in indices:
+    # samples = self[start:start+buffersize-1:buffersize] # TODO: Make this cleaner
+
+    # Draw into existing img?
+    if (img != None):
+        size = img.shape[0]-1
+    else:
+        img = get_canvas(size, axis)
+
+    points = get_points(samples, size)
 
     if antialias:
         # Draw with antialising
         centers = np.round(points)  # 1.0 to 600.0
-        bases = np.cast['uint64'](centers) - 1   # 0 to 599
+        bases = np.cast['uint32'](centers) - 1   # 0 to 599
         deltas = points - bases - 0.5
 
         values_00 = deltas[1] * deltas[0]
@@ -167,10 +176,10 @@ def draw(samples, size=1000, antialias=False):
         img[(size-1) - (bases[1]+1), bases[0]+1, :] += np.repeat((values_00 * 255), 4).reshape(len(samples),4)
     else:
         # Cast floats to integers
-        points = np.cast['uint64'](points)  # 0 to 599
+        points = np.cast['uint32'](points)  # 0 to 599
 
         # Draw image
-        img[(size - 1) - points[1], points[0]] = map(lambda c: hsv2rgb(angle2hsv(c)), angles)     #[255,255,255,255]
+        img[(size - 1) - points[1], points[0]] = map(lambda c: hsv2rgb(angle2hsv(c)), phase2hues(samples))     #[255,255,255,255]
 
     return img
 
@@ -189,8 +198,8 @@ def show(img, plot=False):
 def fast_graph(samples, size=1000, plot=False):
     return graph(samples, size, plot, antialias=False)
 
-def graph(samples, size=1000, plot=False, antialias=False):
-    img = draw(samples, size, antialias)
+def graph(samples, size=1000, plot=False, axis=True, antialias=False):
+    img = draw(samples, size, antialias, axis)
     show(img, plot)
     return False
 
@@ -198,4 +207,10 @@ def plot(samples):
     "Plot samples using matplotlib"
     imgplot = plt.imshow([samples.real, samples.imag])
     imgplot.set_cmap('hot')
+    return False
+
+def plot_real_fn(fn, x, cmap='hot'):
+    plt.set_cmap(cmap)
+    y = fn(x)
+    plt.plot(x, y)
     return False
