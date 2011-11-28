@@ -5,7 +5,6 @@ import numpy as np
 from cmath import rect, polar, phase, pi, exp
 from envelope import Exponential
 from generators import Generator
-from utils.audio import play, write
 
 np.set_printoptions(precision=4, suppress=True)
 

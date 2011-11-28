@@ -21,23 +21,22 @@ from timing import Sampler
 from utils.decorators import memoized
 from utils.math import *
 from utils.graphing import *
-from utils.audio import play, write
 
 # Settings
 np.set_printoptions(precision=16, suppress=True)
 pq.markup.config.use_unicode = True  # Use unicode units representation
 
 
+class Frequency(object, PeriodicGenerator):
+    """Frequency class"""
+    
+    
+
 class Osc(object, PeriodicGenerator):
     """Oscillator class"""
 
-    # Settings
-    prevent_aliasing = True
-    negative_frequencies = False
-
     def __init__(self, ratio, superness=2):
         # print "Ratio: %s, Superness: %s" % (ratio, superness)
-        # Set ratio and limit between 0/1 and 1/1
         self.ratio = ratio
 
         # Set superness
@@ -56,25 +55,29 @@ class Osc(object, PeriodicGenerator):
         self.roots = self.np_exp
         self.roots(self.ratio)
 
+    @classmethod
+    def freq(cls, freq, superness=2):
+        """Oscillator can be initialized using a frequency. Can be a float."""
+        return cls(Osc.freq_to_ratio(freq), superness)
+
     @staticmethod
     def limit(f, max=44100):
         return Fraction(int(round(f * max)), max)
 
-    @classmethod
-    def freq(cls, freq, superness=2, rounding='native'):
-        """Oscillator can be initialized using a frequency. Can be a float."""
+    @staticmethod
+    def freq_to_ratio(freq, rounding='native'):
         ratio = Fraction.from_float(float(freq)/Sampler.rate)
         if rounding == 'native':
             ratio = ratio.limit_denominator(Sampler.rate)
         else:
-            ratio = cls.limit(ratio, Sampler.rate)
-        return cls(ratio, superness)
+            ratio = Osc.limit(ratio, Sampler.rate)
+        return ratio
 
     @staticmethod
     def limit_ratio(f):
-        if Osc.prevent_aliasing and abs(f) > Fraction(1,2):
+        if Sampler.prevent_aliasing and abs(f) > Fraction(1,2):
             return Fraction(0, 1)
-        if Osc.prevent_aliasing and not Osc.negative_frequencies and f < 0:
+        if Sampler.prevent_aliasing and not Sampler.negative_frequencies and f < 0:
             return Fraction(0, 1)
         # wrap roots: 9/8 == 1/8 in Osc! This also helps with numeric accuracy.
         n = f.numerator % f.denominator
@@ -98,6 +101,10 @@ class Osc(object, PeriodicGenerator):
     @property
     def frequency(self):
         return float(self.ratio * Sampler.rate)
+
+    @frequency.setter
+    def frequency(self, f):
+        self.ratio = self.freq_to_ratio(f)
 
     ### Generating functions ###
 
@@ -150,6 +157,10 @@ class Osc(object, PeriodicGenerator):
             return self.np_exp(self.ratio)
         else:
             return normalize(self.supercurve(self.np_exp(self.ratio)))
+
+    @property
+    def imag(self):
+        return self.sample.imag
 
     ### Representation ###
 

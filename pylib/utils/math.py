@@ -56,10 +56,15 @@ def roots_counts(base, limit=44100.0):
     ex = np.floor(logn(limit,base))
     return roots_periods(base, limit)/base**float(ex)
 
+
 # Random
 
-def rand_between(min, max, size=1):
-    return (max - min) * np.random.random(size) + min
+def rand_between(min, max, size=1, random=np.random.random):
+    return np.atleast_1d( (max - min) * random(size) + min )
+
+def random_phase(random=np.random.random):
+    return np.atleast_1d( cmath.rect(1.0, 2.0 * np.pi * random() - np.pi) )
+
 
 # Primes
 
@@ -75,6 +80,7 @@ def primes(min, max):
             primes.append(i)
         i = i+2
     return np.array(primes)
+
 
 # Signal processing utils
 

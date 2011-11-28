@@ -12,6 +12,11 @@ np.set_printoptions(precision=9)
 
 
 class Sampler(object):
+
+    # Settings
+    prevent_aliasing = True
+    negative_frequencies = False
+
     rate = 44100
     videorate = 25
 
@@ -19,7 +24,6 @@ def timecode(t, precision=1000000):
     """t = time.clock(); t; int(math.floor(t)); int(round((t % 1.0) * 1000000))"""
     return (int(math.floor(t)), int(round((t % 1.0) * precision)))
 
-# @staticmethod
 def times_at(frames):
     """Convert frame numbers to time.
 
@@ -28,11 +32,18 @@ def times_at(frames):
     """
     return frames / float(Sampler.rate)
 
-# @staticmethod
 def frames_at(times):
     """Convert time to frame numbers (ie. 1.0 => 44100)"""
     return int(round(times * Sampler.rate))
 
+
+def time_slice(dur, start, time=False):
+    """Use a time slice argument or the provided attributes 'dur' and 'start' to
+    construct a time slice object."""
+    time = time or slice(int(round(0 + start)), int(round(dur * Sampler.rate + start)))
+    if not isinstance(time, slice):
+        raise TypeError("Expected a %s for 'time' argument, got %s." % (slice, type(time)))
+    return time
 
 class Timeslice(object):
     def __init__(self, start=0, stop=None):

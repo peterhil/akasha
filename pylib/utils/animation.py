@@ -12,25 +12,11 @@ try:
 except ImportError:
     raise ImportError('Error Importing Pygame/surfarray')
 
-from timing import Sampler
-
-from harmonics import Harmonic
-from sound import Sound
-from noise import Chaos
-from oscillator import Osc
+from timing import Sampler, time_slice
+from generators import Generator
 
 from graphing import *
 from funct import pairwise
-
-def make_test_sound():
-    freq=230
-    h = Harmonic(freq, damping=lambda f, a=1.0: (-f/100.0, a/(f/freq)), n = 20)(230)
-    c = Chaos()
-    o2 = Osc.freq(220)
-    o4 = Osc.freq(440)
-    o3 = Osc.freq(330)
-    s = Sound(h, o2, o3, o4)
-    return s
 
 def blocksize():
     return int(round(Sampler.rate / float(Sampler.videorate)))
@@ -51,7 +37,7 @@ def show_slice(screen, snd, size=800, name="Resonance", antialias=True):
     surfarray.blit_array(screen, img)
     pygame.display.flip()
 
-def anim(snd, size=800, name="Resonance", antialias=False, lines=False):
+def anim(snd, size=800, dur=5.0, name="Resonance", antialias=False, lines=False):
 
     if 'numpy' in surfarray.get_arraytypes():
         surfarray.use_arraytype('numpy')
@@ -73,7 +59,7 @@ def anim(snd, size=800, name="Resonance", antialias=False, lines=False):
     it = pairwise(indices(snd))
     show_slice(screen, snd[slice(*it.next())], size=size, name=name, antialias=antialias)
 
-    sndarr = np.cast['int32'](snd.imag * (2**16/2.0-1))
+    sndarr = np.cast['int32'](snd[time_slice(dur, 0)].imag * (2**16/2.0-1))
 
     pgsnd = sndarray.make_sound(sndarr)
     pgsnd.play()

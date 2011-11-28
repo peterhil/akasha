@@ -9,7 +9,7 @@ from scipy.signal import hilbert
 from scikits import audiolab
 from scikits.audiolab import Format, Sndfile, available_file_formats, available_encodings
 
-from timing import Sampler
+from timing import Sampler, time_slice
 
 defaults = {
     'type': 'aiff',
@@ -34,7 +34,7 @@ def get_format(*args, **kwargs):
 # Audiolab read, write and play
 
 def play(sndobj, axis='imag', fs=Sampler.rate, dur=5.0, start=0, time=False):
-    time = _slice_from(dur, start, time)
+    time = time_slice(dur, start, time)
     audiolab.play(getattr(sndobj[time], axis), fs)
 
 def write(sndobj, filename='test_sound', axis='imag', fmt=Format(**defaults),
@@ -44,7 +44,7 @@ def write(sndobj, filename='test_sound', axis='imag', fmt=Format(**defaults),
     fmt = get_format(fmt)
     filename = sdir + filename +'_'+ axis +'.'+ fmt.file_format
 
-    time = _slice_from(dur, start, time)
+    time = time_slice(dur, start, time)
     data = getattr(sndobj[time], axis)
 
     if np.ndim(data) <= 1:
@@ -81,7 +81,7 @@ def read(filename, dur=5.0, start=0, time=False, fs=Sampler.rate, complex=True,
 
     format = os.path.splitext(filename)[1][1:]
     check_format(format)
-    time = _slice_from(dur, start, time)
+    time = time_slice(dur, start, time)
 
     # Get and call appropriate reader function
     func = getattr(audiolab, format + 'read')
@@ -107,12 +107,4 @@ def check_format(format):
 
 def check_encoding(format):
     pass
-
-def _slice_from(dur, start, time=False):
-    """Use a time slice argument or the provided attributes 'dur' and 'start' to
-    construct a time slice object."""
-    time = time or slice(int(round(0 + start)), int(round(dur * Sampler.rate + start)))
-    if not isinstance(time, slice):
-        raise TypeError("Expected a %s for 'time' argument, got %s." % (slice, type(time)))
-    return time
 
