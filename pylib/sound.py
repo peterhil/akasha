@@ -19,6 +19,7 @@ from utils.audio import play, write, read
 from utils.math import *
 from utils.graphing import *
 from utils.animation import *
+from utils.splines import *
 
 # np.set_printoptions(precision=4, suppress=True)
 
