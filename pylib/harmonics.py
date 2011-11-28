@@ -9,6 +9,7 @@ from envelope import Exponential
 from oscillator import Osc
 from generators import Generator
 from utils.audio import play, write
+from timing import Sampler
 
 # np.set_printoptions(precision=4, suppress=True)
 
@@ -33,8 +34,17 @@ class Harmonic(object, Generator):
             # numpy.apply_along_axis is faster than map for larger n
             self.overtones = np.apply_along_axis(func, 0, np.arange(0, n, dtype=np.float32))
 
-    def __call__(self, freq):
-        self.freq = freq
+    @property
+    def frequency(self):
+        return self.freq
+
+    @frequency.setter
+    def frequency(self, f):
+        self.freq = f
+
+    @property
+    def max_overtones(self):
+        return int(Sampler.rate / (2.0 * self.freq))
 
     def sample(self, iter):
         oscs = Osc.freq(self.freq, self.superness, self.rounding) * self.overtones

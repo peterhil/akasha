@@ -38,7 +38,7 @@ class Osc(object, PeriodicGenerator):
     def __init__(self, ratio, superness=2):
         # print "Ratio: %s, Superness: %s" % (ratio, superness)
         # Set ratio and limit between 0/1 and 1/1
-        self._ratio = Osc.limit_ratio(Fraction(*[ratio]))
+        self.ratio = ratio
 
         # Set superness
         if not isinstance(superness, (list, Number)):
@@ -87,7 +87,7 @@ class Osc(object, PeriodicGenerator):
 
     @ratio.setter
     def ratio(self, value):
-        self._ratio = value
+        self._ratio = Osc.limit_ratio(Fraction(*[value]))
 
     @property
     def period(self): return self.ratio.denominator
