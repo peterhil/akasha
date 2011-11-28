@@ -50,12 +50,8 @@ def show_slice(screen, snd, size=800, name="Resonance", antialias=True):
     # screen = pygame.display.set_mode(img.shape[:2], 0, 32)
     surfarray.blit_array(screen, img)
     pygame.display.flip()
-    pygame.display.set_caption(name)
-    del img
-    return False
 
-def anim(snd = None, size=800, name="Resonance", antialias=False, lines=False):
-    if (snd == None): snd = self.make_test_sound()
+def anim(snd, size=800, name="Resonance", antialias=False, lines=False):
 
     if 'numpy' in surfarray.get_arraytypes():
         surfarray.use_arraytype('numpy')
@@ -66,34 +62,36 @@ def anim(snd = None, size=800, name="Resonance", antialias=False, lines=False):
     pygame.init()
     mixer.quit()
     mixset = mixer.init(frequency=Sampler.rate, size=-16, channels=1, buffer=blocksize()*4)
-    print mixer.get_init()
+    init = mixer.get_init()
 
-    it = pairwise(indices(snd))
     # clock = pygame.time.Clock()
 
     resolution = (size+1, size+1) # FIXME get resolution some other way. This was: img.shape[:2]
     screen = pygame.display.set_mode(resolution) #, flags=pygame.SRCALPHA, depth=32)
+    pygame.display.set_caption(name)
+
+    it = pairwise(indices(snd))
     show_slice(screen, snd[slice(*it.next())], size=size, name=name, antialias=antialias)
 
     sndarr = np.cast['int32'](snd.imag * (2**16/2.0-1))
-    print sndarr
-    print np.max(sndarr), np.min(sndarr)
+
     pgsnd = sndarray.make_sound(sndarr)
     pgsnd.play()
 
     pygame.time.set_timer(pygame.USEREVENT, 1.0/Sampler.videorate*1000)
-    while 1:
+
+    while True:
         event = pygame.event.wait()
         #check for quit'n events
-        if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-            # pygame.quit()
+        if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+            pygame.quit()
             break
         elif event.type in [pygame.USEREVENT, MOUSEBUTTONDOWN]:
             """Do both mechanics and screen update"""
             try:
                 samples = snd[slice(*it.next())]
                 if lines:
-                    # surfarray.blit_array(screen, img)
+                    #surfarray.blit_array(screen, img)
                     screen.fill([0,0,0,255])
                     pygame.draw.aalines(screen, [255,255,255,0.15], False, get_points(samples).transpose())
                     pygame.display.flip()
@@ -105,8 +103,6 @@ def anim(snd = None, size=800, name="Resonance", antialias=False, lines=False):
 
         #cap the framerate
         # clock.tick(int(1.0/Sampler.videorate*1000))
-
-    print snd
 
     #alldone
     mixer.quit()
