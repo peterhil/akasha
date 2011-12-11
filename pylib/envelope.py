@@ -5,27 +5,10 @@ import math
 import numpy as np
 from cmath import rect, polar, phase, pi, exp
 from fractions import Fraction
-# My modules
+
 from generators import Generator
 from timing import Sampler
-
-# Following two methods are modified from:
-# http://seun-python.blogspot.com/2009/06/floating-point-min-max.html
-
-def minfloat(guess):
-    i = 0
-    while(guess * 0.5 != 0):
-        guess = guess * 0.5
-        i += 1
-    return guess, i
-
-def maxfloat(guess = 1.0):
-    guess = float(guess)
-    i = 0
-    while(guess * 2 != guess):
-        guess = guess * 2
-        i += 1
-    return guess, i
+from utils.math import minfloat, maxfloat
 
 class Exponential(object, Generator):
     """Exponential decay and growth for envelopes."""

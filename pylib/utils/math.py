@@ -63,6 +63,27 @@ def roots_counts(base, limit=44100.0):
     return roots_periods(base, limit)/base**float(ex)
 
 
+# Floats
+
+# Following two methods are modified from:
+# http://seun-python.blogspot.com/2009/06/floating-point-min-max.html
+
+def minfloat(guess):
+    i = 0
+    while(guess * 0.5 != 0):
+        guess = guess * 0.5
+        i += 1
+    return guess, i
+
+def maxfloat(guess = 1.0):
+    guess = float(guess)
+    i = 0
+    while(guess * 2 != guess):
+        guess = guess * 2
+        i += 1
+    return guess, i
+
+
 # Random
 
 def rand_between(min, max, size=1, random=np.random.random):
@@ -121,44 +142,3 @@ def distances(signal):
 def diffs(signal, start=0, end=0):
     # Could use np.apply_over_axes - profile with time?
     return np.append(start, signal[1:]) - np.append(signal[:-1], end)
-
-def magnetize(x0, x1, m, norm_level=0.95):
-    """Get previous magnetization (m) level and diff (x) in signal level in. Return new magnetization level.
-    Should be: Get two input samples in and compare their level and difference to the current magnetization level to get the change in output signal level.
-    """
-    d_in = x1 - x0   # Can be at most (+-)2 (from -1 to +1)
-    d_out = x0 / norm_level #/ min((x0 / d_in), norm_level) # Prevent zero division
-    perm = (np.sign(m) * 1.0) - m   # Remaining polarisation suspectibility: From 0 to norm_level (if m <= norm_level)
-    if debug: print "Delta in: %s, out: %s, Permeability: %s" % (d_in, d_out, perm)
-    return m + perm * d_out
-
-def mag2(x0, x1, m, norm_level=0.95):
-    permeability = (norm_level - m)
-    d_in = x1 - x0
-    # Should d_in be abs(d_in)?
-    d_out = permeability * d_in / max(x0, x1, norm_level)
-    if debug:
-        print "Delta in: %s, Permeability: %s, Change: %s" % (d_in, permeability, d_out)
-    return m + d_out
-
-def mag(x, m, norm_level=1.0):
-    r = m + (x * norm_level - x * abs(m))
-    r = min(np.abs(r), norm_level) * np.sign(r) # normalize to prevent oscillation
-    return r
-
-def tape_compress(signal, norm_level=0.95):
-    """Model tape compression hysteresis."""
-    if (signal[0] == complex):
-        amp, = np.abs(signal)
-    else:
-        amp = signal
-    #diff_in = np.abs(diffs(amp))
-    # Calculate result - could use np.ufunc.accumulate?
-    out = np.empty(len(amp))
-    out[0] = signal[0]
-    for i in xrange(len(amp)-1):
-        out[i+1] = mag2(amp[i], amp[i+1], out[i], norm_level)
-    return out
-
-def cx_tape_compress(signal, norm_level=0.95):
-    return tape_compress(signal, norm_level) * np.exp(np.angle(signal)*1j)
