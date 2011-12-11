@@ -9,7 +9,7 @@ import numpy as np
 # My modules
 from timing import Sampler
 from utils.graphing import *
-import utils
+import io
 
 # Settings
 np.set_printoptions(precision=16, suppress=True)
@@ -41,7 +41,7 @@ class Generator:
         return self.sample(item)
 
     def play(self, *args, **kwargs):
-        utils.play(self, *args, **kwargs)
+        io.audio.play(self, *args, **kwargs)
 
 
 class Osc(object, Generator):

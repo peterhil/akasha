@@ -7,7 +7,10 @@ import os
 from timeit import default_timer as time
 from fractions import Fraction
 
+from funct import pairwise
+from graphing import *
 from io.keyboard import *
+from timing import Sampler, time_slice
 from tunings import WickiLayout
 
 w = WickiLayout(440.0)
@@ -20,12 +23,6 @@ try:
     from pygame.locals import *
 except ImportError:
     raise ImportError('Error Importing Pygame/surfarray')
-
-from timing import Sampler, time_slice
-from generators import Generator
-
-from graphing import *
-from funct import pairwise
 
 def blocksize():
     return int(round(Sampler.rate / float(Sampler.videorate)))

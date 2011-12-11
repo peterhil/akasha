@@ -4,7 +4,8 @@
 import numpy as np
 from fractions import Fraction
 from exceptions import AttributeError
-from oscillator import Frequency
+
+from audio.oscillator import Frequency
 
 def cents(*args):
     """Calculate cents from interval or frequency ratio(s).

@@ -1,15 +1,17 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 import numpy as np
 from collections import defaultdict
 from fractions import Fraction
 
 # My modules
-from envelope import Exponential
-from oscillator import Osc
-from generators import Generator
-from utils.audio import play, write
+from .envelope import Exponential
+from .oscillator import Osc
+from .generators import Generator
+from io.audio import play, write
 
 # np.set_printoptions(precision=4, suppress=True)
 

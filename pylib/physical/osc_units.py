@@ -20,7 +20,7 @@ from timing import Sampler
 # Utils
 from utils.decorators import memoized
 from utils.math import to_phasors
-from utils.audio import play, write
+from io.audio import play, write
 
 # Settings
 np.set_printoptions(precision=16, suppress=True)

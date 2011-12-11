@@ -8,12 +8,12 @@ import numpy as np
 from fractions import Fraction
 
 # My modules
-from physical.envelope import Exponential
-from physical.oscillator import Osc
-from physical.generators import Generator
+from .envelope import Exponential
+from .oscillator import Osc
+from .generators import Generator
 
 # Utils
-from utils.audio import play, write
+from io.audio import play, write
 
 # np.set_printoptions(precision=4, suppress=True)
 

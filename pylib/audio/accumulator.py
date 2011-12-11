@@ -14,13 +14,11 @@ from numbers import Number
 
 # My modules
 from audio.generators import PeriodicGenerator
+from io.audio import play, write
 from timing import Sampler
-
-# Utils
 from utils.decorators import memoized
 from utils.math import *
 from utils.graphing import *
-from utils.audio import play, write
 
 # Settings
 np.set_printoptions(precision=16, suppress=True)
