@@ -2,14 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from scipy.signal import hilbert
-
-from collections import defaultdict
-from fractions import Fraction
-from numbers import Number
 
 # My modules
-from generators import Generator
+from audio.generators import Generator
 
 # np.set_printoptions(precision=4, suppress=True)
 
@@ -79,23 +74,26 @@ class Sound(object, Generator):
 
 if __name__ == '__main__':
     import locale
+    import logging
+    import sys
 
-    from envelope import Attack, Exponential
-    from oscillator import Osc, Super, Frequency
-    from harmonics import Overtones
-    from noise import *
-    from dtmf import DTMF
-    from tunings import WickiLayout
+    from collections import defaultdict
+    from fractions import Fraction
+    from numbers import Number
+    from scipy.signal import hilbert
+
+    from audio.envelope import Attack, Exponential
+    from audio.oscillator import Osc, Super, Frequency
+    from audio.harmonics import Overtones
+    from audio.noise import *
+    from audio.dtmf import DTMF
     from io.keyboard import *
-
+    from tunings import WickiLayout
     from utils.audio import play, write, read
     from utils.graphing import *
     from utils.animation import *
     from utils.math import *
     from utils.splines import *
-
-    import sys
-    import logging
     from utils.log import logger, ansi
 
     # Set the user's default locale, see http:// docs.python.org/library/locale.html

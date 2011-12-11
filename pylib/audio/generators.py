@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from utils import audio
 from sys import maxint
+
+import utils
 
 
 class Generator:
@@ -23,7 +24,7 @@ class Generator:
         return self.__getitem__(slice)
 
     def play(self, *args, **kwargs):
-        audio.play(self, *args, **kwargs)
+        utils.audio.play(self, *args, **kwargs)
 
 
 class PeriodicGenerator(Generator):

@@ -3,7 +3,7 @@
 import string
 
 # My modules
-from generators import Generator
+from audio.generators import Generator
 from timing import Sampler
 
 class DTMF(object, Generator):

@@ -6,9 +6,10 @@ from fractions import Fraction
 from cmath import rect, pi
 from copy import deepcopy
 
-from envelope import Exponential
-from oscillator import Osc, Frequency
-from generators import Generator
+from audio.envelope import Exponential
+from audio.oscillator import Osc, Frequency
+from audio.generators import Generator
+
 from utils.math import random_phase
 from timing import Sampler
 

@@ -13,7 +13,7 @@ import types
 from numbers import Number
 
 # My modules
-from generators import PeriodicGenerator
+from audio.generators import PeriodicGenerator
 from timing import Sampler
 
 # Utils

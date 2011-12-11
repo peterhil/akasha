@@ -3,8 +3,9 @@
 
 import numpy as np
 from cmath import rect, polar, phase, pi, exp
-from envelope import Exponential
-from generators import Generator
+
+from audio.envelope import Exponential
+from audio.generators import Generator
 
 np.set_printoptions(precision=4, suppress=True)
 

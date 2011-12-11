@@ -6,7 +6,7 @@ import numpy as np
 from cmath import rect, polar, phase, pi, exp
 from fractions import Fraction
 
-from generators import Generator
+from audio.generators import Generator
 from timing import Sampler
 from utils.math import minfloat, maxfloat
 
