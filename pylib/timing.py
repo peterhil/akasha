@@ -37,7 +37,7 @@ def frames_at(times):
     return int(round(times * Sampler.rate))
 
 
-def time_slice(dur, start, time=False):
+def time_slice(dur, start=0, time=False):
     """Use a time slice argument or the provided attributes 'dur' and 'start' to
     construct a time slice object."""
     time = time or slice(int(round(0 + start)), int(round(dur * Sampler.rate + start)))

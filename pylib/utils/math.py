@@ -34,6 +34,12 @@ def to_phasors(samples):
 def nth_root(n):
     return np.exp(1j * 2 * np.pi * 1.0/n)
 
+def deg(radians):
+    return 180 * (radians / np.pi)
+
+def rad(degrees):
+    return np.pi * (degrees / 180.0)
+
 # Utils for frequency ratios etc...
 
 def logn(x, base=euler):
@@ -99,6 +105,23 @@ def clip(signal, inplace=False):
     np.clip(reals, a_min=-1, a_max=1, out=reals)    # Uses out=reals to transform in-place!
     return signal
 
+def pad(d, index=-1, count=1, value=None):
+    """Inserts a padding value at index repeated count number of times. If value is None, uses an index from d."""
+    length = len(d)
+    space = index % (length + 1)
+    value = (value if value != None else d[index])
+    return np.concatenate((d[0:space], np.repeat(value, count), d[space:length]))
+
+def distances(signal):
+    if hasattr(signal, '__len__') and (len(signal) >= 2):
+        return np.abs(signal[1:] - signal[:-1])
+    else:
+        raise ValueError("Expected signal to have at least two samples to calculate distances. Signal was: %s" % signal)
+
+def diffs(signal, start=0, end=0):
+    # Could use np.apply_over_axes - profile with time?
+    return np.append(start, signal[1:]) - np.append(signal[:-1], end)
+
 def magnetize(x0, x1, m, norm_level=0.95):
     """Get previous magnetization (m) level and diff (x) in signal level in. Return new magnetization level.
     Should be: Get two input samples in and compare their level and difference to the current magnetization level to get the change in output signal level.
@@ -122,10 +145,6 @@ def mag(x, m, norm_level=1.0):
     r = m + (x * norm_level - x * abs(m))
     r = min(np.abs(r), norm_level) * np.sign(r) # normalize to prevent oscillation
     return r
-
-def diffs(signal, start=0, end=0):
-    # Could use np.apply_over_axes - profile with time?
-    return np.append(start, signal[1:-1]) - np.append(signal[0:-2], end)
 
 def tape_compress(signal, norm_level=0.95):
     """Model tape compression hysteresis."""

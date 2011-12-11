@@ -1,8 +1,17 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+import logging
 import numpy as np
 import os
+from timeit import default_timer as time
+from fractions import Fraction
+
+from io.keyboard import *
+from tunings import WickiLayout
+
+w = WickiLayout(440.0)
+#w = WickiLayout(440.0, generators=(2**(Fraction(7, 12)), 2**(Fraction(2, 12))))
 
 try:
     import pygame
@@ -21,11 +30,13 @@ from funct import pairwise
 def blocksize():
     return int(round(Sampler.rate / float(Sampler.videorate)))
 
-def indices(snd):
+def indices(snd, dur=False):
     if hasattr(snd, "size"):
         size = snd.size
+    elif dur:
+        size = int(round(dur * Sampler.rate))
     else:
-        size = 44100
+        size = Sampler.rate
     return np.append(np.arange(0, size, blocksize()), size)
 
 def show_slice(screen, snd, size=800, name="Resonance", antialias=True):
@@ -37,8 +48,15 @@ def show_slice(screen, snd, size=800, name="Resonance", antialias=True):
     surfarray.blit_array(screen, img)
     pygame.display.flip()
 
-def anim(snd, size=800, dur=5.0, name="Resonance", antialias=False, lines=False):
+def snd_slice(snd, sl):
+    return np.cast['int16'](snd[sl].imag * (2**16/2.0-1))
 
+def pcm(snd, bits=16):
+    return np.cast['int' + str(bits)](snd.imag * (2**bits/2.0-1))
+
+def anim(snd, size=800, dur=5.0, name="Resonance", antialias=False, lines=False, sync=False):
+    sync = (antialias or lines or sync) # For avoiding slowness with colours TODO: optimize colours!
+    
     if 'numpy' in surfarray.get_arraytypes():
         surfarray.use_arraytype('numpy')
     else:
@@ -47,50 +65,129 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=False, lines=False)
 
     pygame.init()
     mixer.quit()
-    mixset = mixer.init(frequency=Sampler.rate, size=-16, channels=1, buffer=blocksize()*4)
+    mixer.init(frequency=Sampler.rate, size=-16, channels=1, buffer=blocksize()/8.0) # Keep the buffer smaller than blocksize!
     init = mixer.get_init()
-
-    # clock = pygame.time.Clock()
-
+    chs = []
+    if hasattr(snd, 'frequency'):
+        nchannels = 1
+    else:
+        nchannels = 1
+    for i in xrange(nchannels):
+        chs.append(mixer.find_channel())
+    chid = 0
+    ch = chs[chid]
+    
+    clock = pygame.time.Clock()
+    
     resolution = (size+1, size+1) # FIXME get resolution some other way. This was: img.shape[:2]
     screen = pygame.display.set_mode(resolution) #, flags=pygame.SRCALPHA, depth=32)
     pygame.display.set_caption(name)
 
-    it = pairwise(indices(snd))
+    it = pairwise(indices(snd, dur))
     show_slice(screen, snd[slice(*it.next())], size=size, name=name, antialias=antialias)
 
-    sndarr = np.cast['int32'](snd[time_slice(dur, 0)].imag * (2**16/2.0-1))
+    #sndarr = np.cast['int16'](snd[time_slice(dur, 0)].imag * (2**16/2.0-1))
+    if sync:
+        ait = pairwise(indices(snd, dur))
+        asl = list(ait.next())
+        asl[1] *= 1
+        audio = sndarray.make_sound(pcm(snd[slice(*asl)]))
+        ch.play(audio)
+    else:
+        pgsnd = sndarray.make_sound(pcm(snd[time_slice(dur, 0)]))
+        pgsnd.play()
 
-    pgsnd = sndarray.make_sound(sndarr)
-    pgsnd.play()
+    VIDEOFRAME = pygame.NUMEVENTS - 1
+    def set_timer():
+        ms = (1.0/Sampler.videorate*1000) # 40 ms for 25 Hz
+        pygame.time.set_timer(VIDEOFRAME, ms) #1000.0/float(Sampler.videorate))
+    set_timer()
 
-    pygame.time.set_timer(pygame.USEREVENT, 1.0/Sampler.videorate*1000)
+    Sampler.paused = False
+    def pause():
+        Sampler.paused = not Sampler.paused
 
-    while True:
-        event = pygame.event.wait()
-        #check for quit'n events
-        if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
-            pygame.quit()
-            break
-        elif event.type in [pygame.USEREVENT, MOUSEBUTTONDOWN]:
-            """Do both mechanics and screen update"""
-            try:
-                samples = snd[slice(*it.next())]
+    done = False
+    while not done:
+        for event in pygame.event.get():
+
+            # Handle events
+            if (event.type == pygame.KEYDOWN and event.key == pygame.K_F8) or \
+                 (event.type == pygame.ACTIVEEVENT and event.state == 3):
+                # Pause
+                pause()
+            elif (event.type == pygame.KEYDOWN and event.key == pygame.K_F7):
+                # Rewind
+                it = pairwise(indices(snd))
+                ait = pairwise(indices(snd))
+            elif (event.type == pygame.KEYDOWN and event.key == pygame.K_UP):
+                # Sampler.videorate += 1
+                # set_timer()
+                #w.move(-2, 0)
+                w.base *= 2.0
+            elif (event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN):
+                # Sampler.videorate = max(Sampler.videorate - 1, 1) # Prevent zero division
+                # set_timer()
+                #w.move(2, 0)
+                w.base /= 2.0
+            elif (event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT):
+                w.move(0, 6)
+            elif (event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT):
+                w.move(0, -6)
+            elif event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == 27):
+                # Quit
+                done = True
+                break
+            elif (event.type == pygame.KEYDOWN and hasattr(snd, 'frequency')):
+                print event
+                f = w.get(*( pos.get(event.key, pos[None]) or (0, 0) ))
+                snd.frequency = f
+                it = pairwise(indices(snd, dur))
+                ait = pairwise(indices(snd, dur))
+                logger.info("Setting NEW frequency: %r for %s, now at frequency: %s" % (f, snd, snd.frequency))
+            # elif (event.type == pygame.KEYUP and hasattr(snd, 'frequency')):
+            #     print event
+            elif (event.type == VIDEOFRAME):
+                if Sampler.paused:
+                    break
+                
+                draw_start = time()
+                try:
+                    samples = snd[slice(*it.next())]
+                    if sync:
+                        audio = sndarray.make_sound(pcm(snd[slice(*ait.next())]))
+                        if hasattr(snd, 'frequency'): ch = mixer.find_channel()
+                        chid = (chid + 1) % nchannels
+                        ch = chs[chid]
+                        ch.queue(audio)
+                except StopIteration:
+                    done = True
+                    break
+
+                """Do both mechanics and screen update"""
                 if lines:
-                    #surfarray.blit_array(screen, img)
-                    screen.fill([0,0,0,255])
-                    pygame.draw.aalines(screen, [255,255,255,0.15], False, get_points(samples).transpose())
+                    img = get_canvas(size, axis=True)[:,:,:-1]  # Drop alpha
+                    surfarray.blit_array(screen, img)
+                    if antialias: # Colorize
+                        for ends in pairwise(samples):
+                            ends = np.array(ends)
+                            pts = get_points(ends, size).transpose()
+                            color = hsv2rgb(angle2hsv(phase2hues(ends, padding=False)))
+                            pygame.draw.aaline(screen, color, *pts)
+                    else:
+                        pts = get_points(samples, size).transpose()
+                        pygame.draw.aalines(screen, pygame.Color('orange'), False, pts, 1)
                     pygame.display.flip()
                 else:
                     show_slice(screen, samples, size=size, name=name, antialias=antialias)
-            except StopIteration:
-                # pygame.time.delay(2000)
-                break
 
-        #cap the framerate
-        # clock.tick(int(1.0/Sampler.videorate*1000))
+                dc = time() - draw_start
+                fps = clock.get_fps()
+                t = clock.tick_busy_loop(Sampler.videorate)         #cap the framerate
+                logger.log(logging.BORING, "Animation: clock tick %d, FPS: %3.3f, drawing took: %.4f", t, fps, dc)
+            else:
+                print event
 
-    #alldone
     mixer.quit()
     pygame.quit()
 

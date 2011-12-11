@@ -10,7 +10,6 @@ from fractions import Fraction
 
 # Types
 import types
-import quantities as pq
 from numbers import Number
 
 # My modules
@@ -20,91 +19,189 @@ from timing import Sampler
 # Utils
 from utils.decorators import memoized
 from utils.math import *
-from utils.graphing import *
 
 # Settings
 np.set_printoptions(precision=16, suppress=True)
-pq.markup.config.use_unicode = True  # Use unicode units representation
 
+
+class Hz(object, PeriodicGenerator):
+    def __init__(self, hz=0):
+        self.__frequency = hz
+
+    def __get__(self, instance, owner):
+        print "Getting from Hz: ", self, instance, owner
+        return self.hz
+
+    @property
+    def hz(self):
+        "Depends on original frequency's rational approximation and sampling rate."
+        return float(self.ratio * Sampler.rate)
+
+    @property
+    def ratio(self):
+        return self.to_ratio(self.__frequency)
+
+    @staticmethod
+    def to_ratio(freq, limit=Sampler.rate):
+        return Fraction.from_float(float(freq)/Sampler.rate).limit_denominator(limit)
+
+class Game(object):
+    f0 = Hz()
+    f10 = Hz(hz=10)
+    f20 = Hz(hz=20)
+    
+    def __init__(self, hz=100):
+        self.__class__.foo = Hz(hz)
 
 class Frequency(object, PeriodicGenerator):
     """Frequency class"""
+
+    def __init__(self, hz):
+        # Original frequency, independent of sampling rate or optimizations
+        self._frequency = hz
+
+    def __get__(self, instance, owner):
+        print "Getting from Frequency: ", self, instance, owner
+        return float(self.ratio * Sampler.rate)
+
+    def __nonzero__(self):
+        """Zero frequency should be considered False"""
+        return self.ratio != 0
+
+    @property
+    def ratio(self):
+        return self.wrap(self.antialias(self.to_ratio(self._frequency)))
+
+    @property
+    def hz(self):
+        "Depends on original frequency's rational approximation and sampling rate."
+        return float(self.ratio * Sampler.rate)
     
+    # Internal stuff
+    
+    @staticmethod
+    def to_ratio(freq, limit=Sampler.rate):
+        return Fraction.from_float(float(freq)/Sampler.rate).limit_denominator(limit)
+
+    @staticmethod
+    def antialias(ratio):
+        if Sampler.prevent_aliasing and abs(ratio) > Fraction(1,2):
+            return Fraction(0, 1)
+        if Sampler.prevent_aliasing and not Sampler.negative_frequencies and ratio < 0:
+            return Fraction(0, 1)
+        return ratio
+    
+    @staticmethod
+    def wrap(ratio):
+        # wrap roots: 9/8 == 1/8 in Osc! This also helps with numeric accuracy.
+        n = ratio.numerator % ratio.denominator
+        return Fraction(n, ratio.denominator)
+
+    ### Representation ###
+
+    def __cmp__(self, other):
+        if isinstance(other, self.__class__):
+            return cmp(self.ratio, other.ratio)
+        else:
+            return cmp(other, self.ratio)
+
+    def __repr__(self):
+        return "Frequency(%s)" % self._frequency
+
+    def __str__(self):
+        return "<Frequency: %s hz>" % self.hz
+
+    ### Arithmetic ###
+    #
+    # See fractions.Fraction._operator_fallbacks() for automagic
+    # generation of forward and backward operator functions
+    
+    def __float__(self):
+        return float(self.hz)
+    
+    def __add__(self, other):
+        print "Self: %s, other: %s (%s)" % (self, other, type(other))
+
+        if isinstance(other, self.__class__):
+            return Frequency(self.hz + other.hz)
+        elif isinstance(other, float):
+            return Frequency(self.hz + other)
+        elif isinstance(other, complex):
+            return complex(self.hz + other)
+        elif isinstance(other, Number):
+            return Frequency(float(self.ratio) + other)
+        elif type(other) in np.typeDict.values():
+            return np.typeDict[np.typeNA[type(other)]](self.ratio * other)
+        elif isinstance(other, np.ndarray) and isinstance(other[0], np.number):
+            return np.array(map(Frequency, self.hz + other), dtype=np.object)
+        else:
+            raise NotImplementedError("Self: %s, other: %s", (self, other))
+    __radd__ = __add__
+
+    def __mul__(self, other):
+        print "Self: %s, other: %s (%s)" % (self, other, type(other))
+        
+        if isinstance(other, self.__class__):
+            return Frequency(self.hz * other.hz)
+        elif isinstance(other, float):
+            return Frequency(self.hz * other)
+        elif isinstance(other, complex):
+            return complex(self.hz * other)
+        elif isinstance(other, Number):
+            return Frequency(float(self.ratio) * other)
+        elif type(other) in np.typeDict.values():
+            return np.typeDict[np.typeNA[type(other)]](self.ratio * other)
+        elif isinstance(other, np.ndarray) and isinstance(other[0], np.number):
+            return map(lambda f: Frequency(self.hz * f), other)
+        else:
+            raise NotImplementedError("Self: %s, other: %s", (self, other))
+    __rmul__ = __mul__
     
 
 class Osc(object, PeriodicGenerator):
     """Oscillator class"""
 
-    def __init__(self, ratio, superness=2):
-        # print "Ratio: %s, Superness: %s" % (ratio, superness)
-        self.ratio = ratio
-
-        # Set superness
-        if not isinstance(superness, (list, Number)):
-            raise ValueError("Superness needs to be a number or a list of length one to four.")
-        if isinstance(superness, Number):
-            superness = [superness]
-        if len(superness) < 4:
-            superness += [superness[-1]] * (4 - len(superness))
-
-        self.superness = superness[:4]  # Take only the first four params
-
-        # Generate roots
-        # self.roots = self.func_roots        # 0.108 s
-        # self.roots = self.table_roots       # 0.057 s
+    def __init__(self, freq):
+        self._frequency = Frequency(freq)
         self.roots = self.np_exp
         self.roots(self.ratio)
 
     @classmethod
-    def freq(cls, freq, superness=2):
-        """Oscillator can be initialized using a frequency. Can be a float."""
-        return cls(Osc.freq_to_ratio(freq), superness)
+    def freq(cls, freq):
+        return cls(freq)
 
-    @staticmethod
-    def limit(f, max=44100):
-        return Fraction(int(round(f * max)), max)
-
-    @staticmethod
-    def freq_to_ratio(freq, rounding='native'):
-        ratio = Fraction.from_float(float(freq)/Sampler.rate)
-        if rounding == 'native':
-            ratio = ratio.limit_denominator(Sampler.rate)
-        else:
-            ratio = Osc.limit(ratio, Sampler.rate)
-        return ratio
-
-    @staticmethod
-    def limit_ratio(f):
-        if Sampler.prevent_aliasing and abs(f) > Fraction(1,2):
-            return Fraction(0, 1)
-        if Sampler.prevent_aliasing and not Sampler.negative_frequencies and f < 0:
-            return Fraction(0, 1)
-        # wrap roots: 9/8 == 1/8 in Osc! This also helps with numeric accuracy.
-        n = f.numerator % f.denominator
-        return Fraction(n, f.denominator)
-
-    ### Properties ###
+    @classmethod
+    def from_ratio(cls, ratio, den=False):
+        if den: ratio = Fraction(ratio, den)
+        return cls(Fraction(ratio) * Sampler.rate)
 
     @property
-    def ratio(self): return self._ratio
+    def hz(self):
+        return self._frequency.hz
 
-    @ratio.setter
-    def ratio(self, value):
-        self._ratio = Osc.limit_ratio(Fraction(*[value]))
-
-    @property
-    def period(self): return self.ratio.denominator
-
-    @property
-    def order(self): return self.ratio.numerator
+    @hz.setter
+    def hz(self, hz):
+        self._frequency._frequency = hz
 
     @property
     def frequency(self):
-        return float(self.ratio * Sampler.rate)
+        return self._frequency.hz
 
     @frequency.setter
-    def frequency(self, f):
-        self.ratio = self.freq_to_ratio(f)
+    def frequency(self, hz):
+        self._frequency = Frequency(hz)  # Use Trellis, and make a interface for frequencies
+
+    @property
+    def ratio(self):
+        return self._frequency.ratio
+
+    @property
+    def period(self):
+        return self.ratio.denominator
+
+    @property
+    def order(self):
+        return self.ratio.numerator
 
     ### Generating functions ###
 
@@ -124,12 +221,63 @@ class Osc(object, PeriodicGenerator):
     @staticmethod
     @memoized
     def func_roots(ratio):
+        # self.roots = self.func_roots        # 0.108 s
         wi = 2 * pi * 1j
         return np.exp(wi * ratio * np.arange(0, ratio.denominator))
 
     def table_roots(self, ratio):
+        # self.roots = self.table_roots       # 0.057 s
         roots = self.np_exp(Fraction(1, Sampler.rate))
         return roots[0:ratio.denominator] ** (Sampler.rate / float(ratio.denominator))
+
+
+    ### Sampling ###
+
+    @property
+    def sample(self):
+        return self.np_exp(self.ratio)
+
+    @property
+    def imag(self):
+        return self.sample.imag
+
+    ### Representation ###
+
+    def __cmp__(self, other):
+        if isinstance(other, self.__class__):
+            return cmp(self.ratio, other.ratio)
+        else:
+            return cmp(other, self.ratio)
+
+    def __repr__(self):
+        return "Osc(%s)" % self.frequency
+
+    def __str__(self):
+        return "<Osc: %s hz>" % self.hz
+
+
+
+class Super(Osc):
+    """Oscillator that has a superness parameter."""
+    
+    def __init__(self, ratio, superness=2):
+        """Super (oscillator) can be initialized using a frequency and superness. See 'superellipse' at Wikipedia for explanation of this parameter means."""
+        super(self.__class__, self).__init__(ratio)
+        self.superness = self.normalise_superness(superness)
+
+    @classmethod
+    def freq(cls, freq, superness=2):
+        return cls(freq, superness)
+
+    @staticmethod
+    def normalise_superness(superness):
+        if not isinstance(superness, (list, Number)):
+            raise ValueError("Superness needs to be a number or a list of length one to four.")
+        if isinstance(superness, Number):
+            superness = [superness]
+        if len(superness) < 4:
+            superness += [superness[-1]] * (4 - len(superness))
+        return superness[:4]  # Take only the first four params
 
     def supercurve(self, points):
         """Superformula function. Generates amplitude curves applicable to oscillators by multiplying.
@@ -148,68 +296,17 @@ class Osc(object, PeriodicGenerator):
 
         return points * super
 
-
     ### Sampling ###
 
     @property
     def sample(self):
-        if (self.superness == [2,2,2,2]):
-            return self.np_exp(self.ratio)
-        else:
-            return normalize(self.supercurve(self.np_exp(self.ratio)))
-
-    @property
-    def imag(self):
-        return self.sample.imag
-
-    ### Representation ###
-
-    def __cmp__(self, other):
-        if isinstance(other, self.__class__):
-            return cmp(self.ratio, other.ratio)
-        else:
-            return cmp(other, self.ratio)
-
-    def __repr__(self):
-        return "Osc(%s, %s)" % (self.order, self.period)
-
-    def __str__(self):
-        return "<Osc: %s Hz>" % self.frequency
-
-    ### Arithmetic ###
-    #
-    # See fractions.Fraction._operator_fallbacks() for automagic
-    # generation of forward and backward operator functions
-    def __add__(self, other):
-        if isinstance(other, self.__class__):
-            return Osc(self.ratio + other.ratio)
-        elif isinstance(other, float):
-            return Osc.freq(self.frequency + other)
-        elif isinstance(other, Number):
-            return Osc(self.ratio + other)
-        elif isinstance(other, np.ndarray) and isinstance(other[0], np.number):
-            return np.array(map(Osc.freq, self.frequency + other), dtype=np.object)
-        else:
-            raise NotImplementedError("Self: %s, other: %s", (self, other))
-    __radd__ = __add__
-
-    def __mul__(self, other):
-        if isinstance(other, self.__class__):
-            superness = list(np.array(self.superness) * np.array(other.superness) / 2.0) # TODO Is this the right behaviour?
-            return Osc(self.ratio * other.ratio, superness)
-        elif isinstance(other, float):
-            return Osc.freq(self.frequency * other, self.superness)
-        elif isinstance(other, Number):
-            return Osc(self.ratio * other, self.superness)
-        elif isinstance(other, np.ndarray) and isinstance(other[0], np.number):
-            return map(lambda f: Osc.freq(self.frequency * f, self.superness), other)
-        else:
-            raise NotImplementedError("Self: %s, other: %s", (self, other))
-    __rmul__ = __mul__
+        return normalize(self.supercurve(self.np_exp(self.ratio)))
 
 
 if __name__ == '__main__':
+    from utils.graphing import *
     o = Osc(Fraction(1, 8))
     t = slice(0, Sampler.rate)
     print o.np_exp(o.period)
     print to_phasors(o.sample)
+

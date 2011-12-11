@@ -7,7 +7,7 @@ from cmath import rect, pi
 from copy import deepcopy
 
 from envelope import Exponential
-from oscillator import Osc
+from oscillator import Osc, Frequency
 from generators import Generator
 from utils.math import random_phase
 from timing import Sampler
@@ -45,21 +45,22 @@ class Overtones(object, Generator):
 
     def sample(self, iter):
         frames = np.zeros(len(iter), dtype=complex)
+        
         for f in self.overtones:
-            # Use deepcopy to preserve superness & other attrs:
-            o = deepcopy(self.base)
-            o.frequency = self.frequency * f
+            o = deepcopy(self.base)     # Uses deepcopy to preserve superness & other attrs
+            o.frequency = Frequency(f * self.frequency)
             if o.frequency == 0: break
-
+            
             # e = Exponential(0, amp=float(self.frequency/o.frequency*float(self.frequency) # square waves
             # e = Exponential(0, amp=float(self.frequency**2/o.frequency**2*float(self.frequency) # triangle waves
             # e = Exponential(-o.frequency/100.0) # sine waves
             e = Exponential(self.damping(o.frequency)) # sine waves
-
+            
             if self.rand_phase:
                 frames += o[iter] * random_phase() * e[iter]    # Move phases to Osc/Frequency!!!
             else:
                 frames += o[iter] * e[iter]
+        
         return frames / max( abs(max(frames)), self.limit, 1.0 )
 
     def __repr__(self):

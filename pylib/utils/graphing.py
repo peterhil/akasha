@@ -5,8 +5,11 @@ import numpy as np
 from cmath import phase
 from timing import Sampler
 from PIL import Image
+from exceptions import ValueError
 
-from utils.math import normalize, clip
+from utils.decorators import memoized
+from utils.math import normalize, clip, deg, distances, pad
+from utils.log import logger
 
 try:
     import matplotlib.pyplot as plt
@@ -25,6 +28,10 @@ lowest_audible_hz = 16.35
 #    Saturation is between 0 and 1
 # */
 def hsv2rgb(hsv, alpha=None):
+    # hsv = np.atleast_1d(hsv)
+    # if (hsv.size == 1):
+    #     hsv = angle2hsv(hsv)
+
     rgb = [0, 0, 0] # Could be a dict {}
     sat = [0, 0, 0]
 
@@ -95,7 +102,7 @@ def rgb2hsv(rgb):
     return hsv
 
 def angle2hsv(deg):
-    return [deg % 360, 1, 255, 255]
+    return np.append(np.asscalar(deg % 360), [1, 255, 255])
 
 def hist_graph(samples, size=1000):
     """Uses numpy histogram2d to make an image from complex signal."""
@@ -119,28 +126,53 @@ def get_points(samples, size=1000):
     # Convert complex samples to real number coordinate points
     return samples.view(np.float).reshape(len(samples), 2).transpose()    # 0.5 to 599.5
 
-def phase2hues(cx_samples):
+def phase2hues(cx_samples, padding=True, debug=False):
     """Converts angles of complex samples into hues"""
-
+    cx_samples = np.atleast_1d(cx_samples)
+    
     # Get angles from points
-    angles = np.array(map(phase, cx_samples)) + np.pi
-    # print repr(angles[:100])
+    angles = np.angle(cx_samples) + np.pi
+    if debug: logger.debug("Angle + pi:\n%s", repr(angles[:100]))
 
-    # Get diffs & convert to degrees 0..240 (red..blue)
-    angles = (np.abs(np.append(angles[-1], angles[:-1]) - angles) % (2.0 * np.pi))  # Fixme! First samples should not be handled differently!
-    # print repr(angles[:100])
+    # Get distances
+    angles = pad(distances(angles), 0) if padding else distances(angles)
 
-    angles =  angles / (2.0 * np.pi) * Sampler.rate  # 0..Fs/2
-    # print repr(angles[:100])
+    # Convert to degrees 0..240 (red..blue)
+    angles = angles % (2.0 * np.pi)
+    if debug: logger.debug("Diffs modulo 2pi:\n%s", repr(angles[:100]))
+
+    angles = angles / (2.0 * np.pi) * Sampler.rate  # 0..Fs/2
+    if debug: logger.debug("Rad to tau * Fs -> 0..Fs:\n%s", repr(angles[:100]))
 
     # Convert rad to deg
     low = np.log2(lowest_audible_hz)
     angles = ((np.log2(np.abs(angles)+1) - low) * 24) % 360   # (np.log2(f)-low) / 10 * 240  red..violet
     # angles = angles * 240.0     # red..violet
-    # print repr(angles[:100])
-
+    if debug: logger.debug("Scaled:\n%s\n", repr(angles[:100]))
     return angles
-    
+
+def chord_to_angle(length):
+    """Return angle for chord length. Restrict to unit circle, ie. max length is 2.0"""
+    return np.arcsin(np.fmin(np.abs(length), 2.0) / 2.0) * 2
+
+def chord_to_hue(length):
+    return deg(chord_to_angle(length))
+
+def chord_to_tau(length):
+    return chord_to_angle(length) / (2.0 * np.pi)
+
+def tau_to_hue(tau):
+    # Hue 240 is violet, and 8.96 is a factor for scaling back to 1.0
+    return (np.log2(np.abs(chord_to_tau(tau))+1)) * 8.96 * 240
+
+def chords_to_hues(signal):
+    d = distances(signal)
+    logger.debug("%s Distances: %s", __name__, d)
+    taus = np.apply_along_axis(chord_to_tau, 0, np.append(d, d[-1])) # Append is a hack to get the same length back
+    hues = tau_to_hue(taus)
+    logger.debug("%s Hues: %s", __name__, hues)
+    return hues
+
 def draw(samples, size=1000, antialias=False, axis=True, img=None):
     """Draw the complex sound signal into specified size image."""
     # See http://jehiah.cz/archive/creating-images-with-numpy
@@ -162,7 +194,7 @@ def draw(samples, size=1000, antialias=False, axis=True, img=None):
     if antialias:
         # Draw with antialising
         centers = np.round(points)  # 1.0 to 600.0
-        bases = np.cast['uint32'](centers) - 1   # 0 to 599
+        bases = np.cast['uint16'](centers) - 1   # 0 to 599
         deltas = points - bases - 0.5
 
         values_00 = deltas[1] * deltas[0]
@@ -176,10 +208,11 @@ def draw(samples, size=1000, antialias=False, axis=True, img=None):
         img[(size-1) - (bases[1]+1), bases[0]+1, :] += np.repeat((values_00 * 255), 4).reshape(len(samples),4)
     else:
         # Cast floats to integers
-        points = np.cast['uint32'](points)  # 0 to 599
+        points = np.cast['uint16'](points)  # 0 to 599
 
         # Draw image
-        img[(size - 1) - points[1], points[0]] = map(lambda c: hsv2rgb(angle2hsv(c)), phase2hues(samples))     #[255,255,255,255]
+        #img[(size - 1) - points[1], points[0]] = np.apply_along_axis(hsv2rgb, 0, phase2hues(samples))
+        img[(size - 1) - points[1], points[0]] = map(lambda c: hsv2rgb(angle2hsv(c)), phase2hues(samples))
 
     return img
 

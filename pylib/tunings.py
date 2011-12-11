@@ -3,7 +3,8 @@
 
 import numpy as np
 from fractions import Fraction
-
+from exceptions import AttributeError
+from oscillator import Frequency
 
 def cents(*args):
     """Calculate cents from interval or frequency ratio(s).
@@ -44,7 +45,7 @@ def freq_plus_cents(f, cnt):
     return f * interval(cnt)
 
 class RegularTuning(object):
-    def init(self, generators):
+    def __init__(self, generators):
         pass
 
 # In [128]: sorted(Fraction(3,2) ** np.array(map(Fraction.from_float, xrange(28))) % Fraction(3,2) + Fraction(1))
@@ -68,3 +69,27 @@ class RegularTuning(object):
 #  1.99755859375,
 #  2.0,
 # ]
+
+class WickiLayout(object):
+    def __init__(self, base=Frequency(440.0), origo=(1, 4), generators=(Fraction(3,2), Fraction(9,8))):
+        """Wicki keyboard layout. Generators are given in (y, x) order. Origo defaults to 'C' key (being on the position(1,4))."""
+        if len(generators) == 2:
+            self.base = base
+            self.gen = generators
+            self.origo = origo
+        else:
+            raise AttributeError("Expected two generators, got: {0!r}".format(generators))
+    
+    def get(self, *pos):
+        # TODO fix Frequency multiplication to work with Fractions!
+        return (
+            self.base * \
+            float(
+                (self.gen[0] ** (pos[0] - self.origo[0])) * \
+                (self.gen[1] ** (pos[1] - self.origo[1]))
+            )
+        )
+
+    def move(self, *pos):
+        assert len(pos) == 2, "Expected two arguments or tuple of length two."
+        self.origo = (self.origo[0] + pos[0], self.origo[1] + pos[1])

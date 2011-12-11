@@ -9,28 +9,9 @@ from fractions import Fraction
 from numbers import Number
 
 # My modules
-from envelope import Attack, Exponential
-from oscillator import Osc
-from harmonics import Overtones
-from noise import *
-from dtmf import DTMF
 from generators import Generator
-from utils.audio import play, write, read
-from utils.math import *
-from utils.graphing import *
-from utils.animation import *
-from utils.splines import *
 
 # np.set_printoptions(precision=4, suppress=True)
-
-def make_test_sound(freq = 230):
-    h = Overtones(Osc.freq(freq), damping=lambda f, a=1.0: (-f/100.0, a/(f/freq)), n = 20)
-    c = Chaos()
-    o2 = Osc.freq(220)
-    o4 = Osc.freq(440)
-    o3 = Osc.freq(330)
-    s = Sound(h, o2, o3, o4)
-    return s
 
 class Sound(object, Generator):
     """Sound groups."""
@@ -94,3 +75,39 @@ class Sound(object, Generator):
     # def stat(self):
     #     '''Return a tuple containing the state of each sound object.'''
     #     return tuple(self.sounds.values())
+
+
+if __name__ == '__main__':
+    import locale
+
+    from envelope import Attack, Exponential
+    from oscillator import Osc, Super, Frequency
+    from harmonics import Overtones
+    from noise import *
+    from dtmf import DTMF
+    from tunings import WickiLayout
+    from io.keyboard import *
+
+    from utils.audio import play, write, read
+    from utils.graphing import *
+    from utils.animation import *
+    from utils.math import *
+    from utils.splines import *
+
+    import sys
+    import logging
+    from utils.log import logger, ansi
+
+    # Set the user's default locale, see http:// docs.python.org/library/locale.html
+    # Also be sure to have LC_ALL='fi_FI.UTF-8' and CHARSET='UTF-8' set in the environment
+    # to have sys.stdin.encoding = UTF-8
+    locale.setlocale(locale.LC_ALL, 'fi_FI.UTF-8')
+
+    def make_test_sound(freq = 230):
+        h = Overtones(Osc.freq(freq), damping=lambda f, a=1.0: (-f/100.0, a/(f/freq)), n = 20)
+        c = Chaos()
+        o2 = Osc.freq(220)
+        o4 = Osc.freq(440)
+        o3 = Osc.freq(330)
+        s = Sound(h, o2, o3, o4)
+        return s
