@@ -1,6 +1,7 @@
 {
     "main": [
         [
+            {},
             {
                 "scancode": 0, 
                 "name": "Left control", 
@@ -94,6 +95,7 @@
             }
         ], 
         [
+            {},
             {
                 "scancode": 0, 
                 "name": "Left shift", 
@@ -167,6 +169,7 @@
             {}
         ], 
         [
+            {},
             {
                 "scancode": 0, 
                 "unicode": "", 
@@ -241,6 +244,7 @@
             }
         ], 
         [
+            {},
             {
                 "scancode": 48, 
                 "unicode": "\\t", 
@@ -318,6 +322,12 @@
         ], 
         [
             {
+                "scancode": 10,
+                "key": 160,
+                "unicode": "\\xa7",
+                "mod": 0, "name": "§"
+            },
+            {
                 "scancode": 18, 
                 "unicode": "1", 
                 "key": 49
@@ -380,7 +390,7 @@
             {
                 "scancode": 12, 
                 "unicode": "\\xb4", 
-                "key": 113
+                "key": 180
             }, 
             {
                 "scancode": 51, 
@@ -390,6 +400,8 @@
             }
         ], 
         [
+            {},
+            {},
             {
                 "scancode": 120, 
                 "unicode": "\\uf705", 

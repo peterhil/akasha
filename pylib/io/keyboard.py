@@ -14,6 +14,14 @@ Copyright (c) 2011 Loihde. All rights reserved.
 # S<zxcvbnm,.-SSS  ^  123E
 # COM ______MMOCC <v> 00,E
 
+#  E1234567890123 456 789E
+#   §1234567890+´B FHA N=/*
+#    Tqwertyuiopå¨R DEV 789-
+#     Lasdfghjklöä'R     456+
+#     S<zxcvbnm,.-SSS  ^  123E
+#     COMM______MMOCC <v> 00,E
+
+
 # Defined by:
 # - Mapping from key to position
 # - Mapping from position to frequency (by index)
@@ -33,7 +41,7 @@ def get_layout(path='settings/keymaps/fi.json', mapdir=os.curdir):
     finally:
         fp.close()
 
-def get_mapping(layout, section='main', mapping=np.empty([6,21], dtype=object)):
+def get_mapping(layout, section='main', mapping=np.empty([6,25], dtype=object)):
     if section == 'main':
         basecol = 0
     elif section == 'arrows':
@@ -51,7 +59,7 @@ def get_mapping(layout, section='main', mapping=np.empty([6,21], dtype=object)):
     return mapping
 
 def get_keyboard(layout=get_layout()):
-    kb = np.empty([6,21], dtype=object)
+    kb = np.empty([6,25], dtype=object)
     kb.fill({})
     kb = get_mapping(layout, 'main', kb)
     kb = get_mapping(layout, 'arrows', kb)
