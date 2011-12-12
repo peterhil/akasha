@@ -250,10 +250,10 @@ class Osc(object, PeriodicGenerator):
             return cmp(other, self.ratio)
 
     def __repr__(self):
-        return "Osc(%s)" % self.frequency
+        return "%s(%s)" % (self.__class__.__name__, self.frequency)
 
     def __str__(self):
-        return "<Osc: %s hz>" % self.hz
+        return "<%s: %s hz>" % (self.__class__.__name__, self.hz)
 
 
 
@@ -301,6 +301,12 @@ class Super(Osc):
     @property
     def sample(self):
         return normalize(self.supercurve(self.np_exp(self.ratio)))
+
+    def __repr__(self):
+        return "%s(%s, superness=%s)" % (self.__class__.__name__, self.frequency, self.superness)
+
+    def __str__(self):
+        return "<%s: %s hz, superness %s>" % (self.__class__.__name__, self.hz, self.superness)
 
 
 if __name__ == '__main__':

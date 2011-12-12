@@ -4,14 +4,15 @@
 import numpy as np
 from fractions import Fraction
 from cmath import rect, pi
-from copy import deepcopy
+from copy import copy, deepcopy
 
 from audio.envelope import Exponential
 from audio.oscillator import Osc, Frequency
 from audio.generators import Generator
-
-from utils.math import random_phase
 from timing import Sampler
+
+from utils.decorators import memoized
+from utils.math import random_phase
 
 
 class Overtones(object, Generator):
@@ -21,7 +22,7 @@ class Overtones(object, Generator):
         self.base = sndobj
         self.n = n
         self.func = func
-        self.damping = damping or (lambda f, a=1.0: (-f/100.0, a/(f/self.frequency)))   # Sine waves
+        self.damping = damping or (lambda f, a=1.0: (-np.log2(f)/(5.0), a/(f/self.frequency)))   # Sine waves
         self.rand_phase = rand_phase
 
     @property
@@ -44,12 +45,23 @@ class Overtones(object, Generator):
     def overtones(self):
         return np.apply_along_axis(self.func, 0, np.arange(0, self.limit, dtype=np.float32))
 
+    @property
+    def oscs(self):
+        return self.gen_oscs(self.frequency, self.overtones)
+
+    @staticmethod
+    def gen_oscs(base_freq, overtones):
+        return map(Osc, base_freq * overtones)
+
+    def oscs2(self):
+        return map(Osc, self.frequency * self.overtones)
+
     def sample(self, iter):
         frames = np.zeros(len(iter), dtype=complex)
         
-        for f in self.overtones:
-            o = deepcopy(self.base)     # Uses deepcopy to preserve superness & other attrs
-            o.frequency = Frequency(f * self.frequency)
+        for o in self.oscs2():
+            #o = copy(self.base)     # Uses deepcopy to preserve superness & other attrs
+            #o.frequency = Frequency(f * self.frequency)
             if o.frequency == 0: break
             
             # e = Exponential(0, amp=float(self.frequency/o.frequency*float(self.frequency) # square waves
@@ -62,7 +74,7 @@ class Overtones(object, Generator):
             else:
                 frames += o[iter] * e[iter]
         
-        return frames / max( abs(max(frames)), self.limit, 1.0 )
+        return frames #/ max( abs(max(frames)), self.limit, 1.0 )
 
     def __repr__(self):
         return "<Overtones(%s): frequency = %s, overtones = %s, limit = %s, func = %s, damping = %s>" % \

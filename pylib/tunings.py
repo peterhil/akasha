@@ -6,6 +6,7 @@ from fractions import Fraction
 from exceptions import AttributeError
 
 from audio.oscillator import Frequency
+from io.keyboard import kb
 
 def cents(*args):
     """Calculate cents from interval or frequency ratio(s).
@@ -72,8 +73,9 @@ class RegularTuning(object):
 # ]
 
 class WickiLayout(object):
-    def __init__(self, base=Frequency(440.0), origo=(1, 4), generators=(Fraction(3,2), Fraction(9,8))):
-        """Wicki keyboard layout. Generators are given in (y, x) order. Origo defaults to 'C' key (being on the position(1,4))."""
+    def __init__(self, base=Frequency(440.0), origo=(1, 5), generators=(Fraction(3,2), Fraction(9,8))):
+        """Wicki keyboard layout. Generators are given in (y, x) order.
+        Origo defaults to 'C' key, being on the position(1,4 + 1 for columns 'tilting' to the left)."""
         if len(generators) == 2:
             self.base = base
             self.gen = generators
@@ -83,13 +85,16 @@ class WickiLayout(object):
     
     def get(self, *pos):
         # TODO fix Frequency multiplication to work with Fractions!
-        return (
-            self.base * \
-            float(
-                (self.gen[0] ** (pos[0] - self.origo[0])) * \
-                (self.gen[1] ** (pos[1] - self.origo[1]))
+        if pos == tuple(np.array(kb.shape) - 1):
+            return Frequency(0.0)
+        else:
+            return (
+                self.base * \
+                float(
+                    (self.gen[0] ** (pos[0] - self.origo[0])) * \
+                    (self.gen[1] ** (pos[1] - self.origo[1]))
+                )
             )
-        )
 
     def move(self, *pos):
         assert len(pos) == 2, "Expected two arguments or tuple of length two."

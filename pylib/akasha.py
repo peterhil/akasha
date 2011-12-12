@@ -17,16 +17,20 @@ if __name__ == '__main__':
     from numbers import Number
     from scipy.signal import hilbert
 
+    from audio.dtmf import DTMF
     from audio.envelope import Attack, Exponential
-    from audio.oscillator import Osc, Super, Frequency
     from audio.harmonics import Overtones
     from audio.noise import *
-    from audio.dtmf import DTMF
-    from io.keyboard import *
-    from tunings import WickiLayout
+    from audio.oscillator import Osc, Super, Frequency
+    from audio.sound import Sound
+
     from io.audio import play, write, read
-    from utils.graphing import *
+    from io.keyboard import *
+
+    from tunings import WickiLayout
+
     from utils.animation import *
+    from utils.graphing import *
     from utils.math import *
     from utils.splines import *
     from utils.log import logger, ansi
