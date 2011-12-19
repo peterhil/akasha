@@ -2,515 +2,116 @@
     "main": [
         [
             {},
-            {
-                "scancode": 0, 
-                "name": "Left control", 
-                "unicode": "", 
-                "key": 306, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 0, 
-                "name": "Left option", 
-                "unicode": "", 
-                "key": 308, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 0, 
-                "name": "Left command", 
-                "unicode": "", 
-                "key": 310, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 0, 
-                "name": "Left command", 
-                "unicode": "", 
-                "key": 310, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 49, 
-                "name": "Spacebar", 
-                "unicode": " ", 
-                "key": 32, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 49, 
-                "name": "Spacebar", 
-                "unicode": " ", 
-                "key": 32, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 49, 
-                "name": "Spacebar", 
-                "unicode": " ", 
-                "key": 32, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 49, 
-                "name": "Spacebar", 
-                "unicode": " ", 
-                "key": 32, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 49, 
-                "name": "Spacebar", 
-                "unicode": " ", 
-                "key": 32, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 49, 
-                "name": "Spacebar", 
-                "unicode": " ", 
-                "key": 32, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 0, 
-                "name": "Right command", 
-                "unicode": "", 
-                "key": 309, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 0, 
-                "name": "Right option", 
-                "unicode": "", 
-                "key": 307, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 0, 
-                "name": "Right control", 
-                "unicode": "", 
-                "key": 305, 
-                "mod": 0
-            }
+            { "scancode": 0, "name": "Left control", "unicode": "", "key": 306, "mod": 0 }, 
+            { "scancode": 0, "name": "Left option", "unicode": "", "key": 308, "mod": 0 }, 
+            { "scancode": 0, "name": "Left command", "unicode": "", "key": 310, "mod": 0 }, 
+            { "scancode": 0, "name": "Left command", "unicode": "", "key": 310, "mod": 0 }, 
+            { "scancode": 49, "name": "Spacebar", "unicode": " ", "key": 32, "mod": 0 }, 
+            { "scancode": 49, "name": "Spacebar", "unicode": " ", "key": 32, "mod": 0 }, 
+            { "scancode": 49, "name": "Spacebar", "unicode": " ", "key": 32, "mod": 0 }, 
+            { "scancode": 49, "name": "Spacebar", "unicode": " ", "key": 32, "mod": 0 },
+            { "scancode": 49, "name": "Spacebar", "unicode": " ", "key": 32, "mod": 0 }, 
+            { "scancode": 49, "name": "Spacebar", "unicode": " ", "key": 32, "mod": 0 },
+            { "scancode": 0, "name": "Right command", "unicode": "", "key": 309, "mod": 0 }, 
+            { "scancode": 0, "name": "Right option", "unicode": "", "key": 307, "mod": 0 }, 
+            { "scancode": 0, "name": "Right control", "unicode": "", "key": 305, "mod": 0 }
         ], 
         [
             {},
-            {
-                "scancode": 0, 
-                "name": "Left shift", 
-                "unicode": "", 
-                "key": 304, 
-                "mod": 1
-            }, 
-            {
-                "scancode": 50, 
-                "unicode": "<", 
-                "key": 60
-            }, 
-            {
-                "scancode": 6, 
-                "unicode": "z", 
-                "key": 122
-            }, 
-            {
-                "scancode": 7, 
-                "unicode": "x", 
-                "key": 120
-            }, 
-            {
-                "scancode": 8, 
-                "unicode": "c", 
-                "key": 99
-            }, 
-            {
-                "scancode": 9, 
-                "unicode": "v", 
-                "key": 118
-            }, 
-            {
-                "scancode": 11, 
-                "unicode": "b", 
-                "key": 98
-            }, 
-            {
-                "scancode": 45, 
-                "unicode": "n", 
-                "key": 110
-            }, 
-            {
-                "scancode": 46, 
-                "unicode": "m", 
-                "key": 109
-            }, 
-            {
-                "scancode": 43, 
-                "unicode": ",", 
-                "key": 44
-            }, 
-            {
-                "scancode": 47, 
-                "unicode": ".", 
-                "key": 46
-            }, 
-            {
-                "scancode": 44, 
-                "unicode": "-", 
-                "key": 45
-            }, 
-            {
-                "scancode": 0, 
-                "name": "Right shift", 
-                "unicode": "", 
-                "key": 303, 
-                "mod": 2
-            }, 
+            { "scancode": 0, "name": "Left shift", "unicode": "", "key": 304, "mod": 1 }, 
+            { "scancode": 50, "unicode": "<", "key": 60 }, 
+            { "scancode": 6, "unicode": "z", "key": 122 }, 
+            { "scancode": 7, "unicode": "x", "key": 120 }, 
+            { "scancode": 8, "unicode": "c", "key": 99 }, 
+            { "scancode": 9, "unicode": "v", "key": 118 }, 
+            { "scancode": 11, "unicode": "b", "key": 98 }, 
+            { "scancode": 45, "unicode": "n", "key": 110 }, 
+            { "scancode": 46, "unicode": "m", "key": 109 }, 
+            { "scancode": 43, "unicode": ",", "key": 44 }, 
+            { "scancode": 47, "unicode": ".", "key": 46 }, 
+            { "scancode": 44, "unicode": "-", "key": 45 }, 
+            { "scancode": 0, "name": "Right shift", "unicode": "", "key": 303, "mod": 2 }, 
             {}, 
             {}
         ], 
         [
             {},
-            {
-                "scancode": 0, 
-                "unicode": "", 
-                "key": 306, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 0, 
-                "unicode": "a", 
-                "key": 97
-            }, 
-            {
-                "scancode": 1, 
-                "unicode": "s", 
-                "key": 115
-            }, 
-            {
-                "scancode": 2, 
-                "unicode": "d", 
-                "key": 100
-            }, 
-            {
-                "scancode": 3, 
-                "unicode": "f", 
-                "key": 102
-            }, 
-            {
-                "scancode": 5, 
-                "unicode": "g", 
-                "key": 103
-            }, 
-            {
-                "scancode": 4, 
-                "unicode": "h", 
-                "key": 104
-            }, 
-            {
-                "scancode": 38, 
-                "unicode": "j", 
-                "key": 106
-            }, 
-            {
-                "scancode": 40, 
-                "unicode": "k", 
-                "key": 107
-            }, 
-            {
-                "scancode": 37, 
-                "unicode": "l", 
-                "key": 108
-            }, 
-            {
-                "scancode": 41, 
-                "unicode": "\\xf6", 
-                "key": 165
-            }, 
-            {
-                "scancode": 39, 
-                "unicode": "\\xe4", 
-                "key": 164
-            }, 
-            {
-                "scancode": 42, 
-                "unicode": "'", 
-                "key": 39
-            }, 
-            {
-                "scancode": 36, 
-                "unicode": "\\r", 
-                "key": 13, 
-                "name": "Return"
-            }
+            { "scancode": 0, "unicode": "", "key": 306, "mod": 0 }, 
+            { "scancode": 0, "unicode": "a", "key": 97 }, 
+            { "scancode": 1, "unicode": "s", "key": 115 }, 
+            { "scancode": 2, "unicode": "d", "key": 100 }, 
+            { "scancode": 3, "unicode": "f", "key": 102 }, 
+            { "scancode": 5, "unicode": "g", "key": 103 }, 
+            { "scancode": 4, "unicode": "h", "key": 104 }, 
+            { "scancode": 38, "unicode": "j", "key": 106 }, 
+            { "scancode": 40, "unicode": "k", "key": 107 }, 
+            { "scancode": 37, "unicode": "l", "key": 108 }, 
+            { "scancode": 41, "unicode": "\\xf6", "key": 165 }, 
+            { "scancode": 39, "unicode": "\\xe4", "key": 164 }, 
+            { "scancode": 42, "unicode": "'", "key": 39 }, 
+            { "scancode": 36, "unicode": "\\r", "key": 13, "name": "Return" }
         ], 
         [
             {},
-            {
-                "scancode": 48, 
-                "unicode": "\\t", 
-                "key": 9, 
-                "name": "Tab"
-            }, 
-            {
-                "scancode": 12, 
-                "unicode": "q", 
-                "key": 113
-            }, 
-            {
-                "scancode": 13, 
-                "unicode": "w", 
-                "key": 119
-            }, 
-            {
-                "scancode": 14, 
-                "unicode": "e", 
-                "key": 101
-            }, 
-            {
-                "scancode": 15, 
-                "unicode": "r", 
-                "key": 114
-            }, 
-            {
-                "scancode": 17, 
-                "unicode": "t", 
-                "key": 116
-            }, 
-            {
-                "scancode": 16, 
-                "unicode": "y", 
-                "key": 121
-            }, 
-            {
-                "scancode": 32, 
-                "unicode": "", 
-                "key": 117
-            }, 
-            {
-                "scancode": 34, 
-                "unicode": "i", 
-                "key": 105
-            }, 
-            {
-                "scancode": 31, 
-                "unicode": "o", 
-                "key": 111
-            }, 
-            {
-                "scancode": 35, 
-                "unicode": "p", 
-                "key": 112
-            }, 
-            {
-                "scancode": 33, 
-                "unicode": "\\xe5", 
-                "key": 163, 
-                "name": "\u00e5"
-            }, 
-            {
-                "scancode": 30, 
-                "unicode": "", 
-                "key": 162, 
-                "name": "Umlaut"
-            }, 
-            {
-                "scancode": 36, 
-                "unicode": "\\r", 
-                "key": 13, 
-                "name": "Return"
-            }
+            { "scancode": 48, "unicode": "\\t", "key": 9, "name": "Tab" }, 
+            { "scancode": 12, "unicode": "q", "key": 113 }, 
+            { "scancode": 13, "unicode": "w", "key": 119 }, 
+            { "scancode": 14, "unicode": "e", "key": 101 }, 
+            { "scancode": 15, "unicode": "r", "key": 114 }, 
+            { "scancode": 17, "unicode": "t", "key": 116 }, 
+            { "scancode": 16, "unicode": "y", "key": 121 }, 
+            { "scancode": 32, "unicode": "", "key": 117 }, 
+            { "scancode": 34, "unicode": "i", "key": 105 }, 
+            { "scancode": 31, "unicode": "o", "key": 111 }, 
+            { "scancode": 35, "unicode": "p", "key": 112 }, 
+            { "scancode": 33, "unicode": "\\xe5", "key": 163, "name": "\u00e5" }, 
+            { "scancode": 30, "unicode": "", "key": 162, "name": "Umlaut" }, 
+            { "scancode": 36, "unicode": "\\r", "key": 13, "name": "Return" }
         ], 
         [
-            {
-                "scancode": 10,
-                "key": 160,
-                "unicode": "\\xa7",
-                "mod": 0, "name": "§"
-            },
-            {
-                "scancode": 18, 
-                "unicode": "1", 
-                "key": 49
-            }, 
-            {
-                "scancode": 19, 
-                "unicode": "2", 
-                "key": 50
-            }, 
-            {
-                "scancode": 20, 
-                "unicode": "3", 
-                "key": 51
-            }, 
-            {
-                "scancode": 21, 
-                "unicode": "4", 
-                "key": 52
-            }, 
-            {
-                "scancode": 23, 
-                "unicode": "5", 
-                "key": 53
-            }, 
-            {
-                "scancode": 22, 
-                "unicode": "6", 
-                "key": 54
-            }, 
-            {
-                "scancode": 26, 
-                "unicode": "7", 
-                "key": 55
-            }, 
-            {
-                "scancode": 28, 
-                "unicode": "8", 
-                "key": 56
-            }, 
-            {
-                "scancode": 25, 
-                "unicode": "9", 
-                "key": 57
-            }, 
-            {
-                "scancode": 29, 
-                "unicode": "0", 
-                "key": 48
-            }, 
-            {
-                "scancode": 27, 
-                "unicode": "+", 
-                "key": 43
-            }, 
-            {
-                "scancode": 24, 
-                "unicode": "", 
-                "key": 161
-            }, 
-            {
-                "scancode": 12, 
-                "unicode": "\\xb4", 
-                "key": 180
-            }, 
-            {
-                "scancode": 51, 
-                "unicode": "\\x7f", 
-                "key": 8, 
-                "name": "Backspace"
-            }
+            { "scancode": 10, "key": 160, "unicode": "\\xa7", "mod": 0, "name": "§" },
+            { "scancode": 18, "unicode": "1", "key": 49 }, 
+            { "scancode": 19, "unicode": "2", "key": 50 }, 
+            { "scancode": 20, "unicode": "3", "key": 51 }, 
+            { "scancode": 21, "unicode": "4", "key": 52 }, 
+            { "scancode": 23, "unicode": "5", "key": 53 }, 
+            { "scancode": 22, "unicode": "6", "key": 54 }, 
+            { "scancode": 26, "unicode": "7", "key": 55 }, 
+            { "scancode": 28, "unicode": "8", "key": 56 }, 
+            { "scancode": 25, "unicode": "9", "key": 57 }, 
+            { "scancode": 29, "unicode": "0", "key": 48 }, 
+            { "scancode": 27, "unicode": "+", "key": 43 }, 
+            { "scancode": 24, "unicode": "", "key": 161 }, 
+            { "scancode": 12, "unicode": "\\xb4", "key": 180 }, 
+            { "scancode": 51, "unicode": "\\x7f", "key": 8, "name": "Backspace" }
         ], 
         [
             {},
             {},
-            {
-                "scancode": 120, 
-                "unicode": "\\uf705", 
-                "key": 283, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 99, 
-                "unicode": "\\uf706", 
-                "key": 284, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 118, 
-                "unicode": "\\uf707", 
-                "key": 285, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 96, 
-                "unicode": "\\uf708", 
-                "key": 286, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 97, 
-                "unicode": "\\uf709", 
-                "key": 287, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 98, 
-                "unicode": "\\uf70a", 
-                "key": 288, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 105, 
-                "unicode": "\\uf710", 
-                "key": 294, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 107, 
-                "unicode": "\\uf711", 
-                "key": 295, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 0, 
-                "unicode": "", 
-                "key": 310, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 106, 
-                "unicode": "\\uf713", 
-                "key": 0, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 64, 
-                "unicode": "\\uf714", 
-                "key": 0, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 79, 
-                "unicode": "\\uf715", 
-                "key": 0, 
-                "mod": 0
-            }, 
-            {
-                "scancode": 80, 
-                "unicode": "\\uf716", 
-                "key": 0, 
-                "mod": 0
-            }
+            { "scancode": 120, "unicode": "\\uf705", "key": 283, "mod": 0 }, 
+            { "scancode": 99, "unicode": "\\uf706", "key": 284, "mod": 0 }, 
+            { "scancode": 118, "unicode": "\\uf707", "key": 285, "mod": 0 }, 
+            { "scancode": 96, "unicode": "\\uf708", "key": 286, "mod": 0 }, 
+            { "scancode": 97, "unicode": "\\uf709", "key": 287, "mod": 0 }, 
+            { "scancode": 98, "unicode": "\\uf70a", "key": 288, "mod": 0 }, 
+            { "scancode": 105, "unicode": "\\uf710", "key": 294, "mod": 0 }, 
+            { "scancode": 107, "unicode": "\\uf711", "key": 295, "mod": 0 }, 
+            { "scancode": 0, "unicode": "", "key": 310, "mod": 0 }, 
+            { "scancode": 106, "unicode": "\\uf713", "key": 0, "mod": 0 }, 
+            { "scancode": 64, "unicode": "\\uf714", "key": 0, "mod": 0 }, 
+            { "scancode": 79, "unicode": "\\uf715", "key": 0, "mod": 0 }, 
+            { "scancode": 80, "unicode": "\\uf716", "key": 0, "mod": 0 }
         ]
     ], 
     "arrows": [
         [
-            {
-                "scancode": 123, 
-                "unicode": "\\uf702", 
-                "key": 276, 
-                "name": "Left"
-            }, 
-            {
-                "scancode": 125, 
-                "unicode": "\\uf701", 
-                "key": 274, 
-                "name": "Down"
-            }, 
-            {
-                "scancode": 124, 
-                "unicode": "\\uf703", 
-                "key": 275, 
-                "name": "Right"
-            }
+            { "scancode": 123, "unicode": "\\uf702", "key": 276, "name": "Left" }, 
+            { "scancode": 125, "unicode": "\\uf701", "key": 274, "name": "Down" }, 
+            { "scancode": 124, "unicode": "\\uf703", "key": 275, "name": "Right" }
         ], 
         [
             {}, 
-            {
-                "scancode": 126, 
-                "unicode": "\\uf700", 
-                "key": 273, 
-                "name": "Up"
-            }, 
+            { "scancode": 126, "unicode": "\\uf700", "key": 273, "name": "Up" }, 
             {}
         ], 
         [
@@ -520,126 +121,45 @@
         ], 
         [
             {}, 
-            {
-                "scancode": 0, 
-                "name": "End"
-            }, 
-            {
-                "scancode": 0, 
-                "name": "Page down"
-            }
+            { "scancode": 0, "name": "End" }, 
+            { "scancode": 0, "name": "Page down" }
         ], 
         [
             {}, 
-            {
-                "scancode": 0, 
-                "name": "Home"
-            }, 
-            {
-                "scancode": 0, 
-                "name": "Page up"
-            }
+            { "scancode": 0, "name": "Home" }, 
+            { "scancode": 0, "name": "Page up" }
         ]
     ], 
     "keypad": [
         [
-            {
-                "scancode": 82, 
-                "unicode": "0", 
-                "key": 256
-            }, 
+            { "scancode": 82, "unicode": "0", "key": 256 }, 
             {}, 
-            {
-                "scancode": 65, 
-                "unicode": ",", 
-                "key": 266
-            }, 
-            {
-                "scancode": 76, 
-                "unicode": "\\x03", 
-                "key": 271, 
-                "name": "Enter"
-            }
+            { "scancode": 65, "unicode": ",", "key": 266 }, 
+            { "scancode": 76, "unicode": "\\x03", "key": 271, "name": "Enter" }
         ], 
         [
-            {
-                "scancode": 83, 
-                "unicode": "1", 
-                "key": 257
-            }, 
-            {
-                "scancode": 84, 
-                "unicode": "2", 
-                "key": 258
-            }, 
-            {
-                "scancode": 85, 
-                "unicode": "3", 
-                "key": 259
-            }, 
+            { "scancode": 83, "unicode": "1", "key": 257 }, 
+            { "scancode": 84, "unicode": "2", "key": 258 }, 
+            { "scancode": 85, "unicode": "3", "key": 259 }, 
             {}
         ], 
         [
-            {
-                "scancode": 86, 
-                "unicode": "4", 
-                "key": 260
-            }, 
-            {
-                "scancode": 87, 
-                "unicode": "5", 
-                "key": 261
-            }, 
-            {
-                "scancode": 88, 
-                "unicode": "6", 
-                "key": 262
-            }, 
-            {
-                "scancode": 69, 
-                "unicode": "+", 
-                "key": 270
-            }
+            { "scancode": 86, "unicode": "4", "key": 260 }, 
+            { "scancode": 87, "unicode": "5", "key": 261 }, 
+            { "scancode": 88, "unicode": "6", "key": 262 }, 
+            { "scancode": 69, "unicode": "+", "key": 270 }
         ], 
         [
-            {
-                "scancode": 89, 
-                "unicode": "7", 
-                "key": 263
-            }, 
-            {
-                "scancode": 91, 
-                "unicode": "8", 
-                "key": 264
-            }, 
-            {
-                "scancode": 92, 
-                "unicode": "9", 
-                "key": 265
-            }, 
-            {
-                "scancode": 78, 
-                "unicode": "-", 
-                "key": 269
-            }
+            { "scancode": 89, "unicode": "7", "key": 263 }, 
+            { "scancode": 91, "unicode": "8", "key": 264 }, 
+            { "scancode": 92, "unicode": "9", "key": 265 }, 
+            { "scancode": 78, "unicode": "-", "key": 269 }
         ], 
         [
             {}, 
-            {
-                "scancode": 81, 
-                "unicode": "=", 
-                "key": 272
-            }, 
-            {
-                "scancode": 75, 
-                "unicode": "/", 
-                "key": 267
-            }, 
-            {
-                "scancode": 67, 
-                "unicode": "*", 
-                "key": 268
-            }
+            { "scancode": 81, "unicode": "=", "key": 272 }, 
+            { "scancode": 75, "unicode": "/", "key": 267 }, 
+            { "scancode": 67, "unicode": "*", "key": 268 }
         ]
     ]
 }
