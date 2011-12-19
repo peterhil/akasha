@@ -3,9 +3,11 @@
 
 import numpy as np
 from cmath import phase
+import colorsys
 from timing import Sampler
 from PIL import Image
 from exceptions import ValueError
+import logging
 
 from utils.decorators import memoized
 from utils.math import normalize, clip, deg, distances, pad
@@ -66,6 +68,34 @@ def hsv2rgb(hsv, alpha=None):
 
     return rgb
 
+def hsv_to_rgb(hsv, alpha=None):
+    hsv = np.array(np.atleast_1d(hsv), dtype=np.uint8)
+    rgb = np.array([0, 0, 0], dtype=np.uint8)
+    sat = np.array([0, 0, 0], dtype=np.float16)
+
+    hsv[0] = hsv[0] % 360
+
+    sp = hsv[0] // 120   # 0..360 -> 0, 1 or 2
+
+    sat[0] = ((sp + 1) * 120 - hsv[0])
+    sat[1] = (hsv[0]         - sp * 120)
+    #sat[2] = 0.0
+
+    sat /= 60.0
+    sat = np.fmin(sat, 1)
+
+    # Move to the right part of spectrum (part = 0,1,2)
+    sat = np.roll(sat, sp, 0)
+
+    rgb = (1 - hsv[1] + hsv[1] * sat) * hsv[2]
+
+    #alpha
+    if (len(hsv) == 4):
+        np.append(rgb, hsv[3])
+    elif alpha:
+        np.append(rgb, alpha)
+    return rgb
+
 # /*
 #    Calculate HSV from RGB
 #    Hue is in degrees
@@ -102,7 +132,8 @@ def rgb2hsv(rgb):
     return hsv
 
 def angle2hsv(deg):
-    return np.append(np.asscalar(deg % 360), [1, 255, 255])
+    # dtype uint8 loses precision, but doesn't matter here. It gets over a problem with hsv_to_rgb.
+    return np.append(np.atleast_1d(deg % 360), np.array([1, 255, 255], dtype=np.uint8))
 
 def hist_graph(samples, size=1000):
     """Uses numpy histogram2d to make an image from complex signal."""
@@ -126,29 +157,54 @@ def get_points(samples, size=1000):
     # Convert complex samples to real number coordinate points
     return samples.view(np.float).reshape(len(samples), 2).transpose()    # 0.5 to 599.5
 
-def phase2hues(cx_samples, padding=True, debug=False):
+def angles2hues(cx_samples, padding=True, loglevel=logging.ANIMA):
+    """Converts angles of complex samples into hues"""
+    cx_samples = np.atleast_1d(cx_samples)
+
+    # Get angles from points
+    angles = np.angle(cx_samples)
+    logger.log(loglevel, "Angles:\n%s", repr(angles[:100]))
+
+    # Get distances
+    angles = pad(distances(angles), 0) if padding else distances(angles)
+
+    # Get tau angles from points
+    angles = (-np.abs( angles - (np.pi) ) % np.pi) / (2.0*np.pi)
+    logger.log(loglevel, "Tau angles:\n%s", repr(angles[:100]))
+
+    angles *= Sampler.rate  # 0..Fs/2
+    logger.log(loglevel, "Tau angles * Fs -> 0..Fs:\n%s", repr(angles[:100]))
+
+    # Convert rad to deg
+    low = np.log2(lowest_audible_hz)
+    angles = ((np.log2(np.abs(angles)+1) - low) * 24) % 360   # (np.log2(f)-low) / 10 * 240  red..violet
+    # angles = angles * 240.0     # red..violet
+    logger.log(loglevel, "Scaled:\n%s\n", repr(angles[:100]))
+    return angles
+
+def phase2hues(cx_samples, padding=True, loglevel=logging.ANIMA):
     """Converts angles of complex samples into hues"""
     cx_samples = np.atleast_1d(cx_samples)
     
     # Get angles from points
     angles = np.angle(cx_samples) + np.pi
-    if debug: logger.debug("Angle + pi:\n%s", repr(angles[:100]))
+    logger.log(loglevel, "Angle + pi:\n%s", repr(angles[:100]))
 
     # Get distances
     angles = pad(distances(angles), 0) if padding else distances(angles)
 
     # Convert to degrees 0..240 (red..blue)
     angles = angles % (2.0 * np.pi)
-    if debug: logger.debug("Diffs modulo 2pi:\n%s", repr(angles[:100]))
+    logger.log(loglevel, "Diffs modulo 2pi:\n%s", repr(angles[:100]))
 
     angles = angles / (2.0 * np.pi) * Sampler.rate  # 0..Fs/2
-    if debug: logger.debug("Rad to tau * Fs -> 0..Fs:\n%s", repr(angles[:100]))
+    logger.log(loglevel, "Rad to tau * Fs -> 0..Fs:\n%s", repr(angles[:100]))
 
     # Convert rad to deg
     low = np.log2(lowest_audible_hz)
     angles = ((np.log2(np.abs(angles)+1) - low) * 24) % 360   # (np.log2(f)-low) / 10 * 240  red..violet
     # angles = angles * 240.0     # red..violet
-    if debug: logger.debug("Scaled:\n%s\n", repr(angles[:100]))
+    logger.log(loglevel, "Scaled:\n%s\n", repr(angles[:100]))
     return angles
 
 def chord_to_angle(length):
@@ -211,8 +267,21 @@ def draw(samples, size=1000, antialias=False, axis=True, img=None):
         points = np.cast['uint16'](points)  # 0 to 599
 
         # Draw image
+        
         #img[(size - 1) - points[1], points[0]] = np.apply_along_axis(hsv2rgb, 0, phase2hues(samples))
-        img[(size - 1) - points[1], points[0]] = map(lambda c: hsv2rgb(angle2hsv(c)), phase2hues(samples))
+        #img[(size - 1) - points[1], points[0]] = map(lambda c: hsv2rgb(angle2hsv(c)), phase2hues(samples))
+        #img[(size - 1) - points[1], points[0]] = map(lambda c: hsv2rgb(angle2hsv(c)), hues)
+        #img[(size - 1) - points[1], points[0]] = map(lambda c: np.append(colorsys.hsv_to_rgb(*np.append([c/360.0], [1, 255])), [255]), hues)
+
+        hues = angles2hues(samples)
+        hsv_colours = np.repeat(np.array([[0,1,255]], dtype=np.float16), hues.size, 0)
+        hsv_colours[:,0] = hues / 360.0
+
+        rgb_colours = np.apply_along_axis(lambda x: colorsys.hsv_to_rgb(*x), 1, hsv_colours)
+
+        rgb_colours = np.insert(rgb_colours.T, [1], 255.0, 0).T # Append alpha
+        img[(size - 1) - points[1], points[0]] = rgb_colours
+
 
     return img
 

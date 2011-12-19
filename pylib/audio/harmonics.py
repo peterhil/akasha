@@ -22,7 +22,7 @@ class Overtones(object, Generator):
         self.base = sndobj
         self.n = n
         self.func = func
-        self.damping = damping or (lambda f, a=1.0: (-np.log2(f)/(5.0), a/(f/self.frequency)))   # Sine waves
+        self.damping = damping or (lambda f, a=1.0: (-np.log2(f)/(5.0), min(1.0, a*(self.frequency/f))))   # Sine waves
         self.rand_phase = rand_phase
 
     @property
@@ -35,6 +35,8 @@ class Overtones(object, Generator):
 
     @property
     def max_overtones(self):
+        if self.frequency == 0:
+            return 1
         return int(Sampler.rate / (2.0 * self.frequency))
 
     @property
@@ -47,21 +49,30 @@ class Overtones(object, Generator):
 
     @property
     def oscs(self):
+        # TODO cleanup - make an interface for different Oscs!
         return self.gen_oscs(self.frequency, self.overtones)
 
-    @staticmethod
-    def gen_oscs(base_freq, overtones):
-        return map(Osc, base_freq * overtones)
+    def gen_oscs2(self, *args):
+        return map(lambda f: self.base.__class__(f, *args), self.frequency * self.overtones)
 
     def oscs2(self):
-        return map(Osc, self.frequency * self.overtones)
+        base = self.base.__class__
+        if base.__name__ == 'Super':
+            #oscs = map(base, self.frequency * self.overtones, [list(self.base.superness)] * self.limit)
+            oscs = self.gen_oscs2(self.base.superness)
+            # for o in oscs:
+            #     o.superness = self.base.superness
+        else:
+            oscs = map(base, self.frequency * self.overtones)
+        return oscs
 
     def sample(self, iter):
         frames = np.zeros(len(iter), dtype=complex)
         
-        for o in self.oscs2():
-            #o = copy(self.base)     # Uses deepcopy to preserve superness & other attrs
-            #o.frequency = Frequency(f * self.frequency)
+        # for o in self.oscs2():
+        for f in self.overtones:
+            o = copy(self.base)     # Uses deepcopy to preserve superness & other attrs
+            o.frequency = Frequency(f * self.frequency)
             if o.frequency == 0: break
             
             # e = Exponential(0, amp=float(self.frequency/o.frequency*float(self.frequency) # square waves
@@ -74,7 +85,7 @@ class Overtones(object, Generator):
             else:
                 frames += o[iter] * e[iter]
         
-        return frames #/ max( abs(max(frames)), self.limit, 1.0 )
+        return frames #/ max( abs(max(frames)), 1.0 )
 
     def __repr__(self):
         return "<Overtones(%s): frequency = %s, overtones = %s, limit = %s, func = %s, damping = %s>" % \

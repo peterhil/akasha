@@ -15,6 +15,7 @@ from numbers import Number
 # My modules
 from audio.generators import PeriodicGenerator
 from timing import Sampler
+from utils.log import logger
 
 # Utils
 from utils.decorators import memoized
@@ -163,6 +164,7 @@ class Osc(object, PeriodicGenerator):
 
     def __init__(self, freq):
         self._frequency = Frequency(freq)
+        self.superness = (2,2,2,2)  # CLEANUP: Oscs shouldn't know about superness -> move curves to own class!
         self.roots = self.np_exp
         self.roots(self.ratio)
 
@@ -216,6 +218,19 @@ class Osc(object, PeriodicGenerator):
         # return np.exp(1j * np.linspace(0, pi2, ratio.denominator, endpoint=False))
         return np.exp(ratio.numerator * 1j * pi2 * np.arange(0, 1, 1.0/ratio.denominator))  # 53.3 us per loop
 
+    @staticmethod
+    @memoized
+    def angles(ratio):
+        if ratio == 0:
+            return np.array([0.], dtype=np.float64)
+        pi2 = 2 * pi
+        return pi2 * ratio.numerator * np.arange(0, 1, 1.0/ratio.denominator, dtype=np.float64)
+    
+    @staticmethod
+    @memoized
+    def circle(ratio):
+        return np.exp(1j * Osc.angles(ratio))
+
     # Older alternative (and sometimes more precise) ways to generate roots
 
     @staticmethod
@@ -260,47 +275,72 @@ class Osc(object, PeriodicGenerator):
 class Super(Osc):
     """Oscillator that has a superness parameter."""
     
-    def __init__(self, ratio, superness=2):
-        """Super (oscillator) can be initialized using a frequency and superness. See 'superellipse' at Wikipedia for explanation of this parameter means."""
-        super(self.__class__, self).__init__(ratio)
-        self.superness = self.normalise_superness(superness)
+    def __init__(self, freq, m=4.0, n=2.0, p=2.0, q=2.0, a=1.0, b=1.0):
+        """
+        Super oscillator can be initialized using a frequency and superness.
+        
+        See 'Superellipse' article at Wikipedia for explanation of this parameter means:
+        http://en.wikipedia.org/wiki/Superellipse
+        """
+        self._frequency = Frequency(freq)
+        self.amp = 1.0
+        self.superness = (m, n, p, q, a, b)
+        self.gen(self.ratio, self.superness)
 
     @classmethod
-    def freq(cls, freq, superness=2):
+    def freq(cls, freq, *superness):
         return cls(freq, superness)
+
+    @classmethod
+    def from_ratio(cls, ratio, den=False, *superness):
+        if den: ratio = Fraction(ratio, den)
+        return cls(Fraction(ratio) * Sampler.rate, superness)
 
     @staticmethod
     def normalise_superness(superness):
-        if not isinstance(superness, (list, Number)):
-            raise ValueError("Superness needs to be a number or a list of length one to four.")
+        if superness == None:
+            logger.warn("Got None for superness!")
+            return (2,2,2,2) # identity for superness
+        if isinstance(superness, tuple) and len(superness) == 4:
+            return superness
+        if not isinstance(superness, (list, tuple, Number)):
+            raise ValueError("Superness %s needs to be a number, a tuple or a list of length one to four. " + \
+                "Got type %s" % (superness, type(superness)))
         if isinstance(superness, Number):
-            superness = [superness]
+            superness = tuple([superness])
         if len(superness) < 4:
-            superness += [superness[-1]] * (4 - len(superness))
-        return superness[:4]  # Take only the first four params
+            superness = list(superness) + [superness[-1]] * (4 - len(superness))
+        return tuple(superness[:4])  # Take only the first four params
 
-    def supercurve(self, points):
+    @staticmethod
+    @memoized
+    def gen(ratio, superness):
+        angles = Super.angles(ratio)
+        return Super.superformula(angles, superness) * np.exp(1j * angles)
+
+    @staticmethod
+    def superformula(angles, superness):
         """Superformula function. Generates amplitude curves applicable to oscillators by multiplying.
 
         Usage:
-        supercurve(m, n1, n2, n3), where m is number of spikes and n1-3 determine the roundness.
-        o = Osc.freq(431, superness=[3, 0.5])
+        supercurve(angles, superness)
+        s = Super(431, m, n, p, q, a, b), where m is number of spikes and n-q determine the roundness.
 
         For more information, see:
         http://en.wikipedia.org/wiki/Superellipse and
-        http://en.wikipedia.org/wiki/Superformula"""
-
-        (m, n1, n2, n3) = self.superness
-        angles = np.array(map(phase, points))
-        super = (np.abs(np.cos(m * angles / 4.0))**n2 + np.abs(np.sin(m * angles / 4.0))**n3) ** -1.0/n1
-
-        return points * super
+        http://en.wikipedia.org/wiki/Superformula
+        """
+        (m, n, p, q, a, b) = list(superness)
+        assert np.isscalar(m), "%s in superformula is not scalar." % m
+        coeff = angles * (m / 4.0)
+        return (np.abs(np.cos(coeff) / a)**p + np.abs(np.sin(coeff) / b)**q) ** (-1.0/n)
 
     ### Sampling ###
 
     @property
     def sample(self):
-        return normalize(self.supercurve(self.np_exp(self.ratio)))
+        #return normalize(self.superformula(self.np_exp(self.ratio), self.superness))
+        return normalize(self.gen(self.ratio, self.superness)) * self.amp
 
     def __repr__(self):
         return "%s(%s, superness=%s)" % (self.__class__.__name__, self.frequency, self.superness)

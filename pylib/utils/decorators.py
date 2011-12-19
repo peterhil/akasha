@@ -3,6 +3,8 @@
 
 # Utility decorator functions
 
+from utils.log import logger
+
 class memoized(object):
     """Decorator that caches a function's return value each time it is called.
     If called later with the same arguments, the cached value is returned, and
@@ -21,6 +23,7 @@ class memoized(object):
         except TypeError:
             # uncachable -- for instance, passing a list as an argument.
             # Better to not cache than to blow up entirely.
+            logger.warn("Arguments '%s' not memoized for function %s!" % (args, self.func))
             return self.func(*args)
 
     def __repr__(self):

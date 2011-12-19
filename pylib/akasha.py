@@ -12,6 +12,7 @@ if __name__ == '__main__':
     import logging
     import sys
 
+    import numpy as np
     from collections import defaultdict
     from fractions import Fraction
     from numbers import Number

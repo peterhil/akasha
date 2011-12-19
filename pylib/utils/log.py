@@ -68,6 +68,9 @@ class ColorFormatter(logging.Formatter, object):
         record.color = ansi.color(record.__dict__['levelname'])
         return super(ColorFormatter, self).format(record)
 
+logging.ANIMA = 4
+logging.addLevelName(logging.ANIMA, 'ANIMA')
+
 logging.BORING = 5
 logging.addLevelName(logging.BORING, 'BORING')
 

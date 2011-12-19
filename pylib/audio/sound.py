@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+from numbers import Number
 
 # My modules
 from audio.generators import Generator
