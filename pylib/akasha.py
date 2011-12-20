@@ -42,11 +42,11 @@ if __name__ == '__main__':
     locale.setlocale(locale.LC_ALL, 'fi_FI.UTF-8')
 
     def make_test_sound(freq = 230):
-        h = Overtones(Osc.freq(freq), damping=lambda f, a=1.0: (-f/100.0, a/(f/freq)), n = 20)
+        h = Overtones(Osc(freq), damping=lambda f, a=1.0: (-f/100.0, a/(f/freq)), n = 20)
         c = Chaos()
-        o2 = Osc.freq(220)
-        o4 = Osc.freq(440)
-        o3 = Osc.freq(330)
+        o2 = Osc(220)
+        o4 = Osc(440)
+        o3 = Osc(330)
         s = Sound(h, o2, o3, o4)
         return s
 

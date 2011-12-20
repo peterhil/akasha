@@ -18,7 +18,7 @@ from utils.math import random_phase
 class Overtones(object, Generator):
     """Harmonical overtones for a sound object having a frequency"""
 
-    def __init__(self, sndobj=Osc.freq(220.0), n=8, func=lambda x: 1+x, damping=None, rand_phase=False):
+    def __init__(self, sndobj=Osc(220.0), n=8, func=lambda x: 1+x, damping=None, rand_phase=False):
         self.base = sndobj
         self.n = n
         self.func = func
