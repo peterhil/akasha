@@ -6,8 +6,9 @@ from fractions import Fraction
 from copy import copy, deepcopy
 
 from audio.envelope import Exponential
+from audio.frequency import Frequency
 from audio.generators import Generator
-from audio.oscillator import Osc, Frequency
+from audio.oscillator import Osc
 
 from timing import Sampler
 

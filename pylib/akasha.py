@@ -20,22 +20,22 @@ def setup():
 if __name__ == '__main__':
     import locale
     import logging
+    import numpy as np
+    import types
     import sys
 
-    import types
-    import numpy as np
-
+    from cmath import rect, pi, exp, phase
     from collections import defaultdict
     from fractions import Fraction
-    from cmath import rect, pi, exp, phase
     from numbers import Number
     from scipy.signal import hilbert
 
     from audio.dtmf import DTMF
     from audio.envelope import Attack, Exponential
+    from audio.frequency import Frequency
     from audio.harmonics import Overtones
     from audio.noise import *
-    from audio.oscillator import Osc, Super, Frequency
+    from audio.oscillator import *
     from audio.sound import Sound
 
     from io.audio import play, write, read
@@ -45,9 +45,9 @@ if __name__ == '__main__':
 
     from utils.animation import *
     from utils.graphing import *
+    from utils.log import logger, ansi
     from utils.math import *
     from utils.splines import *
-    from utils.log import logger, ansi
 
     setup()
 
