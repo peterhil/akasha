@@ -3,12 +3,12 @@
 
 import numpy as np
 from fractions import Fraction
-from cmath import rect, pi
 from copy import copy, deepcopy
 
 from audio.envelope import Exponential
-from audio.oscillator import Osc, Frequency
 from audio.generators import Generator
+from audio.oscillator import Osc, Frequency
+
 from timing import Sampler
 
 from utils.decorators import memoized

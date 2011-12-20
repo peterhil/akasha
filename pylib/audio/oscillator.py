@@ -3,27 +3,19 @@
 
 from __future__ import division
 
-# Math &c.
 import numpy as np
-from cmath import rect, pi, exp, phase
-from fractions import Fraction
-
-# Types
-import types
-from numbers import Number
 import operator
 
-# My modules
+from fractions import Fraction
+from numbers import Number
+
 from audio.generators import PeriodicGenerator
+
 from timing import Sampler
-from utils.log import logger
 
-# Utils
 from utils.decorators import memoized
+from utils.log import logger
 from utils.math import *
-
-# Settings
-np.set_printoptions(precision=16, suppress=True)
 
 
 class Hz(object, PeriodicGenerator):
@@ -60,7 +52,7 @@ class Frequency(object, PeriodicGenerator):
 
     def __init__(self, hz):
         # Original frequency, independent of sampling rate or optimizations
-        self.__hz = hz
+        self.__hz = float(hz)
 
     @classmethod
     def from_ratio(cls, ratio, den=False):
@@ -69,7 +61,10 @@ class Frequency(object, PeriodicGenerator):
 
     def __get__(self, instance, owner):
         print "Getting from Frequency: ", self, instance, owner
-        return float(self.ratio * Sampler.rate) # FIXME
+        if owner == Sampler:
+            return self.__hz
+        else:
+            return float(self.ratio * Sampler.rate) # FIXME
 
     def __nonzero__(self):
         """Zero frequency should be considered False"""
@@ -133,6 +128,8 @@ class Frequency(object, PeriodicGenerator):
         def forward(a, b):
             if isinstance(b, a.__class__):
                 return Frequency( op(a.__hz, b.__hz) )
+            elif isinstance(b, float):
+                return Frequency( op(a.__hz, b) )
             elif isinstance(b, Number):
                 return Frequency( op(a.__hz, b) )
             else:
@@ -143,6 +140,8 @@ class Frequency(object, PeriodicGenerator):
         def reverse(b, a):
             if isinstance(a, Frequency):
                 return Frequency( op(a.__hz, b.__hz) )
+            elif isinstance(b, float):
+                return Frequency( op(a.__hz, b) )
             elif isinstance(b, Number):
                 return Frequency( op(a.__hz, b) )
             else:
@@ -217,7 +216,7 @@ class Osc(object, PeriodicGenerator):
         Could be made still faster by using conjugate for half of the samples."""
         if ratio == 0:
             return np.exp(np.array([0j]))
-        pi2 = 2 * pi
+        pi2 = 2 * np.pi
         # return np.exp(1j * np.linspace(0, pi2, ratio.denominator, endpoint=False))
         return np.exp(ratio.numerator * 1j * pi2 * np.arange(0, 1, 1.0/ratio.denominator))  # 53.3 us per loop
 
@@ -226,7 +225,7 @@ class Osc(object, PeriodicGenerator):
     def angles(ratio):
         if ratio == 0:
             return np.array([0.], dtype=np.float64)
-        pi2 = 2 * pi
+        pi2 = 2 * np.pi
         return pi2 * ratio.numerator * np.arange(0, 1, 1.0/ratio.denominator, dtype=np.float64)
     
     @staticmethod
@@ -314,6 +313,8 @@ class Super(Osc):
         if len(superness) < 4:
             superness = list(superness) + [superness[-1]] * (4 - len(superness))
         return tuple(superness[:4])  # Take only the first four params
+
+    ### Generating functions ###
 
     @staticmethod
     @memoized
