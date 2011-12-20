@@ -11,6 +11,7 @@ from fractions import Fraction
 # Types
 import types
 from numbers import Number
+import operator
 
 # My modules
 from audio.generators import PeriodicGenerator
@@ -27,7 +28,7 @@ np.set_printoptions(precision=16, suppress=True)
 
 class Hz(object, PeriodicGenerator):
     def __init__(self, hz=0):
-        self.__frequency = hz
+        self.__hz = hz
 
     def __get__(self, instance, owner):
         print "Getting from Hz: ", self, instance, owner
@@ -40,7 +41,7 @@ class Hz(object, PeriodicGenerator):
 
     @property
     def ratio(self):
-        return self.to_ratio(self.__frequency)
+        return self.to_ratio(self.__hz)
 
     @staticmethod
     def to_ratio(freq, limit=Sampler.rate):
@@ -59,11 +60,16 @@ class Frequency(object, PeriodicGenerator):
 
     def __init__(self, hz):
         # Original frequency, independent of sampling rate or optimizations
-        self._frequency = hz
+        self.__hz = hz
+
+    @classmethod
+    def from_ratio(cls, ratio, den=False):
+        if den: ratio = Fraction(ratio, den)
+        return cls(Fraction(ratio) * Sampler.rate)
 
     def __get__(self, instance, owner):
         print "Getting from Frequency: ", self, instance, owner
-        return float(self.ratio * Sampler.rate)
+        return float(self.ratio * Sampler.rate) # FIXME
 
     def __nonzero__(self):
         """Zero frequency should be considered False"""
@@ -71,7 +77,7 @@ class Frequency(object, PeriodicGenerator):
 
     @property
     def ratio(self):
-        return self.wrap(self.antialias(self.to_ratio(self._frequency)))
+        return self.wrap(self.antialias(self.to_ratio(self.__hz)))
 
     @property
     def hz(self):
@@ -107,57 +113,63 @@ class Frequency(object, PeriodicGenerator):
             return cmp(other, self.ratio)
 
     def __repr__(self):
-        return "Frequency(%s)" % self._frequency
+        return "Frequency(%s)" % self.__hz
 
     def __str__(self):
         return "<Frequency: %s hz>" % self.hz
 
     ### Arithmetic ###
-    #
-    # See fractions.Fraction._operator_fallbacks() for automagic
-    # generation of forward and backward operator functions
     
     def __float__(self):
         return float(self.hz)
-    
-    def __add__(self, other):
-        print "Self: %s, other: %s (%s)" % (self, other, type(other))
 
-        if isinstance(other, self.__class__):
-            return Frequency(self.hz + other.hz)
-        elif isinstance(other, float):
-            return Frequency(self.hz + other)
-        elif isinstance(other, complex):
-            return complex(self.hz + other)
-        elif isinstance(other, Number):
-            return Frequency(float(self.ratio) + other)
-        elif type(other) in np.typeDict.values():
-            return np.typeDict[np.typeNA[type(other)]](self.ratio * other)
-        elif isinstance(other, np.ndarray) and isinstance(other[0], np.number):
-            return np.array(map(Frequency, self.hz + other), dtype=np.object)
-        else:
-            raise NotImplementedError("Self: %s, other: %s", (self, other))
-    __radd__ = __add__
-
-    def __mul__(self, other):
-        print "Self: %s, other: %s (%s)" % (self, other, type(other))
+    def _op(op):
+        """
+        Add operator fallbacks. Usage: __add__, __radd__ = _gen_ops(operator.add)
         
-        if isinstance(other, self.__class__):
-            return Frequency(self.hz * other.hz)
-        elif isinstance(other, float):
-            return Frequency(self.hz * other)
-        elif isinstance(other, complex):
-            return complex(self.hz * other)
-        elif isinstance(other, Number):
-            return Frequency(float(self.ratio) * other)
-        elif type(other) in np.typeDict.values():
-            return np.typeDict[np.typeNA[type(other)]](self.ratio * other)
-        elif isinstance(other, np.ndarray) and isinstance(other[0], np.number):
-            return map(lambda f: Frequency(self.hz * f), other)
-        else:
-            raise NotImplementedError("Self: %s, other: %s", (self, other))
-    __rmul__ = __mul__
+        This function is borrowed and modified from fractions.Fraction._operator_fallbacks(),
+        which generates forward and backward operator functions automagically.
+        """
+        def forward(a, b):
+            if isinstance(b, a.__class__):
+                return Frequency( op(a.__hz, b.__hz) )
+            elif isinstance(b, Number):
+                return Frequency( op(a.__hz, b) )
+            else:
+                return NotImplemented
+        forward.__name__ = '__' + op.__name__ + '__'
+        forward.__doc__ = op.__doc__
+
+        def reverse(b, a):
+            if isinstance(a, Frequency):
+                return Frequency( op(a.__hz, b.__hz) )
+            elif isinstance(b, Number):
+                return Frequency( op(a.__hz, b) )
+            else:
+                return NotImplemented
+        reverse.__name__ = '__' + op.__name__ + '__'
+        reverse.__doc__ = op.__doc__
+
+        return forward, reverse
+
+    __add__, __radd__ = _op(operator.add)
+    __sub__, __rsub__ = _op(operator.sub)
+    __mul__, __rmul__ = _op(operator.mul)
+    __div__, __rdiv__ = _op(operator.div)
+    __truediv__, __rtruediv__ = _op(operator.truediv)
+    __floordiv__, __rfloordiv__ = _op(operator.div)
+
+    __mod__, __rmod__ = _op(operator.mod)
+    __pow__, __rpow__ = _op(operator.pow)
+
+    # Also implemented by Fractions:
     
+    # __pos__, __neg__, __abs__
+    # __trunc__
+    # __hash__, __eq__
+    # __lt__, __gt__, __le__, __ge__
+    # __reduce__, __copy__, __deepcopy__
+
 
 class Osc(object, PeriodicGenerator):
     """Oscillator class"""
@@ -169,29 +181,20 @@ class Osc(object, PeriodicGenerator):
         self.roots(self.ratio)
 
     @classmethod
-    def freq(cls, freq):
-        return cls(freq)
-
-    @classmethod
     def from_ratio(cls, ratio, den=False):
         if den: ratio = Fraction(ratio, den)
         return cls(Fraction(ratio) * Sampler.rate)
 
     @property
-    def hz(self):
-        return self._frequency.hz
-
-    @hz.setter
-    def hz(self, hz):
-        self._frequency._frequency = hz
-
-    @property
     def frequency(self):
-        return self._frequency.hz
+        return self._frequency
 
     @frequency.setter
     def frequency(self, hz):
-        self._frequency = Frequency(hz)  # Use Trellis, and make a interface for frequencies
+        if isinstance(hz, Frequency):
+            self._frequency = hz
+        else:
+            self._frequency = Frequency(hz)  # Use Trellis, and make a interface for frequencies
 
     @property
     def ratio(self):
@@ -268,7 +271,7 @@ class Osc(object, PeriodicGenerator):
         return "%s(%s)" % (self.__class__.__name__, self.frequency)
 
     def __str__(self):
-        return "<%s: %s hz>" % (self.__class__.__name__, self.hz)
+        return "<%s: %s hz>" % (self.__class__.__name__, self.frequency)
 
 
 
@@ -346,13 +349,5 @@ class Super(Osc):
         return "%s(%s, superness=%s)" % (self.__class__.__name__, self.frequency, self.superness)
 
     def __str__(self):
-        return "<%s: %s hz, superness %s>" % (self.__class__.__name__, self.hz, self.superness)
-
-
-if __name__ == '__main__':
-    from utils.graphing import *
-    o = Osc(Fraction(1, 8))
-    t = slice(0, Sampler.rate)
-    print o.np_exp(o.period)
-    print to_phasors(o.sample)
+        return "<%s: %s hz, superness %s>" % (self.__class__.__name__, self.frequency, self.superness)
 
