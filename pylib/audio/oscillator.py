@@ -144,7 +144,7 @@ class Super(Osc):
 
     @classmethod
     def from_ratio(cls, ratio, den=False, *superness):
-        if den: ratio = Fraction(ratio, den)_
+        if den: ratio = Fraction(ratio, den)
         return cls(Fraction(ratio) * Sampler.rate, superness)
 
     @staticmethod
