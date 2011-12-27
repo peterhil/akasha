@@ -139,12 +139,11 @@ class Frequency(object, PeriodicGenerator):
 
         def reverse(b, a):
             if isinstance(a, Frequency):
-                print "Doing reverse with frequency"
                 return Frequency( op(a.__hz, b.__hz) )
-            elif isinstance(b, (float, np.floating)):
-                return Frequency( op(a.__hz, b) )
-            elif isinstance(b, Number):
-                return Frequency( op(a.__hz, b) )
+            elif isinstance(a, (float, np.floating)):
+                return Frequency( op(a, b.__hz) )
+            elif isinstance(a, Number):
+                return Frequency( op(a, b.__hz) )
             else:
                 return NotImplemented
         reverse.__name__ = '__' + op.__name__ + '__'

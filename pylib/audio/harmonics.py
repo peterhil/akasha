@@ -23,7 +23,7 @@ class Overtones(object, Generator):
         self.base = sndobj
         self.n = n
         self.func = func
-        self.damping = damping or (lambda f, a=1.0: (-5*np.log2(float(f))/(10.0), min(1.0, (self.frequency/f)*a)))   # Sine waves
+        self.damping = damping or (lambda f, a=1.0: (-5*np.log2(float(f))/(10.0), min(1.0, a*(self.frequency/f))))   # Sine waves
         self.rand_phase = rand_phase
 
     @property
@@ -38,7 +38,7 @@ class Overtones(object, Generator):
     def max_overtones(self):
         if self.frequency == 0:
             return 1
-        return int(Sampler.frequency / (self.frequency * 2.0))
+        return int(Sampler.frequency / (2.0 * self.frequency))
 
     @property
     def limit(self):
