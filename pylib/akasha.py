@@ -38,9 +38,10 @@ if __name__ == '__main__':
     from audio.oscillator import *
     from audio.sound import Sound
 
-    from io.audio import play, write, read
-    from io.keyboard import *
+    from control.io.audio import play, write, read
+    from control.io.keyboard import *
 
+    from timing import Sampler
     from tunings import WickiLayout
 
     from utils.animation import *
@@ -50,6 +51,9 @@ if __name__ == '__main__':
     from utils.splines import *
 
     setup()
+
+    Sampler.frequency = Frequency(Sampler.rate)
+    Sampler.videofrequency = Frequency(Sampler.videorate)
 
     def make_test_sound(freq = 230):
         h = Overtones(Osc(freq), damping=lambda f, a=1.0: (-f/100.0, a/(f/freq)), n = 20)

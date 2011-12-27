@@ -14,7 +14,6 @@ from numbers import Number
 
 # My modules
 from audio.generators import PeriodicGenerator
-from io.audio import play, write
 from timing import Sampler
 from utils.decorators import memoized
 from utils.math import *

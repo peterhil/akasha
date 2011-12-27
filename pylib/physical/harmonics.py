@@ -13,7 +13,7 @@ from .oscillator import Osc
 from .generators import Generator
 
 # Utils
-from io.audio import play, write
+from control.io.audio import play, write
 
 # np.set_printoptions(precision=4, suppress=True)
 

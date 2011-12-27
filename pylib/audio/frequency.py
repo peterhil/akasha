@@ -61,10 +61,7 @@ class Frequency(object, PeriodicGenerator):
 
     def __get__(self, instance, owner):
         print "Getting from Frequency: ", self, instance, owner
-        if owner == Sampler:
-            return self.__hz
-        else:
-            return float(self.ratio * Sampler.rate) # FIXME
+        return self
 
     def __nonzero__(self):
         """Zero frequency should be considered False"""
@@ -118,6 +115,9 @@ class Frequency(object, PeriodicGenerator):
     def __float__(self):
         return float(self.hz)
 
+    def __int__(self):
+        return int(self.hz)
+
     def _op(op):
         """
         Add operator fallbacks. Usage: __add__, __radd__ = _gen_ops(operator.add)
@@ -128,7 +128,7 @@ class Frequency(object, PeriodicGenerator):
         def forward(a, b):
             if isinstance(b, a.__class__):
                 return Frequency( op(a.__hz, b.__hz) )
-            elif isinstance(b, float):
+            elif isinstance(b, (float, np.floating)):
                 return Frequency( op(a.__hz, b) )
             elif isinstance(b, Number):
                 return Frequency( op(a.__hz, b) )
@@ -139,8 +139,9 @@ class Frequency(object, PeriodicGenerator):
 
         def reverse(b, a):
             if isinstance(a, Frequency):
+                print "Doing reverse with frequency"
                 return Frequency( op(a.__hz, b.__hz) )
-            elif isinstance(b, float):
+            elif isinstance(b, (float, np.floating)):
                 return Frequency( op(a.__hz, b) )
             elif isinstance(b, Number):
                 return Frequency( op(a.__hz, b) )

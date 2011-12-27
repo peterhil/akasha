@@ -6,7 +6,7 @@ from fractions import Fraction
 from exceptions import AttributeError
 
 from audio.oscillator import Frequency
-from io.keyboard import kb
+from control.io.keyboard import kb
 
 def cents(*args):
     """Calculate cents from interval or frequency ratio(s).

@@ -9,7 +9,7 @@ from fractions import Fraction
 
 from funct import pairwise
 from graphing import *
-from io.keyboard import *
+from control.io.keyboard import *
 from timing import Sampler, time_slice
 from tunings import WickiLayout
 
@@ -62,7 +62,7 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=False, lines=False,
 
     pygame.init()
     mixer.quit()
-    mixer.init(frequency=Sampler.rate, size=-16, channels=1, buffer=blocksize()/8.0) # Keep the buffer smaller than blocksize!
+    mixer.init(frequency=Sampler.rate, size=-16, channels=1, buffer=int(round(blocksize()/8.0))) # Keep the buffer smaller than blocksize!
     init = mixer.get_init()
     chs = []
     if hasattr(snd, 'frequency'):
@@ -97,7 +97,7 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=False, lines=False,
     VIDEOFRAME = pygame.NUMEVENTS - 1
     def set_timer():
         ms = (1.0/Sampler.videorate*1000) # 40 ms for 25 Hz
-        pygame.time.set_timer(VIDEOFRAME, ms) #1000.0/float(Sampler.videorate))
+        pygame.time.set_timer(VIDEOFRAME, int(round(ms))) # FIXME - complain about ints to pygame !!! #1000.0/float(Sampler.videorate))
     set_timer()
 
     Sampler.paused = False

@@ -14,7 +14,7 @@ from timing import Sampler, samples, times
 # Utils
 # from utils.math import *
 # from utils.graphing import *
-from io.audio import play, write
+from control.io.audio import play, write
 
 # Functional
 import itertools as itr

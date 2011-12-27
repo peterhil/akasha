@@ -1,14 +1,11 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+import math
 import numpy as np
 from timeit import default_timer as clock
-import math
 
-# from utils import Sampler
-# from generators import Generator
-
-np.set_printoptions(precision=9)
+#from audio.frequency import Frequency
 
 
 class Sampler(object):
@@ -19,6 +16,11 @@ class Sampler(object):
 
     rate = 44100
     videorate = 25
+
+    #def make(self):
+        #self.frequency = Frequency(self.rate)
+        #self.videofrequency = Frequency(self.videorate)
+
 
 def timecode(t, precision=1000000):
     """t = time.clock(); t; int(math.floor(t)); int(round((t % 1.0) * 1000000))"""
@@ -44,6 +46,7 @@ def time_slice(dur, start=0, time=False):
     if not isinstance(time, slice):
         raise TypeError("Expected a %s for 'time' argument, got %s." % (slice, type(time)))
     return time
+
 
 class Timeslice(object):
     def __init__(self, start=0, stop=None):
