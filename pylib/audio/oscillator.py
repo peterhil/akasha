@@ -119,7 +119,7 @@ class Osc(object, PeriodicGenerator):
         return "%s(%s)" % (self.__class__.__name__, self.frequency)
 
     def __str__(self):
-        return "<%s: %s hz>" % (self.__class__.__name__, self.frequency)
+        return "<%s: %s>" % (self.__class__.__name__, self.frequency)
 
 
 
@@ -199,5 +199,5 @@ class Super(Osc):
         return "%s(%s, superness=%s)" % (self.__class__.__name__, self.frequency, self.superness)
 
     def __str__(self):
-        return "<%s: %s hz, superness %s>" % (self.__class__.__name__, self.frequency, self.superness)
+        return "<%s: %s, superness %s>" % (self.__class__.__name__, self.frequency, self.superness)
 
