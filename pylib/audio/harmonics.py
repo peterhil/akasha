@@ -23,7 +23,7 @@ class Overtones(object, Generator):
         self.base = sndobj
         self.n = n
         self.func = func
-        self.damping = damping or (lambda f, a=1.0: (-5*np.log2(float(f))/(10.0), min(1.0, a*(self.frequency/f))))   # Sine waves
+        self.damping = damping or (lambda f, a=1.0: (-5*np.log2(float(f))/(10.0), min(1.0, a*float(self.frequency/f))))   # Sine waves
         self.rand_phase = rand_phase
 
     @property
@@ -38,7 +38,7 @@ class Overtones(object, Generator):
     def max_overtones(self):
         if self.frequency == 0:
             return 1
-        return int(Sampler.frequency / (2.0 * self.frequency))
+        return int(Sampler.rate / (2.0 * self.frequency))
 
     @property
     def limit(self):
@@ -89,6 +89,10 @@ class Overtones(object, Generator):
         return frames / max( abs(max(frames)), 1.0 )
 
     def __repr__(self):
-        return "<Overtones(%s): frequency = %s, overtones = %s, limit = %s, func = %s, damping = %s>" % \
-                (self.base, self.frequency, self.overtones, self.limit, self.func, self.damping)
+        return "%s(sndobj=%s, n=%s, func=%s, damping=%s, rand_phase=%s>" % \
+                (self.__class__.__name__, self.base, self.n, self.func, self.damping, self.rand_phase)
+
+    def __str__(self):
+        return "<%s: sndobj=%s, limit=%s, frequency=%s, overtones=%s, func=%s, damping=%s>" % \
+                (self.__class__.__name__, self.base, self.limit, self.frequency, self.overtones, self.func, self.damping)
 
