@@ -60,7 +60,7 @@ class Frequency(object, PeriodicGenerator):
         return cls(Fraction(ratio) * Sampler.rate)
 
     def __get__(self, instance, owner):
-        print "Getting from Frequency: ", self, instance, owner
+        logger.debug("Getting from Frequency -- self: %s, instance: %s, owner: %s", self, instance, owner)
         return self
 
     def __nonzero__(self):
@@ -118,6 +118,10 @@ class Frequency(object, PeriodicGenerator):
     def __int__(self):
         return int(self.hz)
 
+    def __trunc__(self):
+        """Returns an integral rounded towards zero."""
+        return float(self.__hz).__trunc__()
+
     def _op(op):
         """
         Add operator fallbacks. Usage: __add__, __radd__ = _gen_ops(operator.add)
@@ -146,7 +150,7 @@ class Frequency(object, PeriodicGenerator):
                 return Frequency( op(a, b.__hz) )
             else:
                 return NotImplemented
-        reverse.__name__ = '__' + op.__name__ + '__'
+        reverse.__name__ = '__r' + op.__name__ + '__'
         reverse.__doc__ = op.__doc__
 
         return forward, reverse
@@ -161,11 +165,35 @@ class Frequency(object, PeriodicGenerator):
     __mod__, __rmod__ = _op(operator.mod)
     __pow__, __rpow__ = _op(operator.pow)
 
-    # Also implemented by Fractions:
-    
-    # __pos__, __neg__, __abs__
-    # __trunc__
-    # __hash__, __eq__
-    # __lt__, __gt__, __le__, __ge__
-    # __reduce__, __copy__, __deepcopy__
+    def __pos__(self):
+        return Frequency(self.__hz)
+
+    def __neg__(self):
+        return Frequency(-self.__hz)
+
+    def __abs__(self):
+        return Frequency(abs(self.__hz))
+
+    def __hash__(self):
+        """hash(self), takes into account any rounding done on Frequency's initialisation."""
+        return hash(self.hz)
+
+    def __eq__(a, b):
+        """a == b, takes into account any rounding done on Frequency's initialisation."""
+        return a.hz == Frequency(b).hz
+
+    def __lt__(a, b):
+        return operator.lt(a.__hz, b)
+
+    def __gt__(a, b):
+        return operator.gt(a.__hz, b)
+
+    def __le__(a, b):
+        return operator.le(a.__hz, b)
+
+    def __ge__(a, b):
+        return operator.ge(a.__hz, b)
+
+    # __reduce__ # TODO: Implement pickling -- see http://docs.python.org/library/pickle.html#the-pickle-protocol
+    # __copy__, __deepcopy__
 
