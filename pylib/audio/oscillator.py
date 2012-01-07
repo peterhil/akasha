@@ -9,7 +9,7 @@ import operator
 from fractions import Fraction
 from numbers import Number
 
-from audio.frequency import Frequency
+from audio.frequency import Frequency, FrequencyRatioMixin
 from audio.generators import PeriodicGenerator
 
 from timing import Sampler
@@ -19,89 +19,30 @@ from utils.log import logger
 from utils.math import *
 
 
-class Osc(object, PeriodicGenerator):
+class Osc(object, FrequencyRatioMixin, PeriodicGenerator):
     """Oscillator class"""
 
     def __init__(self, freq):
         self._frequency = Frequency(freq)
         self.superness = (2,2,2,2)  # CLEANUP: Oscs shouldn't know about superness -> move curves to own class!
-        self.roots = self.np_exp
-        self.roots(self.ratio)
 
     @classmethod
     def from_ratio(cls, ratio, den=False):
         if den: ratio = Fraction(ratio, den)
         return cls(Fraction(ratio) * Sampler.rate)
 
-    @property
-    def frequency(self):
-        return self._frequency
-
-    @frequency.setter
-    def frequency(self, hz):
-        if isinstance(hz, Frequency):
-            self._frequency = hz
-        else:
-            self._frequency = Frequency(hz)  # Use Trellis, and make a interface for frequencies
-
-    @property
-    def ratio(self):
-        return self._frequency.ratio
-
-    @property
-    def period(self):
-        return self.ratio.denominator
-
-    @property
-    def order(self):
-        return self.ratio.numerator
-
     ### Generating functions ###
 
     @staticmethod
     @memoized
-    def np_exp(ratio):
-        """Fastest generating method so far. Uses numpy.exp with linspace for angles.
-        Could be made still faster by using conjugate for half of the samples."""
-        if ratio == 0:
-            return np.exp(np.array([0j]))
-        pi2 = 2 * np.pi
-        # return np.exp(1j * np.linspace(0, pi2, ratio.denominator, endpoint=False))
-        return np.exp(ratio.numerator * 1j * pi2 * np.arange(0, 1, 1.0/ratio.denominator))  # 53.3 us per loop
-
-    @staticmethod
-    @memoized
-    def angles(ratio):
-        if ratio == 0:
-            return np.array([0.], dtype=np.float64)
-        pi2 = 2 * np.pi
-        return pi2 * ratio.numerator * np.arange(0, 1, 1.0/ratio.denominator, dtype=np.float64)
-    
-    @staticmethod
-    @memoized
     def circle(ratio):
-        return np.exp(1j * Osc.angles(ratio))
-
-    # Older alternative (and sometimes more precise) ways to generate roots
-
-    @staticmethod
-    @memoized
-    def func_roots(ratio):
-        # self.roots = self.func_roots        # 0.108 s
-        wi = 2 * pi * 1j
-        return np.exp(wi * ratio * np.arange(0, ratio.denominator))
-
-    def table_roots(self, ratio):
-        # self.roots = self.table_roots       # 0.057 s
-        roots = self.np_exp(Fraction(1, Sampler.rate))
-        return roots[0:ratio.denominator] ** (Sampler.rate / float(ratio.denominator))
-
+        return np.exp(1j * Frequency.angles(ratio))
 
     ### Sampling ###
 
     @property
     def sample(self):
-        return self.np_exp(self.ratio)
+        return self.circle(self.ratio)
 
     @property
     def imag(self):
@@ -136,11 +77,6 @@ class Super(Osc):
         self._frequency = Frequency(freq)
         self.amp = 1.0
         self.superness = (m, n, p, q, a, b)
-        self.gen(self.ratio, self.superness)
-
-    @classmethod
-    def freq(cls, freq, *superness):
-        return cls(freq, superness)
 
     @classmethod
     def from_ratio(cls, ratio, den=False, *superness):
@@ -168,7 +104,7 @@ class Super(Osc):
     @staticmethod
     @memoized
     def gen(ratio, superness):
-        angles = Super.angles(ratio)
+        angles = Frequency.angles(ratio)
         return Super.superformula(angles, superness) * np.exp(1j * angles)
 
     @staticmethod
@@ -192,7 +128,6 @@ class Super(Osc):
 
     @property
     def sample(self):
-        #return normalize(self.superformula(self.np_exp(self.ratio), self.superness))
         return normalize(self.gen(self.ratio, self.superness)) * self.amp
 
     def __repr__(self):

@@ -6,33 +6,27 @@ from fractions import Fraction
 from copy import copy, deepcopy
 
 from audio.envelope import Exponential
-from audio.frequency import Frequency
+from audio.frequency import Frequency, FrequencyRatioMixin
 from audio.generators import Generator
 from audio.oscillator import Osc
 
 from timing import Sampler
 
 from utils.decorators import memoized
+from utils.log import logger
 from utils.math import random_phase
 
 
-class Overtones(object, Generator):
+class Overtones(object, FrequencyRatioMixin, Generator):
     """Harmonical overtones for a sound object having a frequency"""
 
     def __init__(self, sndobj=Osc(220.0), n=8, func=lambda x: 1+x, damping=None, rand_phase=False):
         self.base = sndobj
+        self._frequency = self.base.frequency
         self.n = n
         self.func = func
         self.damping = damping or (lambda f, a=1.0: (-5*np.log2(float(f))/(10.0), min(1.0, a*float(self.frequency/f))))   # Sine waves
         self.rand_phase = rand_phase
-
-    @property
-    def frequency(self):
-        return self.base.frequency
-
-    @frequency.setter
-    def frequency(self, f):
-        self.base.frequency = f  # Use Trellis, and make a interface for frequencies
 
     @property
     def max_overtones(self):
@@ -72,12 +66,12 @@ class Overtones(object, Generator):
         
         # for o in self.oscs2():
         for f in self.overtones:
-            o = copy(self.base)     # Uses deepcopy to preserve superness & other attrs
+            o = deepcopy(self.base)     # Uses deepcopy to preserve superness & other attrs
             o.frequency = Frequency(self.frequency * f)
             if o.frequency == 0: break
             
-            # e = Exponential(0, amp=float(self.frequency/o.frequency*float(self.frequency) # square waves
-            # e = Exponential(0, amp=float(self.frequency**2/o.frequency**2*float(self.frequency) # triangle waves
+            # e = Exponential(0, amp=float(self.frequency/o.frequency*float(self.frequency))) # square waves
+            # e = Exponential(0, amp=float(self.frequency**2/o.frequency**2*float(self.frequency))) # triangle waves
             # e = Exponential(-o.frequency/100.0) # sine waves
             e = Exponential(self.damping(o.frequency)) # sine waves
             
@@ -86,7 +80,7 @@ class Overtones(object, Generator):
             else:
                 frames += o[iter] * e[iter]
         
-        return frames / max( abs(max(frames)), 1.0 )
+        return frames / max( abs(max(frames)), 1.0 ) # TODO fix normalization to use a single value for whole sound!
 
     def __repr__(self):
         return "%s(sndobj=%s, n=%s, func=%s, damping=%s, rand_phase=%s>" % \

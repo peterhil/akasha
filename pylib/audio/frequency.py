@@ -18,35 +18,6 @@ from utils.log import logger
 from utils.math import *
 
 
-class Hz(object, PeriodicGenerator):
-    def __init__(self, hz=0):
-        self.__hz = hz
-
-    def __get__(self, instance, owner):
-        print "Getting from Hz: ", self, instance, owner
-        return self.hz
-
-    @property
-    def hz(self):
-        "Depends on original frequency's rational approximation and sampling rate."
-        return float(self.ratio * Sampler.rate)
-
-    @property
-    def ratio(self):
-        return self.to_ratio(self.__hz)
-
-    @staticmethod
-    def to_ratio(freq, limit=Sampler.rate):
-        return Fraction.from_float(float(freq)/Sampler.rate).limit_denominator(limit)
-
-class Game(object):
-    f0 = Hz()
-    f10 = Hz(hz=10)
-    f20 = Hz(hz=20)
-    
-    def __init__(self, hz=100):
-        self.__class__.foo = Hz(hz)
-
 class Frequency(object, PeriodicGenerator):
     """Frequency class"""
 
@@ -59,14 +30,6 @@ class Frequency(object, PeriodicGenerator):
         if den: ratio = Fraction(ratio, den)
         return cls(Fraction(ratio) * Sampler.rate)
 
-    def __get__(self, instance, owner):
-        logger.debug("Getting from Frequency -- self: %s, instance: %s, owner: %s", self, instance, owner)
-        return self
-
-    def __nonzero__(self):
-        """Zero frequency should be considered False"""
-        return self.ratio != 0
-
     @property
     def ratio(self):
         return self.wrap(self.antialias(self.to_ratio(self.__hz)))
@@ -75,6 +38,15 @@ class Frequency(object, PeriodicGenerator):
     def hz(self):
         "Depends on original frequency's rational approximation and sampling rate."
         return float(self.ratio * Sampler.rate)
+
+    @staticmethod
+    @memoized
+    def angles(ratio):
+        """Fastest generating method so far. Could be made still faster by using conjugate for half of the samples."""
+        if ratio == 0:
+            return np.array([0.], dtype=np.float64)
+        pi2 = 2 * np.pi
+        return pi2 * ratio.numerator * np.arange(0, 1, 1.0/ratio.denominator, dtype=np.float64)
     
     # Internal stuff
     
@@ -98,12 +70,6 @@ class Frequency(object, PeriodicGenerator):
 
     ### Representation ###
 
-    def __cmp__(self, other):
-        if isinstance(other, self.__class__):
-            return cmp(self.ratio, other.ratio)
-        else:
-            return cmp(other, self.ratio)
-
     def __repr__(self):
         return "Frequency(%s)" % self.__hz
 
@@ -112,6 +78,10 @@ class Frequency(object, PeriodicGenerator):
 
     ### Arithmetic ###
     
+    def __nonzero__(self):
+        """Zero frequency should be considered False"""
+        return self.ratio != 0
+
     def __float__(self):
         return float(self.hz)
 
@@ -178,6 +148,12 @@ class Frequency(object, PeriodicGenerator):
         """hash(self), takes into account any rounding done on Frequency's initialisation."""
         return hash(self.hz)
 
+    def __cmp__(self, other):
+        if isinstance(other, self.__class__):
+            return cmp(self.ratio, other.ratio)
+        else:
+            return cmp(other, self.ratio)
+
     def __eq__(a, b):
         """a == b, takes into account any rounding done on Frequency's initialisation."""
         return a.hz == Frequency(b).hz
@@ -196,4 +172,29 @@ class Frequency(object, PeriodicGenerator):
 
     # __reduce__ # TODO: Implement pickling -- see http://docs.python.org/library/pickle.html#the-pickle-protocol
     # __copy__, __deepcopy__
+
+
+class FrequencyRatioMixin:
+    @property
+    def frequency(self):
+        return self._frequency
+
+    @frequency.setter
+    def frequency(self, hz):
+        if isinstance(hz, Frequency):
+            self._frequency = hz
+        else:
+            self._frequency = Frequency(hz)  # Use Trellis, and make a interface for frequencies
+
+    @property
+    def ratio(self):
+        return self._frequency.ratio
+
+    @property
+    def period(self):
+        return self.ratio.denominator
+
+    @property
+    def order(self):
+        return self.ratio.numerator
 
