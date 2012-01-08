@@ -22,7 +22,18 @@ class Exponential(object, Generator):
 
     @property
     def half_life(self):
-        return math.log(2.0) / -self.rate * Sampler.rate
+        if self.rate == 0:
+            return np.inf
+        else:
+            return math.log(2.0) / -self.rate * Sampler.rate
+
+    @property
+    def zero_point(self):
+        """
+        Returns the time required to reach zero from starting amplitude.
+        For e[e.zero_point+offset] to be zero, offset = -1 for growth (positive rate) and +1 for decay (negative rate).
+        """
+        return self.half_life * (minfloat(self.amp)[1]+1)
 
     def sample(self, iterable):
         # Convert frame numbers to time (ie. 44100 => 1.0)
@@ -30,14 +41,7 @@ class Exponential(object, Generator):
         return self.amp * np.exp(self.rate * frames)
 
     def __len__(self):
-        if self.rate == 0:
-            return np.inf
-        elif self.rate < 0:
-            # Exponential decay approaching zero
-            return int(math.ceil(self.half_life*(minfloat(self.amp)[1]+1)))
-        else:
-            # Exponential growth approaching inf
-            return int(math.ceil(-self.half_life*(minfloat(self.amp)[1]+1)))
+        return int(math.ceil(np.abs(self.zero_point)))
 
     def __repr__(self):
         return "%s(%s, %s)" % (self.__class__.__name__, self.rate, self.amp)
