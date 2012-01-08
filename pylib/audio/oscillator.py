@@ -23,7 +23,7 @@ class Osc(object, FrequencyRatioMixin, PeriodicGenerator):
     """Oscillator class"""
 
     def __init__(self, freq):
-        self._frequency = Frequency(freq)
+        self._hz = Frequency(freq)
         self.superness = (2,2,2,2)  # CLEANUP: Oscs shouldn't know about superness -> move curves to own class!
 
     @classmethod
@@ -74,7 +74,7 @@ class Super(Osc):
         See 'Superellipse' article at Wikipedia for explanation of this parameter means:
         http://en.wikipedia.org/wiki/Superellipse
         """
-        self._frequency = Frequency(freq)
+        self._hz = Frequency(freq)
         self.amp = 1.0
         self.superness = (m, n, p, q, a, b)
 

@@ -18,12 +18,37 @@ from utils.log import logger
 from utils.math import *
 
 
-class Frequency(object, PeriodicGenerator):
+class FrequencyRatioMixin:
+    @property
+    def frequency(self):
+        return self._hz
+
+    @frequency.setter
+    def frequency(self, hz):
+        if isinstance(hz, Frequency):
+            self._hz = hz
+        else:
+            self._hz = Frequency(hz)  # Use Trellis, and make a interface for frequencies
+
+    @property
+    def ratio(self):
+        return self._hz.ratio
+
+    @property
+    def period(self):
+        return self.ratio.denominator
+
+    @property
+    def order(self):
+        return self.ratio.numerator
+
+
+class Frequency(object, FrequencyRatioMixin, PeriodicGenerator):
     """Frequency class"""
 
     def __init__(self, hz):
         # Original frequency, independent of sampling rate or optimizations
-        self.__hz = float(hz)
+        self._hz = float(hz)
 
     @classmethod
     def from_ratio(cls, ratio, den=False):
@@ -32,7 +57,7 @@ class Frequency(object, PeriodicGenerator):
 
     @property
     def ratio(self):
-        return self.wrap(self.antialias(self.to_ratio(self.__hz)))
+        return self.wrap(self.antialias(self.to_ratio(self._hz)))
 
     @property
     def hz(self):
@@ -47,7 +72,11 @@ class Frequency(object, PeriodicGenerator):
             return np.array([0.], dtype=np.float64)
         pi2 = 2 * np.pi
         return pi2 * ratio.numerator * np.arange(0, 1, 1.0/ratio.denominator, dtype=np.float64)
-    
+
+    @property
+    def sample(self):
+        return self.angles(self.ratio)
+        
     # Internal stuff
     
     @staticmethod
@@ -71,7 +100,7 @@ class Frequency(object, PeriodicGenerator):
     ### Representation ###
 
     def __repr__(self):
-        return "Frequency(%s)" % self.__hz
+        return "Frequency(%s)" % self._hz
 
     def __str__(self):
         return "<Frequency: %s hz>" % self.hz
@@ -90,7 +119,7 @@ class Frequency(object, PeriodicGenerator):
 
     def __trunc__(self):
         """Returns an integral rounded towards zero."""
-        return float(self.__hz).__trunc__()
+        return float(self._hz).__trunc__()
 
     def _op(op):
         """
@@ -101,11 +130,11 @@ class Frequency(object, PeriodicGenerator):
         """
         def forward(a, b):
             if isinstance(b, a.__class__):
-                return Frequency( op(a.__hz, b.__hz) )
+                return Frequency( op(a._hz, b._hz) )
             elif isinstance(b, (float, np.floating)):
-                return Frequency( op(a.__hz, b) )
+                return Frequency( op(a._hz, b) )
             elif isinstance(b, Number):
-                return Frequency( op(a.__hz, b) )
+                return Frequency( op(a._hz, b) )
             else:
                 return NotImplemented
         forward.__name__ = '__' + op.__name__ + '__'
@@ -113,11 +142,11 @@ class Frequency(object, PeriodicGenerator):
 
         def reverse(b, a):
             if isinstance(a, Frequency):
-                return Frequency( op(a.__hz, b.__hz) )
+                return Frequency( op(a._hz, b._hz) )
             elif isinstance(a, (float, np.floating)):
-                return Frequency( op(a, b.__hz) )
+                return Frequency( op(a, b._hz) )
             elif isinstance(a, Number):
-                return Frequency( op(a, b.__hz) )
+                return Frequency( op(a, b._hz) )
             else:
                 return NotImplemented
         reverse.__name__ = '__r' + op.__name__ + '__'
@@ -136,13 +165,13 @@ class Frequency(object, PeriodicGenerator):
     __pow__, __rpow__ = _op(operator.pow)
 
     def __pos__(self):
-        return Frequency(self.__hz)
+        return Frequency(self._hz)
 
     def __neg__(self):
-        return Frequency(-self.__hz)
+        return Frequency(-self._hz)
 
     def __abs__(self):
-        return Frequency(abs(self.__hz))
+        return Frequency(abs(self._hz))
 
     def __hash__(self):
         """hash(self), takes into account any rounding done on Frequency's initialisation."""
@@ -159,42 +188,17 @@ class Frequency(object, PeriodicGenerator):
         return a.hz == Frequency(b).hz
 
     def __lt__(a, b):
-        return operator.lt(a.__hz, b)
+        return operator.lt(a._hz, b)
 
     def __gt__(a, b):
-        return operator.gt(a.__hz, b)
+        return operator.gt(a._hz, b)
 
     def __le__(a, b):
-        return operator.le(a.__hz, b)
+        return operator.le(a._hz, b)
 
     def __ge__(a, b):
-        return operator.ge(a.__hz, b)
+        return operator.ge(a._hz, b)
 
     # __reduce__ # TODO: Implement pickling -- see http://docs.python.org/library/pickle.html#the-pickle-protocol
     # __copy__, __deepcopy__
-
-
-class FrequencyRatioMixin:
-    @property
-    def frequency(self):
-        return self._frequency
-
-    @frequency.setter
-    def frequency(self, hz):
-        if isinstance(hz, Frequency):
-            self._frequency = hz
-        else:
-            self._frequency = Frequency(hz)  # Use Trellis, and make a interface for frequencies
-
-    @property
-    def ratio(self):
-        return self._frequency.ratio
-
-    @property
-    def period(self):
-        return self.ratio.denominator
-
-    @property
-    def order(self):
-        return self.ratio.numerator
 

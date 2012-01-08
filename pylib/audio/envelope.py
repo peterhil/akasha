@@ -31,24 +31,20 @@ class Exponential(object, Generator):
 
     def __len__(self):
         if self.rate == 0:
-            raise ValueError("Length is infinite.")
+            return np.inf
         elif self.rate < 0:
             # Exponential decay approaching zero
-            length = int(math.ceil(self.half_life*(minfloat(self.amp)[1]+1)))
+            return int(math.ceil(self.half_life*(minfloat(self.amp)[1]+1)))
         else:
             # Exponential growth approaching inf
-            # length = int(math.floor(
-            #     abs(self.half_life) * (maxfloat(self.amp)[1]) + 1
-            # ))
-            raise ValueError("Exponential functions with infinite values \
-                cause overflows too easily.")
-        return length
+            return int(math.ceil(-self.half_life*(minfloat(self.amp)[1]+1)))
 
     def __repr__(self):
         return "%s(%s, %s)" % (self.__class__.__name__, self.rate, self.amp)
 
     def __str__(self):
         return "<%s: rate=%s, amp=%s>" % (self.__class__.__name__, self.rate, self.amp)
+
 
 class Attack(Exponential):
     """Exponential attack (reversed decay/growth) envelope"""
@@ -67,3 +63,11 @@ class Attack(Exponential):
         frames[:len(atck)] = atck
         del(atck)
         return frames
+
+
+class Timbre(object, Generator):
+    """Defines an envelope timbre for frequencies."""
+
+    def __init__(self):
+        pass
+

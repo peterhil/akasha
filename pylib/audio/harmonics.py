@@ -22,7 +22,7 @@ class Overtones(object, FrequencyRatioMixin, Generator):
 
     def __init__(self, sndobj=Osc(220.0), n=8, func=lambda x: 1+x, damping=None, rand_phase=False):
         self.base = sndobj
-        self._frequency = self.base.frequency
+        self._hz = self.base.frequency
         self.n = n
         self.func = func
         self.damping = damping or (lambda f, a=1.0: (-5*np.log2(float(f))/(10.0), min(1.0, a*float(self.frequency/f))))   # Sine waves
