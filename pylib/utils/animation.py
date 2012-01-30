@@ -81,14 +81,11 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=False, lines=False,
     pygame.display.set_caption(name)
 
     it = pairwise(indices(snd, dur))
-    show_slice(screen, snd[slice(*it.next())], size=size, name=name, antialias=antialias)
+    asl = slice(*it.next())
+    show_slice(screen, snd[asl], size=size, name=name, antialias=antialias)
 
-    #sndarr = np.cast['int16'](snd[time_slice(dur, 0)].imag * (2**16/2.0-1))
     if sync:
-        ait = pairwise(indices(snd, dur))
-        asl = list(ait.next())
-        asl[1] *= 1
-        audio = sndarray.make_sound(pcm(snd[slice(*asl)]))
+        audio = sndarray.make_sound(pcm(snd[asl]))
         ch.play(audio)
     else:
         pgsnd = sndarray.make_sound(pcm(snd[time_slice(dur, 0)]))
@@ -116,7 +113,6 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=False, lines=False,
             elif (event.type == pygame.KEYDOWN and event.key == pygame.K_F7):
                 # Rewind
                 it = pairwise(indices(snd))
-                ait = pairwise(indices(snd))
             elif (event.type == pygame.KEYDOWN and event.key == pygame.K_UP):
                 # Sampler.videorate += 1
                 # set_timer()
@@ -140,7 +136,6 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=False, lines=False,
                 f = w.get(*( pos.get(event.key, pos[None]) or (0, 0) ))
                 snd.frequency = f
                 it = pairwise(indices(snd, dur))
-                ait = pairwise(indices(snd, dur))
                 logger.info("Setting NEW frequency: %r for %s, now at frequency: %s" % (f, snd, snd.frequency))
             # elif (event.type == pygame.KEYUP and hasattr(snd, 'frequency')):
             #     print event
@@ -150,12 +145,13 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=False, lines=False,
                 
                 draw_start = time()
                 try:
-                    samples = snd[slice(*it.next())]
+                    asl = slice(*it.next())
+                    samples = snd[asl]
                     if sync:
-                        audio = sndarray.make_sound(pcm(snd[slice(*ait.next())]))
-                        if hasattr(snd, 'frequency'): ch = mixer.find_channel()
-                        chid = (chid + 1) % nchannels
-                        ch = chs[chid]
+                        audio = sndarray.make_sound(pcm(snd[asl]))
+                        # if hasattr(snd, 'frequency'): ch = mixer.find_channel()
+                        # chid = (chid + 1) % nchannels
+                        # ch = chs[chid]
                         ch.queue(audio)
                 except StopIteration:
                     done = True
@@ -169,7 +165,7 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=False, lines=False,
                         for ends in pairwise(samples):
                             ends = np.array(ends)
                             pts = get_points(ends, size).transpose()
-                            color = hsv2rgb(angle2hsv(phase2hues(ends, padding=False)))
+                            color = pygame.Color('green') #hsv2rgb(angle2hsv(phase2hues(ends, padding=False)))
                             pygame.draw.aaline(screen, color, *pts)
                     else:
                         pts = get_points(samples, size).transpose()

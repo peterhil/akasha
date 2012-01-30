@@ -46,9 +46,10 @@ class FrequencyRatioMixin:
 class Frequency(object, FrequencyRatioMixin, PeriodicGenerator):
     """Frequency class"""
 
-    def __init__(self, hz):
+    def __init__(self, hz, unwrapped=False):
         # Original frequency, independent of sampling rate or optimizations
         self._hz = float(hz)
+        self.sampling = unwrapped
 
     @classmethod
     def from_ratio(cls, ratio, den=False):
@@ -57,7 +58,10 @@ class Frequency(object, FrequencyRatioMixin, PeriodicGenerator):
 
     @property
     def ratio(self):
-        return self.wrap(self.antialias(self.to_ratio(self._hz)))
+        if not self.sampling:
+            return self.wrap(self.antialias(self.to_ratio(self._hz)))
+        else:
+            return self.to_ratio(self._hz)
 
     @property
     def hz(self):
@@ -94,8 +98,7 @@ class Frequency(object, FrequencyRatioMixin, PeriodicGenerator):
     @staticmethod
     def wrap(ratio):
         # wrap roots: 9/8 == 1/8 in Osc! This also helps with numeric accuracy.
-        n = ratio.numerator % ratio.denominator
-        return Fraction(n, ratio.denominator)
+        return ratio % 1
 
     ### Representation ###
 
@@ -110,6 +113,12 @@ class Frequency(object, FrequencyRatioMixin, PeriodicGenerator):
     def __nonzero__(self):
         """Zero frequency should be considered False"""
         return self.ratio != 0
+
+    def __cmp__(self, other):
+        if isinstance(other, self.__class__):
+            return cmp(self.ratio, other.ratio)
+        else:
+            return cmp(other, self.ratio)
 
     def __float__(self):
         return float(self.hz)
@@ -176,12 +185,6 @@ class Frequency(object, FrequencyRatioMixin, PeriodicGenerator):
     def __hash__(self):
         """hash(self), takes into account any rounding done on Frequency's initialisation."""
         return hash(self.hz)
-
-    def __cmp__(self, other):
-        if isinstance(other, self.__class__):
-            return cmp(self.ratio, other.ratio)
-        else:
-            return cmp(other, self.ratio)
 
     def __eq__(a, b):
         """a == b, takes into account any rounding done on Frequency's initialisation."""

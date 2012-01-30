@@ -31,7 +31,7 @@ if __name__ == '__main__':
     from scipy.signal import hilbert
 
     from audio.dtmf import DTMF
-    from audio.envelope import Attack, Exponential
+    from audio.envelope import Attack, Exponential, Gamma
     from audio.frequency import Frequency
     from audio.harmonics import Overtones
     from audio.noise import *
@@ -52,8 +52,8 @@ if __name__ == '__main__':
 
     setup()
 
-    Sampler.frequency = Frequency(Sampler.rate)
-    Sampler.videofrequency = Frequency(Sampler.videorate)
+    Sampler.frequency = Frequency(Sampler.rate, unwrapped=True)
+    Sampler.videofrequency = Frequency(Sampler.videorate, unwrapped=True)
 
     def make_test_sound(freq = 230):
         h = Overtones(Osc(freq), damping=lambda f, a=1.0: (-f/100.0, a/(f/freq)), n = 20)

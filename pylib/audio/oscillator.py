@@ -57,7 +57,7 @@ class Osc(object, FrequencyRatioMixin, PeriodicGenerator):
             return cmp(other, self.ratio)
 
     def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__, self.frequency)
+        return "%s(%s)" % (self.__class__.__name__, self.frequency._hz)
 
     def __str__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.frequency)
@@ -131,7 +131,7 @@ class Super(Osc):
         return normalize(self.gen(self.ratio, self.superness)) * self.amp
 
     def __repr__(self):
-        return "%s(%s, superness=%s)" % (self.__class__.__name__, self.frequency, self.superness)
+        return "%s(%s, superness=%s)" % (self.__class__.__name__, self.frequency._hz, self.superness)
 
     def __str__(self):
         return "<%s: %s, superness %s>" % (self.__class__.__name__, self.frequency, self.superness)

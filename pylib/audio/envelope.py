@@ -3,6 +3,7 @@
 
 import math
 import numpy as np
+import scipy as sp
 from cmath import rect, polar, phase, pi, exp
 from fractions import Fraction
 
@@ -67,6 +68,27 @@ class Attack(Exponential):
         frames[:len(atck)] = atck
         del(atck)
         return frames
+
+
+class Gamma(object, Generator):
+    """Gamma cumulative distribution function derived envelope."""
+
+    def __init__(self, shape=1.0, scale=1.0):
+        if isinstance(shape, tuple):
+            self.shape, self.scale = shape
+        else:
+            self.shape = shape
+            self.scale = scale  # Inverse rate
+
+    def sample(self, iterable):
+        frames = (np.array(iterable) / float(Sampler.rate)) * (1.0/max(self.scale, 1e-06)) # Make scale into rate
+        return sp.special.gammaincc(self.shape, frames)
+
+    def __repr__(self):
+        return "%s(%s, %s)" % (self.__class__.__name__, self.shape, self.scale)
+
+    def __str__(self):
+        return "<%s: shape=%s, scale=%s>" % (self.__class__.__name__, self.shape, self.scale)
 
 
 class Timbre(object, Generator):
