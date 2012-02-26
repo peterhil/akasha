@@ -36,7 +36,7 @@ def times_at(frames):
 
 def frames_at(times):
     """Convert time to frame numbers (ie. 1.0 => 44100)"""
-    return int(round(times * Sampler.rate))
+    return np.array(int(round(times * Sampler.rate)))
 
 
 def time_slice(dur, start=0, time=False):
@@ -67,3 +67,23 @@ class Timeslice(object):
 
 class OutputStream(object):
     pass
+
+class Timeline(object):
+    """Class representing time, both physical and discrete."""
+
+    def __init__(self, resolution=Sampler.rate):
+        self.resolution = resolution
+
+    def times(self, start_time, end_time=None):
+        if end_time == None:
+            end_time = start_time
+            start_time = 0
+        return np.arange(start_time, end_time, self.resolution, dtype=np.float64)
+
+    def frames(self, start_time, end_time=None):
+        if end_time == None:
+            end_time = start_time
+            start_time = 0
+        return np.arange(start_time / self.resolution, end_time / self.resolution, 1, dtype=np.int64)
+
+
