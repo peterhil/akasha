@@ -137,6 +137,9 @@ def angle2hsv(deg):
 
 def hist_graph(samples, size=1000):
     """Uses numpy histogram2d to make an image from complex signal."""
+    # NP Doc: http://docs.scipy.org/doc/numpy/reference/generated/numpy.histogram2d.html
+    # TODO see also np.bincount and
+    # http://stackoverflow.com/questions/7422713/numpy-histogram-with-3x3d-arrays-as-indices
     c = samples.view(np.float64).reshape(len(samples), 2).transpose()
     x, y = c[0], -c[1]
     hist, y_edges, x_edges = np.histogram2d(y, x, bins=size, range=[[-1.,1.],[-1.,1.]], normed=False)
@@ -229,6 +232,15 @@ def chords_to_hues(signal):
     logger.debug("%s Hues: %s", __name__, hues)
     return hues
 
+@memoized
+def getHuemap(steps = 6 * 255):
+    #huemap = [ hsv2rgb(angle2hsv(angle)) for angle in np.arange(360) ] # step-size will become 4.2666... = 6 * 256 / 360.0
+    huemap = [ tuple(hsv2rgb(angle2hsv(angle))) for angle in np.arange(0, 360, 1.0 / (steps / 360.0)) ] # len = 1536 = 360 * 4.2666...
+    return np.array(huemap, dtype=np.uint8)
+
+def colorize(samples, steps = 6 * 255):
+    return getHuemap(steps)[(phase2hues(samples) * (steps / 360.0)).astype(np.int)]
+
 def draw(samples, size=1000, antialias=False, axis=True, img=None):
     """Draw the complex sound signal into specified size image."""
     # See http://jehiah.cz/archive/creating-images-with-numpy
@@ -245,12 +257,18 @@ def draw(samples, size=1000, antialias=False, axis=True, img=None):
     else:
         img = get_canvas(size, axis)
 
+    # Clip -- amax could be just 'np.abs(np.max(samples))' for unit circle, but rectangular abs can be sqrt(2) > 1.0!
+    amax = max(np.max(np.abs(samples.real)), np.max(np.abs(samples.imag)))
+    if amax > 1.0:
+        logger.warn("Clipping samples on draw() -- maximum magnitude was: %0.6f" % amax)
+        samples = clip(samples)
+
     points = get_points(samples, size)
 
     if antialias:
         # Draw with antialising
         centers = np.round(points)  # 1.0 to 600.0
-        bases = np.cast['uint16'](centers) - 1   # 0 to 599
+        bases = np.cast['uint32'](centers) - 1   # 0 to 599
         deltas = points - bases - 0.5
 
         values_00 = deltas[1] * deltas[0]
@@ -258,31 +276,44 @@ def draw(samples, size=1000, antialias=False, axis=True, img=None):
         values_10 = (1.0 - deltas[1]) * deltas[0]
         values_11 = (1.0 - deltas[1]) * (1.0 - deltas[0])
 
-        img[(size-1) - bases[1], bases[0], :] += np.repeat((values_11 * 255), 4).reshape(len(samples),4)
-        img[(size-1) - bases[1], bases[0]+1, :] += np.repeat((values_10 * 255), 4).reshape(len(samples),4)
-        img[(size-1) - (bases[1]+1), bases[0], :] += np.repeat((values_01 * 255), 4).reshape(len(samples),4)
-        img[(size-1) - (bases[1]+1), bases[0]+1, :] += np.repeat((values_00 * 255), 4).reshape(len(samples),4)
+        pos = [
+            ( (size-1) - bases[1], bases[0] ),
+            ( (size-1) - bases[1], bases[0]+1 ),
+            ( (size) - (bases[1]+1), bases[0] ),
+            ( (size) - (bases[1]+1), bases[0]+1 ),
+        ]
+
+        colors = colorize(samples) # or 255 for greyscale
+
+        img[pos[0][0], pos[0][1], :] += colors * np.repeat(values_11, 4).reshape(len(samples), 4)
+        img[pos[1][0], pos[1][1], :] += colors * np.repeat(values_10, 4).reshape(len(samples), 4)
+        img[pos[2][0], pos[2][1], :] += colors * np.repeat(values_01, 4).reshape(len(samples), 4)
+        img[pos[3][0], pos[3][1], :] += colors * np.repeat(values_00, 4).reshape(len(samples), 4)
     else:
         # Cast floats to integers
-        points = np.cast['uint16'](points)  # 0 to 599
+        points = np.cast['uint32'](points)  # 0 to 599
 
         # Draw image
         
-        #img[(size - 1) - points[1], points[0]] = np.apply_along_axis(hsv2rgb, 0, phase2hues(samples))
-        #img[(size - 1) - points[1], points[0]] = map(lambda c: hsv2rgb(angle2hsv(c)), phase2hues(samples))
-        #img[(size - 1) - points[1], points[0]] = map(lambda c: hsv2rgb(angle2hsv(c)), hues)
-        #img[(size - 1) - points[1], points[0]] = map(lambda c: np.append(colorsys.hsv_to_rgb(*np.append([c/360.0], [1, 255])), [255]), hues)
+        # img[(size - 1) - points[1], points[0]] = np.apply_along_axis(hsv2rgb, 0, phase2hues(samples))
+        # img[(size - 1) - points[1], points[0]] = map(lambda c: hsv2rgb(angle2hsv(c)), phase2hues(samples))
+        # img[(size - 1) - points[1], points[0]] = map(lambda c: hsv2rgb(angle2hsv(c)), hues)
+        # img[(size - 1) - points[1], points[0]] = map(lambda c: np.append(colorsys.hsv_to_rgb(*np.append([c/360.0], [1, 255])), [255]), hues)
 
-        hues = angles2hues(samples)
-        hsv_colours = np.repeat(np.array([[0,1,255]], dtype=np.float16), hues.size, 0)
-        hsv_colours[:,0] = hues / 360.0
+        # Draw image v2
+        
+        # hues = angles2hues(samples)
+        # hsv_colours = np.repeat(np.array([[0,1,255]], dtype=np.float32), hues.size, 0)
+        # hsv_colours[:,0] = hues / 360.0
+        # 
+        # rgb_colours = np.apply_along_axis(lambda x: colorsys.hsv_to_rgb(*x), 1, hsv_colours)
+        # rgb_colours = np.insert(rgb_colours.T, [1], 255.0, 0).T # Append alpha
+        # 
+        # img[(size - 1) - points[1], points[0]] = rgb_colours
 
-        rgb_colours = np.apply_along_axis(lambda x: colorsys.hsv_to_rgb(*x), 1, hsv_colours)
-
-        rgb_colours = np.insert(rgb_colours.T, [1], 255.0, 0).T # Append alpha
-        img[(size - 1) - points[1], points[0]] = rgb_colours
-
-
+        # Draw image v3
+        img[(size - 1) - points[1], points[0]] = colorize(samples)
+        
     return img
 
 

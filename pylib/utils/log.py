@@ -38,6 +38,7 @@ class ansi:
     
     # Logging
     NOTSET = RESET
+    ANIMA = MAGENTA
     BORING = BLACK
     DEBUG = CYAN
     INFO = BRIGHT + GREEN

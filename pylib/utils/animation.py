@@ -51,9 +51,8 @@ def snd_slice(snd, sl):
 def pcm(snd, bits=16):
     return np.cast['int' + str(bits)](snd.imag * (2**bits/2.0-1))
 
-def anim(snd, size=800, dur=5.0, name="Resonance", antialias=False, lines=False, sync=False):
-    sync = (antialias or lines or sync) # For avoiding slowness with colours TODO: optimize colours!
-    
+def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, sync=True):
+
     if 'numpy' in surfarray.get_arraytypes():
         surfarray.use_arraytype('numpy')
     else:
@@ -162,11 +161,13 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=False, lines=False,
                     img = get_canvas(size, axis=True)[:,:,:-1]  # Drop alpha
                     surfarray.blit_array(screen, img)
                     if antialias: # Colorize
+                        # TODO: optimize colours with lines!
                         for ends in pairwise(samples):
-                            ends = np.array(ends)
-                            pts = get_points(ends, size).transpose()
-                            color = pygame.Color('green') #hsv2rgb(angle2hsv(phase2hues(ends, padding=False)))
-                            pygame.draw.aaline(screen, color, *pts)
+                            pts = get_points(np.array(ends), size).transpose()
+                            # color = pygame.Color('green')
+                            color = hsv2rgb(angle2hsv(phase2hues(ends, padding=False)))
+                            # color = tuple(colorize(ends)[0])
+                            pygame.draw.line(screen, color, *pts)
                     else:
                         pts = get_points(samples, size).transpose()
                         pygame.draw.aalines(screen, pygame.Color('orange'), False, pts, 1)
