@@ -10,7 +10,7 @@ from exceptions import ValueError
 import logging
 
 from utils.decorators import memoized
-from utils.math import normalize, clip, deg, distances, pad
+from utils.math import normalize, clip, deg, distances, pad, pcm
 from utils.log import logger
 
 try:
@@ -146,19 +146,73 @@ def hist_graph(samples, size=1000):
     image = Image.fromarray(np.array(hist / hist.mean() * 255, dtype=np.uint8),'L')
     image.show()
 
-def get_canvas(size=1000, axis=True):
-    img = np.zeros((size+1,size+1,4), np.uint8)             # Note: y, x
+def get_canvas(x_size=1000, y_size=None, axis=True):
+    if not y_size:
+        y_size = x_size
+    img = np.zeros((y_size+1, x_size+1, 4), np.uint8)             # Note: y, x
     if axis:
         # Draw axis
-        img[size/2.0,:] = img[:,size/2.0] = [42,42,42,127]
+        img[y_size/2.0,:] = img[:,x_size/2.0] = [42,42,42,127]
     return img
 
 def get_points(samples, size=1000):
     # Scale to size and interpret values as pixel centers
     samples = ((clip(samples) + 1+1j) / 2.0 * (size - 1) + (0.5+0.5j))      # 0.5 to 599.5
+    return complex_as_reals(samples)
 
+def complex_as_reals(samples):
     # Convert complex samples to real number coordinate points
-    return samples.view(np.float).reshape(len(samples), 2).transpose()    # 0.5 to 599.5
+    return samples.view(np.float64).reshape(len(samples), 2).transpose()    # 0.5 to 599.5
+
+import types
+types.signed = (int, float, np.signedinteger, np.floating)
+
+def assert_type(types, *args):
+    assert np.all(map(lambda p: isinstance(p, types), args)), \
+        "All arguments must be instances of %s, got:\n%s" % (types, map(type, args))
+
+def line_bresenham(x0, y0, x1, y1, colour=1.0, indices=False):
+    """
+    Bresenham line drawing algorithm.
+    Converted from C version at http://free.pages.at/easyfilter/bresenham.html by Peter H.
+    """
+    assert_type(types.signed, x0, y0, x1, y1)
+    sx = 1 if x0 < x1 else -1
+    sy = 1 if y0 < y1 else -1
+    dx =  np.abs(x1 - x0)
+    dy = -np.abs(y1 - y0)
+    bx = np.min((x0, x1))
+    by = np.min((y0, y1))
+    #print "Base x = %s, y = %s" % (bx, by)
+    err = dx + dy # error value e_xy
+    if indices:
+        out = []
+    else:
+        out = np.zeros((-dy + 1, dx + 1))
+
+    while True:
+        #print x0, y0
+        if indices:
+            out.append((x0, y0))
+        else:
+            #setPixel(x0, y0)
+            out[y0 - by, x0 - bx] = colour
+        if (x0 == x1 and y0 == y1):
+            return np.array(out).T
+        e2 = 2 * err
+        if (e2 >= dy): err += dy; x0 += sx # e_xy + e_x > 0
+        if (e2 <= dx): err += dx; y0 += sy # e_xy + e_y < 0
+
+def line_linspace(x0, y0, x1, y1, endpoint=True):
+    assert_type(types.signed, x0, y0, x1, y1)
+    size = np.max([np.abs(x1 - x0), np.abs(y1 - y0)]) + int(bool(endpoint))
+    return complex_as_reals(np.linspace(x0 + y0 * 1j, x1 + y1 * 1j, size, endpoint=endpoint)).astype(np.int32)
+
+def line_linspace_cx(start, end, endpoint=True):
+    assert_type(complex, start, end)
+    distance = np.abs(start - end)
+    size = np.max([distance.real, distance.imag]) + int(bool(endpoint))
+    return np.round(complex_as_reals(np.linspace(start, end, size, endpoint=endpoint))).astype(np.int32)
 
 def angles2hues(cx_samples, padding=True, loglevel=logging.ANIMA):
     """Converts angles of complex samples into hues"""
@@ -233,13 +287,13 @@ def chords_to_hues(signal):
     return hues
 
 @memoized
-def getHuemap(steps = 6 * 255):
+def get_huemap(steps = 6 * 255):
     #huemap = [ hsv2rgb(angle2hsv(angle)) for angle in np.arange(360) ] # step-size will become 4.2666... = 6 * 256 / 360.0
     huemap = [ tuple(hsv2rgb(angle2hsv(angle))) for angle in np.arange(0, 360, 1.0 / (steps / 360.0)) ] # len = 1536 = 360 * 4.2666...
     return np.array(huemap, dtype=np.uint8)
 
 def colorize(samples, steps = 6 * 255):
-    return getHuemap(steps)[(phase2hues(samples) * (steps / 360.0)).astype(np.int)]
+    return get_huemap(steps)[(phase2hues(samples) * (steps / 360.0)).astype(np.int)]
 
 def draw(samples, size=1000, antialias=False, axis=True, img=None):
     """Draw the complex sound signal into specified size image."""
@@ -255,7 +309,7 @@ def draw(samples, size=1000, antialias=False, axis=True, img=None):
     if (img != None):
         size = img.shape[0]-1
     else:
-        img = get_canvas(size, axis)
+        img = get_canvas(size, axis=axis)
 
     # Clip -- amax could be just 'np.abs(np.max(samples))' for unit circle, but rectangular abs can be sqrt(2) > 1.0!
     amax = max(np.max(np.abs(samples.real)), np.max(np.abs(samples.imag)))
@@ -315,6 +369,45 @@ def draw(samples, size=1000, antialias=False, axis=True, img=None):
         img[(size - 1) - points[1], points[0]] = colorize(samples)
         
     return img
+
+
+def video_transfer(signal, type='PAL', axis='real', horiz=720):
+    # See http://en.wikipedia.org/wiki/44100_Hz#Recording_on_video_equipment
+    # Stereo?
+    #
+    # PAL:
+    # 294 × 50 × 3 = 44,100
+    # 294 active lines/field × 50 fields/second × 3 samples/line = 44,100 samples/second
+    # (588 active lines per frame, out of 625 lines total)
+
+    # NTSC:
+    # 245 × 60 × 3 = 44,100
+    # 245 active lines/field × 60 fields/second × 3 samples/line = 44,100 samples/second
+    # (490 active lines per frame, out of 525 lines total)
+
+    # See 576i and 576p: horiz. 720 or 704, vert. 576 out of 625 lines
+    formats = { 'PAL': 588, 'NTSC': 490 }
+    vert = formats[type]
+
+    linewidth = 3   # samples per line
+    framesize = vert * linewidth   # 1764 for PAL, 1470 for NTSC
+
+    # Make complex signal real
+    if isinstance(signal[0], np.complex):
+        signal = getattr(signal, axis)
+
+    #for block in xrange(0, len(signal), framesize):
+    #    pass # draw frame
+
+    img = get_canvas(3 - 1, vert - 1, axis=False) # Stretch to horiz. width later!
+    fv = img.flat
+
+    s = pcm(signal[:framesize] * 256, bits=8, axis='real').astype(np.uint8)
+    #fv[::] = np.repeat(signal[:framesize].T, 4, axis=0).T  # y, x
+    fv[::] = np.repeat(s, 4, axis=0)
+
+    #logger.debug("Image:\n%s,\nFlat view:\n%s" % (img[:framesize], fv[:framesize]))
+    return np.repeat(img[:framesize], horiz / linewidth, axis=1)
 
 
 # Showing images

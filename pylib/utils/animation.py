@@ -12,6 +12,7 @@ from graphing import *
 from control.io.keyboard import *
 from timing import Sampler, time_slice
 from tunings import WickiLayout
+from utils.math import pcm
 
 w = WickiLayout(440.0)
 #w = WickiLayout(440.0, generators=(2**(Fraction(7, 12)), 2**(Fraction(2, 12))))
@@ -45,11 +46,20 @@ def show_slice(screen, snd, size=800, name="Resonance", antialias=True):
     surfarray.blit_array(screen, img)
     pygame.display.flip()
 
+def show_transfer(screen, snd, size=720, name="Transfer", type='PAL', axis='imag'):
+    "Show a slice of the signal"
+    img = get_canvas(size)
+    tfer = video_transfer(snd, type=type, axis=axis)
+    black = (size - tfer.shape[0]) / 2.0
+    img[1+black:-black,1:,:] = tfer
+    img = img[:,:,:-1]  # Drop alpha
+
+    # screen = pygame.display.set_mode(img.shape[:2], 0, 32)
+    surfarray.blit_array(screen, img)
+    pygame.display.flip()
+
 def snd_slice(snd, sl):
     return np.cast['int16'](snd[sl].imag * (2**16/2.0-1))
-
-def pcm(snd, bits=16):
-    return np.cast['int' + str(bits)](snd.imag * (2**bits/2.0-1))
 
 def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, sync=True):
 
@@ -174,6 +184,7 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
                     pygame.display.flip()
                 else:
                     show_slice(screen, samples, size=size, name=name, antialias=antialias)
+                    #show_transfer(screen, samples, size=size, type='PAL', axis='imag')
 
                 dc = time() - draw_start
                 fps = clock.get_fps()
