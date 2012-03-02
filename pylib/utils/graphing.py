@@ -183,7 +183,6 @@ def line_bresenham(x0, y0, x1, y1, colour=1.0, indices=False):
     dy = -np.abs(y1 - y0)
     bx = np.min((x0, x1))
     by = np.min((y0, y1))
-    #print "Base x = %s, y = %s" % (bx, by)
     err = dx + dy # error value e_xy
     if indices:
         out = []
@@ -191,11 +190,9 @@ def line_bresenham(x0, y0, x1, y1, colour=1.0, indices=False):
         out = np.zeros((-dy + 1, dx + 1))
 
     while True:
-        #print x0, y0
         if indices:
             out.append((x0, y0))
         else:
-            #setPixel(x0, y0)
             out[y0 - by, x0 - bx] = colour
         if (x0 == x1 and y0 == y1):
             return np.array(out).T
