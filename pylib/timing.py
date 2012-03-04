@@ -3,8 +3,9 @@
 
 import math
 import numpy as np
-from timeit import default_timer as clock
 
+from timeit import default_timer as clock
+from utils.log import logger
 #from audio.frequency import Frequency
 
 
@@ -13,13 +14,16 @@ class Sampler(object):
     # Settings
     prevent_aliasing = True
     negative_frequencies = False
+    usable_videorates = 1.0/(np.arange(1,51)*0.01)
 
     rate = 44100
-    videorate = 25
+    videorate = usable_videorates[3] #[3] = 25 Hz
 
-    #def make(self):
-        #self.frequency = Frequency(self.rate)
-        #self.videofrequency = Frequency(self.videorate)
+    @classmethod
+    def set_videorate(cls, n):
+        hz = cls.usable_videorates[n]
+        logger.debug("Setting NEW video frame rate: %s Hz" % hz)
+        cls.videorate = hz
 
 
 def timecode(t, precision=1000000):
