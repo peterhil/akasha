@@ -38,7 +38,7 @@ class ansi:
     
     # Logging
     NOTSET = RESET
-    ANIMA = MAGENTA
+    ANIMA = DIM_WHITE
     BORING = BLACK
     DEBUG = CYAN
     INFO = BRIGHT + GREEN
@@ -77,8 +77,8 @@ logging.addLevelName(logging.BORING, 'BORING')
 
 logger = logging.getLogger('Akasha')
 
-absformatter = ColorFormatter("%(color)s%(asctime)s [%(levelname)s] %(name)s: %(message)s" + ansi.END)
-relformatter = ColorFormatter("%(color)s%(relativeCreated)12.4f [%(levelname)s] %(name)s: %(message)s" + ansi.END)
+absformatter = ColorFormatter("%(color)s%(asctime)s %(name)s: [%(levelname)s]\t%(message)s" + ansi.END)
+relformatter = ColorFormatter("%(color)s%(relativeCreated)12.4f %(name)s: [%(levelname)s]\t%(message)s" + ansi.END)
 
 handler = logging.StreamHandler(sys.stderr)
 #handler = logging.FileHandler('/var/log/akasha.log')
