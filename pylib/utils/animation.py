@@ -143,6 +143,11 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
         Sampler.paused = not Sampler.paused
         logger.info("Pause" if Sampler.paused else "Play")
 
+    def change_frequency(snd, key):
+        f = w.get(*( pos.get(key, pos[None]) or (0, 0) ))
+        snd.frequency = f
+        logger.info("Setting NEW frequency: %r for %s, now at frequency: %s" % (f, snd, snd.frequency))
+
     done = False
     while not done:
         for event in pygame.event.get():
@@ -181,14 +186,16 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
                     w.move(0, -1)
                 # Change frequency
                 elif hasattr(snd, 'frequency'):
-                    f = w.get(*( pos.get(event.key, pos[None]) or (0, 0) ))
-                    snd.frequency = f
+                    change_frequency(snd, event.key)
                     it = pairwise(indices(snd, dur))
-                    logger.info("Setting NEW frequency: %r for %s, now at frequency: %s" % (f, snd, snd.frequency))
 
             # -- Key ups --
             elif (event.type == pygame.KEYUP and hasattr(snd, 'frequency')):
-                logger.debug("Key up:   %s" % event)
+                if pygame.K_CAPSLOCK == event.key:
+                    change_frequency(snd, event.key)
+                    it = pairwise(indices(snd, dur))
+                else:
+                    logger.debug("Key up:   %s" % event)
 
             # Video frame
             elif (event.type == VIDEOFRAME):

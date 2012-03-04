@@ -7,6 +7,8 @@ from exceptions import AttributeError
 
 from audio.oscillator import Frequency
 from control.io.keyboard import kb
+from utils.log import logger
+from utils.math import PI2
 
 # See "Pitch Systems in Tonal Music" series on YouTube:
 # http://www.youtube.com/watch?v=0j-YXgXTpoA&feature=related
@@ -75,6 +77,39 @@ class RegularTuning(object):
 #  2.0,
 # ]
 
+class LucyTuning(object):
+    """
+    http://www.lucytune.com/
+
+    "The natural scale of music is associated with the ratio of the diameter of a circle to its circumference."
+    (i.e. pi = 3.14159265358979323846 etc.) -- John Harrison (1693-1776)
+    
+    This scale is based on two intervals:
+    
+    1) (L), The Larger note as he calls it -- this is the ratio of the 2*pi root of 2,
+       which equals a ratio of 1.116633 or 190.9858 cents.
+
+    2) (s), The lesser note, which is half the difference between five Larger notes (5L) and an octave.
+       giving a ratio of 1.073344 or 122.5354 cents.
+
+    The fifth (V) is composed of three Large (3L) plus one small note (s) i.e. (3L+s)
+        = (190.986*3) + (122.535)
+        = 695.493 cents or ratio of 1.494412.
+    The fourth (IV) is 2L+s
+        = 504.507 cents.
+
+    Frequencies and ratios:
+    http://www.lucytune.com/midi_and_keyboard/frequency_ratios.html
+    http://www.lucytune.com/new_to_lt/pitch_04.html
+    """
+    @classmethod
+    def L(cls, n):
+        return 2.0 ** (n / PI2)
+
+    @classmethod
+    def s(cls, n):
+        return (2.0 / cls.L(5)) ** (n / 2.0)
+
 class WickiLayout(object):
     def __init__(self, base=Frequency(432.0), origo=(1, 5), generators=(Fraction(3,2), Fraction(9,8))):
         """Wicki keyboard layout. Generators are given in (y, x) order.
@@ -87,16 +122,14 @@ class WickiLayout(object):
             raise AttributeError("Expected two generators, got: {0!r}".format(generators))
     
     def get(self, *pos):
-        # TODO fix Frequency multiplication to work with Fractions!
+        logger.debug("Getting position: %s %s" % pos)
         if pos == tuple(np.array(kb.shape) - 1):
             return Frequency(0.0)
         else:
             return (
                 self.base * \
-                float(
                     (self.gen[0] ** (pos[0] - self.origo[0])) * \
                     (self.gen[1] ** (pos[1] - self.origo[1]))
-                )
             )
 
     def move(self, *pos):

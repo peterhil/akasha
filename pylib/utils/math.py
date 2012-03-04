@@ -8,6 +8,8 @@ from fractions import Fraction
 euler = np.e
 debug = False
 
+PI2 = np.pi * 2.0
+
 # Viewing complex samples as pairs of reals:
 #
 # o = Osc(1,8)
@@ -25,13 +27,13 @@ def to_phasor(x):
     """
     Convert complex number to phasor tuple with magnitude and angle (in degrees).
     """
-    return (abs(x), (cmath.phase(x) / (2 * cmath.pi) * 360))
+    return (abs(x), (cmath.phase(x) / PI2 * 360))
 
 def to_phasors(samples):
     return np.array(map(to_phasor, samples))
 
 def nth_root(n):
-    return np.exp(1j * 2 * np.pi * 1.0/n)
+    return np.exp(1j * PI2 * 1.0/n)
 
 def deg(radians):
     return 180 * (radians / np.pi)
@@ -90,7 +92,7 @@ def rand_between(min, max, size=1, random=np.random.random):
     return np.atleast_1d( (max - min) * random(size) + min )
 
 def random_phase(random=np.random.random):
-    return np.atleast_1d( cmath.rect(1.0, 2.0 * np.pi * random() - np.pi) )
+    return np.atleast_1d( cmath.rect(1.0, PI2 * random() - np.pi) )
 
 
 # Primes
