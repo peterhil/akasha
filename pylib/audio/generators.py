@@ -49,5 +49,5 @@ class PeriodicGenerator(Generator):
         return self.sample[np.array(item) % self.period]
 
     def __len__(self):
-        return maxint
-        #return self.period
+        #return maxint
+        return self.period

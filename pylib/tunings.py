@@ -8,6 +8,9 @@ from exceptions import AttributeError
 from audio.oscillator import Frequency
 from control.io.keyboard import kb
 
+# See "Pitch Systems in Tonal Music" series on YouTube:
+# http://www.youtube.com/watch?v=0j-YXgXTpoA&feature=related
+
 def cents(*args):
     """Calculate cents from interval or frequency ratio(s).
     When using frequencies, give greater frequencies first.
@@ -73,7 +76,7 @@ class RegularTuning(object):
 # ]
 
 class WickiLayout(object):
-    def __init__(self, base=Frequency(440.0), origo=(1, 5), generators=(Fraction(3,2), Fraction(9,8))):
+    def __init__(self, base=Frequency(432.0), origo=(1, 5), generators=(Fraction(3,2), Fraction(9,8))):
         """Wicki keyboard layout. Generators are given in (y, x) order.
         Origo defaults to 'C' key, being on the position(1,4 + 1 for columns 'tilting' to the left)."""
         if len(generators) == 2:
