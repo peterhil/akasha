@@ -1,16 +1,19 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
-import numpy as np
-from cmath import phase
 import colorsys
+import exceptions
+import logging
+import numpy as np
+import pygame
+
+from cmath import phase
 from timing import Sampler
 from PIL import Image
-from exceptions import ValueError
-import logging
 
+from funct import pairwise
 from utils.decorators import memoized
-from utils.math import normalize, clip, deg, distances, pad, pcm
+from utils.math import normalize, clip, deg, distances, pad, pcm, minfloat
 from utils.log import logger
 
 try:
@@ -211,12 +214,11 @@ def line_linspace_cx(start, end, endpoint=True):
     size = np.max([distance.real, distance.imag]) + int(bool(endpoint))
     return np.round(complex_as_reals(np.linspace(start, end, size, endpoint=endpoint))).astype(np.int32)
 
-def angles2hues(cx_samples, padding=True, loglevel=logging.ANIMA):
+def angles2hues(cx_samples, padding=False, loglevel=logging.ANIMA):
     """Converts angles of complex samples into hues"""
-    cx_samples = np.atleast_1d(cx_samples)
 
     # Get angles from points
-    angles = np.angle(cx_samples)
+    angles = np.angle(np.atleast_1d(cx_samples))
     logger.log(loglevel, "Angles:\n%s", repr(angles[:100]))
 
     # Get distances
@@ -227,43 +229,21 @@ def angles2hues(cx_samples, padding=True, loglevel=logging.ANIMA):
     logger.log(loglevel, "Tau angles:\n%s", repr(angles[:100]))
 
     angles *= Sampler.rate  # 0..Fs/2
-    logger.log(loglevel, "Tau angles * Fs -> 0..Fs:\n%s", repr(angles[:100]))
+    logger.log(loglevel, "Frequencies:\n%s", repr(angles[:100]))
 
     # Convert rad to deg
     low = np.log2(lowest_audible_hz)
-    angles = ((np.log2(np.abs(angles)+1) - low) * 24) % 360   # (np.log2(f)-low) / 10 * 240  red..violet
-    # angles = angles * 240.0     # red..violet
-    logger.log(loglevel, "Scaled:\n%s\n", repr(angles[:100]))
-    return angles
-
-def phase2hues(cx_samples, padding=True, loglevel=logging.ANIMA):
-    """Converts angles of complex samples into hues"""
-    cx_samples = np.atleast_1d(cx_samples)
-    
-    # Get angles from points
-    angles = np.angle(cx_samples) + np.pi
-    logger.log(loglevel, "Angle + pi:\n%s", repr(angles[:100]))
-
-    # Get distances
-    angles = pad(distances(angles), 0) if padding else distances(angles)
-
-    # Convert to degrees 0..240 (red..blue)
-    angles = angles % (2.0 * np.pi)
-    logger.log(loglevel, "Diffs modulo 2pi:\n%s", repr(angles[:100]))
-
-    angles = angles / (2.0 * np.pi) * Sampler.rate  # 0..Fs/2
-    logger.log(loglevel, "Rad to tau * Fs -> 0..Fs:\n%s", repr(angles[:100]))
-
-    # Convert rad to deg
-    low = np.log2(lowest_audible_hz)
-    angles = ((np.log2(np.abs(angles)+1) - low) * 24) % 360   # (np.log2(f)-low) / 10 * 240  red..violet
-    # angles = angles * 240.0     # red..violet
+    angles = ((np.log2(np.abs(angles)+1) - low) / 10 * 240) % 360  # 10 octaves mapped to red..violet
     logger.log(loglevel, "Scaled:\n%s\n", repr(angles[:100]))
     return angles
 
 def chord_to_angle(length):
     """Return angle for chord length. Restrict to unit circle, ie. max length is 2.0"""
-    return np.arcsin(np.fmin(np.abs(length), 2.0) / 2.0) * 2
+    # Limit highest freqs to Nyquist (blue or violet)
+    d = np.fmin(np.abs(length), 2.0)
+    # Limit lower freqs to lowest_audible_hz (red)
+    d = np.fmax(d, 4.0*lowest_audible_hz/float(Sampler.rate))
+    return np.arcsin(d / 2.0) * 2
 
 def chord_to_hue(length):
     return deg(chord_to_angle(length))
@@ -271,16 +251,32 @@ def chord_to_hue(length):
 def chord_to_tau(length):
     return chord_to_angle(length) / (2.0 * np.pi)
 
-def tau_to_hue(tau):
+def tau_to_hue(tau, loglevel=logging.ANIMA):
     # Hue 240 is violet, and 8.96 is a factor for scaling back to 1.0
-    return (np.log2(np.abs(chord_to_tau(tau))+1)) * 8.96 * 240
+    #return (np.log2(np.abs(chord_to_tau(tau))+1)) * 8.96 * 240
+    low = np.log2(lowest_audible_hz)
+    taus = ((np.log2(np.abs(tau)+1) - low) / 8.96 * 240) % 360  # 10 octaves mapped to red..violet
+    #logger.log(loglevel, "Scaled:\n%s\n", repr(taus[:100]))
+    return taus
 
-def chords_to_hues(signal):
-    d = distances(signal)
-    logger.debug("%s Distances: %s", __name__, d)
-    taus = np.apply_along_axis(chord_to_tau, 0, np.append(d, d[-1])) # Append is a hack to get the same length back
+def chords_to_hues(signal, padding=True, loglevel=logging.ANIMA):
+    phases = signal / np.fmax(np.abs(signal), minfloat(0.5)[0])
+
+    # Get distances
+    d = pad(distances(phases), -1) if padding else distances(phases)
+
+    logger.log(loglevel, "%s Distances: %s", __name__, d)
+
+    taus = np.apply_along_axis(chord_to_tau, 0, d) #np.append(d, d[-1])) # Append is a hack to get the same length back
+    logger.log(loglevel, "%s Taus: %s", __name__, taus)
+
+    #taus = taus / (2*np.pi) * Sampler.rate
+    taus *= Sampler.rate  # 0..Fs/2
+    logger.log(loglevel, "Frequency median: %s", np.median(taus))
+    logger.log(loglevel, "Frequencies:\n%s", repr(taus[:100]))
+    #return taus
+
     hues = tau_to_hue(taus)
-    logger.debug("%s Hues: %s", __name__, hues)
     return hues
 
 @memoized
@@ -289,10 +285,11 @@ def get_huemap(steps = 6 * 255):
     huemap = [ tuple(hsv2rgb(angle2hsv(angle))) for angle in np.arange(0, 360, 1.0 / (steps / 360.0)) ] # len = 1536 = 360 * 4.2666...
     return np.array(huemap, dtype=np.uint8)
 
-def colorize(samples, steps = 6 * 255):
-    return get_huemap(steps)[(phase2hues(samples) * (steps / 360.0)).astype(np.int)]
+def colorize(samples, steps = 6 * 255, use_chords=True):
+    #method = chords_to_hues if use_chords else angles2hues
+    return get_huemap(steps)[(chords_to_hues(samples) * (steps / 360.0)).astype(np.int)]
 
-def draw(samples, size=1000, antialias=False, axis=True, img=None):
+def draw(samples, size=1000, dur=None, antialias=False, lines=False, axis=True, img=None, screen=None):
     """Draw the complex sound signal into specified size image."""
     # See http://jehiah.cz/archive/creating-images-with-numpy
 
@@ -308,6 +305,9 @@ def draw(samples, size=1000, antialias=False, axis=True, img=None):
     else:
         img = get_canvas(size, axis=axis)
 
+    if dur:
+        samples = samples[:int(round(dur * Sampler.rate))]
+
     # Clip -- amax could be just 'np.abs(np.max(samples))' for unit circle, but rectangular abs can be sqrt(2) > 1.0!
     amax = max(np.max(np.abs(samples.real)), np.max(np.abs(samples.imag)))
     if amax > 1.0:
@@ -316,54 +316,52 @@ def draw(samples, size=1000, antialias=False, axis=True, img=None):
 
     points = get_points(samples, size)
 
-    if antialias:
-        # Draw with antialising
-        centers = np.round(points)  # 1.0 to 600.0
-        bases = np.cast['uint32'](centers) - 1   # 0 to 599
-        deltas = points - bases - 0.5
-
-        values_00 = deltas[1] * deltas[0]
-        values_01 = deltas[1] * (1.0 - deltas[0])
-        values_10 = (1.0 - deltas[1]) * deltas[0]
-        values_11 = (1.0 - deltas[1]) * (1.0 - deltas[0])
-
-        pos = [
-            ( (size-1) - bases[1], bases[0] ),
-            ( (size-1) - bases[1], bases[0]+1 ),
-            ( (size) - (bases[1]+1), bases[0] ),
-            ( (size) - (bases[1]+1), bases[0]+1 ),
-        ]
-
-        colors = colorize(samples) # or 255 for greyscale
-
-        img[pos[0][0], pos[0][1], :] += colors * np.repeat(values_11, 4).reshape(len(samples), 4)
-        img[pos[1][0], pos[1][1], :] += colors * np.repeat(values_10, 4).reshape(len(samples), 4)
-        img[pos[2][0], pos[2][1], :] += colors * np.repeat(values_01, 4).reshape(len(samples), 4)
-        img[pos[3][0], pos[3][1], :] += colors * np.repeat(values_00, 4).reshape(len(samples), 4)
+    if lines:
+        if antialias: # Colorize
+            # raise exceptions.NotImplementedError("Drawing lines with antialias not implemented yet.")
+            # TODO: optimize colours with lines!
+            colors = colorize(samples)
+            #scaled = (samples + 1+1j) / (2.0 * size)
+            #pts = get_points(samples, size).transpose()
+            pts = pad(samples, -1)
+            for i in xrange(len(samples)):
+                #pts = get_points(np.array(ends), size).transpose()
+                #color = hsv2rgb(angle2hsv(chords_to_hues(ends, padding=False)))
+                #pygame.draw.aaline(screen, colors[i], *pts)
+                
+                line = line_linspace_cx(pts[i], pts[i + 1], endpoint=False)
+                img[line[0], line[1]] = colors[i][-1] # Drop alpha
+        else:
+            # raise exceptions.NotImplementedError("Drawing lines without antialias not implemented yet.")
+            pts = get_points(samples, size).transpose()
+            pygame.draw.aalines(screen, pygame.Color('orange'), False, pts, 1)
     else:
-        # Cast floats to integers
-        points = np.cast['uint32'](points)  # 0 to 599
+        if antialias:
+            centers = np.round(points)  # 1.0 to 600.0
+            bases = np.cast['int32'](centers) - 1  # 0 to 599
+            deltas = points - bases - 0.5
 
-        # Draw image
-        
-        # img[(size - 1) - points[1], points[0]] = np.apply_along_axis(hsv2rgb, 0, phase2hues(samples))
-        # img[(size - 1) - points[1], points[0]] = map(lambda c: hsv2rgb(angle2hsv(c)), phase2hues(samples))
-        # img[(size - 1) - points[1], points[0]] = map(lambda c: hsv2rgb(angle2hsv(c)), hues)
-        # img[(size - 1) - points[1], points[0]] = map(lambda c: np.append(colorsys.hsv_to_rgb(*np.append([c/360.0], [1, 255])), [255]), hues)
+            values_00 = deltas[1] * deltas[0]
+            values_01 = deltas[1] * (1.0 - deltas[0])
+            values_10 = (1.0 - deltas[1]) * deltas[0]
+            values_11 = (1.0 - deltas[1]) * (1.0 - deltas[0])
 
-        # Draw image v2
-        
-        # hues = angles2hues(samples)
-        # hsv_colours = np.repeat(np.array([[0,1,255]], dtype=np.float32), hues.size, 0)
-        # hsv_colours[:,0] = hues / 360.0
-        # 
-        # rgb_colours = np.apply_along_axis(lambda x: colorsys.hsv_to_rgb(*x), 1, hsv_colours)
-        # rgb_colours = np.insert(rgb_colours.T, [1], 255.0, 0).T # Append alpha
-        # 
-        # img[(size - 1) - points[1], points[0]] = rgb_colours
+            pos = [
+                ( (size-1) - bases[1], bases[0] ),
+                ( (size-1) - bases[1], bases[0]+1 ),
+                ( (size) - (bases[1]+1), bases[0] ),
+                ( (size) - (bases[1]+1), bases[0]+1 ),
+            ]
 
-        # Draw image v3
-        img[(size - 1) - points[1], points[0]] = colorize(samples)
+            colors = colorize(samples) # or 255 for greyscale
+
+            img[pos[0][0], pos[0][1], :] += colors * np.repeat(values_11, 4).reshape(len(samples), 4)
+            img[pos[1][0], pos[1][1], :] += colors * np.repeat(values_10, 4).reshape(len(samples), 4)
+            img[pos[2][0], pos[2][1], :] += colors * np.repeat(values_01, 4).reshape(len(samples), 4)
+            img[pos[3][0], pos[3][1], :] += colors * np.repeat(values_00, 4).reshape(len(samples), 4)
+        else:
+            points = np.cast['uint32'](points)  # 0 to 599
+            img[points[0], (size - 1) - points[1]] = colorize(samples)
         
     return img
 
@@ -421,8 +419,10 @@ def show(img, plot=False):
 def fast_graph(samples, size=1000, plot=False):
     return graph(samples, size, plot, antialias=False)
 
-def graph(samples, size=1000, plot=False, axis=True, antialias=False):
-    img = draw(samples, size, antialias, axis)
+def graph(samples, size=1000, dur=None, plot=False, axis=True, antialias=False, lines=False):
+    if dur:
+        samples = samples[:int(round(dur * Sampler.rate))]
+    img = draw(samples, size=size, antialias=antialias, lines=lines, axis=axis)
     show(img, plot)
     return False
 
@@ -437,3 +437,4 @@ def plot_real_fn(fn, x, cmap='hot'):
     y = fn(x)
     plt.plot(x, y)
     return False
+
