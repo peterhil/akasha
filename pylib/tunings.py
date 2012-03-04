@@ -8,7 +8,7 @@ from exceptions import AttributeError
 from audio.oscillator import Frequency
 from control.io.keyboard import kb
 from utils.log import logger
-from utils.math import PI2
+from utils.math import PI2, find_closest_index
 
 # See "Pitch Systems in Tonal Music" series on YouTube:
 # http://www.youtube.com/watch?v=0j-YXgXTpoA&feature=related
@@ -51,9 +51,26 @@ def freq_plus_cents(f, cnt):
     """Calculate freq1 + cents = freq2"""
     return f * interval(cnt)
 
-class RegularTuning(object):
-    def __init__(self, generators):
-        pass
+class EqualTemperament(object):
+    def __init__(self, n = 12, scale = 2.0):
+        self.n = n
+        self.__scale = scale
+
+    @property
+    def generators(self):
+        return tuple(self.get_generators(self.octave(self.n, self.__scale), self.n))
+
+    @property
+    def scale(self):
+        return self.octave(self.n, self.__scale)
+
+    @staticmethod
+    def get_generators(scale, n, large=Fraction(3, 2), small=Fraction(9, 8)):
+        return scale[map(lambda x: find_closest_index(scale, x), [large, small] )]
+
+    @staticmethod
+    def octave(n, scale = 2.0):
+        return scale ** (np.arange(n + 1.0, dtype=np.float64) / n)
 
 # In [128]: sorted(Fraction(3,2) ** np.array(map(Fraction.from_float, xrange(28))) % Fraction(3,2) + Fraction(1))
 # Out[128]:
@@ -123,7 +140,7 @@ class WickiLayout(object):
     
     def get(self, *pos):
         logger.debug("Getting position: %s %s" % pos)
-        if pos == tuple(np.array(kb.shape) - 1):
+        if pos == kb.shape:
             return Frequency(0.0)
         else:
             return (

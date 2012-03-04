@@ -85,6 +85,9 @@ def maxfloat(guess = 1.0):
         i += 1
     return guess, i
 
+def find_closest_index(arr, target):
+    """Finds the index of the (first) item in array 'arr' having the (absolute) value closest to 'target'."""
+    return np.argmin(np.abs(np.atleast_1d(arr) - target))
 
 # Random
 

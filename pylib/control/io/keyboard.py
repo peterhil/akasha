@@ -74,7 +74,7 @@ def get_map(kb, key='key'):
         if code:
             mp[code] = divmod(i, cols)
         else:
-            mp[code] = divmod(kb.size - 1, cols)    # Eject or upper right key
+            mp[code] = kb.shape # Key disabled
     return mp
 
 kb = get_keyboard()
