@@ -147,6 +147,7 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
     def change_frequency(snd, key):
         f = w.get(*( pos.get(key, pos[None]) or (0, 0) ))
         snd.frequency = f
+        snd.sustain = None
         logger.info("Setting NEW frequency: %r for %s, now at frequency: %s" % (f, snd, snd.frequency))
 
     done = False
@@ -169,6 +170,7 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
                 # Rewind
                 if pygame.K_F7 == event.key:
                     it = pairwise(indices(snd))
+                    snd.sustain = None
                     logger.info("Rewind")
                 # Arrows
                 elif pygame.K_UP == event.key:
@@ -196,7 +198,8 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
                     change_frequency(snd, event.key)
                     it = pairwise(indices(snd, dur))
                 else:
-                    logger.debug("Key up:   %s" % event)
+                    snd.sustain = asl.start
+                    logger.debug("Key up:   %s, sustain: %s" % (event, snd.sustain))
 
             # Video frame
             elif (event.type == VIDEOFRAME):

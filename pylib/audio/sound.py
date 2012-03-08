@@ -10,7 +10,7 @@ from audio.generators import Generator
 # np.set_printoptions(precision=4, suppress=True)
 
 class Sound(object, Generator):
-    """Sound groups."""
+    """A group of sound objects."""
 
     def __init__ (self, *args):
         self.sounds = {}
@@ -33,9 +33,9 @@ class Sound(object, Generator):
 
         sound = np.zeros((stop - start), dtype=complex)
         for sl in self.sounds:
-            print "Slice start %s, stop %s" % sl
+            #print "Slice start %s, stop %s" % sl
             for sndobj in self.sounds[sl]:
-                print "Sound object %s" % sndobj
+                #print "Sound object %s" % sndobj
                 sound += sndobj[iter]
         return sound / max( len(self), 1.0 )
 

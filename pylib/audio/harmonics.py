@@ -1,6 +1,7 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+import exceptions
 import numpy as np
 from fractions import Fraction
 from copy import copy, deepcopy
@@ -113,11 +114,17 @@ class Overtones(object, FrequencyRatioMixin, Generator):
 
     def __init__(self, sndobj=Osc(216.0), n=8, func=lambda x: 1+x, damping=None, rand_phase=False):
         self.base = sndobj
+        # TODO Setting ovt.frequency (ovt._hz) leaves ovt.base.frequency (ovt.base._hz)
+        # where it was -- is this the desired behaviour?
         self._hz = self.base.frequency
         self.n = n
         self.func = func
-        #self.damping = damping or (lambda f, a=1.0: (-5*np.log2(float(f))/(10.0), a*float(self.frequency)/float(f)))   # Sine waves
-        self.damping = damping or (lambda f, a=1.0: -5*np.log2(float(f))/10.0)   # Sine waves FIXME: separate freq. damping from rate
+        # Sine waves FIXME: separate freq. damping from rate
+        #self.damping = damping or (lambda f, a=1.0: (-5*np.log2(float(f))/(10.0), a*float(self.frequency)/float(f)))
+        #self.damping = damping or (lambda f, a=1.0: -5*np.log2(float(f))/10.0)
+        self.damping = damping or (lambda f, a=1.0: -5*np.log2(float(f))/1000.0)
+        self.sustain = None
+        self.sustained = None
         self.rand_phase = rand_phase
 
     @property
@@ -168,6 +175,19 @@ class Overtones(object, FrequencyRatioMixin, Generator):
                 frames += o[iter] * random_phase() * e[iter]    # Move phases to Osc/Frequency!!!
             else:
                 frames += o[iter] * e[iter]
+
+        if self.sustain != None:
+            sus_damping = lambda f, a=1.0: -2*np.log2(float(f))/10.0
+            #sus_damping = lambda f: -0.5
+            self.sustained = self.sustained or Exponential(sus_damping(self.frequency))
+            if isinstance(iter, slice):
+                frames *= self.sustained[ slice(*list(np.array(iter.indices(iter.stop)) + self.sustain)) ]
+            elif isinstance(iter, np.ndarray):
+                frames *= self.sustained[ iter + self.sustain ]
+            else:
+                raise exceptions.NotImplementedError(
+                    "Sustain with objects of type %s not implemented yet." % type(iter)
+                )
         
         return frames / self.limit #/ max( abs(max(frames)), 1.0 ) # TODO fix normalization to use a single value for whole sound!
 
