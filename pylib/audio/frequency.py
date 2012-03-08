@@ -28,9 +28,10 @@ class FrequencyRatioMixin:
         if isinstance(hz, Frequency):
             self._hz = hz
         else:
-            self._hz = Frequency(hz)  # Use Trellis, and make a interface for frequencies
+            self._hz = Frequency(hz)  # Use Trellis or other Cells clone?
 
     @property
+    @memoized
     def ratio(self):
         return self._hz.ratio
 
@@ -41,6 +42,27 @@ class FrequencyRatioMixin:
     @property
     def order(self):
         return self.ratio.numerator
+
+    def __nonzero__(self):
+        """Zero frequency should be considered False"""
+        return self.ratio != 0
+
+    def __cmp__(self, other):
+        if isinstance(other, self.__class__):
+            return cmp(self.ratio, other.ratio)
+        else:
+            return cmp(other, self.ratio)
+
+    @property
+    def hz(self):
+        "Depends on original frequency's rational approximation and sampling rate."
+        return float(self.ratio * Sampler.rate)
+
+    def __float__(self):
+        return float(self.hz)
+
+    def __int__(self):
+        return int(self.hz)
 
 
 class Frequency(object, FrequencyRatioMixin, PeriodicGenerator):
@@ -63,11 +85,6 @@ class Frequency(object, FrequencyRatioMixin, PeriodicGenerator):
         else:
             return self.to_ratio(self._hz)
 
-    @property
-    def hz(self):
-        "Depends on original frequency's rational approximation and sampling rate."
-        return float(self.ratio * Sampler.rate)
-
     @staticmethod
     @memoized
     def angles(ratio):
@@ -84,6 +101,7 @@ class Frequency(object, FrequencyRatioMixin, PeriodicGenerator):
     # Internal stuff
     
     @staticmethod
+    @memoized
     def to_ratio(freq, limit=Sampler.rate):
         return Fraction.from_float(float(freq)/Sampler.rate).limit_denominator(limit)
 
@@ -110,22 +128,6 @@ class Frequency(object, FrequencyRatioMixin, PeriodicGenerator):
 
     ### Arithmetic ###
     
-    def __nonzero__(self):
-        """Zero frequency should be considered False"""
-        return self.ratio != 0
-
-    def __cmp__(self, other):
-        if isinstance(other, self.__class__):
-            return cmp(self.ratio, other.ratio)
-        else:
-            return cmp(other, self.ratio)
-
-    def __float__(self):
-        return float(self.hz)
-
-    def __int__(self):
-        return int(self.hz)
-
     def __trunc__(self):
         """Returns an integral rounded towards zero."""
         return float(self._hz).__trunc__()

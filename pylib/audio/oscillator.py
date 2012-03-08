@@ -50,18 +50,11 @@ class Osc(object, FrequencyRatioMixin, PeriodicGenerator):
 
     ### Representation ###
 
-    def __cmp__(self, other):
-        if isinstance(other, self.__class__):
-            return cmp(self.ratio, other.ratio)
-        else:
-            return cmp(other, self.ratio)
-
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, self.frequency._hz)
 
     def __str__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.frequency)
-
 
 
 class Super(Osc):

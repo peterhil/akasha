@@ -4,7 +4,7 @@
 import numpy as np
 from sys import maxint
 
-import io
+from control.io import audio
 
 
 class Generator:
@@ -24,7 +24,7 @@ class Generator:
         return self.__getitem__(slice)
 
     def play(self, *args, **kwargs):
-        io.audio.play(self, *args, **kwargs)
+        audio.play(self, *args, **kwargs)
 
 
 class PeriodicGenerator(Generator):
@@ -48,6 +48,8 @@ class PeriodicGenerator(Generator):
             item = np.arange(*(slice(start, stop, step).indices(stop)))
         return self.sample[np.array(item) % self.period]
 
-    def __len__(self):
-        #return maxint
-        return self.period
+    # Disabled because Numpy gets clever (and slow) when a sound objects have length and
+    # they're made into an object array...
+    # def __len__(self):
+    #     #return maxint
+    #     return self.period
