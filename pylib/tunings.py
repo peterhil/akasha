@@ -1,9 +1,11 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+import exceptions
 import numpy as np
+
+from __future__ import division
 from fractions import Fraction
-from exceptions import AttributeError
 
 from audio.oscillator import Frequency
 from control.io.keyboard import kb
@@ -72,6 +74,12 @@ class EqualTemperament(object):
     def octave(n, scale = 2.0):
         return scale ** (np.arange(n + 1.0, dtype=np.float64) / n)
 
+    def __repr__(self):
+        return "%s(%s, %s)" % (self.__class__.__name__, self.n, self.__scale)
+
+    def __str__(self):
+        return "<%s: %s>" % (self.__class__.__name__, self.n)
+
 # In [128]: sorted(Fraction(3,2) ** np.array(map(Fraction.from_float, xrange(28))) % Fraction(3,2) + Fraction(1))
 # Out[128]:
 # [1.0,
@@ -136,7 +144,7 @@ class WickiLayout(object):
             self.gen = generators
             self.origo = origo
         else:
-            raise AttributeError("Expected two generators, got: {0!r}".format(generators))
+            raise exceptions.AttributeError("Expected two generators, got: {0!r}".format(generators))
     
     def get(self, *pos):
         logger.debug("Getting position: %s %s" % pos)
@@ -152,3 +160,4 @@ class WickiLayout(object):
     def move(self, *pos):
         assert len(pos) == 2, "Expected two arguments or tuple of length two."
         self.origo = (self.origo[0] + pos[0], self.origo[1] + pos[1])
+

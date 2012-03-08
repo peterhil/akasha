@@ -188,6 +188,9 @@ def factor_supersets(factors_in, redundant=None, limit=None):
 
 # Signal processing utils
 
+def identity(x):
+    return x
+
 def pcm(snd, bits=16, axis='imag'):
     return np.cast['int' + str(bits)](getattr(snd, axis) * (2**bits/2.0-1))
 

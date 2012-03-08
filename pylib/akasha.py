@@ -24,6 +24,10 @@ if __name__ == '__main__':
     import types
     import sys
 
+    import funct.xoltar.functional as fx
+    from funct.xoltar import lazy
+
+    from __future__ import division
     from cmath import rect, pi, exp, phase
     from collections import defaultdict
     from fractions import Fraction
