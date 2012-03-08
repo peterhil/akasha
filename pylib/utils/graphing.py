@@ -314,28 +314,33 @@ def draw(samples, size=1000, dur=None, antialias=False, lines=False, axis=True, 
         logger.warn("Clipping samples on draw() -- maximum magnitude was: %0.6f" % amax)
         samples = clip(samples)
 
-    points = get_points(samples, size)
-
     if lines:
         if antialias: # Colorize
             # raise exceptions.NotImplementedError("Drawing lines with antialias not implemented yet.")
             # TODO: optimize colours with lines!
-            colors = colorize(samples)
             #scaled = (samples + 1+1j) / (2.0 * size)
-            #pts = get_points(samples, size).transpose()
-            pts = pad(samples, -1)
-            for i in xrange(len(samples)):
-                #pts = get_points(np.array(ends), size).transpose()
-                #color = hsv2rgb(angle2hsv(chords_to_hues(ends, padding=False)))
-                #pygame.draw.aaline(screen, colors[i], *pts)
-                
-                line = line_linspace_cx(pts[i], pts[i + 1], endpoint=False)
-                img[line[0], line[1]] = colors[i][-1] # Drop alpha
+
+            if True: #lines and not antialias: #(img != None):
+                colors = colorize(samples)
+                pts = get_points(samples, size).T
+                for (i, ends) in enumerate(pairwise(pts)):
+                    #pts = get_points(np.array(ends), size).transpose()
+                    #color = hsv2rgb(angle2hsv(chords_to_hues(ends, padding=False)))
+                    #color = pygame.Color(*list(hsv2rgb(angle2hsv(chords_to_hues(ends, padding=False))))[:-1])
+                    pygame.draw.aaline(screen, colors[i], *ends)
+            else:
+                colors = colorize(samples)
+                pts = pad(samples, -1)
+                for i in xrange(len(samples)):
+                    line = line_linspace_cx(pts[i], pts[i + 1], endpoint=False)
+                    img[line[0], line[1]] = colors[i][-1] # Drop alpha
+
         else:
             # raise exceptions.NotImplementedError("Drawing lines without antialias not implemented yet.")
             pts = get_points(samples, size).transpose()
             pygame.draw.aalines(screen, pygame.Color('orange'), False, pts, 1)
     else:
+        points = get_points(samples, size)
         if antialias:
             centers = np.round(points)  # 1.0 to 600.0
             bases = np.cast['int32'](centers) - 1  # 0 to 599
@@ -355,10 +360,10 @@ def draw(samples, size=1000, dur=None, antialias=False, lines=False, axis=True, 
 
             colors = colorize(samples) # or 255 for greyscale
 
-            img[pos[0][0], pos[0][1], :] += colors * np.repeat(values_11, 4).reshape(len(samples), 4)
-            img[pos[1][0], pos[1][1], :] += colors * np.repeat(values_10, 4).reshape(len(samples), 4)
-            img[pos[2][0], pos[2][1], :] += colors * np.repeat(values_01, 4).reshape(len(samples), 4)
-            img[pos[3][0], pos[3][1], :] += colors * np.repeat(values_00, 4).reshape(len(samples), 4)
+            img[pos[0][1], pos[0][0], :] += colors * np.repeat(values_11, 4).reshape(len(samples), 4)
+            img[pos[1][1], pos[1][0], :] += colors * np.repeat(values_10, 4).reshape(len(samples), 4)
+            img[pos[2][1], pos[2][0], :] += colors * np.repeat(values_01, 4).reshape(len(samples), 4)
+            img[pos[3][1], pos[3][0], :] += colors * np.repeat(values_00, 4).reshape(len(samples), 4)
         else:
             points = np.cast['uint32'](points)  # 0 to 599
             img[points[0], (size - 1) - points[1]] = colorize(samples)

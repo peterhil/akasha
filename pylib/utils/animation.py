@@ -57,16 +57,17 @@ def indices(snd, dur=False):
 
 def show_slice(screen, snd, size=800, name="Resonance", antialias=True, lines=False):
     "Show a slice of the signal"
-    #img = draw(snd, size, antialias=antialias, lines=lines)
-
-    # img = get_canvas(size)
-    # img = img[:,:,:-1]  # Drop alpha
-    # surfarray.blit_array(screen, img)
-    img = draw(snd, size, antialias=antialias, lines=lines, screen=screen)
-
-    # screen = pygame.display.set_mode(img.shape[:2], 0, 32)
-    img = img[:,:,:-1]  # Drop alpha
-    surfarray.blit_array(screen, img)
+    if lines:
+        #img = draw(snd, size, antialias=antialias, lines=lines)
+        img = get_canvas(size)
+        img = img[:,:,:-1]  # Drop alpha
+        surfarray.blit_array(screen, img)
+        img = draw(snd, size, antialias=antialias, lines=lines, screen=screen, img=img)
+        # screen = pygame.display.set_mode(img.shape[:2], 0, 32)
+    else:
+        img = draw(snd, size, antialias=antialias, lines=lines, screen=screen)
+        img = img[:,:,:-1]  # Drop alpha
+        surfarray.blit_array(screen, img)
     pygame.display.flip()
 
 def show_transfer(screen, snd, size=720, name="Transfer", type='PAL', axis='imag'):
