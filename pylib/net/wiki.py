@@ -1,14 +1,21 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import division
+
 import locale
+import logging
 import numpy as np
 import os
 import re
 
-from funct.xoltar.functional import car, cdr
-from utils.math import identity
 from wikitools import wiki, api
+from fractions import Fraction
+
+from funct.xoltar.functional import car, cdr
+from tunings import cents
+from utils.log import logger
+from utils.math import identity
 
 def user_agent(req):
     product = 'Akasha-Resonance'
@@ -33,19 +40,25 @@ def get_interval_list():
     res = req.query(querycontinue=True)
     return res
 
+def replacement(groups, template=u'', filter=identity):
+    def repl(match):
+        if isinstance(groups, (list, tuple)):
+            return template.format(*filter(match.group(*groups)))
+        else:
+            return template.format(filter(match.group(groups)))
+    return repl
+
 def remove_wiki_links(string):
     wiki_link_tag = re.compile(r"\[\[([^\|]+\|)?(.*?)\]\]")
     def repl(m):
         return m.group(2)
-    return re.sub(wiki_link_tag, replacement(3, ' ** {0} '), string)
+    return re.sub(wiki_link_tag, repl, string)
 
 def filter_tags(string, tag, template=u'', filter=identity):
     wiki_tag = re.compile(r"<{0}( name=\"[^\"]+\")?(/>|>([^<]*?)</{0}>)".format(tag))
-    def repl(m):
-        return template.format(filter(m.group(3))) if template else u''
-    return re.sub(wiki_tag, repl, string)
+    return re.sub(wiki_tag, replacement(3, template, filter), string)
 
-def remove_template_tags(string, tags=None):
+def remove_templates(string, tags=None):
     """
     Replaces all template tags (or just named tags) of the type '{{tag|value|other}}' with 'value|other' from the string.
     """
@@ -82,10 +95,15 @@ def parse_interval_name(string, only_first=False):
         return (name, "")
 
 def parse_freq_ratio(string):
-    out = filter_tags(string, tag='sup', template=' ** {0}', filter=lambda x: repr(Fraction(x)))
-    return out
+    re_div = re.compile(ur" ?(:|÷|\xf7) ?", re.UNICODE)
+    re_mul = re.compile(ur" ?(·|\xc2\xb7|\xb7|&middot;) ?", re.UNICODE)
+    out = remove_templates(string)
+    out = re.sub(re_mul, u' * ', out, re.UNICODE)
+    out = re.sub(re_div, u' / ', out, re.UNICODE)
+    out = filter_tags(out, tag='sup', template=u' ** {0!r}', filter=Fraction)
+    return unicode(out.encode('iso-8859-1'))
 
-def parse_wiki(res):
+def parse_wiki(res, loglevel=logging.ANIMA):
     pgs = res['query']['pages']
     content = pgs[pgs.keys()[0]]['revisions'][0]['*']
     table = remove_wiki_links(filter_tags(content, 'ref')).split('|+')[1].split('\n|-\n|')[:-1]
@@ -96,12 +114,29 @@ def parse_wiki(res):
         # Cents
         rec[0] = float(template_value(rec[0]).strip())
         # Musical note
-        rec[1] = remove_template_tags(rec[1], 'music')
+        rec[1] = remove_templates(rec[1], 'music')
         # Interval name and audio
         if len(rec) > 5:
             rec[4:5] = parse_interval_name(rec[4], only_first=True)
         # Combine limits
         rec[-12:] = [rec[-12:]]
+        # Factors
+        rec[3] = parse_freq_ratio(rec[3])
+        print "Factors:", rec[3]
+        # Freq. ratio
+        if rec[2] != 0:
+            rec[2] = parse_freq_ratio(rec[2])
+            cts = float(cents(eval(compile(rec[2], __name__, 'eval'))))
+            if cts != 0 or rec[0] == 0:
+                logger.log(loglevel, "Parsed cents: %s" % cts)
+                rec[0] = cts
+                err = (cts - rec[0])
+                if np.abs(err) >= 0.005:
+                    logger.warn(
+                        "%s '%s' has a too big error %.5f with it's cents %.5f != %.5f" % (rec[2], rec[1], err, rec[0], cts)
+                    )
+            else:
+                logger.warn("Parsed cents is %s for record:\n\t\t%s" % (cts, rec))
         out.append(rec)
     return (out, legend)
 

@@ -1,10 +1,10 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import division
+
 import exceptions
 import numpy as np
-
-from __future__ import division
 from fractions import Fraction
 
 from audio.oscillator import Frequency

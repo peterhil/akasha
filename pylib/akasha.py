@@ -6,6 +6,8 @@ akasha.py
 Created by Peter on 2011-12-11.
 Copyright (c) 2011 Loihde. All rights reserved.
 """
+from __future__ import absolute_import
+from __future__ import division
 
 def setup():
     np.set_printoptions(precision=16, suppress=True)
@@ -27,7 +29,6 @@ if __name__ == '__main__':
     import funct.xoltar.functional as fx
     from funct.xoltar import lazy
 
-    from __future__ import division
     from cmath import rect, pi, exp, phase
     from collections import defaultdict
     from fractions import Fraction
@@ -44,6 +45,8 @@ if __name__ == '__main__':
 
     from control.io.audio import play, write, read
     from control.io.keyboard import *
+
+    from net.wiki import *
 
     from timing import Sampler
     from tunings import WickiLayout
