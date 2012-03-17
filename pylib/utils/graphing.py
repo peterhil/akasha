@@ -13,7 +13,7 @@ from PIL import Image
 
 from funct import pairwise
 from utils.decorators import memoized
-from utils.math import normalize, clip, deg, distances, pad, pcm, minfloat
+from utils.math import normalize, clip, deg, distances, pad, pcm, minfloat, complex_as_reals
 from utils.log import logger
 
 try:
@@ -162,10 +162,6 @@ def get_points(samples, size=1000):
     # Scale to size and interpret values as pixel centers
     samples = ((clip(samples) + 1+1j) / 2.0 * (size - 1) + (0.5+0.5j))      # 0.5 to 599.5
     return complex_as_reals(samples)
-
-def complex_as_reals(samples):
-    # Convert complex samples to real number coordinate points
-    return samples.view(np.float64).reshape(len(samples), 2).transpose()    # 0.5 to 599.5
 
 import types
 types.signed = (int, float, np.signedinteger, np.floating)
@@ -427,7 +423,7 @@ def fast_graph(samples, size=1000, plot=False):
 def graph(samples, size=1000, dur=None, plot=False, axis=True, antialias=False, lines=False):
     if dur:
         samples = samples[:int(round(dur * Sampler.rate))]
-    img = draw(samples, size=size, antialias=antialias, lines=lines, axis=axis)
+    img = draw(samples, size=size, antialias=antialias, lines=lines, axis=axis).transpose((1, 0, 2))
     show(img, plot)
     return False
 

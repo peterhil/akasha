@@ -109,7 +109,7 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
 
     clock = pygame.time.Clock()
     resolution = (size+1, size+1) # FIXME get resolution some other way. This was: img.shape[:2]
-    screen = pygame.display.set_mode(resolution) #, flags=pygame.SRCALPHA, depth=32)
+    screen = pygame.display.set_mode(resolution, pygame.SRCALPHA, 32) # flags=pygame.SRCALPHA, depth=32
 
     chs = []
     if hasattr(snd, 'frequency'):
