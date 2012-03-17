@@ -5,14 +5,23 @@ import numpy as np
 from numbers import Number
 
 # My modules
+from audio.frequency import FrequencyRatioMixin
 from audio.generators import Generator
 
 # np.set_printoptions(precision=4, suppress=True)
 
+class Group(FrequencyRatioMixin, Generator, object):
+    """A group of sound objects."""
+
+    def __init__(self, *args):
+        self.sounds = np.array(*args, dtype=object)
+        # TODO handle zero-frequencies and non-periodic sounds:
+        self.frequency = np.min(np.ma.masked_equal(args, 0).compressed())
+
 class Sound(object, Generator):
     """A group of sound objects."""
 
-    def __init__ (self, *args):
+    def __init__(self, *args):
         self.sounds = {}
         for s in args:
             self.add(s)

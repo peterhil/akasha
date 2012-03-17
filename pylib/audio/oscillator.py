@@ -64,7 +64,7 @@ class Super(Osc):
         """
         Super oscillator can be initialized using a frequency and superness.
         
-        See 'Superellipse' article at Wikipedia for explanation of this parameter means:
+        See 'Superellipse' article at Wikipedia for explanation of what this parameter means:
         http://en.wikipedia.org/wiki/Superellipse
         """
         self._hz = Frequency(freq)
