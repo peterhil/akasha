@@ -136,6 +136,26 @@ class LucyTuning(object):
         return (2.0 / cls.L(5)) ** (n / 2.0)
 
 class WickiLayout(object):
+
+    # Why 432 Hz?
+    #
+    # > factors(432)
+    # array([  1,   2,   3,   4,   6,   8,   9,  12,  16,  18,  24,  27,  36, 48,  54,  72, 108, 144, 216, 432])
+    #
+    # See:
+    # http://en.wikipedia.org/wiki/Concert_pitch#Pitch_inflation
+    # http://en.wikipedia.org/wiki/Schiller_Institute#Verdi_tuning
+    # http://www.mcgee-flutes.com/eng_pitch.html
+    #
+    # Listen:
+    # http://www.youtube.com/results?search_query=432hz&page=&utm_source=opensearch
+    # http://www.youtube.com/watch?v=OcDcGsbYA8k
+    # http://www.youtube.com/results?search_query=marko+rodin+vortex+math
+
+    # Why 441 or 882?
+    #
+    # Good for testing with 44100 Hz sampling rate
+
     def __init__(self, base=Frequency(432.0), origo=(1, 5), generators=(
             # LucyTuning.L(3) * LucyTuning.s(1), LucyTuning.s(1)
             (Fraction(3,2), Fraction(9,8)) # Pythagorean or Just intonation (3-limit)
