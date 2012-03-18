@@ -8,6 +8,7 @@ import pygame as pg
 from timeit import default_timer as time
 from fractions import Fraction
 
+from audio.generators import Generator
 from funct import pairwise
 from graphing import *
 from control.io.keyboard import *
@@ -34,7 +35,7 @@ def init_mixer(*args):
     if args[0]:
         pg.mixer.init(*args[0])
     else:
-        pg.mixer.init(frequency=Sampler.rate, size=-16, channels=1, buffer=128) #int(round(blocksize()/8.0))) # Keep the buffer smaller than blocksize!
+        pg.mixer.init(frequency=Sampler.rate, size=-16, channels=1, buffer=128)
     init = pg.mixer.get_init()
     logger.debug("Mixer init: %s Sampler rate: %s Video rate: %s" % (init, Sampler.rate, Sampler.videorate))
     return init
@@ -51,19 +52,18 @@ def indices(snd, dur=False):
         size = Sampler.rate
     return np.append(np.arange(0, size, blocksize()), size)
 
+def blit(screen, img):
+    pg.surfarray.blit_array(screen, img[:,:,:-1]) # Drop alpha
+
 def show_slice(screen, snd, size=800, name="Resonance", antialias=True, lines=False):
     "Show a slice of the signal"
     if lines:
-        #img = draw(snd, size, antialias=antialias, lines=lines)
         img = get_canvas(size)
-        img = img[:,:,:-1]  # Drop alpha
-        pg.surfarray.blit_array(screen, img)
+        blit(screen, img)
         img = draw(snd, size, antialias=antialias, lines=lines, screen=screen, img=img)
-        # screen = pg.display.set_mode(img.shape[:2], 0, 32)
     else:
         img = draw(snd, size, antialias=antialias, lines=lines, screen=screen)
-        img = img[:,:,:-1]  # Drop alpha
-        pg.surfarray.blit_array(screen, img)
+        blit(screen, img)
     pg.display.flip()
 
 def show_transfer(screen, snd, size=720, name="Transfer", type='PAL', axis='imag'):
@@ -72,13 +72,10 @@ def show_transfer(screen, snd, size=720, name="Transfer", type='PAL', axis='imag
     tfer = video_transfer(snd, type=type, axis=axis)
     black = (size - tfer.shape[0]) / 2.0
     img[1+black:-black,1:,:] = tfer
-
-    img = img[:,:,:-1]  # Drop alpha
-    # screen = pg.display.set_mode(img.shape[:2], 0, 32)
-    pg.surfarray.blit_array(screen, img)
+    blit(screen, img)
     pg.display.flip()
 
-def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, sync=True, init=None):
+def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, init=None):
     """
     Animate complex sound signal
     """
@@ -101,15 +98,6 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
     ch = chs[chid]
     
     it = pairwise(indices(snd, dur))
-    asl = slice(*it.next())
-    show_slice(screen, snd[asl], size=size, name=name, antialias=antialias, lines=lines)
-
-    if sync:
-        audio = pg.sndarray.make_sound(pcm(snd[asl]))
-        ch.play(audio)
-    else:
-        pgsnd = pg.sndarray.make_sound(pcm(snd[time_slice(dur, 0)]))
-        pgsnd.play()
 
     VIDEOFRAME = pg.NUMEVENTS - 1
     def set_timer():
@@ -124,9 +112,10 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
         logger.info("Pause" if Sampler.paused else "Play")
 
     def change_frequency(snd, key):
-        f = w.get(*( pos.get(key, pos[None]) or (0, 0) ))
+        f = w.get(*(pos.get(key, pos[None])))
         snd.frequency = f
-        snd.sustain = None
+        if isinstance(snd, Generator):
+            snd.sustain = None
         logger.info("Setting NEW frequency: %r for %s, now at frequency: %s" % (f, snd, snd.frequency))
 
     done = False
@@ -152,7 +141,8 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
                 # Rewind
                 if pg.K_F7 == event.key:
                     it = pairwise(indices(snd))
-                    snd.sustain = None
+                    if isinstance(snd, Generator):
+                        snd.sustain = None
                     logger.info("Rewind")
                 # Arrows
                 elif pg.K_UP == event.key:
@@ -180,7 +170,8 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
                     change_frequency(snd, event.key)
                     it = pairwise(indices(snd, dur))
                 else:
-                    snd.sustain = asl.start
+                    if isinstance(snd, Generator):
+                        snd.sustain = asl.start
                     logger.debug("Key up:   %s, sustain: %s" % (event, snd.sustain))
 
             # Video frame
@@ -192,13 +183,12 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
                 try:
                     asl = slice(*it.next())
                     samples = snd[asl]
-                    if sync:
-                        audio = pg.sndarray.make_sound(pcm(snd[asl]))
-                        if hasattr(snd, 'frequency'): ch = pg.mixer.find_channel()
-                        chid = (chid + 1) % nchannels
-                        ch = chs[chid]
-                        ch.queue(audio)
+                    audio = pg.sndarray.make_sound(pcm(samples))
+                    chid = (chid + 1) % nchannels
+                    ch = chs[chid]
+                    ch.queue(audio)
                 except StopIteration:
+                    logger.debug("Sound ended!")
                     done = True
                     break
 
