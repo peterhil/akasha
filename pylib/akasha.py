@@ -46,6 +46,9 @@ if __name__ == '__main__':
     from control.io.audio import play, write, read
     from control.io.keyboard import *
 
+    from effects.tape import *
+    from effects.filters import *
+
     from net.wiki import *
 
     from timing import Sampler
