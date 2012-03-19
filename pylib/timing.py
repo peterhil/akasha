@@ -1,6 +1,7 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+import exceptions
 import math
 import numpy as np
 
@@ -25,6 +26,19 @@ class Sampler(object):
         logger.debug("Setting NEW video frame rate: %s Hz" % hz)
         cls.videorate = hz
 
+    @classmethod
+    def blocksize(cls):
+        return int(round(cls.rate / float(cls.videorate)))
+
+
+def indices(snd, dur=False):
+    if hasattr(snd, "size"):
+        size = snd.size
+    elif dur:
+        size = int(round(dur * Sampler.rate))
+    else:
+        raise exceptions.ValueError("indices(): Sound must have size, or duration argument must be specified.")
+    return np.append(np.arange(0, size, Sampler.blocksize()), size)
 
 def timecode(t, precision=1000000):
     """t = time.clock(); t; int(math.floor(t)); int(round((t % 1.0) * 1000000))"""

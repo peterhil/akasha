@@ -9,9 +9,9 @@ from timeit import default_timer as time
 from fractions import Fraction
 
 from audio.generators import Generator
-from funct import pairwise
-from graphing import *
 from control.io.keyboard import *
+from funct import blockwise2
+from graphing import *
 from timing import Sampler, time_slice
 from tunings import WickiLayout
 from utils.math import pcm
@@ -39,18 +39,6 @@ def init_mixer(*args):
     init = pg.mixer.get_init()
     logger.debug("Mixer init: %s Sampler rate: %s Video rate: %s" % (init, Sampler.rate, Sampler.videorate))
     return init
-
-def blocksize():
-    return int(round(Sampler.rate / float(Sampler.videorate)))
-
-def indices(snd, dur=False):
-    if hasattr(snd, "size"):
-        size = snd.size
-    elif dur:
-        size = int(round(dur * Sampler.rate))
-    else:
-        size = Sampler.rate
-    return np.append(np.arange(0, size, blocksize()), size)
 
 def blit(screen, img):
     pg.surfarray.blit_array(screen, img[:,:,:-1]) # Drop alpha
@@ -97,7 +85,9 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
     chid = 0
     ch = chs[chid]
     
-    it = pairwise(indices(snd, dur))
+    def blockiter(snd):
+        return (iter(snd) if isinstance(snd, Generator) else blockwise2(snd, 1, Sampler.blocksize()))
+    it = blockiter(snd)
 
     VIDEOFRAME = pg.NUMEVENTS - 1
     def set_timer():
@@ -140,7 +130,7 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
                 logger.debug("Key down: %s" % event)
                 # Rewind
                 if pg.K_F7 == event.key:
-                    it = pairwise(indices(snd))
+                    it = blockiter(snd)
                     if isinstance(snd, Generator):
                         snd.sustain = None
                     logger.info("Rewind")
@@ -162,16 +152,17 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
                 # Change frequency
                 elif hasattr(snd, 'frequency'):
                     change_frequency(snd, event.key)
-                    it = pairwise(indices(snd, dur))
+                    it = blockiter(snd)
 
             # -- Key ups --
             elif (event.type == pg.KEYUP and hasattr(snd, 'frequency')):
                 if pg.K_CAPSLOCK == event.key:
                     change_frequency(snd, event.key)
-                    it = pairwise(indices(snd, dur))
+                    it = blockiter(snd)
                 else:
                     if isinstance(snd, Generator):
-                        snd.sustain = asl.start
+                        #snd.sustain = np.index(snd, it.next()[0]) - blocksize() # FIXME #asl.start
+                        pass
                     logger.debug("Key up:   %s, sustain: %s" % (event, snd.sustain))
 
             # Video frame
@@ -181,8 +172,7 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
                 
                 draw_start = time()
                 try:
-                    asl = slice(*it.next())
-                    samples = snd[asl]
+                    samples = it.next()
                     audio = pg.sndarray.make_sound(pcm(samples))
                     chid = (chid + 1) % nchannels
                     ch = chs[chid]
@@ -202,6 +192,8 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
             else:
                 logger.debug("Other: %s" % event)
 
+    it.close()
+    del it
     pg.mixer.quit()
     pg.quit()
 

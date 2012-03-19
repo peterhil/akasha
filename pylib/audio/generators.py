@@ -5,6 +5,8 @@ import numpy as np
 from sys import maxint
 
 from control.io import audio
+from funct import blockwise, blockwise2
+from timing import Sampler
 
 
 class Generator:
@@ -22,6 +24,17 @@ class Generator:
 
     def __call__(self, slice):
         return self.__getitem__(slice)
+
+    def __iter__(self):
+        return blockwise2(self, 1, Sampler.blocksize()) # FIXME start should be 0, fix blockwise2!
+
+    def next(self):
+        it = iter(self)
+        while True:
+            try:
+                yield it.next()
+            except StopIteration:
+                break
 
     def play(self, *args, **kwargs):
         audio.play(self, *args, **kwargs)
