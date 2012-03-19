@@ -31,7 +31,6 @@ class FrequencyRatioMixin:
             self._hz = Frequency(hz)  # Use Trellis or other Cells clone?
 
     @property
-    @memoized
     def ratio(self):
         return self._hz.ratio
 
