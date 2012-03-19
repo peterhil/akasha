@@ -23,7 +23,7 @@ class Noise(object, Generator):
         angles = randomizer(*args, size=len(iter), **kwargs) * 1j * 2.0 * pi
         noise = amps * np.exp(angles)
         # noise = (2.0 * amps - 1.0) * 1j   # flat
-        return noise[iter]
+        return noise
 
     @staticmethod
     def unit_square(iter, randomizer, *args, **kwargs):
@@ -31,7 +31,7 @@ class Noise(object, Generator):
         y = 2j * randomizer(*args, size=len(iter), **kwargs) - 1.0j
         noise = x + y
         print noise, type(noise)
-        return noise[iter]
+        return noise
 
     def sample(self, iter):
         return self.function(iter, self.randomizer)
