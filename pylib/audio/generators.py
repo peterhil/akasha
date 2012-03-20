@@ -35,6 +35,7 @@ class Generator:
                 yield it.next()
             except StopIteration:
                 break
+        it.close()
 
     def play(self, *args, **kwargs):
         audio.play(self, *args, **kwargs)

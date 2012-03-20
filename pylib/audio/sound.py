@@ -29,15 +29,6 @@ class Pcm(FrequencyRatioMixin, Generator, object):
     def __iter__(self):
         return blockwise2(dsp.hilbert(self.resample_at_freq()), 1, Sampler.blocksize())
 
-    def next(self):
-        it = iter(self)
-        while True:
-            try:
-                yield it.next()
-            except StopIteration:
-                break
-        it.close()
-
     @memoized
     def resample(self, ratio, type='linear'):
         ratio = float(ratio)
@@ -108,18 +99,6 @@ class Sound(Generator, object):
                 sound += sndobj[iter]
         return sound / max( len(self), 1.0 )
 
-    def __len__(self):
-        return sum(map(lambda s: len(self.sounds[s]), self.sounds))
-
-    # def __repr__(self):
-    #     components = u''
-    #     for obj in self.sounds:
-    #         components += repr(obj)
-    #     return "Sound(%s)" % (components)
-
-    # Use s.sounds.append(sndobj)
-    # s.sounds.index(sndobj)
-
     def add(self, sndobj, start=0, dur=None):
         """Add a new sndobj to self."""
         if dur:
@@ -136,8 +115,4 @@ class Sound(Generator, object):
         else:
             self.sounds[sl] = [sndobj]
         return self
-
-    # def stat(self):
-    #     '''Return a tuple containing the state of each sound object.'''
-    #     return tuple(self.sounds.values())
 
