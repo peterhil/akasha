@@ -200,6 +200,7 @@ def identity(x):
     return x
 
 def pcm(snd, bits=16, axis='imag'):
+    if isinstance(snd[0], np.floating): axis = 'real'
     return np.cast['int' + str(bits)](getattr(snd, axis) * (2**bits/2.0-1))
 
 def normalize(signal):

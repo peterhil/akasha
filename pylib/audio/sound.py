@@ -2,13 +2,72 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+
 from numbers import Number
+from scipy import signal as dsp
+from scikits import samplerate as src
 
-# My modules
-from audio.frequency import FrequencyRatioMixin
+from audio.frequency import FrequencyRatioMixin, Frequency
 from audio.generators import Generator
+from funct import blockwise, blockwise2
+from timing import Sampler
 
-# np.set_printoptions(precision=4, suppress=True)
+from utils.decorators import memoized
+from utils.log import logger
+from utils.math import *
+
+
+class Pcm(FrequencyRatioMixin, Generator, object):
+    """
+    A playable sampled (pcm) sound.
+    """
+    def __init__(self, snd, base=1):
+        self._hz = Frequency(base)
+        self.base_freq = Frequency(base)
+        self.snd = snd
+
+    def __iter__(self):
+        return blockwise2(dsp.hilbert(self.resample_at_freq()), 1, Sampler.blocksize())
+
+    def next(self):
+        it = iter(self)
+        while True:
+            try:
+                yield it.next()
+            except StopIteration:
+                break
+        it.close()
+
+    @memoized
+    def resample(self, ratio, type='linear'):
+        ratio = float(ratio)
+        if ratio == 0.0:
+            return np.array([0j])
+        if ratio == 1.0:
+            return self.snd
+        else:
+            #return dsp.hilbert(src.resample(self.snd, ratio, type, verbose=False)).astype(np.complex128)
+            return src.resample(self.snd, ratio, type, verbose=False).astype(np.float64)
+
+    @memoized
+    def sc_resample(self, ratio, window='blackman'):
+        # TODO: This sounds better than scikits.samplerate, but try if something else is faster with complex samples!
+        #
+        # Note about scipy.signal.resample: t : array_like, optional
+        # If t is given, it is assumed to be the sample positions associated with the signal data in x.
+        # http://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.resample.html
+        num = int(round(len(self.snd) * ratio))
+        return dsp.resample(self.snd, num)
+
+    def resample_at_freq(self):
+        ratio = (self.base_freq.ratio / self.frequency.ratio)
+        logger.debug(__name__ + " resample_at_freq() at ratio: " + str(ratio) + " self: " + str(self))
+        return self.resample(self, ratio)
+
+    def sample(self, iter):
+        logger.debug(__name__ + " sample("+str(self)+"): " + str(iter))
+        return self.resample_at_freq()[iter]
+
 
 class Group(FrequencyRatioMixin, Generator, object):
     """A group of sound objects."""
@@ -18,7 +77,8 @@ class Group(FrequencyRatioMixin, Generator, object):
         # TODO handle zero-frequencies and non-periodic sounds:
         self.frequency = np.min(np.ma.masked_equal(args, 0).compressed())
 
-class Sound(object, Generator):
+
+class Sound(Generator, object):
     """A group of sound objects."""
 
     def __init__(self, *args):
@@ -81,6 +141,3 @@ class Sound(object, Generator):
     #     '''Return a tuple containing the state of each sound object.'''
     #     return tuple(self.sounds.values())
 
-
-if __name__ == '__main__':
-    pass

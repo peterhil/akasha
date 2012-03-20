@@ -41,7 +41,7 @@ if __name__ == '__main__':
     from audio.harmonics import Overtones
     from audio.noise import *
     from audio.oscillator import *
-    from audio.sound import Sound
+    from audio.sound import Sound, Group, Pcm
 
     from control.io.audio import play, write, read
     from control.io.keyboard import *

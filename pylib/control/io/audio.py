@@ -20,7 +20,10 @@ defaults = {
 default_format = Format(**defaults)
 
 def get_format(*args, **kwargs):
-    """Get a Format object from a string, or parameters accepted by Format(type=wav, encoding=pcm16, endianness=file)"""
+    """
+    Get a audiolab.Format object from a string, or from the parameters
+    accepted by Format(type=wav, encoding=pcm16, endianness=file)
+    """
     if (args and isinstance(args[0], Format)):
         res = args[0]
     else:
@@ -34,13 +37,19 @@ def get_format(*args, **kwargs):
 # Audiolab read, write and play
 
 def play(sndobj, axis='imag', fs=Sampler.rate, dur=5.0, start=0, time=False):
+    """
+    Play out a sound.
+    """
     time = time_slice(dur, start, time)
+    if isinstance(sndobj[0], np.floating): axis = 'real'
     audiolab.play(getattr(sndobj[time], axis), fs)
 
 def write(sndobj, filename='test_sound', axis='imag', fmt=Format(**defaults),
           fs=Sampler.rate, dur=5.0, start=0, time=False,
           sdir='../../Sounds/2010_Python_Resonance/'):
-
+    """
+    Write a sound file.
+    """
     fmt = get_format(fmt)
     filename = sdir + filename +'_'+ axis +'.'+ fmt.file_format
 
@@ -60,24 +69,17 @@ def write(sndobj, filename='test_sound', axis='imag', fmt=Format(**defaults),
     finally:
         hdl.close()
 
-
 def read(filename, dur=5.0, start=0, time=False, fs=Sampler.rate, complex=True,
          sdir='../../Sounds/_Music samples/', *args, **kwargs):
-    """Reading function. Useful for doing some analysis."""
-
-    # Process:
-    # Get audiofile in
-    # Process
-    # Return complex audio data
-
-    # Operation:
-    # - examine file extension to determine type
-
+    """
+    Read a sound file in.
+    """
     # TODO:
     # - Factor out the real->complex conversion out.
+    # - If fs or enc differs from default do some conversion?
 
-    if filename[0] != '/':    # Relative path
-        filename = sdir + filename
+    if filename[0] != '/':
+        filename = sdir + filename # Relative path
 
     format = os.path.splitext(filename)[1][1:]
     check_format(format)
@@ -85,19 +87,18 @@ def read(filename, dur=5.0, start=0, time=False, fs=Sampler.rate, complex=True,
 
     # Get and call appropriate reader function
     func = getattr(audiolab, format + 'read')
+    (data, fs, enc) = func(filename, last=time.stop, first=time.start)
 
-    # Read data
-    (data, fs, enc) = func(filename, last=time.stop, first=time.start)   # returns (data, fs, enc)
-
-    # TODO if fs or enc differs from default do some conversion?
     if data.ndim > 1:
         data = data.transpose()[-1]  # Make mono, take left [0] or right [-1] channel.
 
-    # Complex or real samples?
     if complex:
-        data = hilbert(data)
+        return hilbert(data)
+    else:
+        return data
 
-    return data
+write.__doc__ += "Available file formats are: %s." % (', '.join([f for f in available_file_formats()]))
+read.__doc__ += "Available file formats are: %s." % (', '.join([f for f in available_file_formats()]))
 
 def check_format(format):
     """Checks that a requested format is available (in libsndfile)."""
