@@ -174,10 +174,11 @@ def factors(n):
 def arr_factors(arr, method='map'):
     return map_array(factors, arr, method=method, dtype=object)
 
-fs = 120
-setf = dict(enumerate(map( lambda x: set(factors(x)) , np.arange(fs+1) )))
+def get_factorsets(n):
+    return dict(enumerate(map( lambda x: set(factors(x)) , np.arange(n + 1) )))
+
 def factor_supersets(factors_in, redundant=None, limit=None):
-    lim = limit if limit else len(factors_in) - 1 # Change if setf doesn't include fs+1!
+    lim = limit if limit else len(factors_in) - 1 # Change if factors_in doesn't include n + 1!
     length_of_value = lambda x: len(x[1])
     by_key = lambda x: x[0]
 
