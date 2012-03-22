@@ -57,6 +57,19 @@ def frames_at(times):
     """Convert time to frame numbers (ie. 1.0 => 44100)"""
     return np.array(int(round(times * Sampler.rate)))
 
+def sample_times(start, end, rate=Sampler.rate):
+    """
+    Return times when samples occur at rate.
+
+    >>> np.set_printoptions(precision=8, suppress=True)
+    >>> stime(0.5,1.5)
+    array([ 0.5       ,  0.50002268,  0.50004535,  0.50006803,  0.5000907 ,
+            0.50011338,  0.50013605,  0.50015873,  0.50018141,  0.50020408, ...,
+            1.49977324,  1.49979592,  1.49981859,  1.49984127,  1.49986395,
+            1.49988662,  1.4999093 ,  1.49993197,  1.49995465,  1.49997732])
+    """
+    return np.linspace(start, end, (end-start)*rate, endpoint=False)
+
 
 def time_slice(dur, start=0, time=False):
     """Use a time slice argument or the provided attributes 'dur' and 'start' to

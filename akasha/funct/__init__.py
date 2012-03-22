@@ -11,6 +11,32 @@ from itertools import *
 from ..utils.log import logger
 
 
+# function objects - or a kund of function composition?
+
+def _findvars(*funcs):
+    import re
+    idents = re.compile(r'([a-zA-Z_]\w*)') # (letter|"_") (letter | digit | "_")*
+    nfuncs = {}
+    for func in funcs:
+        vars = tuple(set(idents.findall(func)))
+        if len(vars) == 1:
+            vars = vars[0]
+        nfuncs.update([[vars, func]])
+    return nfuncs
+
+class fn(object):
+
+    def __init__(self, *funcs, **nfuncs):
+        self.__dict__ = nfuncs
+
+    def __call__(self, *args, **kwargs):
+        for vars, func in self.__dict__:
+            func(*args, **kwargs)
+
+    def __repr__(self):
+        return repr(self.__dict__)
+
+
 # itertools recipes -- http://docs.python.org/library/itertools.html#recipes
 
 def take(n, iterable):
