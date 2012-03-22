@@ -3,7 +3,7 @@
 
 from __future__ import absolute_import
 
-__package__ = 'pylib'
+__package__ = 'akasha'
 
 import locale
 import logging
@@ -19,7 +19,7 @@ from numbers import Number
 from scipy.signal import hilbert
 
 
-import pylib
+import akasha
 
 from . import settings
 from .utils.log import logger
@@ -56,4 +56,4 @@ from .utils.math import *
 from .utils.splines import *
 
 if __name__ == '__main__':
-	from pylib import *
+	from akasha import *
