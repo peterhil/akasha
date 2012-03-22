@@ -1,7 +1,10 @@
 ###### Monad in Python (with nice syntax!) #######
 ###### http://www.valuedlessons.com/2008/01/monads-in-python-with-nice-syntax.html
 
+from __future__ import absolute_import
+
 import types
+
 
 ###### Base Monad and @do syntax#########
 

@@ -1,6 +1,7 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 from __future__ import division
 
 import numpy as np
@@ -9,13 +10,12 @@ import operator
 from fractions import Fraction
 from numbers import Number
 
-from audio.generators import PeriodicGenerator
+from .generators import PeriodicGenerator
 
-from timing import Sampler
-
-from utils.decorators import memoized
-from utils.log import logger
-from utils.math import *
+from ..timing import Sampler
+from ..utils.decorators import memoized
+from ..utils.log import logger
+from ..utils.math import *
 
 
 class FrequencyRatioMixin:

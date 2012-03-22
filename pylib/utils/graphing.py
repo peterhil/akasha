@@ -8,19 +8,21 @@ import numpy as np
 import pygame
 
 from cmath import phase
-from timing import Sampler
 from PIL import Image
 
-from funct import pairwise
-from utils.decorators import memoized
-from utils.math import normalize, clip, deg, distances, pad, pcm, minfloat, complex_as_reals
-from utils.log import logger
+from .decorators import memoized
+from .math import normalize, clip, deg, distances, pad, pcm, minfloat, complex_as_reals
+from .log import logger
+
+from ..funct import pairwise
+from ..timing import Sampler
 
 try:
     import matplotlib.pyplot as plt
-    import matplotlib.image as mpimg
 except:
+    logger.warn("Can't import pyplot from matplolib!")
     pass
+
 
 lowest_audible_hz = 16.35
 

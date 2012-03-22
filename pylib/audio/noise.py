@@ -1,11 +1,15 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 import numpy as np
+
 from cmath import rect, polar, phase, pi, exp
 
-from audio.envelope import Exponential
-from audio.generators import Generator
+from .envelope import Exponential
+from .generators import Generator
+
 
 np.set_printoptions(precision=4, suppress=True)
 

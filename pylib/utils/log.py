@@ -7,9 +7,12 @@ Created by Peter on 2011-12-06.
 Copyright (c) 2011 Loihde. All rights reserved.
 """
 
+from __future__ import absolute_import
+
 import sys
 import logging
 import string
+
 
 class ansi:
     BLACK   = '\033[90m'

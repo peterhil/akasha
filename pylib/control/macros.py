@@ -1,8 +1,12 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 import inspect
+
 from types import FunctionType, CodeType
+
 
 def funcprinter(func):
     for feat in dir(func.func_code):

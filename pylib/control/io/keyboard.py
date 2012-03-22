@@ -7,6 +7,15 @@ Created by Peter on 2011-12-06.
 Copyright (c) 2011 Loihde. All rights reserved.
 """
 
+from __future__ import absolute_import
+
+import json
+import numpy as np
+import os
+
+from ... import settings
+
+
 #  E1234567890123 456 789E
 #  §1234567890+´B FHA N=/*
 #  Tqwertyuiopå¨R DEV 789-
@@ -26,12 +35,9 @@ Copyright (c) 2011 Loihde. All rights reserved.
 # - Mapping from key to position
 # - Mapping from position to frequency (by index)
 
-import json
-import os
-import numpy as np
-
-def get_layout(path='settings/keymaps/fi.json', mapdir=os.curdir):
+def get_layout(path='settings/keymaps/fi.json', mapdir=settings.basedir):
     mappath = os.path.abspath('/'.join([mapdir, path]))
+    fp = None
     try:
         fp = open(mappath)
         data = json.load(fp, encoding='utf-8')
@@ -39,7 +45,8 @@ def get_layout(path='settings/keymaps/fi.json', mapdir=os.curdir):
     except Exception, e:
         raise e
     finally:
-        fp.close()
+        if hasattr(fp, 'close'):
+            fp.close()
 
 def get_mapping(layout, section='main', mapping=np.empty([6,25], dtype=object)):
     if section == 'main':

@@ -1,10 +1,15 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 import collections
 import numpy as np
+
 from itertools import *
-from utils.log import logger
+
+from ..utils.log import logger
+
 
 # itertools recipes -- http://docs.python.org/library/itertools.html#recipes
 

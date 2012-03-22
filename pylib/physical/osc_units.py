@@ -1,38 +1,32 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 from __future__ import division
 
-# Math &c.
 import numpy as np
+import quantities as pq
+import types
+
 from cmath import rect, pi, exp
 from fractions import Fraction
-
-# Types
-import types
-import quantities as pq
 from numbers import Number
 
-# My modules
-from generators import PeriodicGenerator
-from timing import Sampler
+from ..audio.generators import PeriodicGenerator
+from ..control.io.audio import play, write
+from ..timing import Sampler
+from ..utils.decorators import memoized
+from ..utils.math import to_phasor
 
-# Utils
-from utils.decorators import memoized
-from utils.math import to_phasors
-from control.io.audio import play, write
 
-# Settings
-np.set_printoptions(precision=16, suppress=True)
 pq.markup.config.use_unicode = True  # Use unicode units representation
-
 
 ### Units
 Qt = pq.Quantity
 Hz = pq.Hz
 
 
-class Sampler(object):
+class UnitSampler(object):
 
     _rate = Qt(44100.0, Hz)
 
@@ -178,4 +172,4 @@ class Osc(object, PeriodicGenerator):
 if __name__ == '__main__':
     o = Osc(Fraction(1, 8))
     print o.np_exp(o.period)
-    print to_phasors(o.sample)
+    print to_phasor(o.sample)

@@ -1,38 +1,26 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
-import numpy as np
+from __future__ import absolute_import
+
 import cmath
+import numpy as np
+
 from fractions import Fraction
 
-from timing import Sampler
+from .log import logger
 
-euler = np.e
-debug = False
+from ..timing import Sampler
+
 
 PI2 = np.pi * 2.0
 
-# Viewing complex samples as pairs of reals:
-#
-# o = Osc(1,8)
-# a = o.samples.copy()
-# a
-# b = a.view(np.float64).reshape(8,2)
-# b *= np.array([2,0.5])
-# b
-# c = b.view(np.complex128).reshape(8,)
-# c
-# b.transpose()
-# b.transpose()[0]
 
 def to_phasor(x):
     """
     Convert complex number to phasor tuple with magnitude and angle (in degrees).
     """
-    return (abs(x), (cmath.phase(x) / PI2 * 360))
-
-def to_phasors(samples):
-    return np.array(map(to_phasor, samples))
+    return np.array([np.abs(x), (np.angle(x) / PI2 * 360)]).T
 
 def nth_root(n):
     return np.exp(1j * PI2 * 1.0/n)
@@ -43,9 +31,10 @@ def deg(radians):
 def rad(degrees):
     return np.pi * (degrees / 180.0)
 
+
 # Utils for frequency ratios etc...
 
-def logn(x, base=euler):
+def logn(x, base=np.e):
     return np.log2(x) / np.log2(base)
 
 def roots_periods(base, limit=44100.0):
@@ -88,6 +77,33 @@ def maxfloat(guess = 1.0):
     return guess, i
 
 # Arrays
+
+def map_array(func, arr, method='numpy', dtype=object):
+    """
+    Map over an array pointwise with a function.
+
+    Parameters:
+    -----------
+    func : function
+        Function of one argument
+    arr : ndarray
+        Input array
+    method : str
+        One of [ 'numpy' | 'vec' | 'map' ]
+    dtype : Numpy dtype or str
+        Datatype
+    """
+    shape = arr.shape
+    if method == 'numpy':
+        res = np.apply_along_axis(func, 0, arr.flat)
+    elif method == 'vec':
+        vf = np.vectorize(func)
+        res = vf(arr.flat)
+    elif method == 'map':
+        res = np.array(map(func, arr.flat), dtype=dtype)
+    else:
+        raise exceptions.NotImplementedError("map_array(): method '{0}' missing.".format(method))
+    return res.reshape(shape)
 
 def complex_as_reals(samples):
     # Convert complex samples to real number coordinate points
@@ -136,9 +152,8 @@ np.lcm = lambda a, axis=None: reduce(lcm, a)
 
 
 def as_fractions(a, limit=1000000):
-    from_float = lambda y: Fraction.from_float(y).limit_denominator(limit)
-    map_lambda = lambda x: np.array(map(from_float, x), dtype=Fraction)
-    return np.apply_along_axis(map_lambda, 0, a)
+    from_float = np.vectorize(lambda y: Fraction.from_float(y).limit_denominator(limit))
+    return from_float(a)
 
 def sq_factors(n):
     """
@@ -146,18 +161,18 @@ def sq_factors(n):
     If the modulus is zero, it's a factor.
     Note! This only returns factors less or equal to sqrt(n)!
     """
-    # TODO find complex zeros with conjugates!!!
     try_divisors = np.arange(1, np.sqrt(np.abs(n)+1), dtype=np.int)
+    # TODO: find complex zeros with conjugates!!!
     z = np.ma.masked_not_equal(float(n) / try_divisors % 1, 0)
     return np.ma.masked_array(try_divisors, z.mask).compressed().astype(np.int)
 
 def factors(n):
-    assert np.equal(np.mod(n, 1), 0), "Value %s is not an integer!" % n # test for floats that are integers
+    assert np.all(np.equal(np.mod(n, 1), 0)), "Value %s is not an integer!" % n
     f = sq_factors(n)
     return np.unique(np.append(f, np.array(n, dtype=np.int)/f[::-1]))
 
-def test_factors(arr):
-    return np.array(map(factors, arr), dtype=object)
+def arr_factors(arr, method='map'):
+    return map_array(factors, arr, method=method, dtype=object)
 
 fs = 120
 setf = dict(enumerate(map( lambda x: set(factors(x)) , np.arange(fs+1) )))
@@ -174,8 +189,10 @@ def factor_supersets(factors_in, redundant=None, limit=None):
         ind = (lim, j)
         logger.debug("\t#%s" % (ind, ))
         if fset.issubset(factors_in[lim]):
-            logger.info("\t#%s:\tSet %s is subset of %s, will add missing factors of %s to redundant" % (ind, fset, factors_in[lim], j))
-            logger.warn("#%s:\tMoving %s from essential to redundant. (factors in %s)" % (ind, j, factors_in[j]))
+            logger.info("\t#%s:\tSet %s is subset of %s, will add missing factors of %s to redundant" % \
+                (ind, fset, factors_in[lim], j))
+            logger.warn("#%s:\tMoving %s from essential to redundant. (factors in %s)" % \
+                (ind, j, factors_in[j]))
             if ess.has_key(j): red[j] = ess.pop(j)
             for f in fset:
                 if ess.has_key(f): red[f] = ess.pop(f)
@@ -205,15 +222,23 @@ def pcm(snd, bits=16, axis='imag'):
 
 def normalize(signal):
     max = np.max(np.abs(signal))
-    if (max != 0):
-        return signal / max
-    else:
-        return signal # ZeroDivision if max=0!
+    if not np.all(np.isfinite(signal)): #np.isnan(max) or np.isinf(max):
+        logger.debug("Normalize() substituting non-numeric max: %s" % max)
+        signal = np.ma.masked_invalid(signal).filled(0)
+        max = np.max(np.abs(signal))
+        logger.debug("Normalize() substituted max: %s" % max)
+    if max == 0:
+        logger.debug("Normalize() got silence!" % max)
+        return signal
+    logger.debug("Normalize() by a factor: %s" % max)
+    return signal / max
 
 def clip(signal, inplace=False):
     """
     Clips complex samples to unit area (-1-1j, +1+1j).
     """
+    if np.any(np.isnan(signal)):
+        signal = np.nan_to_num(signal)
     if not inplace:
         signal = signal.copy()
     reals = signal.view(np.float)

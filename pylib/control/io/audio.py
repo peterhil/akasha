@@ -1,21 +1,24 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 import string
+import numpy as np
 import os
 
-import numpy as np
 from scipy.signal import hilbert
 from scikits import audiolab
 from scikits.audiolab import Format, Sndfile, available_file_formats, available_encodings
 
-from timing import Sampler, time_slice
+from ...timing import Sampler, time_slice
+
 
 defaults = {
     'type': 'aiff',
     'encoding': 'pcm16',
     'endianness': 'file'
-    }
+}
 
 default_format = Format(**defaults)
 

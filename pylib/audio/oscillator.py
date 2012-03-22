@@ -1,6 +1,7 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 from __future__ import division
 
 import numpy as np
@@ -9,14 +10,13 @@ import operator
 from fractions import Fraction
 from numbers import Number
 
-from audio.frequency import Frequency, FrequencyRatioMixin
-from audio.generators import PeriodicGenerator
+from .frequency import Frequency, FrequencyRatioMixin
+from .generators import PeriodicGenerator
 
-from timing import Sampler
-
-from utils.decorators import memoized
-from utils.log import logger
-from utils.math import *
+from ..timing import Sampler
+from ..utils.decorators import memoized
+from ..utils.log import logger
+from ..utils.math import *
 
 
 class Osc(object, FrequencyRatioMixin, PeriodicGenerator):
@@ -84,8 +84,10 @@ class Super(Osc):
         if isinstance(superness, tuple) and len(superness) == 4:
             return superness
         if not isinstance(superness, (list, tuple, Number)):
-            raise ValueError("Superness %s needs to be a number, a tuple or a list of length one to four. " + \
-                "Got type %s" % (superness, type(superness)))
+            raise ValueError(
+                "Superness %s needs to be a number, a tuple or a list of length one to four. " + \
+                "Got type %s" % (superness, type(superness))
+            )
         if isinstance(superness, Number):
             superness = tuple([superness])
         if len(superness) < 4:
@@ -102,7 +104,8 @@ class Super(Osc):
 
     @staticmethod
     def superformula(angles, superness):
-        """Superformula function. Generates amplitude curves applicable to oscillators by multiplying.
+        """
+        Superformula function. Generates amplitude curves applicable to oscillators by multiplying.
 
         Usage:
         supercurve(angles, superness)
@@ -128,4 +131,20 @@ class Super(Osc):
 
     def __str__(self):
         return "<%s: %s, superness %s>" % (self.__class__.__name__, self.frequency, self.superness)
+
+
+def chirp_zeta(z1 = -0.5-100j, z2 = 0.5+100j, dur = 10):
+    """
+    Chirp sound made by sampling a line z (z1 -> z2) from the complex plane,
+    and using the function (k ** -z, k = 0..n) used for summation in the Riemann Zeta function.
+
+    Other interesting values to try:
+    chirp_zeta(-10.5-1000j, 1.5-10000j)
+
+    Reference: http://en.wikipedia.org/wiki/Riemann_zeta_function
+    """
+    n = int(round(dur * Sampler.rate))
+    z = np.linspace(z1, z2, n)
+    k = np.arange(n)
+    return normalize(k ** -z)
 

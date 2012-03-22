@@ -1,12 +1,15 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 import numpy as np
+
 from scipy import signal as dsp
 
-from audio.oscillator import Osc
-from timing import Sampler
-from utils.math import *
+from ..audio.oscillator import Osc
+from ..timing import Sampler
+from ..utils.math import *
 
 
 def unosc(signal):

@@ -1,8 +1,11 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 import numpy as np
 import scipy as sc
+
 
 def as_complex(a):
     return a.transpose().flatten().view(np.complex128)

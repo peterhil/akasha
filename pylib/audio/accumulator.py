@@ -1,23 +1,22 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 from __future__ import division
 
-# Math &c.
 import numpy as np
+import types
+
 from cmath import rect, pi, exp, phase
 from fractions import Fraction
-
-# Types
-import types
 from numbers import Number
 
-# My modules
-from audio.generators import PeriodicGenerator
-from timing import Sampler
-from utils.decorators import memoized
-from utils.math import *
-from utils.graphing import *
+from .generators import PeriodicGenerator
+
+from ..timing import Sampler
+from ..utils.decorators import memoized
+from ..utils.math import *
+from ..utils.graphing import *
 
 # Settings
 np.set_printoptions(precision=16, suppress=True)

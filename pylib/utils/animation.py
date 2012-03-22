@@ -1,20 +1,24 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 import logging
 import numpy as np
 import os
 import pygame as pg
-from timeit import default_timer as time
-from fractions import Fraction
 
-from audio.generators import Generator
-from control.io.keyboard import *
-from funct import blockwise2
-from graphing import *
-from timing import Sampler, time_slice
-from tunings import WickiLayout
-from utils.math import pcm
+from fractions import Fraction
+from timeit import default_timer as time
+
+from .graphing import *
+from .math import pcm
+
+from ..audio.generators import Generator
+from ..control.io.keyboard import *
+from ..funct import blockwise2
+from ..timing import Sampler, time_slice
+from ..tunings import WickiLayout
 
 
 w = WickiLayout()

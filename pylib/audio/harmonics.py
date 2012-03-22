@@ -1,21 +1,23 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 import exceptions
 import numpy as np
+
 from fractions import Fraction
 from copy import copy, deepcopy
 
-from audio.envelope import Exponential, Gamma
-from audio.frequency import Frequency, FrequencyRatioMixin
-from audio.generators import Generator
-from audio.oscillator import Osc
+from .envelope import Exponential, Gamma
+from .frequency import Frequency, FrequencyRatioMixin
+from .generators import Generator
+from .oscillator import Osc
 
-from timing import Sampler
-
-from utils.decorators import memoized
-from utils.log import logger
-from utils.math import random_phase
+from ..timing import Sampler
+from ..utils.decorators import memoized
+from ..utils.log import logger
+from ..utils.math import random_phase
 
 
 class Overtones(object, FrequencyRatioMixin, Generator):

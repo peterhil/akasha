@@ -1,29 +1,23 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 from __future__ import division
 
-# Math &c.
+import functools as fun
+import itertools as itr
 import numpy as np
 import operator
+
 from fractions import Fraction
 
-# My modules
-from timing import Sampler, samples, times
+from .timing import Sampler, samples, times
+from .xoltar import lazy
+from .xoltar.functional import *
 
-# Utils
-# from utils.math import *
-# from utils.graphing import *
-from control.io.audio import play, write
-
-# Functional
-import itertools as itr
-import functools as fun
-from xoltar import lazy
-from xoltar.functional import *
-
-# Settings
-np.set_printoptions(precision=16, suppress=True)
+# from ..utils.math import *
+# from ..utils.graphing import *
+from ..control.io.audio import play, write
 
 
 ### Limiter functions

@@ -1,18 +1,19 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 import exceptions
 import math
 import numpy as np
 
 from timeit import default_timer as clock
-from utils.log import logger
-#from audio.frequency import Frequency
+
+from .utils.log import logger
 
 
 class Sampler(object):
 
-    # Settings
     prevent_aliasing = True
     negative_frequencies = False
     usable_videorates = 1.0/(np.arange(1,51)*0.01)
@@ -103,5 +104,4 @@ class Timeline(object):
             end_time = start_time
             start_time = 0
         return np.arange(start_time / self.resolution, end_time / self.resolution, 1, dtype=np.int64)
-
 

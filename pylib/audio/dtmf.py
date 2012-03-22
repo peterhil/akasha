@@ -1,10 +1,13 @@
 #! /usr/bin/python
 
+from __future__ import absolute_import
+
 import string
 
-# My modules
-from audio.generators import Generator
-from timing import Sampler
+from .generators import Generator
+
+from ..timing import Sampler
+
 
 class DTMF(object, Generator):
     """Dual-tone Multifrequency Tones

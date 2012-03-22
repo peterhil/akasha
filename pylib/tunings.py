@@ -1,16 +1,19 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 from __future__ import division
 
 import exceptions
 import numpy as np
+
 from fractions import Fraction
 
-from audio.oscillator import Frequency
-from control.io.keyboard import kb
-from utils.log import logger
-from utils.math import PI2, find_closest_index
+from .audio.oscillator import Frequency
+from .control.io.keyboard import kb
+from .utils.log import logger
+from .utils.math import PI2, find_closest_index
+
 
 # See "Pitch Systems in Tonal Music" series on YouTube:
 # http://www.youtube.com/watch?v=0j-YXgXTpoA&feature=related

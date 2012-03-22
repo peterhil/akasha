@@ -7,11 +7,13 @@ Created by Peter on 2011-12-11.
 Copyright (c) 2011 Loihde. All rights reserved.
 """
 
-import numpy as np
+from __future__ import absolute_import
 
+import numpy as np
 import logging
-from utils.log import logger
-from utils.math import diffs
+
+from ..utils.log import logger
+from ..utils.math import diffs
 
 
 def magnetize(x0, x1, m, norm_level=0.95):

@@ -4,9 +4,12 @@
 Unit tests for graphing functions
 """
 
-import unittest
+from __future__ import absolute_import
+
 import numpy as np
-from utils.graphing import *
+import unittest
+
+from pylib.utils.graphing import *
 
 
 class GraphTest(unittest.TestCase):

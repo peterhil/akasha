@@ -1,11 +1,15 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 import numpy as np
+
 from exceptions import TypeError, AttributeError
 from numbers import Number
 
-from monads import fid, decorator_with_args
+from .monads import fid, decorator_with_args
+
 
 class Arrow(object):
     def __init__(self, func):

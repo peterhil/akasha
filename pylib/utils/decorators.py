@@ -1,9 +1,10 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
-# Utility decorator functions
+from __future__ import absolute_import
 
-from utils.log import logger
+from .log import logger
+
 
 class memoized(object):
     """Decorator that caches a function's return value each time it is called.

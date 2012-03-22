@@ -1,5 +1,6 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 
 import numpy as np
 
@@ -7,14 +8,14 @@ from numbers import Number
 from scipy import signal as dsp
 from scikits import samplerate as src
 
-from audio.frequency import FrequencyRatioMixin, Frequency
-from audio.generators import Generator
-from funct import blockwise, blockwise2
-from timing import Sampler
+from .frequency import FrequencyRatioMixin, Frequency
+from .generators import Generator
+from ..funct import blockwise, blockwise2
+from ..timing import Sampler
 
-from utils.decorators import memoized
-from utils.log import logger
-from utils.math import *
+from ..utils.decorators import memoized
+from ..utils.log import logger
+from ..utils.math import *
 
 
 class Pcm(FrequencyRatioMixin, Generator, object):

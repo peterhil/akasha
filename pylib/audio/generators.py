@@ -1,12 +1,15 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 import numpy as np
+
 from sys import maxint
 
-from control.io import audio
-from funct import blockwise, blockwise2
-from timing import Sampler
+from ..control.io import audio
+from ..funct import blockwise, blockwise2
+from ..timing import Sampler
 
 
 class Generator:

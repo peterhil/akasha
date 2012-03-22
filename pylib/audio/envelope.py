@@ -1,15 +1,20 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 import math
 import numpy as np
 import scipy as sp
+
 from cmath import rect, polar, phase, pi, exp
 from fractions import Fraction
 
-from audio.generators import Generator
-from timing import Sampler
-from utils.math import minfloat, maxfloat
+from .generators import Generator
+
+from ..timing import Sampler
+from ..utils.math import minfloat, maxfloat
+
 
 class Exponential(object, Generator):
     """Exponential decay and growth for envelopes."""

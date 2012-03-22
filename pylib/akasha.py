@@ -6,17 +6,9 @@ akasha.py
 Created by Peter on 2011-12-11.
 Copyright (c) 2011 Loihde. All rights reserved.
 """
+
 from __future__ import absolute_import
 from __future__ import division
-
-def setup():
-    np.set_printoptions(precision=16, suppress=True)
-
-    # Set the user's default locale, see http:// docs.python.org/library/locale.html
-    # Also be sure to have LC_ALL='fi_FI.UTF-8' and CHARSET='UTF-8' set in the environment
-    # to have sys.stdin.encoding = UTF-8
-    locale.setlocale(locale.LC_ALL, 'fi_FI.UTF-8')
-    assert sys.stdin.encoding == 'UTF-8', "Unicode not enabled! Current input encoding is: %s" % sys.stdin.encoding
 
 
 if __name__ == '__main__':
@@ -59,8 +51,6 @@ if __name__ == '__main__':
     from utils.log import logger, ansi
     from utils.math import *
     from utils.splines import *
-
-    setup()
 
     Sampler.frequency = Frequency(Sampler.rate, unwrapped=True)
     Sampler.videofrequency = Frequency(Sampler.videorate, unwrapped=True)

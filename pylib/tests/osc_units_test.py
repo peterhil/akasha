@@ -4,11 +4,14 @@
 Unit tests for oscillator.py
 """
 
+from __future__ import absolute_import
+
 import unittest
+
 from fractions import Fraction
-from osc_units import *
-# Utils
-from utils.math import to_phasors
+
+from ..physical.osc_units import *
+from ..utils.math import to_phasor
 
 
 class OscInitTest(unittest.TestCase):
@@ -22,7 +25,7 @@ class OscInitTest(unittest.TestCase):
 
     def testSize(self):
         """Test size of roots"""
-        self.assertEqual(8, Osc(1,8).samples.size)
+        self.assertEqual(8, Osc(1,8).sample.size)
 
     def testInitWithAliasing(self):
         Osc.prevent_aliasing = False
@@ -57,7 +60,7 @@ class OscRootsTest(unittest.TestCase):
     def testRootFuncSanity(self):
         """It should give sane values."""
         wi = 2 * pi * 1j
-        a = Osc(1,8).samples
+        a = Osc(1,8).sample
         b = np.array([
             +1+0j, exp(wi*1/8),
             +0+1j, exp(wi*3/8),
@@ -70,15 +73,13 @@ class OscRootsTest(unittest.TestCase):
             "imag %s is not close to\n\t\t%s" % (a, b)
 
     def testPhasors(self):
-        """It should be accurate.
-        Uses angles to make testing easier.
-        """
+        """It should be accurate."""
         for period in (5,7,8,23):   # + tuple( random.choice(range(1, 44100)) )
             o = Osc(Fraction(1, period))
             fractional_angle = lambda n: float(Fraction(n, period) % 1) * 360
             angles = np.array( map( fractional_angle, range(0,period) ) )
             angles = 180 - ( (180 - angles) % 360) # wrap 'em to -180..180!
-            a = o.to_phasors()
+            a = to_phasor(o.sample)
             b = np.array( zip( [1] * period,  angles ) )
             assert np.allclose(a, b), \
                 "%s is not close to\n\t\t%s" % (a, b)
@@ -94,8 +95,8 @@ class OscSlicingTest(unittest.TestCase):
         self.assertEqual(*self.o[0,6,12])
 
     def testSliceAccess(self):
-        assert np.equal(self.p[::], self.p.samples).all()
-        assert np.allclose(self.o[:3:2], Osc(1, 3).samples)
+        assert np.equal(self.p[::], self.p.sample).all()
+        assert np.allclose(self.o[:3:2], Osc(1, 3).sample)
         assert np.equal(self.p[-1:8:3], self.p[7,2,5,0,3,6,1,4,7]).all()
 
 

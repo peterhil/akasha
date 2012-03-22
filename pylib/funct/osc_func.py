@@ -1,19 +1,19 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
+import functools as fun
+import itertools as itr
 import numpy as np
 import types
+
 from cmath import rect, polar, phase, pi, exp
 from fractions import Fraction
-# My modules
-# from generators import PeriodicGenerator
 
-import itertools as itr
-import functools as fun
-from xoltar import lazy
-from xoltar.functional import *
+from .xoltar import lazy
+from .xoltar.functional import *
 
-np.set_printoptions(8,1000,10,suppress=True)
 
 # General flow:
 # 1. Get time slice
