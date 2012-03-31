@@ -11,7 +11,7 @@ import operator
 
 from fractions import Fraction
 
-from .timing import Sampler, samples, times
+from .timing import sampler, samples, times
 from .xoltar import lazy
 from .xoltar.functional import *
 
@@ -78,16 +78,16 @@ def wrap(f, modulo=1):
 
 ### Frequencies
 
-def limit_resolution(f, max=Sampler.rate):
+def limit_resolution(f, max=sampler.rate):
     return Fraction(int(round(f * max)), max)
 
-def hz(f, fs=Sampler.rate, rounding='native'):
+def hz(f, fs=sampler.rate, rounding='native'):
     """Return normalized frequency (as a Fraction) from physical frequency.
 
     Examples:
     =========
 
-    >>> Sampler.rate = 44100
+    >>> sampler.rate = 44100
 
     >>> hz(5512.5)
     Fraction(1, 8)
@@ -95,7 +95,7 @@ def hz(f, fs=Sampler.rate, rounding='native'):
     >>> hz(20.0)
     Fraction(1, 2205)
 
-    >>> float(hz(20.0) * Sampler.rate)
+    >>> float(hz(20.0) * sampler.rate)
     20.0
 
     # A different sampling rate can be given with the fs option:
@@ -127,7 +127,7 @@ def osc(freq):
         return np.exp( osc.gen * osc.freq * (times % (1.0 / osc.freq)) )
     osc.freq = freq
     def ratio():
-        return osc.freq / float(Sampler.rate)
+        return osc.freq / float(sampler.rate)
     osc.ratio = ratio
     return osc
 

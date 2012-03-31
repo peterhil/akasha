@@ -27,8 +27,8 @@ class OscInitTest(unittest.TestCase):
         self.assertEqual(8, Osc.from_ratio(1, 8).sample.size)
 
     def testInitWithAliasing(self):
-        Sampler.prevent_aliasing = False
-        Sampler.negative_frequencies = True
+        sampler.prevent_aliasing = False
+        sampler.negative_frequencies = True
         self.assertEqual(Osc.from_ratio(1, 8), Osc.from_ratio(9, 8))
         self.assertEqual(Osc.from_ratio(7, 8), Osc.from_ratio(-1, 8))
 
@@ -107,35 +107,35 @@ class OscAliasingTest(unittest.TestCase):
 
     def testFrequenciesOverNyquistRate(self):
         """It should (not) produce silence if ratio > 1/2"""
-        Sampler.prevent_aliasing = True
+        sampler.prevent_aliasing = True
         self.assertEqual(Osc.from_ratio(9, 14), self.silence)
 
-        Sampler.prevent_aliasing = False
+        sampler.prevent_aliasing = False
         self.assertEqual(Osc.from_ratio(9, 14).ratio, Fraction(9, 14))
 
     def testFrequenciesOverSamplingRate(self):
-        Sampler.prevent_aliasing = True
+        sampler.prevent_aliasing = True
         self.assertEqual(Osc.from_ratio(9, 7), self.silence)
 
-        Sampler.prevent_aliasing = False    # but still wraps when ratio > 1
+        sampler.prevent_aliasing = False    # but still wraps when ratio > 1
         self.assertEqual(Osc.from_ratio(9, 7).ratio, Fraction(2, 7))
 
     def testNegativeFrequencies(self):
         """It should handle negative frequencies according to preferences."""
-        Sampler.prevent_aliasing = True
-        Sampler.negative_frequencies = False
+        sampler.prevent_aliasing = True
+        sampler.negative_frequencies = False
         self.assertEqual(Osc.from_ratio(-1, 7), self.silence)
 
-        Sampler.prevent_aliasing = False
-        Sampler.negative_frequencies = True
+        sampler.prevent_aliasing = False
+        sampler.negative_frequencies = True
         self.assertEqual(Osc.from_ratio(-1, 7), Osc.from_ratio(6, 7))
 
-        Sampler.prevent_aliasing = True
-        Sampler.negative_frequencies = True
+        sampler.prevent_aliasing = True
+        sampler.negative_frequencies = True
         ratio = Fraction(-1, 7)
         o = Osc.from_ratio(ratio)
-        self.assertEqual(o.frequency, float(ratio * Sampler.rate))
-        # o.ratio is still modulo Sampler.rate - is this right?
+        self.assertEqual(o.frequency, float(ratio * sampler.rate))
+        # o.ratio is still modulo sampler.rate - is this right?
 
 
 if __name__ == "__main__":

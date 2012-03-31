@@ -10,10 +10,10 @@ from enthought.traits.api import HasTraits, \
 
 # My modules
 # from generators import PeriodicGenerator
-# from timing import Sampler
+# from timing import sampler
 
 
-class Sampler(HasTraits):
+class sampler(HasTraits):
     rate = Frequency( 44100 )
 
 
@@ -27,7 +27,7 @@ class Frequency(HasTraits):
         # self.freq.on_trait_change(self._get_ratio())
 
     def _get_ratio(self):
-        self.ratio = Fraction.from_float(float(self.freq)/Sampler.rate).limit_denominator(Sampler.rate)
+        self.ratio = Fraction.from_float(float(self.freq)/sampler.rate).limit_denominator(sampler.rate)
 
     def __repr__(self):
         return "%.02f Hz" % self.freq

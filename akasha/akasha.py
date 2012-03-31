@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     from net.wiki import *
 
-    from timing import Sampler
+    from timing import sampler
     from tunings import WickiLayout
 
     from utils.animation import *
@@ -52,8 +52,8 @@ if __name__ == '__main__':
     from utils.math import *
     from utils.splines import *
 
-    Sampler.frequency = Frequency(Sampler.rate, unwrapped=True)
-    Sampler.videofrequency = Frequency(Sampler.videorate, unwrapped=True)
+    sampler.frequency = Frequency(sampler.rate, unwrapped=True)
+    sampler.videofrequency = Frequency(sampler.videorate, unwrapped=True)
 
     def make_test_sound(freq = 230):
         h = Overtones(Osc(freq), damping=lambda f, a=1.0: (-f/100.0, a/(f/freq)), n = 20)

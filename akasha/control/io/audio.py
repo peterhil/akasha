@@ -11,7 +11,8 @@ from scipy.signal import hilbert
 from scikits import audiolab
 from scikits.audiolab import Format, Sndfile, available_file_formats, available_encodings
 
-from ...timing import Sampler, time_slice
+from ...timing import sampler, time_slice
+from . import relative_path
 
 
 defaults = {
@@ -39,7 +40,7 @@ def get_format(*args, **kwargs):
 
 # Audiolab read, write and play
 
-def play(sndobj, axis='imag', fs=Sampler.rate, dur=5.0, start=0, time=False):
+def play(sndobj, axis='imag', fs=sampler.rate, dur=5.0, start=0, time=False):
     """
     Play out a sound.
     """
@@ -48,13 +49,17 @@ def play(sndobj, axis='imag', fs=Sampler.rate, dur=5.0, start=0, time=False):
     audiolab.play(getattr(sndobj[time], axis), fs)
 
 def write(sndobj, filename='test_sound', axis='imag', fmt=Format(**defaults),
-          fs=Sampler.rate, dur=5.0, start=0, time=False,
-          sdir='../../Sounds/2010_Python_Resonance/'):
+          fs=sampler.rate, dur=5.0, start=0, time=False,
+          sdir=relative_path('../../Sounds/2010_Python_Resonance/')):
     """
     Write a sound file.
     """
     fmt = get_format(fmt)
-    filename = sdir + filename +'_'+ axis +'.'+ fmt.file_format
+
+    if filename[0] != '/':
+        filename = '/'.join([sdir, filename]) # Relative path
+
+    filename = filename +'_'+ axis +'.'+ fmt.file_format
 
     time = time_slice(dur, start, time)
     data = getattr(sndobj[time], axis)
@@ -72,8 +77,8 @@ def write(sndobj, filename='test_sound', axis='imag', fmt=Format(**defaults),
     finally:
         hdl.close()
 
-def read(filename, dur=5.0, start=0, time=False, fs=Sampler.rate, complex=True,
-         sdir='../../Sounds/_Music samples/', *args, **kwargs):
+def read(filename, dur=5.0, start=0, time=False, fs=sampler.rate, complex=True,
+         sdir=relative_path('../../Sounds/_Music samples/'), *args, **kwargs):
     """
     Read a sound file in.
     """
@@ -82,7 +87,7 @@ def read(filename, dur=5.0, start=0, time=False, fs=Sampler.rate, complex=True,
     # - If fs or enc differs from default do some conversion?
 
     if filename[0] != '/':
-        filename = sdir + filename # Relative path
+        filename = '/'.join([sdir, filename]) # Relative path
 
     format = os.path.splitext(filename)[1][1:]
     check_format(format)

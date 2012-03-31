@@ -9,7 +9,7 @@ from sys import maxint
 
 from ..control.io import audio
 from ..funct import blockwise, blockwise2
-from ..timing import Sampler
+from ..timing import sampler
 
 
 class Generator:
@@ -29,7 +29,7 @@ class Generator:
         return self.__getitem__(slice)
 
     def __iter__(self):
-        return blockwise2(self, 1, Sampler.blocksize()) # FIXME start should be 0, fix blockwise2!
+        return blockwise2(self, 1, sampler.blocksize()) # FIXME start should be 0, fix blockwise2!
 
     def next(self):
         it = iter(self)

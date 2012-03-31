@@ -14,6 +14,7 @@ import numpy as np
 import os
 
 from ... import settings
+from . import relative_path
 
 
 #  E1234567890123 456 789E
@@ -35,8 +36,8 @@ from ... import settings
 # - Mapping from key to position
 # - Mapping from position to frequency (by index)
 
-def get_layout(path='settings/keymaps/fi.json', mapdir=settings.basedir):
-    mappath = os.path.abspath('/'.join([mapdir, path]))
+def get_layout(path='settings/keymaps/fi.json'):
+    mappath = relative_path(path)
     fp = None
     try:
         fp = open(mappath)

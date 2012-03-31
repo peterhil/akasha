@@ -6,11 +6,11 @@ from __future__ import absolute_import
 import numpy as np
 
 
-class Sampler(object):
+class sampler(object):
     rate = 44100
 
-def samples(start, end, rate=Sampler.rate):
+def samples(start, end, rate=sampler.rate):
     return np.arange(int(np.ceil(start * rate)), int(round(np.floor(end * rate))))
 
-def times(start, end, rate=Sampler.rate):
+def times(start, end, rate=sampler.rate):
     return samples(start, end, rate) / float(rate)

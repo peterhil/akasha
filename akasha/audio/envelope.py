@@ -12,7 +12,7 @@ from fractions import Fraction
 
 from .generators import Generator
 
-from ..timing import Sampler
+from ..timing import sampler
 from ..utils.math import minfloat, maxfloat
 
 
@@ -31,7 +31,7 @@ class Exponential(object, Generator):
         if self.rate == 0:
             return np.inf
         else:
-            return math.log(2.0) / -self.rate * Sampler.rate
+            return math.log(2.0) / -self.rate * sampler.rate
 
     @property
     def zero_point(self):
@@ -43,7 +43,7 @@ class Exponential(object, Generator):
 
     def sample(self, iterable):
         # Convert frame numbers to time (ie. 44100 => 1.0)
-        frames = np.array(iterable) / float(Sampler.rate)
+        frames = np.array(iterable) / float(sampler.rate)
         return self.amp * np.exp(self.rate * frames)
 
     def __len__(self):
@@ -86,7 +86,7 @@ class Gamma(object, Generator):
             self.scale = scale  # Inverse rate
 
     def sample(self, iterable):
-        frames = (np.array(iterable) / float(Sampler.rate)) * (1.0/max(self.scale, 1e-06)) # Make scale into rate
+        frames = (np.array(iterable) / float(sampler.rate)) * (1.0/max(self.scale, 1e-06)) # Make scale into rate
         return sp.special.gammaincc(self.shape, frames)
 
     def __repr__(self):

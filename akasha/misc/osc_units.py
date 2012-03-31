@@ -14,7 +14,7 @@ from numbers import Number
 
 from ..audio.generators import PeriodicGenerator
 from ..control.io.audio import play, write
-from ..timing import Sampler
+from ..timing import sampler
 from ..utils.decorators import memoized
 from ..utils.math import to_phasor
 
@@ -26,7 +26,7 @@ Qt = pq.Quantity
 Hz = pq.Hz
 
 
-class UnitSampler(object):
+class Unitsampler(object):
 
     _rate = Qt(44100.0, Hz)
 
@@ -35,7 +35,7 @@ class UnitSampler(object):
         return self._rate
 
     def _set_frame_time(self):
-        pq.frame = pq.UnitTime('frame', Sampler.rate**-1, symbol='frame')
+        pq.frame = pq.UnitTime('frame', sampler.rate**-1, symbol='frame')
 
     @rate.setter
     def rate(self, value):
@@ -63,7 +63,7 @@ class Osc(object, PeriodicGenerator):
     @classmethod
     def freq(cls, freq):
         """Oscillator can be initialized using a frequency. Can be a float."""
-        ratio = Fraction.from_float(float(freq)/Sampler.rate).limit_denominator(Sampler.rate)
+        ratio = Fraction.from_float(float(freq)/sampler.rate).limit_denominator(sampler.rate)
         return cls(ratio)
 
     @staticmethod
@@ -93,7 +93,7 @@ class Osc(object, PeriodicGenerator):
 
     @property
     def frequency(self):
-        return float(self.ratio * Sampler.rate)
+        return float(self.ratio * sampler.rate)
 
     ### Generating functions ###
 
@@ -115,8 +115,8 @@ class Osc(object, PeriodicGenerator):
         return np.exp(wi * ratio * np.arange(0, ratio.denominator))
 
     def table_roots(self, ratio):
-        roots = self.np_exp(Fraction(1, Sampler.rate))
-        return roots[0:ratio.denominator] ** (Sampler.rate / float(ratio.denominator))
+        roots = self.np_exp(Fraction(1, sampler.rate))
+        return roots[0:ratio.denominator] ** (sampler.rate / float(ratio.denominator))
 
     ### Sampling ###
 

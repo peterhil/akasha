@@ -15,7 +15,7 @@ from .math import normalize, clip, deg, distances, pad, pcm, minfloat, complex_a
 from .log import logger
 
 from ..funct import pairwise
-from ..timing import Sampler
+from ..timing import sampler
 
 try:
     import matplotlib.pyplot as plt
@@ -226,7 +226,7 @@ def angles2hues(cx_samples, padding=False, loglevel=logging.ANIMA):
     angles = (-np.abs( angles - (np.pi) ) % np.pi) / (2.0*np.pi)
     logger.log(loglevel, "Tau angles:\n%s", repr(angles[:100]))
 
-    angles *= Sampler.rate  # 0..Fs/2
+    angles *= sampler.rate  # 0..Fs/2
     logger.log(loglevel, "Frequencies:\n%s", repr(angles[:100]))
 
     # Convert rad to deg
@@ -240,7 +240,7 @@ def chord_to_angle(length):
     # Limit highest freqs to Nyquist (blue or violet)
     d = np.fmin(np.abs(length), 2.0)
     # Limit lower freqs to lowest_audible_hz (red)
-    d = np.fmax(d, 4.0*lowest_audible_hz/float(Sampler.rate))
+    d = np.fmax(d, 4.0*lowest_audible_hz/float(sampler.rate))
     return np.arcsin(d / 2.0) * 2
 
 def chord_to_hue(length):
@@ -268,8 +268,8 @@ def chords_to_hues(signal, padding=True, loglevel=logging.ANIMA):
     taus = np.apply_along_axis(chord_to_tau, 0, d) #np.append(d, d[-1])) # Append is a hack to get the same length back
     logger.log(loglevel, "%s Taus: %s", __name__, taus)
 
-    #taus = taus / (2*np.pi) * Sampler.rate
-    taus *= Sampler.rate  # 0..Fs/2
+    #taus = taus / (2*np.pi) * sampler.rate
+    taus *= sampler.rate  # 0..Fs/2
     logger.log(loglevel, "Frequency median: %s", np.median(taus))
     logger.log(loglevel, "Frequencies:\n%s", repr(taus[:100]))
     #return taus
@@ -292,7 +292,7 @@ def draw(samples, size=1000, dur=None, antialias=False, lines=False, axis=True, 
     # See http://jehiah.cz/archive/creating-images-with-numpy
 
     # TODO: Buffering with frame rate for animations or realtime signal view.
-    # buffersize = int(round(float(Sampler.rate) / framerate))    # 44100.0/30 = 1470
+    # buffersize = int(round(float(sampler.rate) / framerate))    # 44100.0/30 = 1470
     # indices = np.arange(*(slice(item.start, item.stop, buffersize).indices(item.stop)))
     # for start in indices:
     # samples = self[start:start+buffersize-1:buffersize] # TODO: Make this cleaner
@@ -304,7 +304,7 @@ def draw(samples, size=1000, dur=None, antialias=False, lines=False, axis=True, 
         img = get_canvas(size, axis=axis)
 
     if dur:
-        samples = samples[:int(round(dur * Sampler.rate))]
+        samples = samples[:int(round(dur * sampler.rate))]
 
     # Clip -- amax could be just 'np.abs(np.max(samples))' for unit circle, but rectangular abs can be sqrt(2) > 1.0!
     amax = max(np.max(np.abs(samples.real)), np.max(np.abs(samples.imag)))
@@ -424,7 +424,7 @@ def fast_graph(samples, size=1000, plot=False):
 
 def graph(samples, size=1000, dur=None, plot=False, axis=True, antialias=False, lines=False):
     if dur:
-        samples = samples[:int(round(dur * Sampler.rate))]
+        samples = samples[:int(round(dur * sampler.rate))]
     img = draw(samples, size=size, antialias=antialias, lines=lines, axis=axis).transpose((1, 0, 2))
     show(img, plot)
     return False

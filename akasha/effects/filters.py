@@ -8,7 +8,7 @@ import numpy as np
 from scipy import signal as dsp
 
 from ..audio.oscillator import Osc
-from ..timing import Sampler
+from ..timing import sampler
 from ..utils.math import *
 
 
@@ -33,7 +33,7 @@ def unosc(signal):
 
 def freq_shift(signal, a=12.1, b=0.290147):
     #f = 440
-    #scale = (1+f/Sampler.rate)
+    #scale = (1+f/sampler.rate)
     w = unosc(signal)
     out = -np.exp(w.real + (normalize((w.imag * a) % (PI2/b)) * PI2 - np.pi) * 1j) # remove - before exp and - np.pi?
     return out
@@ -48,13 +48,13 @@ def transform(signal, scale=[1, 1], translate=[0, 0]):
     tr += np.atleast_2d(translate).T
     return np.exp(cx_plane)
 
-def highpass(signal, freq, bins=256, pass_zero=True, scale=False, nyq=Sampler.rate/2.0):
+def highpass(signal, freq, bins=256, pass_zero=True, scale=False, nyq=sampler.rate/2.0):
     a = 1
     b = dsp.firwin(bins, cutoff=freq, pass_zero=pass_zero, scale=scale, nyq=nyq)
     return dsp.lfilter(b, a, signal)
 
-def lowpass(signal, cutoff=Sampler.rate/2.0, bins=256):
-    fs = float(Sampler.rate)
+def lowpass(signal, cutoff=sampler.rate/2.0, bins=256):
+    fs = float(sampler.rate)
     fc = cutoff / fs
     a = 1
     b = dsp.firwin(bins, cutoff=fc, window='hamming')
@@ -73,7 +73,7 @@ def resonate(signal, poles, zeros=[], gain=1.0, zi=None):
 def resonator_comb(signal, a=5, b=6, step=135, dampen=1-1/2**15, sp_dur = 2, fx_dur=4, playtime = 10):
     # Is dampen double the Q value?
     roots = Osc(1).sample
-    fs = Sampler.rate
+    fs = sampler.rate
     out = normalize(
         pad(signal[:int(round(sp_dur*fs))], -1, int(round(playtime*fs - sp_dur*fs)), 0) +
         normalize(

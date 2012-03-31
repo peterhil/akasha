@@ -6,7 +6,7 @@ class MyClass:
 
 # Many ways to use properties
 from recipes import prop
-from oscillator import SampleRate
+from oscillator import samplerate
 from utils.prop import prop
 from utils.borg import Borg
 
@@ -20,7 +20,7 @@ class Singleton(type):
             cls.instance = super(Singleton, cls).__call__(*args, **kw)
         return cls.instance
 
-class Sampler_(object):
+class sampler_(object):
     __metaclass__ = Singleton
 
     def __init__(self, rate=44100):
@@ -32,7 +32,7 @@ class Rate(Borg):
         Borg.__init__(self)
 
 
-class SampleRate(object):
+class samplerate(object):
     """
     A descriptor object for sample rate.
     TODO: also handle sending resampling calls to objects?
@@ -52,7 +52,7 @@ class SampleRate(object):
         self.rate = val
 
 
-class Sampler:
+class sampler:
     rate = 44100
 
     #@prop

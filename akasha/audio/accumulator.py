@@ -13,7 +13,7 @@ from numbers import Number
 
 from .generators import PeriodicGenerator
 
-from ..timing import Sampler
+from ..timing import sampler
 from ..utils.decorators import memoized
 from ..utils.math import *
 from ..utils.graphing import *
@@ -37,7 +37,7 @@ class Acc(object, PeriodicGenerator):
 
     @classmethod
     def freq(cls, freq):
-        ratio = Fraction.from_float(float(freq)/Sampler.rate).limit_denominator(Sampler.rate)
+        ratio = Fraction.from_float(float(freq)/sampler.rate).limit_denominator(sampler.rate)
         return cls(ratio)
 
     ### Properties ###
@@ -60,7 +60,7 @@ class Acc(object, PeriodicGenerator):
 
     @property
     def frequency(self):
-        return float(self.ratio * Sampler.rate)
+        return float(self.ratio * sampler.rate)
 
     ### Sampling ###
 
@@ -71,6 +71,6 @@ class Acc(object, PeriodicGenerator):
 
 if __name__ == '__main__':
     o = Acc(Fraction(1, 8))
-    t = slice(0, Sampler.rate)
+    t = slice(0, sampler.rate)
     print o.np_exp(o.period)
     print to_phasors(o.sample)

@@ -22,7 +22,7 @@ from .xoltar.functional import *
 # 4. ?
 
 ### Time related functions ###
-class Sampler(object):
+class sampler(object):
     rate = 44100
 
 from datetime import timedelta
@@ -42,13 +42,13 @@ def timeslice(iterable, unit=sec):
     In [10]: timeslice([0, 8125, 44100, 44100*500.12])
     Out[10]: array([0:00:00, 0:00:00.184240, 0:00:01, 0:08:20.120000], dtype=timedelta64[us])
     """
-    result = np.divide(np.array(iterable), float(Sampler.rate))
+    result = np.divide(np.array(iterable), float(sampler.rate))
     return np.fromiter(imap(unit, result), dtype=td)
 
 def frames(iterable):
     """Convert time deltas to frame numbers (ie. 1.0 => 44100)"""
     # iterable = (imap(sec, iterable))
-    result = np.multiply(np.array(iterable), Sampler.rate)
+    result = np.multiply(np.array(iterable), sampler.rate)
     result = np.fromiter(imap(sec, result), dtype=np.float64)
     return np.cast['uint64'](np.round(result))
 
@@ -122,18 +122,18 @@ def oscillate(phases):
     return np.exp( 1j*2*pi * (phases % 1.0))
 
 def osc_freq(iterable, frq):
-    return oscillate(iterable * frq * 1.0/Sampler.rate)
+    return oscillate(iterable * frq * 1.0/sampler.rate)
 
 def osc(n):
     return itr.cycle(roots(n))
 
 def freq(fl):
     """Calculate ratio for a frequency."""
-    ratio = Fraction.from_float(float(fl)/Sampler.rate).limit_denominator(Sampler.rate)
+    ratio = Fraction.from_float(float(fl)/sampler.rate).limit_denominator(sampler.rate)
     return ratio
 
 def freq2(fl):
-    ratio = Fraction(*(fl/Sampler.rate).as_integer_ratio()).limit_denominator(Sampler.rate)
+    ratio = Fraction(*(fl/sampler.rate).as_integer_ratio()).limit_denominator(sampler.rate)
     return ratio
 
 def roots(period):

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import absolute_import
+from __future__ import division
 
 import logging
 import numpy as np
@@ -17,15 +18,15 @@ from .math import pcm
 from ..audio.generators import Generator
 from ..control.io.keyboard import *
 from ..funct import blockwise2
-from ..timing import Sampler, time_slice
+from ..timing import sampler, time_slice
 from ..tunings import WickiLayout
 
 
 w = WickiLayout()
 
 def init_pygame():
-    # Set mixer defaults: Sampler rate, sample type, number of channels, buffer size
-    pg.mixer.pre_init(Sampler.rate, pg.AUDIO_S16, 1, 128)
+    # Set mixer defaults: sampler rate, sample type, number of channels, buffer size
+    pg.mixer.pre_init(sampler.rate, pg.AUDIO_S16, 1, 128)
     if 'numpy' in pg.surfarray.get_arraytypes():
         pg.surfarray.use_arraytype('numpy')
         logger.info("Using %s" % pg.surfarray.get_arraytype().capitalize())
@@ -39,9 +40,9 @@ def init_mixer(*args):
     if args[0]:
         pg.mixer.init(*args[0])
     else:
-        pg.mixer.init(frequency=Sampler.rate, size=-16, channels=1, buffer=128)
+        pg.mixer.init(frequency=sampler.rate, size=-16, channels=1, buffer=128)
     init = pg.mixer.get_init()
-    logger.debug("Mixer init: %s Sampler rate: %s Video rate: %s" % (init, Sampler.rate, Sampler.videorate))
+    logger.debug("Mixer init: %s sampler rate: %s Video rate: %s" % (init, sampler.rate, sampler.videorate))
     return init
 
 def blit(screen, img):
@@ -90,20 +91,18 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
     ch = chs[chid]
     
     def blockiter(snd):
-        return (iter(snd) if isinstance(snd, Generator) else blockwise2(snd, 1, Sampler.blocksize()))
+        return (iter(snd) if isinstance(snd, Generator) else blockwise2(snd, 1, sampler.blocksize()))
     it = blockiter(snd)
 
     VIDEOFRAME = pg.NUMEVENTS - 1
-    def set_timer():
-        # FIXME - complain about ints to pygame
-        ms = int(round(1000.0 / Sampler.videorate)) # 40 ms for 25 Hz
+    def set_timer(ms = sampler.frametime):
         pg.time.set_timer(VIDEOFRAME, ms)
     set_timer()
 
-    Sampler.paused = False
+    sampler.paused = False
     def pause():
-        Sampler.paused = not Sampler.paused
-        logger.info("Pause" if Sampler.paused else "Play")
+        sampler.paused = not sampler.paused
+        logger.info("Pause" if sampler.paused else "Play")
 
     def change_frequency(snd, key):
         f = w.get(*(pos.get(key, pos[None])))
@@ -120,7 +119,7 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
         for event in events:
 
             # Quit
-            if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == 27):
+            if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
                 done = True
                 break
 
@@ -132,6 +131,7 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
             # -- Key downs --
             elif event.type == pg.KEYDOWN:
                 logger.debug("Key down: %s" % event)
+                step_size = (5 if event.mod & (pg.KMOD_LSHIFT | pg.KMOD_RSHIFT) else 1)
                 # Rewind
                 if pg.K_F7 == event.key:
                     it = blockiter(snd)
@@ -140,15 +140,17 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
                     logger.info("Rewind")
                 # Arrows
                 elif pg.K_UP == event.key:
-                    # Sampler.videorate += 1
-                    # set_timer()
-                    #w.move(-2, 0)
-                    w.base *= 2.0
+                    if event.mod & (pg.KMOD_LALT | pg.KMOD_RALT):
+                        set_timer(sampler.change_frametime(rel = step_size))
+                    else:
+                        w.move(-2, 0)
+                        #w.base *= 2.0
                 elif pg.K_DOWN == event.key:
-                    # Sampler.videorate = max(Sampler.videorate - 1, 1) # Prevent zero division
-                    # set_timer()
-                    #w.move(2, 0)
-                    w.base /= 2.0
+                    if event.mod & (pg.KMOD_LALT | pg.KMOD_RALT):
+                        set_timer(sampler.change_frametime(rel = -step_size))
+                    else:
+                        w.move(2, 0)
+                        #w.base /= 2.0
                 elif pg.K_LEFT == event.key:
                     w.move(0, 1)
                 elif pg.K_RIGHT == event.key:
@@ -171,7 +173,7 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
 
             # Video frame
             elif (event.type == VIDEOFRAME):
-                if Sampler.paused:
+                if sampler.paused:
                     break
                 
                 draw_start = time()
@@ -191,8 +193,17 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
 
                 dc = time() - draw_start
                 fps = clock.get_fps()
-                t = clock.tick_busy_loop(Sampler.videorate)         #cap the framerate
+                t = clock.tick_busy_loop(sampler.videorate)         #cap the framerate
                 logger.log(logging.BORING, "Animation: clock tick %d, FPS: %3.3f, drawing took: %.4f", t, fps, dc)
+
+                # lag = 1/dc - sampler.frametime
+                # if np.abs(t - sampler.frametime) > 5 and lag > 0:
+                #     logger.warn("Drawing took {0} ms too long, slowing down...".format(lag))
+                #     set_timer(sampler.change_frametime(rel = 5))
+                # if lag < -8:
+                #     logger.warn("Drawing only took {0} ms, going FASTER...".format(lag))
+                #     set_timer(sampler.change_frametime(rel = -5))
+                
             else:
                 logger.debug("Other: %s" % event)
 

@@ -14,7 +14,7 @@ from .frequency import Frequency, FrequencyRatioMixin
 from .generators import Generator
 from .oscillator import Osc
 
-from ..timing import Sampler
+from ..timing import sampler
 from ..utils.decorators import memoized
 from ..utils.log import logger
 from ..utils.math import random_phase
@@ -42,7 +42,7 @@ class Overtones(object, FrequencyRatioMixin, Generator):
     def max_overtones(self):
         if self.frequency < 1:
             return 1
-        return int(Sampler.rate / (2.0 * self.frequency))
+        return int(sampler.rate / (2.0 * self.frequency))
 
     @property
     def limit(self):
@@ -113,7 +113,7 @@ class Overtones(object, FrequencyRatioMixin, Generator):
 
 class Multiosc(Overtones):
     # MAKE A MULTIOSC without ENV, iow. sample using overtones and apply_along_axis with sum!!!!
-    # ratios = map(lambda r: Fraction.from_float(r).limit_denominator(Sampler.rate), h.ratio*h.overtones)
+    # ratios = map(lambda r: Fraction.from_float(r).limit_denominator(sampler.rate), h.ratio*h.overtones)
     # samples = map(Frequency.angles, ratios)
     # map(len, samples)
     # Out[58]: [1960, 980, 1960, 490, 393, 980, 280]

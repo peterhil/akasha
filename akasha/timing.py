@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import absolute_import
+from __future__ import division
 
 import exceptions
 import math
@@ -13,33 +14,55 @@ from .utils.log import logger
 
 
 class Sampler(object):
+    """
+    A sampler object, providing parameters for sampling.
+    """
 
-    prevent_aliasing = True
-    negative_frequencies = False
-    usable_videorates = 1.0/(np.arange(1,51)*0.01)
+    def __init__(self, rate = 44100, frametime = 40, antialias = True, allow_negative = False):
+        """
+        Parameters:
+        -----------
+        rate : int
+            The sampling rate (frequency) of the sampler.
+        frametime : int
+            The time interval in milliseconds between video frames.
+            The default is 40 ms which corresponds to 25 Hz (1000/40).
+        antialias : bool
+            Whether to force frequencies below Nyquist frequency, which is sampling rate / 2.
+        allow_negative : bool
+            Whether to allow negative frequencies to occur.
+        """
+        self.rate = rate
+        self.frametime = frametime
+        self.prevent_aliasing = antialias
+        self.negative_frequencies = allow_negative
 
-    rate = 44100
-    videorate = usable_videorates[3] #[3] = 25 Hz
+    @property
+    def videorate(self):
+        return 1000 / self.frametime
 
-    @classmethod
-    def set_videorate(cls, n):
-        hz = cls.usable_videorates[n]
-        logger.debug("Setting NEW video frame rate: %s Hz" % hz)
-        cls.videorate = hz
+    def change_frametime(self, ms = None, rel = 0, mintime = 16):
+        if ms == None:
+            ms = self.frametime
+        ms = max(int(round(ms + rel)), mintime) # Limit to mintime (1000 / 16 = 62.5 Hz)
+        logger.info("Changing video FRAME TIME to {0} ms ({1:.3f} FPS)".format(ms, 1000 / ms))
+        self.frametime = ms
+        return ms
 
-    @classmethod
-    def blocksize(cls):
-        return int(round(cls.rate / float(cls.videorate)))
+    def blocksize(self):
+        return int(round(self.rate / self.videorate))
+
+sampler = Sampler()
 
 
 def indices(snd, dur=False):
     if hasattr(snd, "size"):
         size = snd.size
     elif dur:
-        size = int(round(dur * Sampler.rate))
+        size = int(round(dur * sampler.rate))
     else:
         raise exceptions.ValueError("indices(): Sound must have size, or duration argument must be specified.")
-    return np.append(np.arange(0, size, Sampler.blocksize()), size)
+    return np.append(np.arange(0, size, sampler.blocksize()), size)
 
 def timecode(t, precision=1000000):
     """t = time.clock(); t; int(math.floor(t)); int(round((t % 1.0) * 1000000))"""
@@ -51,13 +74,13 @@ def times_at(frames):
     >>> time_at(44100)
     1.0
     """
-    return frames / float(Sampler.rate)
+    return frames / float(sampler.rate)
 
 def frames_at(times):
     """Convert time to frame numbers (ie. 1.0 => 44100)"""
-    return np.array(int(round(times * Sampler.rate)))
+    return np.array(int(round(times * sampler.rate)))
 
-def sample_times(start, end, rate=Sampler.rate):
+def sample_times(start, end, rate=sampler.rate):
     """
     Return times when samples occur at rate.
 
@@ -74,8 +97,8 @@ def sample_times(start, end, rate=Sampler.rate):
 def time_slice(dur, start=0, time=False):
     """Use a time slice argument or the provided attributes 'dur' and 'start' to
     construct a time slice object."""
-    start *= Sampler.rate
-    time = time or slice(int(round(0 + start)), int(round(dur * Sampler.rate + start)))
+    start *= sampler.rate
+    time = time or slice(int(round(0 + start)), int(round(dur * sampler.rate + start)))
     if not isinstance(time, slice):
         raise TypeError("Expected a %s for 'time' argument, got %s." % (slice, type(time)))
     return time
@@ -90,8 +113,8 @@ class Timeslice(object):
 
     @property
     def sample(self):
-        #return np.array(np.linspace(self.start, self.stop, Sampler.rate, endpoint=False) * Sampler.rate, dtype=int)
-        return np.array(np.arange(self.start * Sampler.rate, self.stop * Sampler.rate), dtype=int)
+        #return np.array(np.linspace(self.start, self.stop, sampler.rate, endpoint=False) * sampler.rate, dtype=int)
+        return np.array(np.arange(self.start * sampler.rate, self.stop * sampler.rate), dtype=int)
 
     def __repr__(self):
         return "<%s: start = %s, stop = %s>" % (self.__class__.__name__, self.start, self.stop)
@@ -103,7 +126,7 @@ class OutputStream(object):
 class Timeline(object):
     """Class representing time, both physical and discrete."""
 
-    def __init__(self, resolution=Sampler.rate):
+    def __init__(self, resolution=sampler.rate):
         self.resolution = resolution
 
     def times(self, start_time, end_time=None):

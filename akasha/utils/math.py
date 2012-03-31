@@ -10,7 +10,7 @@ from fractions import Fraction
 
 from .log import logger
 
-from ..timing import Sampler
+from ..timing import sampler
 
 
 PI2 = np.pi * 2.0

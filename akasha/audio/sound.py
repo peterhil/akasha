@@ -11,7 +11,7 @@ from scikits import samplerate as src
 from .frequency import FrequencyRatioMixin, Frequency
 from .generators import Generator
 from ..funct import blockwise, blockwise2
-from ..timing import Sampler
+from ..timing import sampler
 
 from ..utils.decorators import memoized
 from ..utils.log import logger
@@ -28,7 +28,7 @@ class Pcm(FrequencyRatioMixin, Generator, object):
         self.snd = snd
 
     def __iter__(self):
-        return blockwise2(dsp.hilbert(self.resample_at_freq()), 1, Sampler.blocksize())
+        return blockwise2(dsp.hilbert(self.resample_at_freq()), 1, sampler.blocksize())
 
     @memoized
     def resample(self, ratio, type='linear'):

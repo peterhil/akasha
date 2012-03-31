@@ -26,7 +26,7 @@ def istft(X, fs, T, hop):
 
 if __name__ == '__main__':
     f0 = 440         # Compute the STFT of a 440 Hz sinusoid
-    fs = Sampler.rate        # sampled at 8 kHz
+    fs = sampler.rate        # sampled at 8 kHz
     T = 30            # lasting 5 seconds
     framesz = 0.050  # with a frame size of 50 milliseconds
     hop = 0.020      # and hop size of 20 milliseconds.

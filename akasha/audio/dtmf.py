@@ -6,7 +6,7 @@ import string
 
 from .generators import Generator
 
-from ..timing import Sampler
+from ..timing import sampler
 
 
 class DTMF(object, Generator):
@@ -100,4 +100,4 @@ class DTMF(object, Generator):
         pass
 
     def __len__(self):
-        int(round(len(self.number) * (self.pulselength + self.pause) * Sampler.rate - self.pause))
+        int(round(len(self.number) * (self.pulselength + self.pause) * sampler.rate - self.pause))

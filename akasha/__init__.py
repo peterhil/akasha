@@ -47,7 +47,7 @@ from .funct.xoltar import lazy
 
 from .net.wiki import *
 
-from .timing import Sampler
+from .timing import sampler
 from .tunings import WickiLayout
 
 from .utils.animation import *

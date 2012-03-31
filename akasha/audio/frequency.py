@@ -12,7 +12,7 @@ from numbers import Number
 
 from .generators import PeriodicGenerator
 
-from ..timing import Sampler
+from ..timing import sampler
 from ..utils.decorators import memoized
 from ..utils.log import logger
 from ..utils.math import *
@@ -55,7 +55,7 @@ class FrequencyRatioMixin:
     @property
     def hz(self):
         "Depends on original frequency's rational approximation and sampling rate."
-        return float(self.ratio * Sampler.rate)
+        return float(self.ratio * sampler.rate)
 
     def __float__(self):
         return float(self.hz)
@@ -75,7 +75,7 @@ class Frequency(object, FrequencyRatioMixin, PeriodicGenerator):
     @classmethod
     def from_ratio(cls, ratio, den=False):
         if den: ratio = Fraction(ratio, den)
-        return cls(Fraction(ratio) * Sampler.rate)
+        return cls(Fraction(ratio) * sampler.rate)
 
     @property
     def ratio(self):
@@ -101,14 +101,14 @@ class Frequency(object, FrequencyRatioMixin, PeriodicGenerator):
     
     @staticmethod
     @memoized
-    def to_ratio(freq, limit=Sampler.rate):
-        return Fraction.from_float(float(freq)/Sampler.rate).limit_denominator(limit)
+    def to_ratio(freq, limit=sampler.rate):
+        return Fraction.from_float(float(freq)/sampler.rate).limit_denominator(limit)
 
     @staticmethod
     def antialias(ratio):
-        if Sampler.prevent_aliasing and abs(ratio) > Fraction(1,2):
+        if sampler.prevent_aliasing and abs(ratio) > Fraction(1,2):
             return Fraction(0, 1)
-        if Sampler.prevent_aliasing and not Sampler.negative_frequencies and ratio < 0:
+        if sampler.prevent_aliasing and not sampler.negative_frequencies and ratio < 0:
             return Fraction(0, 1)
         return ratio
     

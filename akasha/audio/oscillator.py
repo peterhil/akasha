@@ -13,7 +13,7 @@ from numbers import Number
 from .frequency import Frequency, FrequencyRatioMixin
 from .generators import PeriodicGenerator
 
-from ..timing import Sampler
+from ..timing import sampler
 from ..utils.decorators import memoized
 from ..utils.log import logger
 from ..utils.math import *
@@ -29,7 +29,7 @@ class Osc(object, FrequencyRatioMixin, PeriodicGenerator):
     @classmethod
     def from_ratio(cls, ratio, den=False):
         if den: ratio = Fraction(ratio, den)
-        return cls(Fraction(ratio) * Sampler.rate)
+        return cls(Fraction(ratio) * sampler.rate)
 
     ### Generating functions ###
 
@@ -74,7 +74,7 @@ class Super(Osc):
     @classmethod
     def from_ratio(cls, ratio, den=False, *superness):
         if den: ratio = Fraction(ratio, den)
-        return cls(Fraction(ratio) * Sampler.rate, superness)
+        return cls(Fraction(ratio) * sampler.rate, superness)
 
     @staticmethod
     def normalise_superness(superness):
@@ -143,7 +143,7 @@ def chirp_zeta(z1 = -0.5-100j, z2 = 0.5+100j, dur = 10):
 
     Reference: http://en.wikipedia.org/wiki/Riemann_zeta_function
     """
-    n = int(round(dur * Sampler.rate))
+    n = int(round(dur * sampler.rate))
     z = np.linspace(z1, z2, n)
     k = np.arange(n)
     return normalize(k ** -z)

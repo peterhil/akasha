@@ -133,7 +133,7 @@ class OscAliasingTest(unittest.TestCase):
         Osc.negative_frequencies = True
         ratio = Fraction(-1, 7)
         o = Osc(ratio)
-        self.assertEqual(o.frequency, float(float(ratio) * float(Sampler.rate)) % Sampler.rate)
+        self.assertEqual(o.frequency, float(float(ratio) * float(sampler.rate)) % sampler.rate)
 
 
 if __name__ == "__main__":

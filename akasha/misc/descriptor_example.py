@@ -15,7 +15,7 @@ class RevealAccess(object):
         print 'Updating' , self.name, value
         self.val = value
 
-class SampleRate(object):
+class samplerate(object):
     """A descriptor object for sample rate.
        TODO: also handle sending resampling calls to objects?
     """
