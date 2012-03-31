@@ -28,18 +28,24 @@ class Pcm(FrequencyRatioMixin, Generator, object):
         self.snd = snd
 
     def __iter__(self):
-        return blockwise2(dsp.hilbert(self.resample_at_freq()), 1, sampler.blocksize())
+        return blockwise2(self.resample_at_freq(), sampler.blocksize())
+
+    def __len__(self):
+        return max(int(round(len(self.snd) * (self.base_freq.ratio / self.frequency.ratio))), 1)
 
     @memoized
-    def resample(self, ratio, type='linear'):
+    def resample(self, ratio, window='linear'):
         ratio = float(ratio)
         if ratio == 0.0:
+            logger.info("Resampling at 0.0: returning [0j]!")
             return np.array([0j])
         if ratio == 1.0:
+            logger.info("Resampling at 1.0: returning self.snd!")
             return self.snd
         else:
-            #return dsp.hilbert(src.resample(self.snd, ratio, type, verbose=False)).astype(np.complex128)
-            return src.resample(self.snd, ratio, type, verbose=False).astype(np.float64)
+            logger.info("Resampling at %s. Note that hilbert transform may cause clipping!" % ratio)
+            return dsp.hilbert(src.resample(self.snd.real, ratio, window)).astype(np.complex128)
+            #return dsp.hilbert(src.resample(self.snd, ratio, window, verbose=False).astype(np.float64))
 
     @memoized
     def sc_resample(self, ratio, window='blackman'):
@@ -48,11 +54,10 @@ class Pcm(FrequencyRatioMixin, Generator, object):
         # Note about scipy.signal.resample: t : array_like, optional
         # If t is given, it is assumed to be the sample positions associated with the signal data in x.
         # http://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.resample.html
-        num = int(round(len(self.snd) * ratio))
-        return dsp.resample(self.snd, num)
+        return dsp.resample(self.snd, len(self))
 
     def resample_at_freq(self):
-        ratio = (self.base_freq.ratio / self.frequency.ratio)
+        ratio = float(self.base_freq.ratio / self.frequency.ratio)
         logger.debug(__name__ + " resample_at_freq() at ratio: " + str(ratio) + " self: " + str(self))
         return self.resample(self, ratio)
 

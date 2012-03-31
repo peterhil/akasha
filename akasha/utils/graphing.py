@@ -306,10 +306,10 @@ def draw(samples, size=1000, dur=None, antialias=False, lines=False, axis=True, 
     if dur:
         samples = samples[:int(round(dur * sampler.rate))]
 
-    # Clip -- amax could be just 'np.abs(np.max(samples))' for unit circle, but rectangular abs can be sqrt(2) > 1.0!
-    amax = max(np.max(np.abs(samples.real)), np.max(np.abs(samples.imag)))
-    if amax > 1.0:
-        logger.warn("Clipping samples on draw() -- maximum magnitude was: %0.6f" % amax)
+    #clip_max = np.max(np.abs(samples)) # unit circle
+    clip_max = np.max(np.fmax(np.abs(samples.real), np.abs(samples.imag))) # rectangular abs can be sqrt(2) > 1.0!
+    if clip_max > 1.0:
+        logger.warn("Clipping samples on draw() -- maximum magnitude was: %0.6f" % clip_max)
         samples = clip(samples)
 
     if lines:

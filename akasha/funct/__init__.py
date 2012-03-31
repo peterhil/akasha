@@ -92,24 +92,21 @@ def blockwise(iterable, start=1, step=None):
 		except StopIteration:
 			break
 
-def blockwise2(iter, start=1, step=None):
-	# BUG FIXME: doesn't work, if start is 0!
-	if step is None:
-		step, start = start, 0
+def blockwise2(iter, step=1, start=0):
 	if np.sign(step) == -1:
 		logger.warn("Blockwise will lose first value on negative step, because Numpy array's indexing bug.")
 	def get_next(it):
-		next = list(np.fmax(it.next(), 0))
-		next[1] = (None if next[1] == 0 else next[1])
-		return next
+		# next = list(np.fmax(it.next(), 0))
+		# next[1] = (None if next[1] == 0 else next[1])
+		# return next
+		return it.next()
 	blocks = pairwise(count_step(start, step))
-	next = get_next(blocks)
-	while np.all(next):
+	while True:
 		try:
-			next = get_next(blocks)
-			#logger.debug("Blockwise iter: %s" % next)
-			block = iter[slice(*np.append(next, np.sign(step)))]
+			indices = blocks.next()
+			block = iter[slice(*np.append(indices, np.sign(step)))]
 			if len(block) > 0:
+				#logger.debug("Blockwise next: %s" % (indices,))
 				yield block
 			else:
 				raise StopIteration
@@ -118,6 +115,6 @@ def blockwise2(iter, start=1, step=None):
 		except GeneratorExit:
 			logger.debug("Blockwise generator exit.")
 			break
-	del blocks, next
+	del blocks, indices
 
 

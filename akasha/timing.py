@@ -36,6 +36,7 @@ class Sampler(object):
         self.frametime = frametime
         self.prevent_aliasing = antialias
         self.negative_frequencies = allow_negative
+        self.paused = False
 
     @property
     def videorate(self):
@@ -51,6 +52,10 @@ class Sampler(object):
 
     def blocksize(self):
         return int(round(self.rate / self.videorate))
+
+    def pause(self):
+        self.paused = not self.paused
+        logger.info("Pause" if self.paused else "Play")
 
 sampler = Sampler()
 

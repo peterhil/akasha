@@ -66,7 +66,10 @@ class Overtones(object, FrequencyRatioMixin, Generator):
         return oscs
 
     def sample(self, iter):
-        frames = np.zeros(len(iter), dtype=complex)
+        if isinstance(iter, int):
+            frames = np.array([0j])
+        else:
+            frames = np.zeros(len(iter), dtype=complex)
         
         for o in self.oscs:
         # for f in self.overtones:

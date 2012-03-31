@@ -21,15 +21,23 @@ class Generator:
     def __getitem__(self, item):
         """Slicing support."""
         if isinstance(item, slice):
-           # Construct an array of indices.
-           item = np.arange(*(item.indices(item.stop)))
+            if hasattr(self, '__len__'):
+                # Mimick ndarray slicing, ie. clip the slice indices
+                res = np.clip(np.array([item.start, item.stop]), a_min=None, a_max=len(self))
+                for i in xrange(len(res)):
+                    if res[i] != None and np.sign(res[i]) == -1:
+                        res[i] = max(-len(self)-1, res[i])
+                item = slice(res[0], res[1], item.step)
+                item = np.arange(*(item.indices(item.stop or len(self))))
+            else:
+                item = np.arange(*(item.indices(item.stop)))
         return self.sample(item)
 
     def __call__(self, slice):
         return self.__getitem__(slice)
 
     def __iter__(self):
-        return blockwise2(self, 1, sampler.blocksize()) # FIXME start should be 0, fix blockwise2!
+        return blockwise2(self, sampler.blocksize())
 
     def next(self):
         it = iter(self)
@@ -61,7 +69,6 @@ class PeriodicGenerator(Generator):
             start = ((item.start or 0) % self.period)
             element_count = abs((item.stop or self.period) - (item.start or 0))
             stop = start + (element_count * step)
-            # Construct an array of indices.
             item = np.arange(*(slice(start, stop, step).indices(stop)))
         return self.sample[np.array(item) % self.period]
 
