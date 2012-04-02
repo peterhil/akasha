@@ -80,17 +80,17 @@ def change_frequency(snd, key):
         snd.sustain = None
     logger.info("Setting NEW frequency: %r for %s, now at frequency: %s" % (f, snd, snd.frequency))
 
-def clock_tick(snd, it, paint, clock):
+def handle_frame(snd, it, paint_fn, clock, twisted_loop=False):
     done = False
     events = pg.event.get()
     if len(events) > 1:
         logger.debug("Got %s events to handle: %s" % (len(events), events))
     for event in events:
-        if (event.type != VIDEOFRAME):
-            done = handle_event(snd, it, event)
+        if twisted_loop or (event.type != VIDEOFRAME):
+            done = handle_input(snd, it, event)
             if done:
                 break
-        else:
+        if twisted_loop or (event.type == VIDEOFRAME):
             if sampler.paused:
                 break
             draw_start = time()
@@ -105,15 +105,17 @@ def clock_tick(snd, it, paint, clock):
                 done = True
                 break
 
-            paint([samples]) # FIXME wrap samples into a list for xoltar curry to work
+            paint_fn([samples]) # FIXME wrap samples into a list for xoltar curry to work
 
             dc = time() - draw_start
             fps = clock.get_fps()
             t = clock.tick_busy_loop(sampler.videorate)
             logger.log(logging.BORING, "Animation: clock tick %d, FPS: %3.3f, drawing took: %.4f", t, fps, dc)
+    if done and reactor.running:
+        reactor.stop()
     return done
 
-def handle_event(snd, it, event):
+def handle_input(snd, it, event):
     # Quit
     if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
         logger.info("Quitting.")
@@ -168,7 +170,7 @@ def handle_event(snd, it, event):
 def set_timer(ms = sampler.frametime):
     pg.time.set_timer(VIDEOFRAME, ms)
 
-def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, init=None):
+def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, init=None, loop='pygame'):
     """
     Animate complex sound signal
     """
@@ -185,12 +187,20 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
     clock = pg.time.Clock()
     set_timer()
 
-    paint = fx.curry(show_slice, screen, size=size, name=name, antialias=antialias, lines=lines)
-    # paint = fx.curry(show_transfer, screen, size=size, type='PAL', axis='imag')
+    paint_frame = fx.curry(show_slice, screen, size=size, name=name, antialias=antialias, lines=lines)
+    # paint_frame = fx.curry(show_transfer, screen, size=size, type='PAL', axis='imag')
 
-    done = False
-    while not done:
-        done = clock_tick(snd, it, paint, clock)
+    if loop == 'pygame':
+        done = False
+        while not done:
+            done = handle_frame(snd, it, paint_frame, clock)
+    else:
+        pg.display.init()
+        tick = LoopingCall(handle_frame, (snd, it, paint_frame, clock))
+        deferred = tick.start(1 / sampler.videorate, now=False)
+        deferred.addErrback(lambda err: raise err)
+        deferred.addCallback(lambda ign: self.display.quit())
+        reactor.run()
 
     it.close()
     del it
@@ -198,6 +208,51 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
     pg.quit()
 
 
+class SignalView(object):
+    """
+    A view for animated sound signal and audio output.
+    """
+    def __init__(position=(0, 0), size=(800, 800), antialias=True, lines=False):
+        self.position = position
+        self.size = size
+        self.antialias = antialias
+        self.lines = lines
+
+class ComplexSignal(SignalView):
+    pass #paint = fx.curry(show_slice, screen, size=self.size, antialias=self.antialias, lines=self.lines)
+
+class Window(object):
+    """
+    Pygame based window.
+    """
+    def __init__(
+                self,
+                clock=reactor,
+                display=pg.display,
+                event=pg.event,
+                view=ComplexSignal,
+                size=(800, 800),
+                name="Resonance"
+                ):
+        self.clock = clock
+        self.display = display
+        self.event = event
+        self.size = size
+        self.viewType = view
+        self._view = view(size=size)
+
+    def go(self):
+        self.display.init()
+        self.display.set_caption(name)
+
+        self.time = LoopingCall(event_handler, (snd, it, paint_frame, clock))
+        deferred = self.time.start(1 / sampler.videorate, now=False)
+        deferred.addCallback(lambda ign: self.display.quit())
+
+        reactor.run()
+
+
+
 if __name__ == '__main__':
-    init_pygame()
+    pass
 
