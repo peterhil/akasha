@@ -5,6 +5,7 @@ from __future__ import absolute_import
 from __future__ import division
 
 import akasha.funct.xoltar.functional as fx
+import exceptions
 import logging
 import numpy as np
 import os
@@ -108,11 +109,15 @@ def handle_frame(snd, it, paint_fn, clock, twisted_loop=False):
             paint_fn([samples]) # FIXME wrap samples into a list for xoltar curry to work
 
             dc = time() - draw_start
-            fps = clock.get_fps()
-            t = clock.tick_busy_loop(sampler.videorate)
+            if isinstance(clock, pg.time.Clock):
+                fps = clock.get_fps()
+                t = clock.tick_busy_loop(sampler.videorate)
+            else:
+                fps = 'n/a'
+                t = 'n/a'
             logger.log(logging.BORING, "Animation: clock tick %d, FPS: %3.3f, drawing took: %.4f", t, fps, dc)
-    if done and reactor.running:
-        reactor.stop()
+    #if done and reactor.running:
+        #reactor.stop()
     return done
 
 def handle_input(snd, it, event):
@@ -170,6 +175,12 @@ def handle_input(snd, it, event):
 def set_timer(ms = sampler.frametime):
     pg.time.set_timer(VIDEOFRAME, ms)
 
+def handleError(err):
+    logger.error("%s happened!" % str(err))
+    pg.display.quit()
+    #reactor.stop()
+    raise err
+
 def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, init=None, loop='pygame'):
     """
     Animate complex sound signal
@@ -184,21 +195,21 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
     ch = pg.mixer.find_channel()
     it = iter(snd)
 
-    clock = pg.time.Clock()
-    set_timer()
-
     paint_frame = fx.curry(show_slice, screen, size=size, name=name, antialias=antialias, lines=lines)
     # paint_frame = fx.curry(show_transfer, screen, size=size, type='PAL', axis='imag')
 
     if loop == 'pygame':
+        clock = pg.time.Clock()
+        set_timer()
         done = False
         while not done:
             done = handle_frame(snd, it, paint_frame, clock)
     else:
         pg.display.init()
-        tick = LoopingCall(handle_frame, (snd, it, paint_frame, clock))
+        clock = reactor
+        tick = LoopingCall(handle_frame, snd, it, paint_frame, clock)
         deferred = tick.start(1 / sampler.videorate, now=False)
-        deferred.addErrback(lambda err: raise err)
+        deferred.addErrback(lambda err: handleError(err))
         deferred.addCallback(lambda ign: self.display.quit())
         reactor.run()
 
