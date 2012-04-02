@@ -10,6 +10,7 @@ from fractions import Fraction
 
 from .log import logger
 
+from ..funct import blockwise
 from ..timing import sampler
 
 
@@ -112,6 +113,9 @@ def complex_as_reals(samples):
 def find_closest_index(arr, target):
     """Finds the index of the (first) item in array 'arr' having the (absolute) value closest to 'target'."""
     return np.argmin(np.abs(np.atleast_1d(arr) - target))
+
+def blockiter(snd):
+    return blockwise(snd, sampler.blocksize())
 
 # Random
 
@@ -231,7 +235,7 @@ def normalize(signal):
     if max == 0:
         logger.debug("Normalize() got silence!" % max)
         return signal
-    logger.debug("Normalize() by a factor: %s" % max)
+    #logger.debug("Normalize() by a factor: %s" % max)
     return signal / max
 
 def clip(signal, inplace=False):
@@ -246,15 +250,15 @@ def clip(signal, inplace=False):
     np.clip(reals, a_min=-1, a_max=1, out=reals)    # Uses out=reals to transform in-place!
     return signal
 
-def pad(d, index=-1, count=1, value=None):
+def pad(signal, index=-1, count=1, value=None):
     """
     Inserts a padding value at index repeated count number of times.
-    If value is None, uses an index from d.
+    If value is None, uses an index from signal.
     """
-    length = len(d)
+    length = len(signal)
     space = index % (length + 1)
-    value = (value if value != None else d[index])
-    return np.concatenate((d[0:space], np.repeat(value, count), d[space:length]))
+    value = (value if value != None else signal[index])
+    return np.concatenate((signal[0:space], np.repeat(value, count), signal[space:length]))
 
 def distances(signal):
     # See also np.diff!

@@ -4,6 +4,7 @@
 from __future__ import absolute_import
 from __future__ import division
 
+import akasha.funct.xoltar.functional as fx
 import logging
 import numpy as np
 import os
@@ -11,13 +12,14 @@ import pygame as pg
 
 from fractions import Fraction
 from timeit import default_timer as time
+from twisted.internet.task import LoopingCall
+from twisted.internet import reactor
 
 from .graphing import *
 from .math import pcm
 
 from ..audio.generators import Generator
 from ..control.io.keyboard import *
-from ..funct import blockwise2
 from ..timing import sampler, time_slice
 from ..tunings import WickiLayout
 
@@ -37,8 +39,8 @@ def init_pygame():
 def init_mixer(*args):
     pg.init()
     pg.mixer.quit()
-    print args[0]
-    if args[0]:
+    if isinstance(args, (tuple, list)) and len(args) > 0 and args[0]:
+        print args[0]
         pg.mixer.init(*args[0])
     else:
         pg.mixer.init(frequency=sampler.rate, size=-16, channels=1, buffer=128)
@@ -51,6 +53,7 @@ def blit(screen, img):
 
 def show_slice(screen, snd, size=800, name="Resonance", antialias=True, lines=False):
     "Show a slice of the signal"
+    snd = snd[0] # FIXME because xoltar uses 'is' to inspect the arguments, snd samples need to be wrapped into a list!
     if lines:
         img = get_canvas(size)
         blit(screen, img)
@@ -62,6 +65,7 @@ def show_slice(screen, snd, size=800, name="Resonance", antialias=True, lines=Fa
 
 def show_transfer(screen, snd, size=720, name="Transfer", type='PAL', axis='imag'):
     "Show a slice of the signal"
+    snd = snd[0] # FIXME because xoltar uses 'is' to inspect the arguments, snd samples need to be wrapped into a list!
     img = get_canvas(size)
     tfer = video_transfer(snd, type=type, axis=axis)
     black = (size - tfer.shape[0]) / 2.0
@@ -76,14 +80,44 @@ def change_frequency(snd, key):
         snd.sustain = None
     logger.info("Setting NEW frequency: %r for %s, now at frequency: %s" % (f, snd, snd.frequency))
 
-def blockiter(snd):
-    return (iter(snd) if isinstance(snd, Generator) else blockwise2(snd, sampler.blocksize()))
+def clock_tick(snd, it, paint, clock):
+    done = False
+    events = pg.event.get()
+    if len(events) > 1:
+        logger.debug("Got %s events to handle: %s" % (len(events), events))
+    for event in events:
+        if (event.type != VIDEOFRAME):
+            done = handle_event(snd, it, event)
+            if done:
+                break
+        else:
+            if sampler.paused:
+                break
+            draw_start = time()
+            try:
+                samples = it.next()
+                audio = pg.sndarray.make_sound(pcm(samples))
+                ch = pg.mixer.find_channel()
+                ch.queue(audio)
+                #logger.debug("Using channel {0} for audio.".format(ch))
+            except StopIteration:
+                logger.debug("Sound ended!")
+                done = True
+                break
 
-def handle_event(snd, event):
+            paint([samples]) # FIXME wrap samples into a list for xoltar curry to work
+
+            dc = time() - draw_start
+            fps = clock.get_fps()
+            t = clock.tick_busy_loop(sampler.videorate)
+            logger.log(logging.BORING, "Animation: clock tick %d, FPS: %3.3f, drawing took: %.4f", t, fps, dc)
+    return done
+
+def handle_event(snd, it, event):
     # Quit
     if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
         logger.info("Quitting.")
-        return 'done'
+        return True
     # Pause
     elif (event.type == pg.KEYDOWN and event.key == pg.K_F8) or \
          (event.type == pg.ACTIVEEVENT and event.state == 3):
@@ -97,7 +131,7 @@ def handle_event(snd, event):
             if isinstance(snd, Generator):
                 snd.sustain = None
             logger.info("Rewind")
-            return 'reload'
+            it.send('reset')
         # Arrows
         elif pg.K_UP == event.key:
             if event.mod & (pg.KMOD_LALT | pg.KMOD_RALT):
@@ -118,17 +152,16 @@ def handle_event(snd, event):
         # Change frequency
         elif hasattr(snd, 'frequency'):
             change_frequency(snd, event.key)
-            return 'reload'
+            it.send('reset')
     # Key up
     elif (event.type == pg.KEYUP and hasattr(snd, 'frequency')):
         if pg.K_CAPSLOCK == event.key:
             change_frequency(snd, event.key)
-            return 'reload'
+            it.send('reset')
         else:
             if isinstance(snd, Generator):
-                #snd.sustain = np.index(snd, it.next()[0]) - blocksize() # FIXME #asl.start
-                pass
-            logger.debug("Key up:   %s, sustain: %s" % (event, snd.sustain))
+                snd.sustain = it.send('current')[1]
+                logger.debug("Key up:   %s, sustain: %s" % (event, snd.sustain))
     else:
         logger.debug("Other: %s" % event)
 
@@ -147,44 +180,17 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
     screen = pg.display.set_mode(resolution, pg.SRCALPHA, 32)
 
     ch = pg.mixer.find_channel()
-    it = blockiter(snd)
+    it = iter(snd)
 
     clock = pg.time.Clock()
     set_timer()
 
+    paint = fx.curry(show_slice, screen, size=size, name=name, antialias=antialias, lines=lines)
+    # paint = fx.curry(show_transfer, screen, size=size, type='PAL', axis='imag')
+
     done = False
     while not done:
-        events = pg.event.get()
-        if len(events) > 1:
-            logger.debug("Got %s events to handle: %s" % (len(events), events))
-        for event in events:
-            if (event.type != VIDEOFRAME):
-                action = handle_event(snd, event)
-                if action == 'reload':
-                    it = blockiter(snd)
-                elif action == 'done':
-                    done = True
-                    break
-            else:
-                if sampler.paused:
-                    break
-                draw_start = time()
-                try:
-                    samples = it.next()
-                    audio = pg.sndarray.make_sound(pcm(samples))
-                    ch.queue(audio)
-                except StopIteration:
-                    logger.debug("Sound ended!")
-                    done = True
-                    break
-
-                #show_transfer(screen, samples, size=size, type='PAL', axis='imag')
-                show_slice(screen, samples, size=size, name=name, antialias=antialias, lines=lines)
-
-                dc = time() - draw_start
-                fps = clock.get_fps()
-                t = clock.tick_busy_loop(sampler.videorate)
-                logger.log(logging.BORING, "Animation: clock tick %d, FPS: %3.3f, drawing took: %.4f", t, fps, dc)
+        done = clock_tick(snd, it, paint, clock)
 
     it.close()
     del it

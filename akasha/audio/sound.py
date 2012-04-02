@@ -10,7 +10,7 @@ from scikits import samplerate as src
 
 from .frequency import FrequencyRatioMixin, Frequency
 from .generators import Generator
-from ..funct import blockwise, blockwise2
+from ..funct import blockwise
 from ..timing import sampler
 
 from ..utils.decorators import memoized
@@ -28,24 +28,22 @@ class Pcm(FrequencyRatioMixin, Generator, object):
         self.snd = snd
 
     def __iter__(self):
-        return blockwise2(self.resample_at_freq(), sampler.blocksize())
+        return blockwise(self.resample_at_freq(), sampler.blocksize())
 
     def __len__(self):
-        return max(int(round(len(self.snd) * (self.base_freq.ratio / self.frequency.ratio))), 1)
+        if self.frequency == 0:
+            return 1
+        else:
+            return int(np.floor(float(len(self.snd) * (self.base_freq.ratio / self.frequency.ratio))))
 
     @memoized
     def resample(self, ratio, window='linear'):
-        ratio = float(ratio)
-        if ratio == 0.0:
-            logger.info("Resampling at 0.0: returning [0j]!")
-            return np.array([0j])
-        if ratio == 1.0:
-            logger.info("Resampling at 1.0: returning self.snd!")
-            return self.snd
-        else:
-            logger.info("Resampling at %s. Note that hilbert transform may cause clipping!" % ratio)
-            return dsp.hilbert(src.resample(self.snd.real, ratio, window)).astype(np.complex128)
-            #return dsp.hilbert(src.resample(self.snd, ratio, window, verbose=False).astype(np.float64))
+        logger.info("Resample at {0} ({1:.3f}). Hilbert transform may cause clipping!".format(ratio, float(ratio)))
+        orig_state = sampler.paused; sampler.paused = True
+        out = dsp.hilbert(src.resample(self.snd.real, float(ratio), window)).astype(np.complex128)
+        sampler.paused = orig_state
+        return out
+        #return src.resample(self.snd.real, float(ratio), window, verbose=True).astype(np.float64)
 
     @memoized
     def sc_resample(self, ratio, window='blackman'):
@@ -56,14 +54,22 @@ class Pcm(FrequencyRatioMixin, Generator, object):
         # http://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.resample.html
         return dsp.resample(self.snd, len(self))
 
-    def resample_at_freq(self):
-        ratio = float(self.base_freq.ratio / self.frequency.ratio)
-        logger.debug(__name__ + " resample_at_freq() at ratio: " + str(ratio) + " self: " + str(self))
-        return self.resample(self, ratio)
+    def resample_at_freq(self, iter):
+        ratio = (self.base_freq.ratio / self.frequency.ratio)
+        if ratio == 0:
+            return np.array([0j])
+        elif ratio == 1:
+            return self.snd[iter]
+        else:
+            if isinstance(iter, slice) and iter.stop >= len(self):
+                logger.warn("Normalising {0} for length {1}".format(iter, len(self)))
+                iter = slice(iter.start, min(iter.stop, len(self), iter.step))
+            return self.resample(self, ratio)[iter]
+            #return self.sc_resample(self, ratio)[iter]
 
     def sample(self, iter):
-        logger.debug(__name__ + " sample("+str(self)+"): " + str(iter))
-        return self.resample_at_freq()[iter]
+        #logger.debug(__name__ + " sample("+str(self)+"): " + str(iter))
+        return self.resample_at_freq(iter)
 
 
 class Group(FrequencyRatioMixin, Generator, object):

@@ -8,8 +8,9 @@ import numpy as np
 from sys import maxint
 
 from ..control.io import audio
-from ..funct import blockwise, blockwise2
+from ..funct import blockwise
 from ..timing import sampler
+from ..utils.log import logger
 
 
 class Generator:
@@ -28,7 +29,7 @@ class Generator:
                     if res[i] != None and np.sign(res[i]) == -1:
                         res[i] = max(-len(self)-1, res[i])
                 item = slice(res[0], res[1], item.step)
-                item = np.arange(*(item.indices(item.stop or len(self))))
+                item = np.arange(*(item.indices(item.stop or (len(self)-1))))
             else:
                 item = np.arange(*(item.indices(item.stop)))
         return self.sample(item)
@@ -37,16 +38,7 @@ class Generator:
         return self.__getitem__(slice)
 
     def __iter__(self):
-        return blockwise2(self, sampler.blocksize())
-
-    def next(self):
-        it = iter(self)
-        while True:
-            try:
-                yield it.next()
-            except StopIteration:
-                break
-        it.close()
+        return blockwise(self, sampler.blocksize())
 
     def play(self, *args, **kwargs):
         audio.play(self, *args, **kwargs)

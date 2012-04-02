@@ -67,54 +67,35 @@ def count_step(start=0, step=1):
 	while True:
 		yield g.next()
 
-def blockwise(iterable, start=1, step=None):
-	if step is None:
-		step, start = start, 0
-
-	it = iter(iterable[start:])
-	#consume(it, start)
-	if np.sign(step) == -1:
-		it = reversed(list(it))
-	blocks = izip_longest(*[iter(it)] * np.abs(step))
-
-	while True:
-		try:
-			next = takewhile(lambda x: x != None, blocks.next())
-			#if isinstance(iterable, (np.ndarray)):
-			block = np.fromiter(next, dtype=np.dtype(iterable[0]))
-			#else:
-			#	block = list(next)
-
-			if len(block) > 0:
-				yield block
-			else:
-				raise StopIteration
-		except StopIteration:
-			break
-
-def blockwise2(iter, step=1, start=0):
+def blockwise(iterable, step=1, start=0):
 	if np.sign(step) == -1:
 		logger.warn("Blockwise will lose first value on negative step, because Numpy array's indexing bug.")
-	def get_next(it):
-		# next = list(np.fmax(it.next(), 0))
-		# next[1] = (None if next[1] == 0 else next[1])
-		# return next
-		return it.next()
-	blocks = pairwise(count_step(start, step))
+
+	def reset(start=start):
+		return pairwise(count_step(start, step))
+
+	blocks = reset()
 	while True:
 		try:
 			indices = blocks.next()
-			block = iter[slice(*np.append(indices, np.sign(step)))]
-			if len(block) > 0:
-				#logger.debug("Blockwise next: %s" % (indices,))
-				yield block
-			else:
-				raise StopIteration
+			block = iterable[slice(*np.append(indices, np.sign(step)))]
 		except StopIteration:
 			break
 		except GeneratorExit:
 			logger.debug("Blockwise generator exit.")
 			break
-	del blocks, indices
 
+		if len(block) > 0:
+			val = (yield block) # sending values into generator with send
+			while val is not None:
+				if val == 'current':
+					val = (yield indices)
+				if val == 'reset':
+					blocks = reset()
+					indices = (start, step)
+					val = (yield True)
+		else:
+			raise StopIteration
+
+	del block, blocks, indices
 

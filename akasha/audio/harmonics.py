@@ -17,7 +17,7 @@ from .oscillator import Osc
 from ..timing import sampler
 from ..utils.decorators import memoized
 from ..utils.log import logger
-from ..utils.math import random_phase
+from ..utils.math import random_phase, normalize
 
 
 class Overtones(object, FrequencyRatioMixin, Generator):
@@ -40,9 +40,8 @@ class Overtones(object, FrequencyRatioMixin, Generator):
 
     @property
     def max_overtones(self):
-        if self.frequency < 1:
-            return 1
-        return int(sampler.rate / (2.0 * self.frequency))
+        low_freq_overtone_limit = 10
+        return int(sampler.rate / (2.0 * max(self.frequency, low_freq_overtone_limit)))
 
     @property
     def limit(self):
@@ -103,7 +102,7 @@ class Overtones(object, FrequencyRatioMixin, Generator):
                     "Sustain with objects of type %s not implemented yet." % type(iter)
                 )
         
-        return frames / self.limit #/ max( abs(max(frames)), 1.0 ) # TODO fix normalization to use a single value for whole sound!
+        return frames / self.limit # normalize using a single value for whole sound!
 
     def __repr__(self):
         return "%s(sndobj=%s, n=%s, func=%s, damping=%s, rand_phase=%s>" % \
