@@ -68,7 +68,7 @@ def show_transfer(screen, snd, size=720, name="Transfer", type='PAL', axis='imag
     "Show a slice of the signal"
     snd = snd[0] # FIXME because xoltar uses 'is' to inspect the arguments, snd samples need to be wrapped into a list!
     img = get_canvas(size)
-    tfer = video_transfer(snd, type=type, axis=axis)
+    tfer = video_transfer(snd, type=type, axis=axis, horiz=size)
     black = (size - tfer.shape[0]) / 2.0
     img[1+black:-black,1:,:] = tfer
     blit(screen, img)
@@ -109,15 +109,11 @@ def handle_frame(snd, it, paint_fn, clock, twisted_loop=False):
             paint_fn([samples]) # FIXME wrap samples into a list for xoltar curry to work
 
             dc = time() - draw_start
-            if isinstance(clock, pg.time.Clock):
-                fps = clock.get_fps()
-                t = clock.tick_busy_loop(sampler.videorate)
-            else:
-                fps = 'n/a'
-                t = 'n/a'
+            fps = clock.get_fps()
+            t = clock.tick_busy_loop(sampler.videorate)
             logger.log(logging.BORING, "Animation: clock tick %d, FPS: %3.3f, drawing took: %.4f", t, fps, dc)
-    #if done and reactor.running:
-        #reactor.stop()
+    if done and reactor.running:
+        reactor.stop()
     return done
 
 def handle_input(snd, it, event):
@@ -196,17 +192,17 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
     it = iter(snd)
 
     paint_frame = fx.curry(show_slice, screen, size=size, name=name, antialias=antialias, lines=lines)
-    # paint_frame = fx.curry(show_transfer, screen, size=size, type='PAL', axis='imag')
+    #paint_frame = fx.curry(show_transfer, screen, size=size, type='PAL', axis='imag')
+
+    clock = pg.time.Clock()
+    set_timer()
 
     if loop == 'pygame':
-        clock = pg.time.Clock()
-        set_timer()
         done = False
         while not done:
             done = handle_frame(snd, it, paint_frame, clock)
     else:
         pg.display.init()
-        clock = reactor
         tick = LoopingCall(handle_frame, snd, it, paint_frame, clock)
         deferred = tick.start(1 / sampler.videorate, now=False)
         deferred.addErrback(lambda err: handleError(err))
