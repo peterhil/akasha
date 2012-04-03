@@ -81,7 +81,7 @@ def change_frequency(snd, key):
         snd.sustain = None
     logger.info("Setting NEW frequency: %r for %s, now at frequency: %s" % (f, snd, snd.frequency))
 
-def handle_frame(snd, it, paint_fn, clock, twisted_loop=False):
+def handle_frame(snd, it, ch, paint_fn, clock, twisted_loop=False):
     done = False
     events = pg.event.get()
     if len(events) > 1:
@@ -98,9 +98,7 @@ def handle_frame(snd, it, paint_fn, clock, twisted_loop=False):
             try:
                 samples = it.next()
                 audio = pg.sndarray.make_sound(pcm(samples))
-                ch = pg.mixer.find_channel()
                 ch.queue(audio)
-                #logger.debug("Using channel {0} for audio.".format(ch))
             except StopIteration:
                 logger.debug("Sound ended!")
                 done = True
@@ -163,7 +161,7 @@ def handle_input(snd, it, event):
             it.send('reset')
         else:
             if isinstance(snd, Generator):
-                snd.sustain = it.send('current')[1]
+                snd.sustain = it.send('current')[0]
                 logger.debug("Key up:   %s, sustain: %s" % (event, snd.sustain))
     else:
         logger.debug("Other: %s" % event)
@@ -200,10 +198,10 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
     if loop == 'pygame':
         done = False
         while not done:
-            done = handle_frame(snd, it, paint_frame, clock)
+            done = handle_frame(snd, it, ch, paint_frame, clock)
     else:
         pg.display.init()
-        tick = LoopingCall(handle_frame, snd, it, paint_frame, clock)
+        tick = LoopingCall(handle_frame, snd, it, ch, paint_frame, clock)
         deferred = tick.start(1 / sampler.videorate, now=False)
         deferred.addErrback(lambda err: handleError(err))
         deferred.addCallback(lambda ign: self.display.quit())

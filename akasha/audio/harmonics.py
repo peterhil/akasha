@@ -90,13 +90,13 @@ class Overtones(object, FrequencyRatioMixin, Generator):
                 frames += o[iter] * e[iter]
 
         if self.sustain != None:
-            sus_damping = lambda f, a=1.0: -2*np.log2(float(f))/10.0
+            sus_damping = lambda f, a=1.0: -2*np.log2(float(f))/5.0
             #sus_damping = lambda f: -0.5
             self.sustained = self.sustained or Exponential(sus_damping(self.frequency))
             if isinstance(iter, slice):
-                frames *= self.sustained[ slice(*list(np.array(iter.indices(iter.stop)) + self.sustain)) ]
+                frames *= self.sustained[ slice(*list(np.array(iter.indices(iter.stop)) - self.sustain)) ]
             elif isinstance(iter, np.ndarray):
-                frames *= self.sustained[ iter + self.sustain ]
+                frames *= self.sustained[ iter - self.sustain ]
             else:
                 raise exceptions.NotImplementedError(
                     "Sustain with objects of type %s not implemented yet." % type(iter)
