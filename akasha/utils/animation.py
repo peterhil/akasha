@@ -12,7 +12,7 @@ import os
 import pygame as pg
 
 from fractions import Fraction
-from timeit import default_timer as time
+from timeit import timeit, default_timer as time
 from twisted.internet.task import LoopingCall
 from twisted.internet import reactor
 
@@ -28,91 +28,12 @@ from ..tunings import WickiLayout
 w = WickiLayout()
 VIDEOFRAME = pg.NUMEVENTS - 1
 
-def init_pygame():
-    # Set mixer defaults: sampler rate, sample type, number of channels, buffer size
-    pg.mixer.pre_init(sampler.rate, pg.AUDIO_S16, 1, 128)
-    if 'numpy' in pg.surfarray.get_arraytypes():
-        pg.surfarray.use_arraytype('numpy')
-        logger.info("Using %s" % pg.surfarray.get_arraytype().capitalize())
-    else:
-        raise ImportError('Numpy array package is not installed')
-
-def init_mixer(*args):
-    pg.init()
-    pg.mixer.quit()
-    if isinstance(args, (tuple, list)) and len(args) > 0 and args[0]:
-        print args[0]
-        pg.mixer.init(*args[0])
-    else:
-        pg.mixer.init(frequency=sampler.rate, size=-16, channels=1, buffer=128)
-    init = pg.mixer.get_init()
-    logger.debug("Mixer init: %s sampler rate: %s Video rate: %s" % (init, sampler.rate, sampler.videorate))
-    return init
-
-def blit(screen, img):
-    pg.surfarray.blit_array(screen, img[:,:,:-1]) # Drop alpha
-
-def show_slice(screen, snd, size=800, name="Resonance", antialias=True, lines=False):
-    "Show a slice of the signal"
-    snd = snd[0] # FIXME because xoltar uses 'is' to inspect the arguments, snd samples need to be wrapped into a list!
-    if lines:
-        img = get_canvas(size)
-        blit(screen, img)
-        img = draw(snd, size, antialias=antialias, lines=lines, screen=screen, img=img)
-    else:
-        img = draw(snd, size, antialias=antialias, lines=lines, screen=screen)
-        blit(screen, img)
-    pg.display.flip()
-
-def show_transfer(screen, snd, size=720, name="Transfer", type='PAL', axis='imag'):
-    "Show a slice of the signal"
-    snd = snd[0] # FIXME because xoltar uses 'is' to inspect the arguments, snd samples need to be wrapped into a list!
-    img = get_canvas(size)
-    tfer = video_transfer(snd, type=type, axis=axis, horiz=size)
-    black = (size - tfer.shape[0]) / 2.0
-    img[1+black:-black,1:,:] = tfer
-    blit(screen, img)
-    pg.display.flip()
-
 def change_frequency(snd, key):
     f = w.get(*(pos.get(key, pos[None])))
     snd.frequency = f
     if isinstance(snd, Generator):
         snd.sustain = None
     logger.info("Setting NEW frequency: %r for %s, now at frequency: %s" % (f, snd, snd.frequency))
-
-def handle_frame(snd, it, ch, paint_fn, clock, twisted_loop=False):
-    done = False
-    events = pg.event.get()
-    if len(events) > 1:
-        logger.debug("Got %s events to handle: %s" % (len(events), events))
-    for event in events:
-        if twisted_loop or (event.type != VIDEOFRAME):
-            done = handle_input(snd, it, event)
-            if done:
-                break
-        if twisted_loop or (event.type == VIDEOFRAME):
-            if sampler.paused:
-                break
-            draw_start = time()
-            try:
-                samples = it.next()
-                audio = pg.sndarray.make_sound(pcm(samples))
-                ch.queue(audio)
-            except StopIteration:
-                logger.debug("Sound ended!")
-                done = True
-                break
-
-            paint_fn([samples]) # FIXME wrap samples into a list for xoltar curry to work
-
-            dc = time() - draw_start
-            fps = clock.get_fps()
-            t = clock.tick_busy_loop(sampler.videorate)
-            logger.log(logging.BORING, "Animation: clock tick %d, FPS: %3.3f, drawing took: %.4f", t, fps, dc)
-    if done and reactor.running:
-        reactor.stop()
-    return done
 
 def handle_input(snd, it, event):
     # Quit
@@ -165,6 +86,93 @@ def handle_input(snd, it, event):
                 logger.debug("Key up:   %s, sustain: %s" % (event, snd.sustain))
     else:
         logger.debug("Other: %s" % event)
+    return False
+
+def paint_frame(it, ch, paint_fn, clock):
+    done = False
+    if sampler.paused:
+        return done
+    draw_start = time()
+    try:
+        samples = it.next()
+        audio = pg.sndarray.make_sound(pcm(samples))
+        ch.queue(audio)
+    except StopIteration:
+        logger.debug("Sound ended!")
+        done = True
+
+    paint_fn([samples]) # FIXME wrap samples into a list for xoltar curry to work
+
+    dc = time() - draw_start
+    fps = clock.get_fps()
+    t = clock.tick_busy_loop(sampler.videorate)
+    logger.log(logging.BORING, "Animation: clock tick %d, FPS: %3.3f, drawing took: %.4f", t, fps, dc)
+    return done
+
+def handle_events(snd, it, ch, paint_fn, clock, twisted_loop=False):
+    done = False
+    input_start = time()
+    events = pg.event.get()
+    for event in events:
+        if twisted_loop or (event.type != VIDEOFRAME):
+            done = handle_input(snd, it, event)
+        if twisted_loop or (event.type == VIDEOFRAME):
+            done |= paint_frame(it, ch, paint_fn, clock)
+        if done:
+            break
+    dc = time() - input_start
+    if len(events) > 1:
+        logger.debug("Handled %s events in %.4f seconds: %s" % (len(events), dc, events))
+    if done and reactor.running:
+        pg.display.quit()
+        reactor.stop()
+    return done
+
+def init_pygame():
+    # Set mixer defaults: sampler rate, sample type, number of channels, buffer size
+    pg.mixer.pre_init(sampler.rate, pg.AUDIO_S16, 1, 128)
+    if 'numpy' in pg.surfarray.get_arraytypes():
+        pg.surfarray.use_arraytype('numpy')
+        logger.info("Using %s" % pg.surfarray.get_arraytype().capitalize())
+    else:
+        raise ImportError('Numpy array package is not installed')
+
+def init_mixer(*args):
+    pg.init()
+    pg.mixer.quit()
+    if isinstance(args, (tuple, list)) and len(args) > 0 and args[0]:
+        print args[0]
+        pg.mixer.init(*args[0])
+    else:
+        pg.mixer.init(frequency=sampler.rate, size=-16, channels=1, buffer=128)
+    init = pg.mixer.get_init()
+    logger.debug("Mixer init: %s sampler rate: %s Video rate: %s" % (init, sampler.rate, sampler.videorate))
+    return init
+
+def blit(screen, img):
+    pg.surfarray.blit_array(screen, img[:,:,:-1]) # Drop alpha
+
+def show_slice(screen, snd, size=800, name="Resonance", antialias=True, lines=False):
+    "Show a slice of the signal"
+    snd = snd[0] # FIXME because xoltar uses 'is' to inspect the arguments, snd samples need to be wrapped into a list!
+    if lines:
+        img = get_canvas(size)
+        blit(screen, img)
+        img = draw(snd, size, antialias=antialias, lines=lines, screen=screen, img=img)
+    else:
+        img = draw(snd, size, antialias=antialias, lines=lines, screen=screen)
+        blit(screen, img)
+    pg.display.flip()
+
+def show_transfer(screen, snd, size=720, name="Transfer", type='PAL', axis='imag'):
+    "Show a slice of the signal"
+    snd = snd[0] # FIXME because xoltar uses 'is' to inspect the arguments, snd samples need to be wrapped into a list!
+    img = get_canvas(size)
+    tfer = video_transfer(snd, type=type, axis=axis, horiz=size)
+    black = (size - tfer.shape[0]) / 2.0
+    img[1+black:-black,1:,:] = tfer
+    blit(screen, img)
+    pg.display.flip()
 
 def set_timer(ms = sampler.frametime):
     pg.time.set_timer(VIDEOFRAME, ms)
@@ -172,7 +180,7 @@ def set_timer(ms = sampler.frametime):
 def handleError(err):
     logger.error("%s happened!" % str(err))
     pg.display.quit()
-    #reactor.stop()
+    reactor.stop()
     raise err
 
 def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, init=None, loop='pygame'):
@@ -189,22 +197,30 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
     ch = pg.mixer.find_channel()
     it = iter(snd)
 
-    paint_frame = fx.curry(show_slice, screen, size=size, name=name, antialias=antialias, lines=lines)
-    #paint_frame = fx.curry(show_transfer, screen, size=size, type='PAL', axis='imag')
+    paint_fn = fx.curry(show_slice, screen, size=size, name=name, antialias=antialias, lines=lines)
+    #paint_fn = fx.curry(show_transfer, screen, size=size, type='PAL', axis='imag')
 
     clock = pg.time.Clock()
-    set_timer()
 
     if loop == 'pygame':
+        set_timer()
         done = False
         while not done:
-            done = handle_frame(snd, it, ch, paint_frame, clock)
+            done = handle_events(snd, it, ch, paint_fn, clock)
     else:
         pg.display.init()
-        tick = LoopingCall(handle_frame, snd, it, ch, paint_frame, clock)
-        deferred = tick.start(1 / sampler.videorate, now=False)
-        deferred.addErrback(lambda err: handleError(err))
-        deferred.addCallback(lambda ign: self.display.quit())
+
+        renderCall = LoopingCall(paint_frame, it, ch, paint_fn, clock)
+        inputCall = LoopingCall(handle_events, snd, it, ch, paint_fn, clock)
+
+        renderdef = renderCall.start(1 / sampler.videorate, now=False)
+        renderdef.addErrback(lambda err: handleError(err))
+
+        finished = inputCall.start(1 / sampler.videorate / 10, now=False)
+        finished.addErrback(lambda err: handleError(err))
+
+        finished.addCallback(lambda ign: renderCall.stop())
+        finished.addCallback(lambda ign: self.display.quit())
         reactor.run()
 
     it.close()
