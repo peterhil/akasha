@@ -97,11 +97,11 @@ def paint_frame(it, ch, paint_fn, clock):
         samples = it.next()
         audio = pg.sndarray.make_sound(pcm(samples))
         ch.queue(audio)
+        paint_fn([samples]) # FIXME wrap samples into a list for xoltar curry to work
     except StopIteration:
         logger.debug("Sound ended!")
         done = True
-
-    paint_fn([samples]) # FIXME wrap samples into a list for xoltar curry to work
+        return done
 
     dc = time() - draw_start
     fps = clock.get_fps()

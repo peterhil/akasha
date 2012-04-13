@@ -54,7 +54,9 @@ class Pcm(FrequencyRatioMixin, Generator, object):
         # http://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.resample.html
         return dsp.resample(self.snd, len(self))
 
-    def resample_at_freq(self, iter):
+    def resample_at_freq(self, iter=None):
+        if iter == None:
+            iter = slice(0, len(self))
         ratio = (self.base_freq.ratio / self.frequency.ratio)
         if ratio == 0:
             return np.array([0j])
@@ -64,8 +66,8 @@ class Pcm(FrequencyRatioMixin, Generator, object):
             if isinstance(iter, slice) and iter.stop >= len(self):
                 logger.warn("Normalising {0} for length {1}".format(iter, len(self)))
                 iter = slice(iter.start, min(iter.stop, len(self), iter.step))
-            return self.resample(self, ratio)[iter]
-            #return self.sc_resample(self, ratio)[iter]
+            return self.resample(ratio)[iter]
+            #return self.sc_resample(ratio)[iter]
 
     def sample(self, iter):
         #logger.debug(__name__ + " sample("+str(self)+"): " + str(iter))
