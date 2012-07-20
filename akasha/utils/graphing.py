@@ -26,6 +26,9 @@ except:
 
 lowest_audible_hz = 16.35
 
+colour_values = np.float32
+colour_result = np.float32
+
 # Colour conversions from: http://local.wasp.uwa.edu.au/~pbourke/texture_colour/convert/
 
 # /*
@@ -34,13 +37,11 @@ lowest_audible_hz = 16.35
 #    Lightness is between 0 and 1
 #    Saturation is between 0 and 1
 # */
-def hsv2rgb(hsv, alpha=None):
-    # hsv = np.atleast_1d(hsv)
-    # if (hsv.size == 1):
-    #     hsv = angle2hsv(hsv)
+def hsv2rgb(hsv, alpha=None, dtype=colour_result):
+    hsv = np.array(np.atleast_1d(hsv), dtype=colour_values)
 
-    rgb = [0, 0, 0] # Could be a dict {}
-    sat = [0, 0, 0]
+    rgb = np.array([0, 0, 0], dtype=colour_values)
+    sat = np.array([0, 0, 0], dtype=colour_values)
 
     hsv[0] = hsv[0] % 360
 
@@ -61,22 +62,22 @@ def hsv2rgb(hsv, alpha=None):
     sat[1] = min(sat[1], 1)
     sat[2] = min(sat[2], 1)
 
-    rgb[0] = int(round( (1 - hsv[1] + hsv[1] * sat[0]) * hsv[2] ))
-    rgb[1] = int(round( (1 - hsv[1] + hsv[1] * sat[1]) * hsv[2] ))
-    rgb[2] = int(round( (1 - hsv[1] + hsv[1] * sat[2]) * hsv[2] ))
+    rgb[0] = (1 - hsv[1] + hsv[1] * sat[0]) * hsv[2]
+    rgb[1] = (1 - hsv[1] + hsv[1] * sat[1]) * hsv[2]
+    rgb[2] = (1 - hsv[1] + hsv[1] * sat[2]) * hsv[2]
 
-    #alpha
+    # Alpha
     if (len(hsv) == 4):
-        rgb.append(hsv[3])
+        np.append(rgb, hsv[3])
     elif alpha:
-        rgb.append(alpha)
+        np.append(rgb, alpha)
 
-    return rgb
+    return rgb.astype(dtype)
 
-def hsv_to_rgb(hsv, alpha=None):
-    hsv = np.array(np.atleast_1d(hsv), dtype=np.uint8)
-    rgb = np.array([0, 0, 0], dtype=np.uint8)
-    sat = np.array([0, 0, 0], dtype=np.float16)
+def hsv_to_rgb(hsv, alpha=None, dtype=colour_result):
+    hsv = np.array(np.atleast_1d(hsv), dtype=colour_values)
+    rgb = np.array([0, 0, 0], dtype=colour_values)
+    sat = np.array([0, 0, 0], dtype=colour_values)
 
     hsv[0] = hsv[0] % 360
 
@@ -94,12 +95,13 @@ def hsv_to_rgb(hsv, alpha=None):
 
     rgb = (1 - hsv[1] + hsv[1] * sat) * hsv[2]
 
-    #alpha
+    # Alpha
     if (len(hsv) == 4):
         np.append(rgb, hsv[3])
     elif alpha:
         np.append(rgb, alpha)
-    return rgb
+
+    return rgb.astype(dtype)
 
 # /*
 #    Calculate HSV from RGB
@@ -107,8 +109,9 @@ def hsv_to_rgb(hsv, alpha=None):
 #    Lightness is betweeen 0 and 1
 #    Saturation is between 0 and 1
 # */
-def rgb2hsv(rgb):
-    hsv = [0, 0, 0] # Could be a dict {}
+def rgb2hsv(rgb, dtype=colour_result):
+    rgb = np.array(np.atleast_1d(rgb), dtype=colour_values)
+    hsv = np.array([0, 0, 0], dtype=colour_values)
 
     themin = np.min(rgb)
     themax = np.max(rgb)
@@ -128,17 +131,15 @@ def rgb2hsv(rgb):
             hsv[0] += (4.0 + (rgb[0] - rgb[1]) / delta)
         hsv[0] *= 60.0
 
-    hsv = map(lambda a: int(round(a)), hsv)
-
-    #alpha
+    # Alpha
     if (len(rgb) == 4):
         hsv.append(rgb[3])
 
-    return hsv
+    return hsv.astype(dtype)
 
-def angle2hsv(deg):
+def angle2hsv(deg, dtype=colour_result):
     # dtype uint8 loses precision, but doesn't matter here. It gets over a problem with hsv_to_rgb.
-    return np.append(np.atleast_1d(deg % 360), np.array([1, 255, 255], dtype=np.uint8))
+    return np.append(np.atleast_1d(deg % 360), np.array([1, 255, 255], dtype=colour_values)).astype(dtype)
 
 def hist_graph(samples, size=1000):
     """Uses numpy histogram2d to make an image from complex signal."""
@@ -357,6 +358,8 @@ def draw(samples, size=1000, dur=None, antialias=False, lines=False, axis=True, 
             ]
 
             colors = colorize(samples) # or 255 for greyscale
+            # Add opaque alpha
+            colors = np.append(colors, np.array([0] * len(colors)).reshape(len(colors), 1), 1)
 
             img[pos[0][1], pos[0][0], :] += colors * np.repeat(values_11, 4).reshape(len(samples), 4)
             img[pos[1][1], pos[1][0], :] += colors * np.repeat(values_10, 4).reshape(len(samples), 4)
