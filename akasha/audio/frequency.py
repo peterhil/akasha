@@ -14,8 +14,6 @@ from .generators import PeriodicGenerator
 
 from ..timing import sampler
 from ..utils.decorators import memoized
-from ..utils.log import logger
-from ..utils.math import *
 
 
 class FrequencyRatioMixin:
