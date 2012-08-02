@@ -14,17 +14,17 @@ from ..funct import blockwise
 from ..timing import sampler
 
 
-PI2 = np.pi * 2.0
+pi2 = np.pi * 2.0
 
 
 def to_phasor(x):
     """
     Convert complex number to phasor tuple with magnitude and angle (in degrees).
     """
-    return np.array([np.abs(x), (np.angle(x) / PI2 * 360)]).T
+    return np.array([np.abs(x), (np.angle(x) / pi2 * 360)]).T
 
 def nth_root(n):
-    return np.exp(1j * PI2 * 1.0/n)
+    return np.exp(1j * pi2 * 1.0/n)
 
 def deg(radians):
     return 180 * (radians / np.pi)
@@ -123,7 +123,7 @@ def rand_between(min, max, size=1, random=np.random.random):
     return np.atleast_1d( (max - min) * random(size) + min )
 
 def random_phase(random=np.random.random):
-    return np.atleast_1d( cmath.rect(1.0, PI2 * random() - np.pi) )
+    return np.atleast_1d( cmath.rect(1.0, pi2 * random() - np.pi) )
 
 
 # Primes
@@ -282,7 +282,7 @@ def get_impulses(signal, tau=False):
         peaks = pad(distances(np.angle(signal) / np.pi % 2), 0)
         res = np.fmax(np.sign((peaks - 1)) * 2, 0)
     else:
-        peaks = pad(distances(np.angle(signal) % PI2), 0)
-        res = np.fmax(np.sign((peaks - np.pi)) * PI2, 0)
+        peaks = pad(distances(np.angle(signal) % pi2), 0)
+        res = np.fmax(np.sign((peaks - np.pi)) * pi2, 0)
     return res
 

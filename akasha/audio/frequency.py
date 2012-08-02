@@ -87,11 +87,16 @@ class Frequency(object, FrequencyRatioMixin, PeriodicGenerator):
     @staticmethod
     @memoized
     def angles(ratio):
-        """Fastest generating method so far. Could be made still faster by using conjugate for half of the samples."""
+        """Normalized frequency (Tau) angles for one full period at ratio."""
+        # Fastest generating method so far. Could be made still faster by using conjugate for half of the samples.
         if ratio == 0:
             return np.array([0.], dtype=np.float64)
-        pi2 = 2 * np.pi
-        return pi2 * ratio.numerator * np.arange(0, 1, 1.0/ratio.denominator, dtype=np.float64)
+        return ratio.numerator * np.arange(0, 1, 1.0/ratio.denominator, dtype=np.float64)
+
+    @staticmethod
+    def rads(ratio):
+        """Radian angles for one full period at ratio."""
+        return 2 * np.pi * Frequency.angles(ratio)
 
     @property
     def sample(self):

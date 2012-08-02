@@ -116,7 +116,7 @@ class Overtones(object, FrequencyRatioMixin, Generator):
 class Multiosc(Overtones):
     # MAKE A MULTIOSC without ENV, iow. sample using overtones and apply_along_axis with sum!!!!
     # ratios = map(lambda r: Fraction.from_float(r).limit_denominator(sampler.rate), h.ratio*h.overtones)
-    # samples = map(Frequency.angles, ratios)
+    # samples = map(Frequency.rads, ratios)
     # map(len, samples)
     # Out[58]: [1960, 980, 1960, 490, 393, 980, 280]
     # In [60]: 7*280*393.0 / np.array(map(len, samples))
@@ -141,7 +141,7 @@ class Multiosc(Overtones):
     @staticmethod
     @memoized
     def circle(ratio):
-        return np.exp(1j * Frequency.angles(ratio))
+        return np.exp(1j * pi2 * Frequency.angles(ratio))
 
     def sample(self, iter):
         frames = np.zeros(len(iter), dtype=complex)

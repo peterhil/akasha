@@ -19,91 +19,97 @@ from ..utils.log import logger
 from ..utils.math import *
 
 
-class Osc(object, FrequencyRatioMixin, PeriodicGenerator):
-    """Oscillator class"""
+class Curve(object, PeriodicGenerator):
+    """Generic curve abstraction"""
 
-    def __init__(self, freq):
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def at(param):
+        return param
+
+
+class Circle(Curve):
+    """Curve of the circle"""
+
+    @staticmethod
+    def at(param):
+        return np.exp(1j * pi2 * param)
+
+
+class Osc(object, FrequencyRatioMixin, PeriodicGenerator):
+    """Generic oscillator class with a frequency and a parametric curve."""
+
+    def __init__(self, freq, curve = Circle()):
         self._hz = Frequency(freq)
-        self.superness = (2,2,2,2)  # CLEANUP: Oscs shouldn't know about superness -> move curves to own class!
+        self.curve = curve
 
     @classmethod
     def from_ratio(cls, ratio, den=False):
         if den: ratio = Fraction(ratio, den)
         return cls(Fraction(ratio) * sampler.rate)
 
-    ### Generating functions ###
-
-    @staticmethod
-    @memoized
-    def circle(ratio):
-        return np.exp(1j * Frequency.angles(ratio))
-
-    ### Sampling ###
-
     @property
     def sample(self):
-        return self.circle(self.ratio)
+        return self.curve.at(Frequency.angles(self.ratio))
 
     @property
     def imag(self):
         return self.sample.imag
 
-    ### Representation ###
-
     def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__, self.frequency._hz)
+        return "%s(%s, curve=%s)" % (self.__class__.__name__, self.frequency._hz, repr(self.curve))
 
     def __str__(self):
-        return "<%s: %s>" % (self.__class__.__name__, self.frequency)
+        return "<%s: %s, curve = %s>" % (self.__class__.__name__, self.frequency, str(self.curve))
 
 
-class Super(Osc):
-    """Oscillator that has a superness parameter."""
+class SuperEllipse(Curve):
+    """Oscillator curve that has superness parameters."""
     
-    def __init__(self, freq, m=4.0, n=2.0, p=2.0, q=2.0, a=1.0, b=1.0):
+    def __init__(self, *superness):
         """
-        Super oscillator can be initialized using a frequency and superness.
+        Super oscillator can be initialized using superness parameters to control the shape.
+
+        The parameters are:
+        superness = { m: 4.0, n: 2.0, p: 2.0, q: 2.0, a: 1.0, b: 1.0 }
         
         See 'Superellipse' article at Wikipedia for explanation of what this parameter means:
         http://en.wikipedia.org/wiki/Superellipse
         """
-        self._hz = Frequency(freq)
-        self.amp = 1.0
-        self.superness = (m, n, p, q, a, b)
-
-    @classmethod
-    def from_ratio(cls, ratio, den=False, *superness):
-        if den: ratio = Fraction(ratio, den)
-        return cls(Fraction(ratio) * sampler.rate, superness)
+        self.superness = self.normalise_superness(superness)
 
     @staticmethod
     def normalise_superness(superness):
-        if superness == None:
-            logger.warn("Got None for superness!")
-            return (2,2,2,2) # identity for superness
-        if isinstance(superness, tuple) and len(superness) == 4:
-            return superness
-        if not isinstance(superness, (list, tuple, Number)):
+        if not isinstance(superness, (dict, list, tuple, Number, None)):
             raise ValueError(
-                "Superness %s needs to be a number, a tuple or a list of length one to four. " + \
+                "Superness %s needs to be a number, a tuple or a list of length one to six. " + \
                 "Got type %s" % (superness, type(superness))
             )
+        if isinstance(superness, tuple):
+            if len(superness) == 6:
+                return superness
+            if isinstance(list(superness)[0], (tuple, list)):
+                superness = list(superness)[0]
+        if superness == None:
+            logger.warn("Got None for superness!")
+            superness = [2.0] # identity for superness
         if isinstance(superness, Number):
-            superness = tuple([superness])
-        if len(superness) < 4:
-            superness = list(superness) + [superness[-1]] * (4 - len(superness))
-        return tuple(superness[:4])  # Take only the first four params
+            superness = [superness]
+        if isinstance(superness, dict):
+            superness = superness.values()
+        if len(superness) < 6:
+            if len(superness) < 4:
+                superness = list(superness) + [superness[-1]] * (4 - len(superness))
+            superness = list(superness) + [1.0] * (6 - len(superness))
+        return tuple(superness[:6])  # Take first six params
 
-    ### Generating functions ###
+    def at(self, param):
+        return normalize(self.superformula(param, self.superness)) * Circle.at(param)
 
     @staticmethod
-    @memoized
-    def gen(ratio, superness):
-        angles = Frequency.angles(ratio)
-        return Super.superformula(angles, superness) * np.exp(1j * angles)
-
-    @staticmethod
-    def superformula(angles, superness):
+    def superformula(at, superness):
         """
         Superformula function. Generates amplitude curves applicable to oscillators by multiplying.
 
@@ -117,20 +123,8 @@ class Super(Osc):
         """
         (m, n, p, q, a, b) = list(superness)
         assert np.isscalar(m), "%s in superformula is not scalar." % m
-        coeff = angles * (m / 4.0)
+        coeff = pi2 * at * (m / 4.0)
         return (np.abs(np.cos(coeff) / a)**p + np.abs(np.sin(coeff) / b)**q) ** (-1.0/n)
-
-    ### Sampling ###
-
-    @property
-    def sample(self):
-        return normalize(self.gen(self.ratio, self.superness)) * self.amp
-
-    def __repr__(self):
-        return "%s(%s, superness=%s)" % (self.__class__.__name__, self.frequency._hz, self.superness)
-
-    def __str__(self):
-        return "<%s: %s, superness %s>" % (self.__class__.__name__, self.frequency, self.superness)
 
 
 def chirp_zeta(z1 = -0.5-100j, z2 = 0.5+100j, dur = 10):

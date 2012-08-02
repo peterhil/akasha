@@ -12,7 +12,7 @@ from fractions import Fraction
 from .audio.oscillator import Frequency
 from .control.io.keyboard import kb
 from .utils.log import logger
-from .utils.math import PI2, find_closest_index
+from .utils.math import pi2, find_closest_index
 
 
 # See "Pitch Systems in Tonal Music" series on YouTube:
@@ -132,7 +132,7 @@ class LucyTuning(object):
     """
     @classmethod
     def L(cls, n):
-        return 2.0 ** (n / PI2)
+        return 2.0 ** (n / pi2)
 
     @classmethod
     def s(cls, n):
