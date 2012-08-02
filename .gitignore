@@ -1,0 +1,12 @@
+*~
+TAGS
+
+.figleaf
+*.cover
+
+doc/
+html/
+
+install/
+pip-stable-req.txt
+virtualenvs/
