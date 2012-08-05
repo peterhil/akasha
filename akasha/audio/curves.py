@@ -16,9 +16,6 @@ from ..utils.math import pi2, normalize
 class Curve(object, PeriodicGenerator):
     """Generic curve abstraction"""
 
-    def __init__(self):
-        pass
-
     @staticmethod
     def at(param):
         return param
@@ -30,7 +27,6 @@ class Circle(Curve):
     @staticmethod
     def at(param):
         return np.exp(1j * pi2 * param)
-
 
 class SuperEllipse(Curve):
     """Oscillator curve that has superness parameters."""
