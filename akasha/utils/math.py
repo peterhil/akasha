@@ -151,13 +151,20 @@ def gcd(m, n):
 def lcm(a, b):
     return a * b / gcd(a, b)
 
+
+# Vectorized functions
+
 np.gcd = lambda a, axis=None: reduce(gcd, a)
 np.lcm = lambda a, axis=None: reduce(lcm, a)
 
+np.getattr = np.vectorize(lambda x, attr: getattr(x, attr))
 
 def as_fractions(a, limit=1000000):
     from_float = np.vectorize(lambda y: Fraction.from_float(y).limit_denominator(limit))
     return from_float(a)
+
+
+# Factors
 
 def sq_factors(n):
     """
