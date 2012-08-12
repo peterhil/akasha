@@ -24,6 +24,9 @@ class Curve(object, PeriodicGenerator):
     def __call__(self, param):
         return self.at(param)
 
+    def __str__(self):
+        return repr(self)
+
 
 class Circle(Curve):
     """Curve of the circle"""
@@ -31,6 +34,9 @@ class Circle(Curve):
     @staticmethod
     def at(param):
         return np.exp(1j * pi2 * param)
+
+    def __repr__(self):
+        return "%s()" % (self.__class__.__name__ ,)
 
 
 class Super(Curve):
@@ -95,5 +101,8 @@ class Super(Curve):
         assert np.isscalar(m), "%s in superformula is not scalar." % m
         coeff = pi2 * at * (m / 4.0)
         return (np.abs(np.cos(coeff) / a)**p + np.abs(np.sin(coeff) / b)**q) ** (-1.0/n)
+
+    def __repr__(self):
+        return "%s%s" % (self.__class__.__name__, self.superness)
 
 
