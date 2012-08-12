@@ -15,7 +15,13 @@ def setup():
     # Also be sure to have LC_ALL='fi_FI.UTF-8' and CHARSET='UTF-8' set in the environment
     # to have sys.stdin.encoding = UTF-8
     locale.setlocale(locale.LC_ALL, 'fi_FI.UTF-8')
-    assert sys.stdin.encoding == 'UTF-8', \
-    	"Unicode not enabled! Current input encoding is: %s" % sys.stdin.encoding
+
+    assert locale.getlocale()[1] == 'UTF8', \
+        "Unicode not enabled! Current locale is: %s.%s" % locale.getlocale()
+
+    if isinstance(sys.stdin, file):
+        assert sys.stdin.encoding == 'UTF-8', \
+        "Unicode input not enabled! Current input encoding is: %s" % sys.stdin.encoding
+
 
 setup()
