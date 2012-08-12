@@ -157,7 +157,7 @@ def lcm(a, b):
 np.gcd = lambda a, axis=None: reduce(gcd, a)
 np.lcm = lambda a, axis=None: reduce(lcm, a)
 
-np.getattr = np.vectorize(lambda x, attr: getattr(x, attr))
+np.getattr = np.vectorize(lambda x, attr: getattr(x, attr), otypes=['object'])
 
 def as_fractions(a, limit=1000000):
     from_float = np.vectorize(lambda y: Fraction.from_float(y).limit_denominator(limit))
