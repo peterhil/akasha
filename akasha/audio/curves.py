@@ -10,7 +10,8 @@ from numbers import Number
 
 from .generators import PeriodicGenerator
 
-from ..utils.math import pi2, normalize
+from ..utils.math import pad, pi2, normalize
+from ..utils.log import logger
 
 
 class Curve(object, PeriodicGenerator):
@@ -18,7 +19,10 @@ class Curve(object, PeriodicGenerator):
 
     @staticmethod
     def at(param):
-        return param
+        raise NotImplementedError("Please implement static method at() in a subclass.")
+
+    def __call__(self, param):
+        return self.at(param)
 
 
 class Circle(Curve):
@@ -28,7 +32,8 @@ class Circle(Curve):
     def at(param):
         return np.exp(1j * pi2 * param)
 
-class SuperEllipse(Curve):
+
+class Super(Curve):
     """Oscillator curve that has superness parameters."""
 
     def __init__(self, *superness):
@@ -45,28 +50,30 @@ class SuperEllipse(Curve):
 
     @staticmethod
     def normalise_superness(superness):
-        if not isinstance(superness, (dict, list, tuple, Number, None)):
+        superness = tuple(np.array(superness).flat)
+
+        if isinstance(superness, tuple) and len(superness) == 6:
+            return superness
+
+        if superness in (None, (None,), tuple(), ((),)):
+            logger.warn("Got None for superness!")
+            superness = (4.0, 2.0) # identity for superness
+
+        if not isinstance(superness, (list, tuple, Number)):
             raise ValueError(
                 "Superness %s needs to be a number, a tuple or a list of length one to six. " + \
-                "Got type %s" % (superness, type(superness))
+                "Got type %s" % ((superness), type(superness))
             )
-        if isinstance(superness, tuple):
-            if len(superness) == 6:
-                return superness
-            if isinstance(list(superness)[0], (tuple, list)):
-                superness = list(superness)[0]
-        if superness == None:
-            logger.warn("Got None for superness!")
-            superness = [2.0] # identity for superness
+
         if isinstance(superness, Number):
             superness = [superness]
-        if isinstance(superness, dict):
-            superness = superness.values()
+
         if len(superness) < 6:
             if len(superness) < 4:
                 superness = list(superness) + [superness[-1]] * (4 - len(superness))
             superness = list(superness) + [1.0] * (6 - len(superness))
-        return tuple(superness[:6])  # Take first six params
+
+        return tuple(superness[:6])
 
     def at(self, param):
         return normalize(self.superformula(param, self.superness)) * Circle.at(param)

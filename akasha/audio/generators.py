@@ -34,9 +34,6 @@ class Generator:
                 item = np.arange(*(item.indices(item.stop)))
         return self.sample(item)
 
-    def __call__(self, slice):
-        return self.__getitem__(slice)
-
     def __iter__(self):
         return blockwise(self, sampler.blocksize())
 

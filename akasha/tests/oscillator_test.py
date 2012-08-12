@@ -14,16 +14,53 @@ from numpy.testing.utils import nulp_diff
 
 from fractions import Fraction
 
-from ..audio.oscillator import *
-from ..utils.math import to_phasor
-from ..tunings import cents, cents_diff
+from .. import akasha
 
+from akasha.audio.curves import Circle, Curve
+from akasha.audio.frequency import Frequency
+from akasha.audio.oscillator import Osc
+from akasha.timing import sampler
+from akasha.tunings import cents, cents_diff
+from akasha.utils.math import to_phasor, pi2
 
 # Just noticeable difference allowance for Frequency rounding
 # See http://en.wikipedia.org/wiki/Cent_(music)#Human_perception
 # This should probably be much smaller than the suggested 3-6 cents...
 JND_CENTS_EPSILON = 1.0e-2
 
+
+class TestOscillator(object):
+    """Test oscillator"""
+
+    def test_init(self):
+        a = Osc(440)
+        assert a.frequency == Frequency(440.0)
+        assert isinstance(a.curve, Circle)
+        assert callable(a.curve)
+
+        b = Osc(216, Curve)
+        with pytest.raises(NotImplementedError):
+            b.curve.at(4)
+        # assert b.curve.at(4) == NotImplemented
+
+    def test_from_ratio(self):
+        o, p = 3, 802
+        a = Osc.from_ratio(o, p)
+        b = Osc.from_ratio(Fraction(o, p))
+        c = Osc(Fraction(o, p) * sampler.rate)
+        assert a == b == c
+        assert a.order == o
+        assert a.period == p
+        assert a.ratio == Fraction(o, p)
+
+    def test_sample(self):
+        o, p = 1, sampler.rate
+
+        a = Osc.from_ratio(o, p)
+        # expected = np.exp(1j * pi2 * np.linspace(0, o, p, endpoint=False))
+        expected = np.exp(1j * pi2 * o * np.arange(0, 1.0, 1.0/p, dtype=np.float64))
+
+        assert_nulp_diff(a.sample, expected, 1)
 
 class TestOscillatorInit(object):
     """Test oscillator initialization"""
