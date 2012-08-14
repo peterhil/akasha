@@ -6,15 +6,8 @@ Unit tests for oscillator.py
 
 import pytest
 import unittest
+
 import numpy as np
-
-from numpy.testing.utils import assert_array_almost_equal, assert_array_max_ulp
-from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
-from numpy.testing.utils import nulp_diff
-
-from fractions import Fraction
-
-from .. import akasha
 
 from akasha.audio.curves import Circle, Curve
 from akasha.audio.frequency import Frequency
@@ -22,6 +15,13 @@ from akasha.audio.oscillator import Osc
 from akasha.timing import sampler
 from akasha.tunings import cents, cents_diff
 from akasha.utils.math import to_phasor, pi2
+
+from fractions import Fraction
+
+from numpy.testing.utils import assert_array_almost_equal, assert_array_max_ulp
+from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
+from numpy.testing.utils import nulp_diff
+
 
 # Just noticeable difference allowance for Frequency rounding
 # See http://en.wikipedia.org/wiki/Cent_(music)#Human_perception

@@ -13,16 +13,16 @@ import pygame as pg
 
 from fractions import Fraction
 from timeit import timeit, default_timer as time
+
 from twisted.internet.task import LoopingCall
 from twisted.internet import reactor
 
-from .graphing import *
-from .math import pcm
-
-from ..audio.generators import Generator
-from ..control.io.keyboard import *
-from ..timing import sampler, time_slice
-from ..tunings import WickiLayout
+from akasha.audio.generators import Generator
+from akasha.control.io.keyboard import *
+from akasha.graphics.drawing import *
+from akasha.timing import sampler, time_slice
+from akasha.tunings import WickiLayout
+from akasha.utils.math import pcm
 
 
 w = WickiLayout()

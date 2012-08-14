@@ -41,16 +41,17 @@ if __name__ == '__main__':
     from effects.tape import *
     from effects.filters import *
 
+    from graphics.animation import *
+    from graphics.drawing import *
+    from graphics.splines import *
+
     from net.wiki import *
 
     from timing import sampler
     from tunings import WickiLayout
 
-    from utils.animation import *
-    from utils.graphing import *
     from utils.log import logger, ansi
     from utils.math import *
-    from utils.splines import *
 
     sampler.frequency = Frequency(sampler.rate, unwrapped=True)
     sampler.videofrequency = Frequency(sampler.videorate, unwrapped=True)

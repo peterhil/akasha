@@ -15,10 +15,6 @@ from .timing import sampler, samples, times
 from .xoltar import lazy
 from .xoltar.functional import *
 
-# from ..utils.math import *
-# from ..utils.graphing import *
-from ..control.io.audio import play, write
-
 
 ### Limiter functions
 

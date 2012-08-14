@@ -3,14 +3,14 @@
 """
 Unit tests for envelope.py
 """
-from __future__ import absolute_import
+
+import unittest
 
 import math
 import numpy as np
-import unittest
 
-from ..audio.envelope import Exponential
-from ..utils.math import minfloat
+from akasha.audio.envelope import Exponential
+from akasha.utils.math import minfloat
 
 
 class ExponentialTest(unittest.TestCase):

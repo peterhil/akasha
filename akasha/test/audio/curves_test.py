@@ -5,6 +5,7 @@ Unit tests for curves.py
 """
 
 import pytest
+
 import numpy as np
 
 from numpy.testing.utils import assert_array_almost_equal, assert_array_max_ulp
@@ -12,8 +13,6 @@ from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_di
 from numpy.testing.utils import nulp_diff
 
 from numbers import Number
-
-from .. import akasha
 
 from akasha.audio.curves import Circle, Curve, Super
 from akasha.utils.math import pi2

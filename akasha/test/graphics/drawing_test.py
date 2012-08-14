@@ -1,7 +1,7 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 """
-Unit tests for graphing functions
+Unit tests for drawing functions
 """
 
 from __future__ import absolute_import
@@ -9,7 +9,7 @@ from __future__ import absolute_import
 import numpy as np
 import unittest
 
-from akasha.utils.graphing import *
+from akasha.graphics.drawing import *
 
 
 class GraphTest(unittest.TestCase):

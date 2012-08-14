@@ -45,15 +45,16 @@ from .effects.filters import *
 from .funct.xoltar import functional as fx
 from .funct.xoltar import lazy
 
+from .graphics.animation import *
+from .graphics.drawing import *
+from .graphics.splines import *
+
 from .net.wiki import *
 
 from .timing import sampler
 from .tunings import WickiLayout
 
-from .utils.animation import *
-from .utils.graphing import *
 from .utils.math import *
-from .utils.splines import *
 
 if __name__ == '__main__':
 	from akasha import *

@@ -10,12 +10,11 @@ import pygame
 from cmath import phase
 from PIL import Image
 
-from .decorators import memoized
-from .math import normalize, clip, deg, distances, pad, pcm, minfloat, complex_as_reals
-from .log import logger
-
-from ..funct import pairwise
-from ..timing import sampler
+from akasha.funct import pairwise
+from akasha.timing import sampler
+from akasha.utils.decorators import memoized
+from akasha.utils.log import logger
+from akasha.utils.math import normalize, clip, deg, distances, pad, pcm, minfloat, complex_as_reals
 
 try:
     import matplotlib.pyplot as plt

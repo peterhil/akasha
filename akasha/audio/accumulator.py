@@ -14,12 +14,7 @@ from numbers import Number
 from .generators import PeriodicGenerator
 
 from ..timing import sampler
-from ..utils.decorators import memoized
-from ..utils.math import *
-from ..utils.graphing import *
-
-# Settings
-np.set_printoptions(precision=16, suppress=True)
+from ..utils.math import pi2, to_phasors
 
 
 class Acc(object, PeriodicGenerator):
