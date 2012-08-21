@@ -23,10 +23,7 @@ class FrequencyRatioMixin:
 
     @frequency.setter
     def frequency(self, hz):
-        if isinstance(hz, Frequency):
-            self._hz = hz
-        else:
-            self._hz = Frequency(hz)  # Use Trellis or other Cells clone?
+        self._hz = hz if isinstance(hz, Frequency) else Frequency(hz)  # Use Trellis or other Cells clone?
 
     @property
     def ratio(self):
@@ -105,6 +102,7 @@ class Frequency(object, FrequencyRatioMixin, PeriodicGenerator):
     @staticmethod
     @memoized
     def to_ratio(freq, limit=sampler.rate):
+        # @TODO investigate what is the right limit, and take beating tones into account!
         return Fraction.from_float(float(freq)/sampler.rate).limit_denominator(limit)
 
     @staticmethod

@@ -19,7 +19,7 @@ from ..utils.math import minfloat, maxfloat
 class Exponential(object, Generator):
     """Exponential decay and growth for envelopes."""
 
-    def __init__(self, rate=0.0, amp=1.0, *args, **kwargs):
+    def __init__(self, rate=0.0, amp=1.0):
         if isinstance(rate, tuple):
             self.rate, self.amp = rate
         else:
@@ -28,26 +28,33 @@ class Exponential(object, Generator):
 
     @property
     def half_life(self):
-        if self.rate == 0:
-            return np.inf
+        """Returns the time required to reach half-life from a starting amplitude."""
+        return np.inf if self.rate == 0 else math.log(2.0) / -self.rate * sampler.rate
+
+    @classmethod
+    def from_half_life(cls, time, amp=1.0):
+        """Returns an exponential decay envelope with time parameter for half-life measured in seconds."""
+        if np.inf == np.abs(time):
+            return cls(rate=0.0, amp=amp)
         else:
-            return math.log(2.0) / -self.rate * sampler.rate
+            return cls(rate=sampler.rate / (-(time * sampler.rate) / math.log(2.0)), amp=amp) # @TODO simplify!
 
     @property
-    def zero_point(self):
-        """
-        Returns the time required to reach zero from starting amplitude.
-        For e[e.zero_point+offset] to be zero, offset = -1 for growth (positive rate) and +1 for decay (negative rate).
-        """
-        return self.half_life * (minfloat(self.amp)[1]+1)
+    def scale(self):
+        """Returns the time required to reach a (discrete) zero from a starting amplitude."""
+        return self.half_life * (minfloat(np.max(self.amp))[1]+1)
+
+    @classmethod
+    def from_scale(cls, time, amp=1.0):
+        return cls.from_half_life((time / sampler.rate) / (minfloat(np.max(amp))[1]+1), amp)
 
     def sample(self, iterable):
         # Convert frame numbers to time (ie. 44100 => 1.0)
         frames = np.array(iterable) / float(sampler.rate)
         return self.amp * np.exp(self.rate * frames)
 
-    def __len__(self):
-        return int(math.ceil(np.abs(self.zero_point)))
+    # def __len__(self):
+    #     return int(math.ceil(np.abs(self.scale)))
 
     def __repr__(self):
         return "%s(%s, %s)" % (self.__class__.__name__, self.rate, self.amp)

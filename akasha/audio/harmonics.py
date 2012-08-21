@@ -49,7 +49,7 @@ class Overtones(object, FrequencyRatioMixin, Generator):
 
     @property
     def overtones(self):
-        return np.apply_along_axis(self.func, 0, np.arange(0, self.limit, dtype=np.float32))
+        return np.apply_along_axis(self.func, 0, np.arange(0, self.limit, dtype=np.float64))
 
     @property
     def oscs(self):
