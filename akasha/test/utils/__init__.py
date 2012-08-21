@@ -3,6 +3,4 @@
 
 from __future__ import absolute_import
 
-def _super(self):
-    return super(self.__class__, self)
-
+from ... import akasha
