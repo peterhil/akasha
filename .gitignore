@@ -10,3 +10,4 @@ html/
 install/
 pip-stable-req.txt
 virtualenvs/
+py2.7/
