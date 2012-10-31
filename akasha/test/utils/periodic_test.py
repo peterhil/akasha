@@ -51,19 +51,27 @@ class TestPeriod(object):
         n = 4
         pa = period.array(np.arange(n))
         for i in np.arange(-2, n + 2):
-            assert i % n == pa._mod(i, -1)
+            assert i % n == pa._mod(i)
 
     def test_index_mod_slice(self):
         ar = np.arange(6).reshape(2, 3)
         pa = period.array(ar)
 
+        assert_array_equal(ar[slice(None)], pa[slice(None)])
+        assert_array_equal(ar[1, slice(None)], pa[1, slice(None)])
+
         assert_array_equal(ar, pa[::])
+        assert_array_equal(ar, pa[:])
+        assert_array_equal(ar[:], pa[:])
+
+        assert_array_equal(ar[1:], pa[1:])
 
         assert_array_equal(ar[1], pa[1])
         assert_array_equal(ar[0], pa[4])
 
-        # assert_array_equal(ar, pa[:])
-        # assert_array_equal(ar[1], pa[1:])
+
+        # assert_array_equal(ar[0:1, 1:-2], pa[0:1, 1:-2])
+        # assert_array_equal(ar[:,   1:-2], pa[:,   1:-2])
 
     def test_view(self):
         ar = np.arange(6).reshape(2,3)

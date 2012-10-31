@@ -18,7 +18,7 @@ from akasha.utils.math import to_phasor, pi2
 
 from fractions import Fraction
 
-from numpy.testing.utils import assert_array_almost_equal, assert_array_max_ulp
+from numpy.testing.utils import assert_array_equal, assert_array_almost_equal, assert_array_max_ulp
 from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
 from numpy.testing.utils import nulp_diff
 
@@ -160,7 +160,7 @@ class TestOscSlicing(object):
         self.setup()
         assert np.equal(self.p[::], self.p.sample).all()
         assert np.allclose(self.o[:3:2], Osc.from_ratio(1, 3).sample)
-        assert np.equal(self.p[-1:8:3], self.p[7,2,5,0,3,6,1,4,7]).all()
+        assert_array_equal(self.p[7,2,5,0,3,6,1,4,7], self.p[-1:8:3])
 
 
 class TestOscAliasing(object):
