@@ -9,11 +9,14 @@ Copyright (c) 2011 Loihde. All rights reserved.
 
 from __future__ import absolute_import
 
+import cmath
 import numpy as np
 import logging
 
+from akasha.funct.xoltar import functional as fx
+
 from ..utils.log import logger
-from ..utils.math import diffs
+from ..utils.math import diffs, normalize
 
 
 def magnetize(x0, x1, m, norm_level=0.95):
@@ -56,3 +59,24 @@ def tape_compress(signal, norm_level=0.95):
 
 def cx_tape_compress(signal, norm_level=0.95):
     return tape_compress(signal, norm_level) * np.exp(np.angle(signal)*1j)
+
+# 10.9.2012
+
+def as_polar(signal):
+    return np.array([np.abs(signal), np.angle(signal)]).T
+
+def gamma(g, amp, signal):
+    return signal**g*amp
+
+def gamma_compress(signal, g, amp=1.0, normal=True):
+    phi = as_polar(signal)
+    if normal: phi[:,0] = normalize(phi[:,0])
+
+    vgamma = np.vectorize(fx.curry(gamma, g, amp))
+    phi[:,0] = np.apply_along_axis(vgamma, 0, phi[:,0])*(1.0/amp) # @TODO amp can't be zero
+
+    return np.array(map(lambda x: cmath.rect(*x), phi)).T
+
+# eine = normalize(read("Amadeus - Eine Kleine.aiff", fs=44100, dur=6*60+32))
+# gr082 = gamma_compress(eine, 0.81968, 105)
+# anim(Pcm(gr082), antialias=True, dur=60*6+30)
