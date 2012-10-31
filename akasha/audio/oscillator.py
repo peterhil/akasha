@@ -16,7 +16,7 @@ from ..timing import sampler
 from ..utils.math import pi2, normalize
 
 
-class Osc(object, FrequencyRatioMixin, PeriodicGenerator):
+class Osc(FrequencyRatioMixin, PeriodicGenerator, object):
     """Generic oscillator class with a frequency and a parametric curve."""
 
     def __init__(self, freq, curve = Circle()):
@@ -31,10 +31,6 @@ class Osc(object, FrequencyRatioMixin, PeriodicGenerator):
     @property
     def sample(self):
         return self.curve.at(Frequency.angles(self.ratio))
-
-    @property
-    def imag(self):
-        return self.sample.imag
 
     def __repr__(self):
         return "%s(%s, curve=%s)" % (self.__class__.__name__, self.frequency._hz, repr(self.curve))
