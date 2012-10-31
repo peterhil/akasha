@@ -39,6 +39,17 @@ class Circle(Curve):
         return "%s()" % (self.__class__.__name__ ,)
 
 
+class Square(Curve):
+    """Curve of the square wave (made with np.sign)"""
+
+    @staticmethod
+    def at(param):
+        return np.sign(np.exp(1j * pi2 * param))
+
+    def __repr__(self):
+        return "%s()" % (self.__class__.__name__ ,)
+
+
 class Super(Curve):
     """Oscillator curve that has superness parameters."""
 
