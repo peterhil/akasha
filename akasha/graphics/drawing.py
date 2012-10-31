@@ -5,7 +5,10 @@ import colorsys
 import exceptions
 import logging
 import numpy as np
+import os
 import pygame
+import tempfile
+import time
 
 from cmath import phase
 from PIL import Image
@@ -414,20 +417,34 @@ def video_transfer(signal, type='PAL', axis='real', horiz=720):
 
 def show(img, plot=False):
     if (plot and plt):
-        imgplot = plt.imshow(img[:,:,0])
+        plt.interactive(True)
+        imgplot = plt.imshow(img[:,:,:3])
         imgplot.set_cmap('hot')
+        plt.show(False)
     else:
-        image = Image.fromarray(img, 'RGBA')
-        image.show()
-    return False
+        image = Image.fromarray(img[...,:3], 'RGB')
+        # image.show()
+        # return False
+        try:
+            tmp = tempfile.NamedTemporaryFile(dir='/var/tmp', suffix='akasha.bmp')
+            logger.debug("Tempfile: %s" % tmp.name)
+            image.save(tmp, 'bmp')
+            time.sleep(0.5)
+            os.system("open " + tmp.name)
+        except IOError, err:
+            logger.error("Failed to open a temporary file and save the image: %s" % err)
+        except OSError, err:
+            logger.error("Failed to open the image with a default app: %s" % err)
+        finally:
+            tmp.close()
 
 def fast_graph(samples, size=1000, plot=False):
     return graph(samples, size, plot, antialias=False)
 
-def graph(samples, size=1000, dur=None, plot=False, axis=True, antialias=False, lines=False):
+def graph(samples, size=1000, dur=None, plot=False, axis=True, antialias=True, lines=False, img=None):
     if dur:
         samples = samples[:int(round(dur * sampler.rate))]
-    img = draw(samples, size=size, antialias=antialias, lines=lines, axis=axis).transpose((1, 0, 2))
+    img = draw(samples, size=size, antialias=antialias, lines=lines, axis=axis, img=img).transpose((1, 0, 2))
     show(img, plot)
     return False
 
