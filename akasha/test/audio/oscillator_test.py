@@ -41,7 +41,6 @@ class TestOscillator(object):
         b = Osc(216, Curve)
         with pytest.raises(NotImplementedError):
             b.curve.at(4)
-        # assert b.curve.at(4) == NotImplemented
 
     def test_from_ratio(self):
         o, p = 3, 802
@@ -132,7 +131,7 @@ class TestOscRoots(object):
         """It should be accurate.
         Uses angles to make testing easier.
         """
-        for period in (5, 7, 8, 23): #, 2202):   # + tuple( random.choice(range(1, 44100)) )
+        for period in (5, 7, 8, 23): #, 2202):
             o = Osc.from_ratio(1, period)
 
             fractional_angle = lambda n: float(Fraction(n, period) % 1) * 360
