@@ -38,8 +38,8 @@ class ExponentialTest(unittest.TestCase):
         z = Exponential(0, amp)
         assert np.equal(amp, z[:44100]).all()
 
-    def test_len(self):
-        """Test that __len__() reports correct length."""
+    def test_scale(self):
+        """Test that scale reports correct time for reach zero."""
         min_float = minfloat(1)[0]
         window = 50
         testdata = [
@@ -56,7 +56,7 @@ class ExponentialTest(unittest.TestCase):
         ]
         for rate, amp in testdata:
             e = Exponential(rate, amp)
-            i = len(e)
+            i = int(e.scale)
 
             # There should be at least one non-zero item
             non_zero_before_end = False
