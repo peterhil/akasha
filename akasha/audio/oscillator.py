@@ -34,18 +34,3 @@ class Osc(FrequencyRatioMixin, PeriodicGenerator, object):
         return "<%s: %s, curve = %s>" % (self.__class__.__name__, self.frequency, str(self.curve))
 
 
-def chirp_zeta(z1 = -0.5-100j, z2 = 0.5+100j, dur = 10):
-    """
-    Chirp sound made by sampling a line z (z1 -> z2) from the complex plane,
-    and using the function (k ** -z, k = 0..n) used for summation in the Riemann Zeta function.
-
-    Other interesting values to try:
-    chirp_zeta(-10.5-1000j, 1.5-10000j)
-
-    Reference: http://en.wikipedia.org/wiki/Riemann_zeta_function
-    """
-    n = int(round(dur * sampler.rate))
-    z = np.linspace(z1, z2, n)
-    k = np.arange(n)
-    return normalize(k ** -z)
-
