@@ -31,6 +31,6 @@ class Osc(FrequencyRatioMixin, PeriodicGenerator, object):
         return "%s(%s, curve=%s)" % (self.__class__.__name__, self.frequency._hz, repr(self.curve))
 
     def __str__(self):
-        return "<%s: %s, curve = %s>" % (self.__class__.__name__, self.frequency, str(self.curve))
+        return "<%s: %s, curve=%s>" % (self.__class__.__name__, self.frequency, str(self.curve))
 
 
