@@ -10,7 +10,8 @@ import unittest
 import numpy as np
 
 from akasha.audio.curves import Circle, Curve
-from akasha.audio.frequency import Frequency
+from akasha.audio.frequency import Frequency, FrequencyRatioMixin
+from akasha.audio.generators import PeriodicGenerator
 from akasha.audio.oscillator import Osc
 from akasha.timing import sampler
 from akasha.tunings import cents, cents_diff
@@ -32,8 +33,14 @@ JND_CENTS_EPSILON = 1.0e-2
 class TestOscillator(object):
     """Test oscillator"""
 
+    def test_class(self):
+        assert issubclass(Osc, FrequencyRatioMixin)
+        assert issubclass(Osc, PeriodicGenerator)
+        assert issubclass(Osc, object)
+
     def test_init(self):
         a = Osc(440)
+        assert isinstance(a, Osc)
         assert a.frequency == Frequency(440.0)
         assert isinstance(a.curve, Circle)
         assert callable(a.curve)
@@ -55,11 +62,21 @@ class TestOscillator(object):
     def test_sample(self):
         o, p = 1, sampler.rate
 
-        a = Osc.from_ratio(o, p)
-        # expected = np.exp(1j * pi2 * np.linspace(0, o, p, endpoint=False))
         expected = np.exp(1j * pi2 * o * np.arange(0, 1.0, 1.0/p, dtype=np.float64))
 
-        assert_nulp_diff(a.sample, expected, 1)
+        assert_nulp_diff(
+            Osc.from_ratio(o, p).sample,
+            expected,
+            1
+        )
+
+    def test_str(self):
+        o = Osc(100)
+        assert 'Osc' in str(o)
+
+    def test_repr(self):
+        o = Osc(100)
+        assert o == eval(repr(o))
 
 class TestOscillatorInit(object):
     """Test oscillator initialization"""
@@ -81,27 +98,6 @@ class TestOscillatorInit(object):
         sampler.negative_frequencies = True
         assert Osc.from_ratio(1, 8), Osc.from_ratio(9, 8)
         assert Osc.from_ratio(7, 8), Osc.from_ratio(-1, 8)
-
-
-class TestOscFrequency(object):
-    """Test frequencies"""
-
-    def test_freq_init(self):
-        """It should intialize using a frequency"""
-        o = Osc(440)
-        assert isinstance(o, Osc)
-        assert isinstance(o.frequency, Frequency)
-
-    def test_frequency_440(self):
-        """It should return correct frequency for 440 Hz."""
-        o = Osc(440)
-        assert o.frequency == 440
-
-    def test_float_frequency(self):
-        """It should return close frequency from float."""
-        for f in [20.899, 30.0001, 220.0001, 440.899, 2201.34, 8001.378, 12003.989, 20000.1]:
-            o = Osc(f)
-            assert cents_diff(o.frequency, f) <= JND_CENTS_EPSILON
 
 
 class TestOscRoots(object):
@@ -160,44 +156,3 @@ class TestOscSlicing(object):
         assert np.equal(self.p[::], self.p.sample).all()
         assert np.allclose(self.o[:3:2], Osc.from_ratio(1, 3).sample)
         assert_array_equal(self.p[7,2,5,0,3,6,1,4,7], self.p[-1:8:3])
-
-
-class TestOscAliasing(object):
-    """Test (preventing the) aliasing of frequencies: f < 0, f > sample rate"""
-    silence = Osc(0)
-
-    def testFrequenciesOverNyquistRate(self):
-        """It should (not) produce silence if ratio > 1/2"""
-        sampler.prevent_aliasing = True
-        assert Osc.from_ratio(9, 14) == self.silence
-
-        sampler.prevent_aliasing = False
-        assert Osc.from_ratio(9, 14).ratio == Fraction(9, 14)
-
-    def testFrequenciesOverSamplingRate(self):
-        sampler.prevent_aliasing = True
-        assert Osc.from_ratio(9, 7) == self.silence
-
-        sampler.prevent_aliasing = False    # but still wraps when ratio > 1
-        assert Osc.from_ratio(9, 7).ratio == Fraction(2, 7)
-
-    def testNegativeFrequencies(self):
-        """It should handle negative frequencies according to preferences."""
-        sampler.prevent_aliasing = True
-        sampler.negative_frequencies = False
-        assert Osc.from_ratio(-1, 7) == self.silence
-
-        sampler.prevent_aliasing = False
-        sampler.negative_frequencies = True
-        assert Osc.from_ratio(-1, 7) == Osc.from_ratio(6, 7)
-
-        sampler.prevent_aliasing = True
-        sampler.negative_frequencies = True
-        ratio = Fraction(-1, 7)
-        o = Osc.from_ratio(ratio)
-        assert o.frequency == float(ratio * sampler.rate) == -6300.0
-
-        # Note! o.ratio is modulo sampler.rate for negative frequencies
-        assert o.ratio == Fraction(6, 7)
-
-
