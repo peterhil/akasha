@@ -17,6 +17,11 @@ from ..utils.decorators import memoized
 
 
 class FrequencyRatioMixin:
+    @classmethod
+    def from_ratio(cls, ratio, den=False):
+        if den: ratio = Fraction(ratio, den)
+        return cls(Fraction(ratio) * sampler.rate)
+
     @property
     def frequency(self):
         return self._hz
@@ -66,11 +71,6 @@ class Frequency(object, FrequencyRatioMixin, PeriodicGenerator):
         # Original frequency, independent of sampling rate or optimizations
         self._hz = float(hz)
         self.sampling = unwrapped
-
-    @classmethod
-    def from_ratio(cls, ratio, den=False):
-        if den: ratio = Fraction(ratio, den)
-        return cls(Fraction(ratio) * sampler.rate)
 
     @property
     def ratio(self):

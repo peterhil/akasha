@@ -23,11 +23,6 @@ class Osc(FrequencyRatioMixin, PeriodicGenerator, object):
         self._hz = Frequency(freq)
         self.curve = curve
 
-    @classmethod
-    def from_ratio(cls, ratio, den=False):
-        if den: ratio = Fraction(ratio, den)
-        return cls(Fraction(ratio) * sampler.rate)
-
     @property
     def sample(self):
         return self.curve.at(Frequency.angles(self.ratio))
