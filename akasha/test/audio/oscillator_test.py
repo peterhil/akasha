@@ -14,20 +14,12 @@ from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import PeriodicGenerator
 from akasha.audio.oscillator import Osc
 from akasha.timing import sampler
-from akasha.tunings import cents, cents_diff
+from akasha.tunings import cents_diff
 from akasha.utils.math import to_phasor, pi2
 
 from fractions import Fraction
-
-from numpy.testing.utils import assert_array_equal, assert_array_almost_equal, assert_array_max_ulp
+from numpy.testing.utils import assert_array_equal
 from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
-from numpy.testing.utils import nulp_diff
-
-
-# Just noticeable difference allowance for Frequency rounding
-# See http://en.wikipedia.org/wiki/Cent_(music)#Human_perception
-# This should probably be much smaller than the suggested 3-6 cents...
-JND_CENTS_EPSILON = 1.0e-2
 
 
 class TestOscillator(object):
@@ -77,6 +69,7 @@ class TestOscillator(object):
     def test_repr(self):
         o = Osc(100)
         assert o == eval(repr(o))
+
 
 class TestOscillatorInit(object):
     """Test oscillator initialization"""

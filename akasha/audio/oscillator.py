@@ -6,14 +6,9 @@ from __future__ import division
 
 import numpy as np
 
-from fractions import Fraction
-
-from .curves import *
-from .frequency import Frequency, FrequencyRatioMixin
-from .generators import PeriodicGenerator
-
-from ..timing import sampler
-from ..utils.math import pi2, normalize
+from akasha.audio.curves import Circle
+from akasha.audio.frequency import Frequency, FrequencyRatioMixin
+from akasha.audio.generators import PeriodicGenerator
 
 
 class Osc(FrequencyRatioMixin, PeriodicGenerator, object):
