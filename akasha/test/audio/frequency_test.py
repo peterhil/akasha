@@ -50,42 +50,42 @@ class TestFrequency(object):
             assert cents_diff(o.frequency, f) <= JND_CENTS_EPSILON
 
 
-class TestOscAliasing(object):
+class TestFrequencyAliasing(object):
     """Test (preventing the) aliasing of frequencies: f < 0, f > sample rate"""
-    silence = Osc(0)
+    silence = Frequency(0)
 
     def testFrequenciesOverNyquistRate(self):
         """It should (not) produce silence if ratio > 1/2"""
         sampler.prevent_aliasing = True
-        assert Osc.from_ratio(9, 14) == self.silence
+        assert Frequency.from_ratio(9, 14) == self.silence
 
         sampler.prevent_aliasing = False
-        assert Osc.from_ratio(9, 14).ratio == Fraction(9, 14)
+        assert Frequency.from_ratio(9, 14).ratio == Fraction(9, 14)
 
     def testFrequenciesOverSamplingRate(self):
         sampler.prevent_aliasing = True
-        assert Osc.from_ratio(9, 7) == self.silence
+        assert Frequency.from_ratio(9, 7) == self.silence
 
-        sampler.prevent_aliasing = False    # but still wraps when ratio > 1
-        assert Osc.from_ratio(9, 7).ratio == Fraction(2, 7)
+        sampler.prevent_aliasing = False
+        assert Frequency.from_ratio(9, 7).ratio == Fraction(2, 7)
 
     def testNegativeFrequencies(self):
         """It should handle negative frequencies according to preferences."""
         sampler.prevent_aliasing = True
         sampler.negative_frequencies = False
-        assert Osc.from_ratio(-1, 7) == self.silence
+        assert Frequency.from_ratio(-1, 7) == self.silence
 
         sampler.prevent_aliasing = False
         sampler.negative_frequencies = True
-        assert Osc.from_ratio(-1, 7) == Osc.from_ratio(6, 7)
+        assert Frequency.from_ratio(-1, 7) == Frequency.from_ratio(6, 7)
 
         sampler.prevent_aliasing = True
         sampler.negative_frequencies = True
         ratio = Fraction(-1, 7)
-        o = Osc.from_ratio(ratio)
-        assert o.frequency == float(ratio * sampler.rate) == -6300.0
+        f = Frequency.from_ratio(ratio)
+        assert f.frequency == float(ratio * sampler.rate) == -6300.0
 
-        # Note! o.ratio is modulo sampler.rate for negative frequencies
-        assert o.ratio == Fraction(6, 7)
+        # Note! f.ratio is modulo sampler.rate for negative frequencies
+        assert f.ratio == Fraction(6, 7)
 
 
