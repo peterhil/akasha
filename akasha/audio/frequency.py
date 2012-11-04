@@ -10,17 +10,17 @@ import operator
 from fractions import Fraction
 from numbers import Number
 
-from .generators import PeriodicGenerator
+from akasha.audio.generators import PeriodicGenerator
+from akasha.timing import sampler
+from akasha.utils import _super
+from akasha.utils.decorators import memoized
 
-from ..timing import sampler
-from ..utils.decorators import memoized
 
-
-class FrequencyRatioMixin:
+class FrequencyRatioMixin(object):
     @classmethod
-    def from_ratio(cls, ratio, den=False):
+    def from_ratio(cls, ratio, den=False, *args, **kwargs):
         if den: ratio = Fraction(ratio, den)
-        return cls(Fraction(ratio) * sampler.rate)
+        return cls(Fraction(ratio) * sampler.rate, *args, **kwargs)
 
     @property
     def frequency(self):
@@ -28,11 +28,16 @@ class FrequencyRatioMixin:
 
     @frequency.setter
     def frequency(self, hz):
-        self._hz = hz if isinstance(hz, Frequency) else Frequency(hz)  # Use Trellis or other Cells clone?
+        self._hz = float(hz) if isinstance(self, Frequency) else Frequency(hz)  # Use Trellis or other Cells clone?
 
     @property
     def ratio(self):
-        return self._hz.ratio
+        return self.wrap(self.antialias(self.to_ratio(self._hz)))
+
+    @property
+    def hz(self):
+        "Depends on original frequency's rational approximation and sampling rate."
+        return float(self.ratio * sampler.rate)
 
     @property
     def period(self):
@@ -42,20 +47,50 @@ class FrequencyRatioMixin:
     def order(self):
         return self.ratio.numerator
 
+    @staticmethod
+    @memoized
+    def to_ratio(freq, limit=sampler.rate):
+        # @TODO investigate what is the right limit, and take beating tones into account!
+        return Fraction.from_float(float(freq)/sampler.rate).limit_denominator(limit)
+
+    @staticmethod
+    def antialias(ratio):
+        if sampler.prevent_aliasing and abs(ratio) > Fraction(1,2):
+            return Fraction(0, 1)
+        if sampler.prevent_aliasing and not sampler.negative_frequencies and ratio < 0:
+            return Fraction(0, 1)
+        return ratio
+
+    @staticmethod
+    def wrap(ratio):
+        # wrap roots: 9/8 == 1/8 in Osc! This also helps with numeric accuracy.
+        return ratio % 1
+
     def __nonzero__(self):
         """Zero frequency should be considered False"""
         return self.ratio != 0
 
-    def __cmp__(self, other):
-        if isinstance(other, self.__class__):
-            return cmp(self.ratio, other.ratio)
-        else:
-            return cmp(other, self.ratio)
+    def _cmp(op):
+        """Generate comparison methods."""
 
-    @property
-    def hz(self):
-        "Depends on original frequency's rational approximation and sampling rate."
-        return float(self.ratio * sampler.rate)
+        def comparison(self, other):
+            if isinstance(other, FrequencyRatioMixin):
+                return op(self.ratio, other.ratio)
+            elif isinstance(other, Number):
+                return op(float(self), float(other))
+            else:
+                return NotImplemented
+
+        comparison.__name__ = '__' + op.__name__ + '__'
+        comparison.__doc__ = op.__doc__
+
+        return comparison
+
+    __eq__ = _cmp(operator.eq)
+    __ge__ = _cmp(operator.ge)
+    __gt__ = _cmp(operator.gt)
+    __le__ = _cmp(operator.le)
+    __lt__ = _cmp(operator.lt)
 
     def __float__(self):
         return float(self.hz)
@@ -64,20 +99,19 @@ class FrequencyRatioMixin:
         return int(self.hz)
 
 
-class Frequency(object, FrequencyRatioMixin, PeriodicGenerator):
+class Frequency(FrequencyRatioMixin, PeriodicGenerator):
     """Frequency class"""
 
     def __init__(self, hz, unwrapped=False):
         # Original frequency, independent of sampling rate or optimizations
         self._hz = float(hz)
-        self.sampling = unwrapped
+        self.unwrapped = unwrapped
 
     @property
     def ratio(self):
-        if not self.sampling:
-            return self.wrap(self.antialias(self.to_ratio(self._hz)))
-        else:
+        if self.unwrapped:
             return self.to_ratio(self._hz)
+        return _super(self).ratio
 
     @staticmethod
     @memoized
@@ -97,44 +131,19 @@ class Frequency(object, FrequencyRatioMixin, PeriodicGenerator):
     def sample(self):
         return self.angles(self.ratio)
         
-    # Internal stuff
-    
-    @staticmethod
-    @memoized
-    def to_ratio(freq, limit=sampler.rate):
-        # @TODO investigate what is the right limit, and take beating tones into account!
-        return Fraction.from_float(float(freq)/sampler.rate).limit_denominator(limit)
-
-    @staticmethod
-    def antialias(ratio):
-        if sampler.prevent_aliasing and abs(ratio) > Fraction(1,2):
-            return Fraction(0, 1)
-        if sampler.prevent_aliasing and not sampler.negative_frequencies and ratio < 0:
-            return Fraction(0, 1)
-        return ratio
-    
-    @staticmethod
-    def wrap(ratio):
-        # wrap roots: 9/8 == 1/8 in Osc! This also helps with numeric accuracy.
-        return ratio % 1
-
-    ### Representation ###
-
     def __repr__(self):
         return "Frequency(%s)" % self._hz
 
     def __str__(self):
         return "<Frequency: %s hz>" % self.hz
 
-    ### Arithmetic ###
-    
     def __trunc__(self):
         """Returns an integral rounded towards zero."""
         return float(self._hz).__trunc__()
 
     def _op(op):
         """
-        Add operator fallbacks. Usage: __add__, __radd__ = _gen_ops(operator.add)
+        Add operator fallbacks. Usage: __add__, __radd__ = _op(operator.add)
         
         This function is borrowed and modified from fractions.Fraction._operator_fallbacks(),
         which generates forward and backward operator functions automagically.
@@ -170,7 +179,7 @@ class Frequency(object, FrequencyRatioMixin, PeriodicGenerator):
     __mul__, __rmul__ = _op(operator.mul)
     __div__, __rdiv__ = _op(operator.div)
     __truediv__, __rtruediv__ = _op(operator.truediv)
-    __floordiv__, __rfloordiv__ = _op(operator.div)
+    __floordiv__, __rfloordiv__ = _op(operator.floordiv)
 
     __mod__, __rmod__ = _op(operator.mod)
     __pow__, __rpow__ = _op(operator.pow)
@@ -191,18 +200,6 @@ class Frequency(object, FrequencyRatioMixin, PeriodicGenerator):
     def __eq__(a, b):
         """a == b, takes into account any rounding done on Frequency's initialisation."""
         return a.hz == Frequency(b).hz
-
-    def __lt__(a, b):
-        return operator.lt(a._hz, b)
-
-    def __gt__(a, b):
-        return operator.gt(a._hz, b)
-
-    def __le__(a, b):
-        return operator.le(a._hz, b)
-
-    def __ge__(a, b):
-        return operator.ge(a._hz, b)
 
     # __reduce__ # TODO: Implement pickling -- see http://docs.python.org/library/pickle.html#the-pickle-protocol
     # __copy__, __deepcopy__
