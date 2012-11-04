@@ -7,7 +7,6 @@ Unit tests for frequency.py
 import numpy as np
 import operator
 import pytest
-import unittest
 
 from fractions import Fraction
 from numpy.testing.utils import assert_array_equal
@@ -17,8 +16,8 @@ from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import PeriodicGenerator
 from akasha.audio.oscillator import Osc
 from akasha.timing import sampler
-from akasha.tunings import cents, cents_diff
-from akasha.utils.math import to_phasor, pi2
+from akasha.tunings import cents_diff
+from akasha.utils.math import pi2
 
 
 class TestFrequencyRatioMixin(object):
