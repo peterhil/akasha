@@ -195,11 +195,11 @@ class Frequency(FrequencyRatioMixin, PeriodicGenerator):
 
     def __hash__(self):
         """hash(self), takes into account any rounding done on Frequency's initialisation."""
-        return hash(self.hz)
+        return hash(self.ratio)
 
-    def __eq__(a, b):
+    def __eq__(self, other):
         """a == b, takes into account any rounding done on Frequency's initialisation."""
-        return a.hz == Frequency(b).hz
+        return self.ratio == Frequency(other).ratio
 
     # __reduce__ # TODO: Implement pickling -- see http://docs.python.org/library/pickle.html#the-pickle-protocol
     # __copy__, __deepcopy__
