@@ -12,7 +12,7 @@ import os
 import pygame as pg
 
 from fractions import Fraction
-from timeit import timeit, default_timer as time
+from timeit import timeit, default_timer as timer
 
 from twisted.internet.task import LoopingCall
 from twisted.internet import reactor
@@ -92,7 +92,7 @@ def paint_frame(it, ch, paint_fn, clock):
     done = False
     if sampler.paused:
         return done
-    draw_start = time()
+    draw_start = timer()
     try:
         samples = it.next()
         audio = pg.sndarray.make_sound(pcm(samples))
@@ -103,7 +103,7 @@ def paint_frame(it, ch, paint_fn, clock):
         done = True
         return done
 
-    dc = time() - draw_start
+    dc = timer() - draw_start
     fps = clock.get_fps()
     t = clock.tick_busy_loop(sampler.videorate)
     logger.log(logging.BORING, "Animation: clock tick %d, FPS: %3.3f, drawing took: %.4f", t, fps, dc)
@@ -111,7 +111,7 @@ def paint_frame(it, ch, paint_fn, clock):
 
 def handle_events(snd, it, ch, paint_fn, clock, twisted_loop=False):
     done = False
-    input_start = time()
+    input_start = timer()
     events = pg.event.get()
     for event in events:
         if twisted_loop or (event.type != VIDEOFRAME):
@@ -120,7 +120,7 @@ def handle_events(snd, it, ch, paint_fn, clock, twisted_loop=False):
             done |= paint_frame(it, ch, paint_fn, clock)
         if done:
             break
-    dc = time() - input_start
+    dc = timer() - input_start
     if len(events) > 1:
         logger.debug("Handled %s events in %.4f seconds: %s" % (len(events), dc, events))
     if done and reactor.running:
