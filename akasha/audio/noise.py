@@ -11,9 +11,6 @@ from .envelope import Exponential
 from .generators import Generator
 
 
-np.set_printoptions(precision=4, suppress=True)
-
-
 class Noise(Generator):
     """Round (magnitude 0..1 with random angle) or polar noise generator"""
 
