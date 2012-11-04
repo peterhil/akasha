@@ -5,14 +5,10 @@ Unit tests for curves.py
 """
 
 import pytest
-
 import numpy as np
 
-from numpy.testing.utils import assert_array_almost_equal, assert_array_max_ulp
-from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
-from numpy.testing.utils import nulp_diff
-
 from numbers import Number
+from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
 
 from akasha.audio.curves import Circle, Curve, Super
 from akasha.utils.math import pi2
