@@ -17,7 +17,7 @@ from ..timing import sampler
 from ..utils.math import pi2, to_phasors
 
 
-class Acc(object, PeriodicGenerator):
+class Acc(PeriodicGenerator):
     def __init__(self, *args):
         # Set ratio and limit between 0/1 and 1/1
         self._ratio = Osc.limit_ratio(Fraction(*args))

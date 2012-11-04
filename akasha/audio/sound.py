@@ -18,7 +18,7 @@ from ..utils.log import logger
 from ..utils.math import *
 
 
-class Pcm(FrequencyRatioMixin, Generator, object):
+class Pcm(FrequencyRatioMixin, Generator):
     """
     A playable sampled (pcm) sound.
     """
@@ -74,7 +74,7 @@ class Pcm(FrequencyRatioMixin, Generator, object):
         return self.resample_at_freq(iter)
 
 
-class Group(FrequencyRatioMixin, Generator, object):
+class Group(FrequencyRatioMixin, Generator):
     """A group of sound objects."""
 
     def __init__(self, *args):
@@ -83,7 +83,7 @@ class Group(FrequencyRatioMixin, Generator, object):
         self.frequency = np.min(np.ma.masked_equal(args, 0).compressed())
 
 
-class Sound(Generator, object):
+class Sound(Generator):
     """A group of sound objects."""
 
     def __init__(self, *args):

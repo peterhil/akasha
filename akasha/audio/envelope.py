@@ -16,7 +16,7 @@ from ..timing import sampler
 from ..utils.math import minfloat, maxfloat
 
 
-class Exponential(object, Generator):
+class Exponential(Generator):
     """Exponential decay and growth for envelopes."""
 
     def __init__(self, rate=0.0, amp=1.0):
@@ -82,7 +82,7 @@ class Attack(Exponential):
         return frames
 
 
-class Gamma(object, Generator):
+class Gamma(Generator):
     """Gamma cumulative distribution function derived envelope."""
 
     def __init__(self, shape=1.0, scale=1.0):
@@ -103,7 +103,7 @@ class Gamma(object, Generator):
         return "<%s: shape=%s, scale=%s>" % (self.__class__.__name__, self.shape, self.scale)
 
 
-class Timbre(object, Generator):
+class Timbre(Generator):
     """Defines an envelope timbre for frequencies."""
 
     def __init__(self):

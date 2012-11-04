@@ -14,7 +14,7 @@ from .generators import Generator
 np.set_printoptions(precision=4, suppress=True)
 
 
-class Noise(object, Generator):
+class Noise(Generator):
     """Round (magnitude 0..1 with random angle) or polar noise generator"""
 
     def __init__(self, domain_fn=None, random_fn=np.random.random):
@@ -41,7 +41,7 @@ class Noise(object, Generator):
         return self.function(iter, self.randomizer)
 
 
-class Rustle(object, Generator):
+class Rustle(Generator):
     """Rustle noise generator.
 
     Rustle noise is noise consisting of aperiodic pulses characterized by
@@ -60,7 +60,7 @@ class Rustle(object, Generator):
     pass
 
 
-class Chaos(object, Generator):
+class Chaos(Generator):
     """Chaos generator"""
 
     def __init__(self):

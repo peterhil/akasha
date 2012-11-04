@@ -14,7 +14,7 @@ import logging
 import string
 
 
-class ansi:
+class ansi(object):
     BLACK   = '\033[90m'
     RED     = '\033[91m'
     GREEN   = '\033[92m'

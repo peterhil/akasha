@@ -17,7 +17,7 @@ debug = False
 debug_gs = False
 
 
-class period(np.ndarray):
+class period(np.ndarray, object):
     """
     Periodic n-dimensional array. Subclasses numpy.ndarray.
 

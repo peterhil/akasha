@@ -14,7 +14,7 @@ from ..utils.math import pad, pi2, normalize
 from ..utils.log import logger
 
 
-class Curve(object, PeriodicGenerator):
+class Curve(PeriodicGenerator):
     """Generic curve abstraction"""
 
     @staticmethod

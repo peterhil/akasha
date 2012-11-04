@@ -9,7 +9,7 @@ from .generators import Generator
 from ..timing import sampler
 
 
-class DTMF(object, Generator):
+class DTMF(Generator):
     """Dual-tone Multifrequency Tones
 
     DTMF keypad frequencies:

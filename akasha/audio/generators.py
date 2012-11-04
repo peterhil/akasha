@@ -13,7 +13,7 @@ from ..timing import sampler
 from ..utils.log import logger
 
 
-class Generator:
+class Generator(object):
     # Could be new style class, but this causes many problems because numpy
     # uses obj[0] (arrays first element) to determine it's type and then
     # automatically broadcasts oscs to their complex samples!

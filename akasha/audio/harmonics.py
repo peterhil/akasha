@@ -20,7 +20,7 @@ from ..utils.log import logger
 from ..utils.math import random_phase, normalize
 
 
-class Overtones(object, FrequencyRatioMixin, Generator):
+class Overtones(FrequencyRatioMixin, Generator):
     """Harmonical overtones for a sound object having a frequency"""
 
     def __init__(self, sndobj=Osc(216.0), n=8, func=lambda x: 1+x, damping=None, rand_phase=False):

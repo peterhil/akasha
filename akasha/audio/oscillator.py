@@ -11,7 +11,7 @@ from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import PeriodicGenerator
 
 
-class Osc(FrequencyRatioMixin, PeriodicGenerator, object):
+class Osc(FrequencyRatioMixin, PeriodicGenerator):
     """Generic oscillator class with a frequency and a parametric curve."""
 
     def __init__(self, freq, curve = Circle()):
