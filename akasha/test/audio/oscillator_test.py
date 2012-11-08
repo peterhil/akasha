@@ -13,7 +13,7 @@ from akasha.audio.curves import Circle, Curve
 from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import PeriodicGenerator
 from akasha.audio.oscillator import Osc
-from akasha.timing import sampler
+from akasha.timing import sampler, time_slice
 from akasha.tunings import cents_diff
 from akasha.utils.math import to_phasor, pi2
 
@@ -61,6 +61,12 @@ class TestOscillator(object):
             expected,
             1
         )
+
+    def test_sample_period_is_accurate(self):
+        o = Osc(1)
+        s = sampler.rate
+        assert_array_equal(o[0*s:1*s], o[1*s:2*s])
+        assert_array_equal(o[0*s:1*s], o[2*s:3*s])
 
     def test_str(self):
         o = Osc(100)
@@ -149,3 +155,5 @@ class TestOscSlicing(object):
         assert np.equal(self.p[::], self.p.sample).all()
         assert np.allclose(self.o[:3:2], Osc.from_ratio(1, 3).sample)
         assert_array_equal(self.p[7,2,5,0,3,6,1,4,7], self.p[-1:8:3])
+
+
