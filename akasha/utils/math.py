@@ -106,8 +106,12 @@ def map_array(func, arr, method='numpy', dtype=object):
         raise exceptions.NotImplementedError("map_array(): method '{0}' missing.".format(method))
     return res.reshape(shape)
 
+def as_complex(a):
+    """Convert real number coordinate points to complex samples"""
+    return a.transpose().flatten().view(np.complex128)
+
 def complex_as_reals(samples):
-    # Convert complex samples to real number coordinate points
+    """Convert complex samples to real number coordinate points"""
     return samples.view(np.float64).reshape(len(samples), 2).transpose()    # 0.5 to 599.5
 
 def find_closest_index(arr, target):

@@ -9,9 +9,8 @@ import scipy as sc
 
 from cmath import rect
 
+from akasha.utils.math import as_complex
 
-def as_complex(a):
-    return a.transpose().flatten().view(np.complex128)
 
 def clothoid(points):
     points = np.atleast_1d(points)
