@@ -118,8 +118,9 @@ class Frequency(FrequencyRatioMixin, PeriodicGenerator):
     def angles(ratio):
         """Normalized frequency (Tau) angles for one full period at ratio."""
         # Fastest generating method so far. Could be made still faster by using conjugate for half of the samples.
-        if ratio == 0:
-            return np.array([0.], dtype=np.float64)
+        zero = np.zeros(1, dtype=np.float64)
+        if np.all(zero == ratio):
+            return zero
         return ratio.numerator * np.arange(0, 1, 1.0/ratio.denominator, dtype=np.float64)
 
     @staticmethod
