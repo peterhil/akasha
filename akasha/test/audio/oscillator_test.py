@@ -90,15 +90,13 @@ class TestOscRoots(object):
             -1+0j, np.exp(wi*5/8),
             -0-1j, np.exp(wi*7/8),
         ], dtype=np.complex128)
+
         assert np.allclose(a.real, b.real, atol=1e-13), \
             "real \n%s\nis not close to\n%s" % (a, b)
         assert np.allclose(a.imag, b.imag, atol=1e-13), \
             "imag \n%s\nis not close to\n%s" % (a, b)
 
-        # assert_nulp_diff(a.real, b.real, nulp=1) # @FIXME nulp should be smaller!
-        # assert_nulp_diff(a.imag, b.imag, nulp=1)
-
-        assert_nulp_diff(a, b, nulp=1) # complex testing works differently?!
+        assert_nulp_diff(a, b, nulp=1)
 
     def test_phasors(self):
         """It should be accurate.
