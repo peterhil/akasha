@@ -77,28 +77,6 @@ class TestOscillator(object):
         assert o == eval(repr(o))
 
 
-class TestOscillatorInit(object):
-    """Test oscillator initialization"""
-
-    def test_init(self):
-        """Test initialization"""
-        o = Osc.from_ratio(1, 8)
-        assert isinstance(o, Osc)
-        assert o.order == 1
-        assert o.period == 8
-        assert o.ratio == Fraction(1,8)
-
-    def test_size(self):
-        """Test size of roots"""
-        assert 8, Osc.from_ratio(1, 8).sample.size
-
-    def test_init_with_aliasing(self):
-        sampler.prevent_aliasing = False
-        sampler.negative_frequencies = True
-        assert Osc.from_ratio(1, 8), Osc.from_ratio(9, 8)
-        assert Osc.from_ratio(7, 8), Osc.from_ratio(-1, 8)
-
-
 class TestOscRoots(object):
     """Test root generating functions."""
 
@@ -138,22 +116,5 @@ class TestOscRoots(object):
 
             assert_nulp_diff(a.real, b.real, nulp=25) # @FIXME nulp should be smaller!
             assert_nulp_diff(a.imag, b.imag, nulp=1)
-
-
-class TestOscSlicing(object):
-    def setup(self):
-        self.o = Osc.from_ratio(1, 6)
-        self.p = Osc.from_ratio(3, 8)
-
-    def test_list_access(self):
-        self.setup()
-        assert self.o[-1] == self.o[5] == self.o[11]
-        assert_nulp_diff(self.o[0, 6, 12], self.o[0], 1)
-
-    def test_slice_access(self):
-        self.setup()
-        assert np.equal(self.p[::], self.p.sample).all()
-        assert np.allclose(self.o[:3:2], Osc.from_ratio(1, 3).sample)
-        assert_array_equal(self.p[7,2,5,0,3,6,1,4,7], self.p[-1:8:3])
 
 

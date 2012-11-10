@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-
 import numpy as np
 
 from sys import maxint
 
-from ..control.io import audio
-from ..funct import blockwise
-from ..timing import sampler
-from ..utils.log import logger
+from akasha.control.io import audio
+from akasha.funct import blockwise
+from akasha.timing import sampler
+from akasha.utils.log import logger
 
 
 class Generator(object):
