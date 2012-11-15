@@ -1,0 +1,11 @@
+distribute>=0.6.24
+ipython>=0.12
+#Pygments>=1.4
+
+numpy>=1.6.1
+-e git+https://github.com/scipy/scipy@d0b840e2ad27f6049392e2bcb67d874e4b8fbfde#egg=scipy-dev
+-e hg+https://bitbucket.org/pygame/pygame@macosx-openfile2#egg=pygame-dev
+matplotlib>=1.1.0
+
+PIL==1.1.7
+scikits.audiolab==0.11.0

@@ -1,0 +1,32 @@
+
+numpy==1.6.2
+
+PIL==1.1.7
+Pygments==1.4
+ipython==0.13
+pyzmq>=2.1.11
+wsgiref>=0.1.2
+
+mercurial
+
+# Do "brew install sdl sdl_image sdl_mixer sdl_ttf portmidi --HEAD smpeg" before pygame!
+# See http://stackoverflow.com/questions/8458911/pygame-in-a-virtualenv
+#pygame==1.9.1release
+#pygame==1.9.2pre
+-e hg+http://bitbucket.org/pygame/pygame
+# If installing manually, use 'sudo pip install hg+http://bitbucket.org/pygame/pygame' and
+# chown -R py2.7/lib/python2.7/sitepackagespygame* afterwards
+
+scikits.audiolab>=0.11.0
+scikits.samplerate
+#-e git+https://github.com/scipy/scipy@d0b840e2ad27f6049392e2bcb67d874e4b8fbfde#egg=scipy-dev
+-e git+https://github.com/scipy/scipy#egg=scipy-dev
+python-dateutil
+
+matplotlib # depends on numpy, python-dateutil (pyplot)
+Twisted
+txosc
+wikitools
+
+# brew install libevent
+gevent

@@ -1,0 +1,20 @@
+-e git+git://github.com/sloonz/pil-py3k.git#egg=PIL-dev
+Pygments==1.5
+Twisted==12.2.0
+distribute==0.6.24
+
+pyzmq==2.2.0.1
+ipython==0.13
+matplotlib==1.1.1
+numpy>=1.6.2
+pygame==1.9.2pre
+python-dateutil>=2.1
+readline>=6.2.2
+scikits.audiolab>=0.11.0
+scikits.samplerate>=0.3.3
+-e git+https://github.com/scipy/scipy#egg=scipy-dev
+six>=1.2.0
+
+wikitools>=1.1.1
+wsgiref>=0.1.2
+zope.interface>=4.0.1

@@ -7,8 +7,6 @@ TAGS
 doc/
 html/
 htmlcov/
-install/
-pip-stable-req.txt
 py2.7/
 venv/
 virtualenvs/
