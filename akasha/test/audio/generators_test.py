@@ -95,4 +95,10 @@ class TestPeriodicGenerator(object):
             self.p[-1:8:3]
         )
 
+    def test_sample_period_is_accurate(self):
+        o = Osc(1)
+        s = sampler.rate
+        assert_array_equal(o[0*s:1*s], o[1*s:2*s])
+        assert_array_equal(o[0*s:1*s], o[2*s:3*s])
+
 

@@ -41,32 +41,14 @@ class TestOscillator(object):
         with pytest.raises(NotImplementedError):
             b.curve.at(4)
 
-    def test_from_ratio(self):
-        o, p = 3, 802
-        a = Osc.from_ratio(o, p)
-        b = Osc.from_ratio(Fraction(o, p))
-        c = Osc(Fraction(o, p) * sampler.rate)
-        assert a == b == c
-        assert a.order == o
-        assert a.period == p
-        assert a.ratio == Fraction(o, p)
-
     def test_sample(self):
         o, p = 1, sampler.rate
-
         expected = np.exp(1j * pi2 * o * np.arange(0, 1.0, 1.0/p, dtype=np.float64))
-
         assert_nulp_diff(
             Osc.from_ratio(o, p).sample,
             expected,
             1
         )
-
-    def test_sample_period_is_accurate(self):
-        o = Osc(1)
-        s = sampler.rate
-        assert_array_equal(o[0*s:1*s], o[1*s:2*s])
-        assert_array_equal(o[0*s:1*s], o[2*s:3*s])
 
     def test_str(self):
         o = Osc(100)
