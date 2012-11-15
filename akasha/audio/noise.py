@@ -5,10 +5,10 @@ from __future__ import absolute_import
 
 import numpy as np
 
-from cmath import rect, polar, phase, pi, exp
+from cmath import rect, phase, pi
 
-from .envelope import Exponential
-from .generators import Generator
+from akasha.audio.envelope import Exponential
+from akasha.audio.generators import Generator
 
 
 class Noise(Generator):
@@ -63,13 +63,12 @@ class Chaos(Generator):
     def __init__(self):
         self.gen = self.Mandelbrot()
 
-    def sample(self, iter, e = Exponential(0, amp=0.5)):
+    def sample(self, iter, e=Exponential(0, amp=0.5)):
         chaos = np.fromiter(self.gen, count=len(iter), dtype=complex)
         return chaos[iter] * e[iter]
 
     def __repr__(self):
         return "Mandelbrot: c=%s, z=%s" % (self.gen.c, self.gen.z)
-
 
     # Generator function class for Chaos
     class Mandelbrot:
@@ -82,7 +81,7 @@ class Chaos(Generator):
             if c:
                 self.c = c
             else:
-                self.c = rect(np.random.random(), 2 * pi * np.random.random() * 1.0/8.0)
+                self.c = rect(np.random.random(), 2 * pi * np.random.random() * 1.0 / 8.0)
             if random:
                 self.seed()
             else:
@@ -91,7 +90,7 @@ class Chaos(Generator):
         def next(self):
             self.z = self.mandelbrot(self.z)
             if abs(self.z) > 1.0:
-                self.z = rect(1.0/abs(self.z), phase(self.z))
+                self.z = rect(1.0 / abs(self.z), phase(self.z))
             return self.z
 
         def seed(self):
@@ -106,6 +105,6 @@ class Chaos(Generator):
             else:
                 return False
 
-        def mandelbrot(self,z):
+        def mandelbrot(self, z):
             # mandel = np.poly1d([1, 0, self.c])
-            return z**2 + self.c
+            return z ** 2 + self.c

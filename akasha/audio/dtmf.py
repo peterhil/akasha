@@ -79,8 +79,8 @@ class DTMF(Generator):
         table[nkeys[i]] = (lo[l], hi[h])
 
     alphabet_trans = string.maketrans(
-        ''.join(['ABC','DEF','GHI','JKL','MNO','PQRS','TUV','WXYZ',' ','-']),
-        ''.join(['222','333','444','555','666','7777','888','9999','0','-'])
+        ''.join(['ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PQRS', 'TUV', 'WXYZ', ' ', '-']),
+        ''.join(['222', '333', '444', '555', '666', '7777', '888', '9999', '0', '-'])
     )
 
     def __init__(self, str, pulselength=0.07, pause=0.05):

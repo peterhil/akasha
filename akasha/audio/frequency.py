@@ -19,7 +19,8 @@ from akasha.utils.decorators import memoized
 class FrequencyRatioMixin(object):
     @classmethod
     def from_ratio(cls, ratio, den=False, *args, **kwargs):
-        if den: ratio = Fraction(ratio, den)
+        if den:
+            ratio = Fraction(ratio, den)
         return cls(Fraction(ratio) * sampler.rate, *args, **kwargs)
 
     @property
@@ -28,7 +29,8 @@ class FrequencyRatioMixin(object):
 
     @frequency.setter
     def frequency(self, hz):
-        self._hz = float(hz) if isinstance(self, Frequency) else Frequency(hz)  # Use Trellis or other Cells clone?
+        # Use Trellis or other Cells clone?
+        self._hz = float(hz) if isinstance(self, Frequency) else Frequency(hz)
 
     @property
     def ratio(self):
@@ -51,11 +53,11 @@ class FrequencyRatioMixin(object):
     @memoized
     def to_ratio(freq, limit=sampler.rate):
         # @TODO investigate what is the right limit, and take beating tones into account!
-        return Fraction.from_float(float(freq)/sampler.rate).limit_denominator(limit)
+        return Fraction.from_float(float(freq) / sampler.rate).limit_denominator(limit)
 
     @staticmethod
     def antialias(ratio):
-        if sampler.prevent_aliasing and abs(ratio) > Fraction(1,2):
+        if sampler.prevent_aliasing and abs(ratio) > Fraction(1, 2):
             return Fraction(0, 1)
         if sampler.prevent_aliasing and not sampler.negative_frequencies and ratio < 0:
             return Fraction(0, 1)
@@ -117,11 +119,11 @@ class Frequency(FrequencyRatioMixin, PeriodicGenerator):
     @memoized
     def angles(ratio):
         """Normalized frequency (Tau) angles for one full period at ratio."""
-        # Fastest generating method so far. Could be made still faster by using conjugate for half of the samples.
+        # Could be made still faster by using conjugate for half of the samples.
         zero = np.zeros(1, dtype=np.float64)
         if np.all(zero == ratio):
             return zero
-        return ratio.numerator * np.arange(0, 1, 1.0/ratio.denominator, dtype=np.float64)
+        return ratio.numerator * np.arange(0, 1, 1.0 / ratio.denominator, dtype=np.float64)
 
     @staticmethod
     def rads(ratio):
@@ -131,7 +133,7 @@ class Frequency(FrequencyRatioMixin, PeriodicGenerator):
     @property
     def sample(self):
         return self.angles(self.ratio)
-        
+
     def __repr__(self):
         return "Frequency(%s)" % self._hz
 
@@ -145,17 +147,20 @@ class Frequency(FrequencyRatioMixin, PeriodicGenerator):
     def _op(op):
         """
         Add operator fallbacks. Usage: __add__, __radd__ = _op(operator.add)
-        
+
         This function is borrowed and modified from fractions.Fraction._operator_fallbacks(),
         which generates forward and backward operator functions automagically.
         """
+        def calc(a, b):
+            return Frequency(op(a, b))
+
         def forward(a, b):
             if isinstance(b, a.__class__):
-                return Frequency( op(a._hz, b._hz) )
+                return calc(a._hz, b._hz)
             elif isinstance(b, (float, np.floating)):
-                return Frequency( op(a._hz, b) )
+                return calc(a._hz, b)
             elif isinstance(b, Number):
-                return Frequency( op(a._hz, b) )
+                return calc(a._hz, b)
             else:
                 return NotImplemented
         forward.__name__ = '__' + op.__name__ + '__'
@@ -163,11 +168,11 @@ class Frequency(FrequencyRatioMixin, PeriodicGenerator):
 
         def reverse(b, a):
             if isinstance(a, Frequency):
-                return Frequency( op(a._hz, b._hz) )
+                return calc(a._hz, b._hz)
             elif isinstance(a, (float, np.floating)):
-                return Frequency( op(a, b._hz) )
+                return calc(a, b._hz)
             elif isinstance(a, Number):
-                return Frequency( op(a, b._hz) )
+                return calc(a, b._hz)
             else:
                 return NotImplemented
         reverse.__name__ = '__r' + op.__name__ + '__'
@@ -202,6 +207,8 @@ class Frequency(FrequencyRatioMixin, PeriodicGenerator):
         """a == b, takes into account any rounding done on Frequency's initialisation."""
         return self.ratio == Frequency(other).ratio
 
-    # __reduce__ # TODO: Implement pickling -- see http://docs.python.org/library/pickle.html#the-pickle-protocol
-    # __copy__, __deepcopy__
+    # TODO: Implement pickling
+    # http://docs.python.org/library/pickle.html#the-pickle-protocol
 
+    # __reduce__
+    # __copy__, __deepcopy__

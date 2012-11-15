@@ -3,12 +3,9 @@
 
 import numpy as np
 
-from sys import maxint
-
 from akasha.control.io import audio
 from akasha.funct import blockwise
 from akasha.timing import sampler
-from akasha.utils.log import logger
 
 
 class Generator(object):
@@ -24,10 +21,10 @@ class Generator(object):
                 # Mimick ndarray slicing, ie. clip the slice indices
                 res = np.clip(np.array([item.start, item.stop]), a_min=None, a_max=len(self))
                 for i in xrange(len(res)):
-                    if res[i] != None and np.sign(res[i]) == -1:
-                        res[i] = max(-len(self)-1, res[i])
+                    if res[i] is not None and np.sign(res[i]) == -1:
+                        res[i] = max(-len(self) - 1, res[i])
                 item = slice(res[0], res[1], item.step)
-                item = np.arange(*(item.indices(item.stop or (len(self)-1))))
+                item = np.arange(*(item.indices(item.stop or (len(self) - 1))))
             else:
                 item = np.arange(*(item.indices(item.stop)))
         return self.sample(item)
@@ -62,5 +59,4 @@ class PeriodicGenerator(Generator):
     # Disabled because Numpy gets clever (and slow) when a sound objects have length and
     # they're made into an object array...
     # def __len__(self):
-    #     #return maxint
     #     return self.period

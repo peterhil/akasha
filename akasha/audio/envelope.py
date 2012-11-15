@@ -7,13 +7,9 @@ import math
 import numpy as np
 import scipy as sp
 
-from cmath import rect, polar, phase, pi, exp
-from fractions import Fraction
-
-from .generators import Generator
-
-from ..timing import sampler
-from ..utils.math import minfloat, maxfloat
+from akasha.audio.generators import Generator
+from akasha.timing import sampler
+from akasha.utils.math import minfloat
 
 
 class Exponential(Generator):
@@ -33,20 +29,24 @@ class Exponential(Generator):
 
     @classmethod
     def from_half_life(cls, time, amp=1.0):
-        """Returns an exponential decay envelope with time parameter for half-life measured in seconds."""
+        """
+        Returns an exponential decay envelope.
+        Time parameter for half-life is measured in seconds.
+        """
         if np.inf == np.abs(time):
             return cls(rate=0.0, amp=amp)
         else:
-            return cls(rate=sampler.rate / (-(time * sampler.rate) / math.log(2.0)), amp=amp) # @TODO simplify!
+            # TODO simplify!
+            return cls(rate=sampler.rate / (-(time * sampler.rate) / math.log(2.0)), amp=amp)
 
     @property
     def scale(self):
         """Returns the time required to reach a (discrete) zero from a starting amplitude."""
-        return self.half_life * (minfloat(np.max(self.amp))[1]+1)
+        return self.half_life * (minfloat(np.max(self.amp))[1] + 1)
 
     @classmethod
     def from_scale(cls, time, amp=1.0):
-        return cls.from_half_life((time / sampler.rate) / (minfloat(np.max(amp))[1]+1), amp)
+        return cls.from_half_life((time / sampler.rate) / (minfloat(np.max(amp))[1] + 1), amp)
 
     def sample(self, iterable):
         # Convert frame numbers to time (ie. 44100 => 1.0)
@@ -74,7 +74,7 @@ class Attack(Exponential):
         frames = np.zeros(orig_length)
 
         atck = super(Attack, self).sample(iter)
-        atck = filter(lambda x: x > threshold, atck)[::-1] # filter silence and reverse
+        atck = filter(lambda x: x > threshold, atck)[::-1]  # filter silence and reverse
         sus_level = atck[-1]
         frames.fill(sus_level)
         frames[:len(atck)] = atck
@@ -93,7 +93,8 @@ class Gamma(Generator):
             self.scale = scale  # Inverse rate
 
     def sample(self, iterable):
-        frames = (np.array(iterable) / float(sampler.rate)) * (1.0/max(self.scale, 1e-06)) # Make scale into rate
+        rate = (1.0 / max(self.scale, 1e-06))
+        frames = (np.array(iterable) / float(sampler.rate)) * rate
         return sp.special.gammaincc(self.shape, frames)
 
     def __repr__(self):
@@ -108,4 +109,3 @@ class Timbre(Generator):
 
     def __init__(self):
         pass
-

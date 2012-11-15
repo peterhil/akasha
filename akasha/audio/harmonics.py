@@ -6,24 +6,26 @@ from __future__ import absolute_import
 import exceptions
 import numpy as np
 
-from fractions import Fraction
-from copy import copy, deepcopy
+from akasha.audio.envelope import Exponential
+from akasha.audio.frequency import Frequency, FrequencyRatioMixin
+from akasha.audio.generators import Generator
+from akasha.audio.oscillator import Osc
 
-from .envelope import Exponential, Gamma
-from .frequency import Frequency, FrequencyRatioMixin
-from .generators import Generator
-from .oscillator import Osc
-
-from ..timing import sampler
-from ..utils.decorators import memoized
-from ..utils.log import logger
-from ..utils.math import random_phase, normalize
+from akasha.timing import sampler
+from akasha.utils.decorators import memoized
+from akasha.utils.math import random_phase, normalize, pi2
 
 
 class Overtones(FrequencyRatioMixin, Generator):
     """Harmonical overtones for a sound object having a frequency"""
 
-    def __init__(self, sndobj=Osc(216.0), n=8, func=lambda x: 1+x, damping=None, rand_phase=False):
+    def __init__(
+            self,
+            sndobj=Osc(216.0),
+            n=8,
+            func=lambda x: 1 + x,
+            damping=None,
+            rand_phase=False):
         self.base = sndobj
         # TODO Setting ovt.frequency (ovt._hz) leaves ovt.base.frequency (ovt.base._hz)
         # where it was -- is this the desired behaviour?
@@ -31,9 +33,14 @@ class Overtones(FrequencyRatioMixin, Generator):
         self.n = n
         self.func = func
         # Sine waves FIXME: separate freq. damping from rate
-        #self.damping = damping or (lambda f, a=1.0: (-5*np.log2(float(f))/(10.0), a*float(self.frequency)/float(f)))
+        # self.damping = damping or (
+        #     lambda f, a=1.0: (
+        #         -5 * np.log2(float(f)) / (10.0),
+        #         a * float(self.frequency)/float(f)
+        #         )
+        #     )
         #self.damping = damping or (lambda f, a=1.0: -5*np.log2(float(f))/10.0)
-        self.damping = damping or (lambda f, a=1.0: -5*np.log2(float(f))/1000.0)
+        self.damping = damping or (lambda f, a=1.0: -5 * np.log2(float(f)) / 1000.0)
         self.sustain = None
         self.sustained = None
         self.rand_phase = rand_phase
@@ -69,48 +76,55 @@ class Overtones(FrequencyRatioMixin, Generator):
             frames = np.array([0j])
         else:
             frames = np.zeros(len(iter), dtype=complex)
-        
+
         for o in self.oscs:
         # for f in self.overtones:
             # o = deepcopy(self.base)     # Uses deepcopy to preserve superness & other attrs
             # o.frequency = Frequency(self.frequency * f)
             #logger.boring("Overtone frequency: %s" % o.frequency)
-            if o.frequency == 0: break
-            
-            # e = Exponential(0, amp=float(self.frequency/o.frequency*float(self.frequency))) # square waves
-            # e = Exponential(0, amp=float(self.frequency**2/o.frequency**2*float(self.frequency))) # triangle waves
-            # e = Exponential(-o.frequency/100.0) # sine waves
-            e = Exponential(self.damping(o.frequency)) # sine waves
+            if o.frequency == 0:
+                break
+
+            # square waves
+            # e = Exponential(0, amp=float(self.frequency / o.frequency * float(self.frequency)))
+
+            # triangle waves
+            # e = Exponential(0, amp=float(self.frequency ** 2 / o.frequency ** 2 * float(self.frequency)))
+
+            # sine waves
+            # e = Exponential(-o.frequency / 100.0)
+            e = Exponential(self.damping(o.frequency))
             # damp = self.damping(o.frequency)
-            # e = Gamma(-self.damping(o.frequency)[0], 1.0/max(float(o.frequency)/100.0, 1.0)) # sine waves
-            
+            # e = Gamma(-self.damping(o.frequency)[0], 1.0 / max(float(o.frequency) / 100.0, 1.0))
+
             if self.rand_phase:
-                frames += o[iter] * random_phase() * e[iter]    # Move phases to Osc/Frequency!!!
+                frames += o[iter] * random_phase() * e[iter]  # Move phases to Osc/Frequency!
             else:
                 frames += o[iter] * e[iter]
 
-        if self.sustain != None:
-            sus_damping = lambda f, a=1.0: -2*np.log2(float(f))/5.0
+        if self.sustain is not None:
+            sus_damping = lambda f, a=1.0: -2 * np.log2(float(f)) / 5.0
             #sus_damping = lambda f: -0.5
             self.sustained = self.sustained or Exponential(sus_damping(self.frequency))
             if isinstance(iter, slice):
-                frames *= self.sustained[ slice(*list(np.array(iter.indices(iter.stop)) - self.sustain)) ]
+                frames *= self.sustained[slice(*list(np.array(iter.indices(iter.stop)) - self.sustain))]
             elif isinstance(iter, np.ndarray):
-                frames *= self.sustained[ iter - self.sustain ]
+                frames *= self.sustained[iter - self.sustain]
             else:
                 raise exceptions.NotImplementedError(
                     "Sustain with objects of type %s not implemented yet." % type(iter)
                 )
-        
-        return frames / self.limit # normalize using a single value for whole sound!
+
+        return frames / self.limit  # normalize using a single value for whole sound!
 
     def __repr__(self):
         return "%s(sndobj=%s, n=%s, func=%s, damping=%s, rand_phase=%s>" % \
-                (self.__class__.__name__, self.base, self.n, self.func, self.damping, self.rand_phase)
+            (self.__class__.__name__, self.base, self.n, self.func, self.damping, self.rand_phase)
 
     def __str__(self):
         return "<%s: sndobj=%s, limit=%s, frequency=%s, overtones=%s, func=%s, damping=%s>" % \
-                (self.__class__.__name__, self.base, self.limit, self.frequency, self.overtones, self.func, self.damping)
+            (self.__class__.__name__, self.base, self.limit, self.frequency,
+             self.overtones, self.func, self.damping)
 
 
 class Multiosc(Overtones):
@@ -125,18 +139,18 @@ class Multiosc(Overtones):
     # In [11]: np.arange(7) * o.ratio
     # Out[11]: array([0, 11/735, 22/735, 11/245, 44/735, 11/147, 22/245], dtype=object)
 
-    # np.exp(1j * np.atleast_2d(h.overtones).T * np.atleast_2d(2.0 * np.pi * (np.arange(0,44100.0/25) * float(o.ratio))))
+    # np.exp(1j * np.atleast_2d(h.overtones).T * \
+    #     np.atleast_2d(2.0 * np.pi * (np.arange(0,44100.0/25) * float(o.ratio))))
 
-    # The problem is that different frequencies have different periods, and getting samples (mod period) would be needed
-    # to be implemented at numpy array level...
+    # The problem is that different frequencies have different periods, and getting
+    # samples (mod period) would be needed to be implemented at numpy array level...
 
     @staticmethod
     @memoized
     def angles(ratio, limit):
         if ratio == 0:
             return np.array([0.], dtype=np.float64)
-        pi2 = 2 * np.pi
-        return pi2 * ratio.numerator * np.arange(0, 1, 1.0/ratio.denominator, dtype=np.float64)
+        return pi2 * ratio.numerator * np.arange(0, 1, 1.0 / ratio.denominator, dtype=np.float64)
 
     @staticmethod
     @memoized
@@ -147,7 +161,8 @@ class Multiosc(Overtones):
         frames = np.zeros(len(iter), dtype=complex)
 
         for o in self.oscs:
-            if o.frequency == 0: break
+            if o.frequency == 0:
+                break
 
             if self.rand_phase:
                 frames += o[iter] * random_phase()
@@ -155,4 +170,3 @@ class Multiosc(Overtones):
                 frames += o[iter]
 
         return normalize(frames)
-

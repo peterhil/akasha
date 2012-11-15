@@ -4,8 +4,6 @@
 from __future__ import absolute_import
 from __future__ import division
 
-import numpy as np
-
 from akasha.audio.curves import Circle
 from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import PeriodicGenerator
@@ -14,7 +12,7 @@ from akasha.audio.generators import PeriodicGenerator
 class Osc(FrequencyRatioMixin, PeriodicGenerator):
     """Generic oscillator class with a frequency and a parametric curve."""
 
-    def __init__(self, freq, curve = Circle()):
+    def __init__(self, freq, curve=Circle()):
         self._hz = Frequency(freq)
         self.curve = curve
 
@@ -27,5 +25,3 @@ class Osc(FrequencyRatioMixin, PeriodicGenerator):
 
     def __str__(self):
         return "<%s: %s, curve=%s>" % (self.__class__.__name__, self.frequency, str(self.curve))
-
-

@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Curves for oscillators
+"""
 
 from __future__ import absolute_import
 from __future__ import division
 
 import numpy as np
-import sys
-
-from numbers import Number
 
 from akasha.audio.generators import PeriodicGenerator
+from akasha.timing import sampler
 from akasha.utils import issequence
-from akasha.utils.log import logger
 from akasha.utils.math import clip, pad, pi2, normalize
 from akasha.utils.patterns import Singleton
 
@@ -27,7 +27,7 @@ class Curve(PeriodicGenerator):
         return self.at(param)
 
     def __repr__(self):
-        return "%s()" % (self.__class__.__name__ ,)
+        return "%s()" % (self.__class__.__name__,)
 
     def __str__(self):
         return repr(self)
@@ -65,11 +65,11 @@ class Super(Curve):
     def get_superness(m=None, n=None, p=None, q=None, a=None, b=None):
         """
         Return a superness out of the arguments m to b.
-        If given a sequence as m, will spread it through other arguments, ignoring them.
+        If given a sequence as m, will spread to other arguments, ignoring them.
 
         Defaults to (m=4.0, n=2.0, p=2.0, q=2.0, a=1.0, b=1.0) as an np.array.
         If b is missing, but a provided, it will be given the value of a.
-        Arguments n, p and q are handled similarly, so the missing values are filled from the left.
+        Arguments n, p and q are handled similarly. Missing values are filled from the left.
         """
         if issequence(m):
             superness = np.repeat(None, 6)
@@ -96,11 +96,13 @@ class Super(Curve):
     @staticmethod
     def formula(at, superness):
         """
-        Superformula function. Generates amplitude curves applicable to oscillators by multiplying.
+        Superformula function.
+        Generates amplitude curves applicable to oscillators by multiplying.
 
         Usage:
         supercurve(angles, superness)
-        s = Super(431, m, n, p, q, a, b), where m is number of spikes and n-q determine the roundness.
+        s = Super(431, m, n, p, q, a, b), where
+        m is the number of spikes and n-q determine the roundness.
 
         For more information, see:
         http://en.wikipedia.org/wiki/Superellipse and
@@ -109,7 +111,7 @@ class Super(Curve):
         (m, n, p, q, a, b) = list(superness)
         assert np.isscalar(m), "%s in superformula is not scalar." % m
         coeff = pi2 * at * (m / 4.0)
-        return (np.abs(np.cos(coeff) / a)**p + np.abs(np.sin(coeff) / b)**q) ** (-1.0/n)
+        return (np.abs(np.cos(coeff) / a) ** p + np.abs(np.sin(coeff) / b) ** q) ** (-1.0 / n)
 
     def __eq__(self, other):
         return hash(self) == hash(other)
@@ -121,7 +123,7 @@ class Super(Curve):
         return "%s%s" % (self.__class__.__name__, tuple(self.superness))
 
 
-def chirp_zeta(z1 = -0.5-100j, z2 = 0.5+100j, dur = 10):
+def chirp_zeta(z1=-0.5-100j, z2=0.5+100j, dur=10):
     """
     Chirp sound made by sampling a line z (z1 -> z2) from the complex plane,
     and using the function (k ** -z, k = 0..n) used for summation in the Riemann Zeta function.
@@ -135,4 +137,3 @@ def chirp_zeta(z1 = -0.5-100j, z2 = 0.5+100j, dur = 10):
     z = np.linspace(z1, z2, n)
     k = np.arange(n)
     return normalize(k ** -z)
-
