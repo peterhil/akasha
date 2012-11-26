@@ -12,6 +12,7 @@ from numbers import Number
 
 from akasha.audio.generators import PeriodicGenerator
 from akasha.timing import sampler
+from akasha.types.numeric import AlgebraicField
 from akasha.utils import _super
 from akasha.utils.decorators import memoized
 
@@ -101,12 +102,12 @@ class FrequencyRatioMixin(object):
         return int(self.hz)
 
 
-class Frequency(FrequencyRatioMixin, PeriodicGenerator):
+class Frequency(AlgebraicField, FrequencyRatioMixin, PeriodicGenerator):
     """Frequency class"""
 
     def __init__(self, hz, unwrapped=False):
-        # Original frequency, independent of sampling rate or optimizations
-        self._hz = float(hz)
+        self._unit = '_hz'
+        self._hz = float(hz) # Original frequency, independent of sampling rate or optimizations
         self.unwrapped = unwrapped
 
     @property
@@ -139,65 +140,6 @@ class Frequency(FrequencyRatioMixin, PeriodicGenerator):
 
     def __str__(self):
         return "<Frequency: %s hz>" % self.hz
-
-    def __trunc__(self):
-        """Returns an integral rounded towards zero."""
-        return float(self._hz).__trunc__()
-
-    def _op(op):
-        """
-        Add operator fallbacks. Usage: __add__, __radd__ = _op(operator.add)
-
-        This function is borrowed and modified from fractions.Fraction._operator_fallbacks(),
-        which generates forward and backward operator functions automagically.
-        """
-        def calc(a, b):
-            return Frequency(op(a, b))
-
-        def forward(a, b):
-            if isinstance(b, a.__class__):
-                return calc(a._hz, b._hz)
-            elif isinstance(b, (float, np.floating)):
-                return calc(a._hz, b)
-            elif isinstance(b, Number):
-                return calc(a._hz, b)
-            else:
-                return NotImplemented
-        forward.__name__ = '__' + op.__name__ + '__'
-        forward.__doc__ = op.__doc__
-
-        def reverse(b, a):
-            if isinstance(a, Frequency):
-                return calc(a._hz, b._hz)
-            elif isinstance(a, (float, np.floating)):
-                return calc(a, b._hz)
-            elif isinstance(a, Number):
-                return calc(a, b._hz)
-            else:
-                return NotImplemented
-        reverse.__name__ = '__r' + op.__name__ + '__'
-        reverse.__doc__ = op.__doc__
-
-        return forward, reverse
-
-    __add__, __radd__ = _op(operator.add)
-    __sub__, __rsub__ = _op(operator.sub)
-    __mul__, __rmul__ = _op(operator.mul)
-    __div__, __rdiv__ = _op(operator.div)
-    __truediv__, __rtruediv__ = _op(operator.truediv)
-    __floordiv__, __rfloordiv__ = _op(operator.floordiv)
-
-    __mod__, __rmod__ = _op(operator.mod)
-    __pow__, __rpow__ = _op(operator.pow)
-
-    def __pos__(self):
-        return Frequency(self._hz)
-
-    def __neg__(self):
-        return Frequency(-self._hz)
-
-    def __abs__(self):
-        return Frequency(abs(self._hz))
 
     def __hash__(self):
         """hash(self), takes into account any rounding done on Frequency's initialisation."""

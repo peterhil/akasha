@@ -13,10 +13,11 @@ from numpy.testing.utils import assert_array_equal
 from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
 
 from akasha.audio.frequency import Frequency, FrequencyRatioMixin
-from akasha.audio.generators import PeriodicGenerator
+from akasha.audio.generators import PeriodicGenerator, Generator
 from akasha.audio.oscillator import Osc
 from akasha.timing import sampler
 from akasha.tunings import cents_diff
+from akasha.types.numeric import AlgebraicField
 from akasha.utils.math import pi2
 
 
@@ -148,6 +149,22 @@ class TestFrequencyAliasing(object):
 class TestFrequency(object):
     """Test frequencies"""
 
+    def test_mro(self):
+        assert [
+            Frequency,
+            AlgebraicField,
+            FrequencyRatioMixin,
+            PeriodicGenerator,
+            Generator,
+            object
+        ] == Frequency.mro()
+
+    def test_class(self):
+        assert issubclass(Frequency, AlgebraicField)
+        assert issubclass(Frequency, FrequencyRatioMixin)
+        assert issubclass(Frequency, PeriodicGenerator)
+        assert issubclass(Frequency, object)
+
     def test_init(self):
         """It should intialize using a frequency"""
         hz = 440.001
@@ -213,10 +230,10 @@ class TestFrequency(object):
         assert 'Frequency' in s
         assert '100' in s
 
-    def test_trunc(self):
+    def test_int(self):
         sampler.negative_frequencies = True
-        assert 21 == Frequency(21.5).__trunc__()
-        assert -30 == Frequency(-30.5).__trunc__()
+        assert 21 == int(Frequency(21.5))
+        assert -30 == int(Frequency(-30.5))
 
     def test_pos_neg_abs(self):
         sampler.negative_frequencies = True
