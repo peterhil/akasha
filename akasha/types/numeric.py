@@ -3,10 +3,13 @@
 
 from __future__ import division
 
+import numbers
 import numpy as np
 import operator
 
-from numbers import Number
+from cdecimal import Decimal
+from copy import copy
+from fractions import Fraction
 
 
 def ops(op):
@@ -14,27 +17,61 @@ def ops(op):
     Return forward and backward operator functions.
     Usage: __add__, __radd__ = ops(operator.add)
 
-    This function is borrowed and modified from fractions.Fraction.opserator_fallbacks(),
+    This function is borrowed and modified from fractions.Fraction.operator_fallbacks(),
     which generates forward and backward operator functions automagically.
     """
-    def calc(self, other):
-        return self.__class__(op(self, other))
+    def calc(self, other, cls):
+        return cls(op(self, other))
 
     def forward(self, other):
-        if isinstance(other, self.__class__):
-            return calc(self.unit, other.unit)
-        elif isinstance(other, (Number, np.number)):
-            return calc(self.unit, other)
+        cls = self.__class__
+        if isinstance(other, type(self.value)):
+            return calc(self.value, other, cls)
+
+        elif isinstance(other, Decimal):
+            return calc(Decimal(self.value), Decimal(other), cls)
+
+        # elif isinstance(other, numbers.Integral):
+        #     return calc(int(self.value), int(other), cls)
+        # elif isinstance(other, numbers.Real):
+        #     return calc(float(self), float(other), cls)
+        # elif isinstance(other, numbers.Rational):
+        #     return calc(Fraction(self.value), Fraction(other), cls)
+        # elif isinstance(other, numbers.Complex):
+        #     return calc(complex(self), complex(other), cls)
+
+        # elif isinstance(other, self.__class__):
+        #     return calc(self.value, other.value, cls)
+
+        elif isinstance(other, numbers.Number):
+            return calc(self.value, other, cls)
         else:
             return NotImplemented
     forward.__name__ = '__' + op.__name__ + '__'
     forward.__doc__ = op.__doc__
 
     def reverse(self, other):
-        if isinstance(self, other.__class__):
-            return calc(other.unit, self.unit)
-        elif isinstance(other, (Number, np.number)):
-            return calc(other, self.unit)
+        cls = self.__class__
+        if isinstance(other, type(self.value)):
+            return calc(other, self.value, cls)
+
+        elif isinstance(other, self.__class__):
+            return calc(other.value, self.value, cls)
+
+        elif isinstance(other, Decimal):
+            return calc(Decimal(other), Decimal(self.value), cls)
+
+        # elif isinstance(other, numbers.Integral):
+        #     return calc(int(other), int(self), cls)
+        # elif isinstance(other, numbers.Rational):
+        #     return calc(Fraction(other), Fraction(self), cls)
+        # elif isinstance(other, numbers.Real):
+        #     return calc(float(other), float(self), cls)
+        # elif isinstance(other, numbers.Complex):
+        #     return calc(complex(other), complex(self), cls)
+
+        elif isinstance(other, numbers.Number):
+            return calc(other, self.value, cls)
         else:
             return NotImplemented
     reverse.__name__ = '__r' + op.__name__ + '__'
@@ -43,53 +80,97 @@ def ops(op):
     return forward, reverse
 
 
-class AlgebraicField(object):
+class AlgebraicField(numbers.Integral):
     """
     A mixin to enable arithmetic operations with the inherited class.
-    Refer to: http://docs.python.org/2/reference/datamodel.html
     """
+    # References
+    # ----------
+    # PEP 3141 -- A Type Hierarchy for Numbers: http://www.python.org/dev/peps/pep-3141/
+    # Python Docs: Data Model -- http://docs.python.org/2/reference/datamodel.html
 
     @property
-    def unit(obj):
+    def value(obj):
         return getattr(obj, obj._unit)
 
-    def __eq__(self, other):
-        """Equality"""
-        return self.unit == self.__class__(other).unit
+    def _normalize_value(self, value):
+        return value.value if isinstance(value, type(self)) else value
+
 
     def __hash__(self):
-        """Identity hash"""
-        return hash(self.unit)
+        return hash(self.value)
+
+    def __eq__(self, other):
+        return hash(self) == hash(other)
+
+    # Complex
+
+    def __complex__(self):
+        return complex(self.value)
+
+    def __abs__(self):
+        return self.__class__(abs(self.value))
+    def __neg__(self):
+        return self.__class__(-self.value)
+    def __pos__(self):
+        return self.__class__(+self.value)
+
+    def conjugate(self):
+        return self.__class__(self.value.conjugate())
+    def real(self):
+        return self.__class__(self.value.real)
+    def imag(self):
+        return self.__class__(self.value.imag)
 
     __add__, __radd__ = ops(operator.add)
     __sub__, __rsub__ = ops(operator.sub)
     __mul__, __rmul__ = ops(operator.mul)
+    __pow__, __rpow__ = ops(operator.pow)
     __div__, __rdiv__ = ops(operator.div)
     __truediv__, __rtruediv__ = ops(operator.truediv)
     __floordiv__, __rfloordiv__ = ops(operator.floordiv)
-
     __mod__, __rmod__ = ops(operator.mod)
-    __pow__, __rpow__ = ops(operator.pow)
 
-    def __pos__(self):
-        return self.__class__(self.unit)
-
-    def __neg__(self):
-        return self.__class__(-self.unit)
-
-    def __abs__(self):
-        return self.__class__(abs(self.unit))
+    # Real
 
     def __float__(self):
-        """Returns a float valued unit."""
-        return float(self.unit)
+        return float(self.value)
 
+    def __trunc__(self):
+        return int(float(self.value))
+
+    __le__ = ops(operator.le)
+    __lt__ = ops(operator.lt)
+
+    # Rational
+
+    @property
+    def numerator(self):
+        return self.value.numerator
+    @property
+    def denominator(self):
+        return self.value.denominator
+
+    # Integral
+
+    def __long__(self):
+        return long(self.value)
     def __int__(self):
-        return int(self.unit)
+        return int(self.value)
+
+    def __invert__(self):
+        return ~(self.value)
+
+    __and__, __rand__ = ops(operator.and_)
+    __or__,  __ror__  = ops(operator.or_)
+    __xor__, __rxor__ = ops(operator.xor)
+
+    __lshift__, __rlshift__ = ops(operator.lshift)
+    __rshift__, __rrshift__ = ops(operator.rshift)
 
     def __repr__(self):
-        return "%s(%s)" % (self.__class__, self.unit)
+        return "%s(%s)" % (self.__class__.__name__, self.value)
 
     def __str__(self):
-        return "<%s: %s %s>" % (self.__class__, self.unit, self.unit.strip('_'))
+        return "<%s: %s %s>" % (self.__class__.__name__, self.value, self._unit.strip('_'))
 
