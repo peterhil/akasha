@@ -27,14 +27,24 @@ class TestAlgebraicField(object):
     """Test algebraic field mixin."""
 
     operations = (
+        # Complex
         'add',
         'sub',
         'mul',
+        'pow',
         'div',
         'truediv',
         'floordiv',
         'mod',
-        'pow',
+        # Real
+        # 'ge',
+        # 'gt',
+        # Integral
+        # 'and_',
+        # 'or_',
+        # 'xor',
+        # 'lshift',
+        # 'rshift',
         )
 
     types = {
@@ -48,7 +58,7 @@ class TestAlgebraicField(object):
     def op_params(self, operation, field):
         op = getattr(operator, operation)
         cls = self.types[field]
-        return 7., 5., op, cls
+        return 7, 5, op, cls
 
     @pytest.mark.parametrize(['operation', 'field'], list(itertools.product(operations, types.keys())))
     def test_ops_self(self, operation, field):

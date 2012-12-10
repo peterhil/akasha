@@ -139,8 +139,10 @@ class AlgebraicField(numbers.Integral):
     def __trunc__(self):
         return int(float(self.value))
 
-    __le__ = ops(operator.le)
-    __lt__ = ops(operator.lt)
+    def __le__(self, other):
+        return self.value <= other
+    def __lt__(self, other):
+        return self.value < other
 
     # Rational
 
