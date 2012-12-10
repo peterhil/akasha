@@ -4,6 +4,7 @@
 Unit tests for frequency.py
 """
 
+import numbers
 import numpy as np
 import operator
 import pytest
@@ -17,7 +18,7 @@ from akasha.audio.generators import PeriodicGenerator, Generator
 from akasha.audio.oscillator import Osc
 from akasha.timing import sampler
 from akasha.tunings import cents_diff
-from akasha.types.numeric import AlgebraicField
+from akasha.types.numeric import NumericUnit, ComplexUnit, RealUnit
 from akasha.utils.math import pi2
 
 
@@ -150,17 +151,23 @@ class TestFrequency(object):
     """Test frequencies"""
 
     def test_mro(self):
+        print(Frequency.mro())
         assert [
             Frequency,
-            AlgebraicField,
             FrequencyRatioMixin,
+            RealUnit,
+            ComplexUnit,
+            NumericUnit,
+            numbers.Real,
+            numbers.Complex,
+            numbers.Number,
             PeriodicGenerator,
             Generator,
             object
         ] == Frequency.mro()
 
     def test_class(self):
-        assert issubclass(Frequency, AlgebraicField)
+        assert issubclass(Frequency, RealUnit)
         assert issubclass(Frequency, FrequencyRatioMixin)
         assert issubclass(Frequency, PeriodicGenerator)
         assert issubclass(Frequency, object)

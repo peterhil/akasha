@@ -12,7 +12,7 @@ from numbers import Number
 
 from akasha.audio.generators import PeriodicGenerator
 from akasha.timing import sampler
-from akasha.types.numeric import AlgebraicField
+from akasha.types.numeric import RealUnit
 from akasha.utils import _super
 from akasha.utils.decorators import memoized
 
@@ -102,7 +102,7 @@ class FrequencyRatioMixin(object):
         return int(self.hz)
 
 
-class Frequency(AlgebraicField, FrequencyRatioMixin, PeriodicGenerator):
+class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
     """Frequency class"""
 
     def __init__(self, hz, unwrapped=False):

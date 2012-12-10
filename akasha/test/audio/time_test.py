@@ -10,7 +10,7 @@ import pytest
 import timeit
 
 from akasha.audio.time import Chrono, ps, ns, us, ms, seconds, minutes, hours, days, months, years
-from akasha.types.numeric import AlgebraicField
+from akasha.types.numeric import RealUnit
 from cdecimal import Decimal, getcontext
 from timeit import default_timer as clock
 
@@ -20,7 +20,7 @@ class TestChrono(object):
     Tests of time
     """
     def setup_class(cls):
-        assert issubclass(Chrono, AlgebraicField)
+        assert issubclass(Chrono, RealUnit)
         assert issubclass(Chrono, object)
 
     def test_init(self):

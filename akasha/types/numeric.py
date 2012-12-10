@@ -27,24 +27,22 @@ def ops(op):
         cls = self.__class__
         if isinstance(other, type(self.value)):
             return calc(self.value, other, cls)
+        elif isinstance(other, self.__class__):
+            return calc(self.value, other.value, cls)
 
         elif isinstance(other, Decimal):
             return calc(Decimal(self.value), Decimal(other), cls)
 
-        # elif isinstance(other, numbers.Integral):
-        #     return calc(int(self.value), int(other), cls)
-        # elif isinstance(other, numbers.Real):
-        #     return calc(float(self), float(other), cls)
-        # elif isinstance(other, numbers.Rational):
-        #     return calc(Fraction(self.value), Fraction(other), cls)
-        # elif isinstance(other, numbers.Complex):
-        #     return calc(complex(self), complex(other), cls)
-
-        # elif isinstance(other, self.__class__):
-        #     return calc(self.value, other.value, cls)
-
-        elif isinstance(other, numbers.Number):
-            return calc(self.value, other, cls)
+        elif isinstance(other, numbers.Integral):
+            return calc(int(self), int(other), cls)
+        elif isinstance(other, numbers.Real):
+            return calc(float(self), float(other), cls)
+        elif isinstance(other, numbers.Rational):
+            return calc(Fraction(self.value), Fraction(other), cls)
+        elif isinstance(other, numbers.Complex):
+            return calc(complex(self), complex(other), cls)
+        # elif isinstance(other, numbers.Number):
+        #     return calc(self.value, other, cls)
         else:
             return NotImplemented
     forward.__name__ = '__' + op.__name__ + '__'
@@ -54,7 +52,6 @@ def ops(op):
         cls = self.__class__
         if isinstance(other, type(self.value)):
             return calc(other, self.value, cls)
-
         elif isinstance(other, self.__class__):
             return calc(other.value, self.value, cls)
 
@@ -79,10 +76,9 @@ def ops(op):
 
     return forward, reverse
 
-
-class AlgebraicField(numbers.Integral):
+class NumericUnit(numbers.Number):
     """
-    A mixin to enable arithmetic operations with the inherited class.
+    Base numeric unit mixin for automatic arithmetic operations.
     """
     # References
     # ----------
@@ -103,22 +99,35 @@ class AlgebraicField(numbers.Integral):
     def __eq__(self, other):
         return hash(self) == hash(other)
 
-    # Complex
+    def __repr__(self):
+        return "%s(%s)" % (self.__class__.__name__, self.value)
 
+    def __str__(self):
+        return "<%s: %s %s>" % (self.__class__.__name__, self.value, self._unit.strip('_'))
+
+
+class ComplexUnit(NumericUnit, numbers.Complex):
+    """
+    Complex valued unit mixin for automatic arithmetic operations.
+    """
     def __complex__(self):
         return complex(self.value)
 
     def __abs__(self):
         return self.__class__(abs(self.value))
+
     def __neg__(self):
         return self.__class__(-self.value)
+
     def __pos__(self):
         return self.__class__(+self.value)
 
     def conjugate(self):
         return self.__class__(self.value.conjugate())
+
     def real(self):
         return self.__class__(self.value.real)
+
     def imag(self):
         return self.__class__(self.value.imag)
 
@@ -128,11 +137,13 @@ class AlgebraicField(numbers.Integral):
     __pow__, __rpow__ = ops(operator.pow)
     __div__, __rdiv__ = ops(operator.div)
     __truediv__, __rtruediv__ = ops(operator.truediv)
-    __floordiv__, __rfloordiv__ = ops(operator.floordiv)
     __mod__, __rmod__ = ops(operator.mod)
 
-    # Real
 
+class RealUnit(ComplexUnit, numbers.Real):
+    """
+    Real valued unit mixin for automatic arithmetic operations.
+    """
     def __float__(self):
         return float(self.value)
 
@@ -141,22 +152,33 @@ class AlgebraicField(numbers.Integral):
 
     def __le__(self, other):
         return self.value <= other
+
     def __lt__(self, other):
         return self.value < other
 
-    # Rational
+    __floordiv__, __rfloordiv__ = ops(operator.floordiv)
 
+
+class RationalUnit(RealUnit, numbers.Rational):
+    """
+    Rational valued unit mixin for automatic arithmetic operations.
+    """
     @property
     def numerator(self):
         return self.value.numerator
+
     @property
     def denominator(self):
         return self.value.denominator
 
-    # Integral
 
+class IntegralUnit(RationalUnit, numbers.Integral):
+    """
+    Integral valued unit mixin for automatic arithmetic operations.
+    """
     def __long__(self):
         return long(self.value)
+
     def __int__(self):
         return int(self.value)
 
@@ -170,9 +192,10 @@ class AlgebraicField(numbers.Integral):
     __lshift__, __rlshift__ = ops(operator.lshift)
     __rshift__, __rrshift__ = ops(operator.rshift)
 
-    def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__, self.value)
 
-    def __str__(self):
-        return "<%s: %s %s>" % (self.__class__.__name__, self.value, self._unit.strip('_'))
+# Numerical hierarchy
+NumericUnit.register(numbers.Complex)
+ComplexUnit.register(numbers.Real)
+RealUnit.register(numbers.Rational)
+RationalUnit.register(numbers.Integral)
 

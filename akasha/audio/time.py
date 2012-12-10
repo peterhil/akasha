@@ -4,14 +4,14 @@
 import numpy as np
 from timeit import default_timer as clock
 
-from akasha.types.numeric import AlgebraicField
+from akasha.types.numeric import RealUnit
 from cdecimal import Decimal, getcontext
 
 
 getcontext().prec = 32
 
 
-class Chrono(AlgebraicField):
+class Chrono(RealUnit):
     """
     Chrono is a nanosecond precision time class, that is compatible with OSC.
 
