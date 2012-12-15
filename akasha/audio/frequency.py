@@ -12,12 +12,12 @@ from numbers import Number
 
 from akasha.audio.generators import PeriodicGenerator
 from akasha.timing import sampler
-from akasha.types.numeric import RealUnit
+from akasha.types.numeric import RationalUnit, RealUnit
 from akasha.utils import _super
 from akasha.utils.decorators import memoized
 
 
-class FrequencyRatioMixin(object):
+class FrequencyRatioMixin(RationalUnit):
     @classmethod
     def from_ratio(cls, ratio, den=False, *args, **kwargs):
         if den:
@@ -45,10 +45,12 @@ class FrequencyRatioMixin(object):
     @property
     def period(self):
         return self.ratio.denominator
+    denominator = period
 
     @property
     def order(self):
         return self.ratio.numerator
+    numerator = order
 
     @staticmethod
     @memoized
@@ -72,34 +74,6 @@ class FrequencyRatioMixin(object):
     def __nonzero__(self):
         """Zero frequency should be considered False"""
         return self.ratio != 0
-
-    def _cmp(op):
-        """Generate comparison methods."""
-
-        def comparison(self, other):
-            if isinstance(other, FrequencyRatioMixin):
-                return op(self.ratio, other.ratio)
-            elif isinstance(other, Number):
-                return op(float(self), float(other))
-            else:
-                return NotImplemented
-
-        comparison.__name__ = '__' + op.__name__ + '__'
-        comparison.__doc__ = op.__doc__
-
-        return comparison
-
-    __eq__ = _cmp(operator.eq)
-    __ge__ = _cmp(operator.ge)
-    __gt__ = _cmp(operator.gt)
-    __le__ = _cmp(operator.le)
-    __lt__ = _cmp(operator.lt)
-
-    def __float__(self):
-        return float(self.hz)
-
-    def __int__(self):
-        return int(self.hz)
 
 
 class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):

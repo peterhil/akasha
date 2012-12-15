@@ -13,6 +13,7 @@ class Osc(FrequencyRatioMixin, PeriodicGenerator):
     """Generic oscillator class with a frequency and a parametric curve."""
 
     def __init__(self, freq, curve=Circle()):
+        self._unit = '_hz'
         self._hz = Frequency(freq)
         self.curve = curve
 
