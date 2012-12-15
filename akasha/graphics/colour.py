@@ -4,9 +4,7 @@
 import colorsys
 import numpy as np
 
-
-colour_values = np.float32
-colour_result = np.float32
+from akasha.types import colour_values, colour_result
 
 
 # Colour conversions from: http://local.wasp.uwa.edu.au/~pbourke/texture_colour/convert/

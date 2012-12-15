@@ -8,6 +8,7 @@ import os
 import pygame
 import tempfile
 import time
+import types
 
 from cmath import phase
 from PIL import Image
@@ -15,6 +16,7 @@ from PIL import Image
 from akasha.funct import pairwise
 from akasha.graphics.colour import hsv2rgb, angle2hsv
 from akasha.timing import sampler
+from akasha.types import signed
 from akasha.utils.decorators import memoized
 from akasha.utils.log import logger
 from akasha.utils.math import normalize, clip, deg, distances, pad, pcm, minfloat, complex_as_reals
@@ -54,9 +56,6 @@ def get_points(samples, size=1000):
     samples = ((clip(samples) + 1+1j) / 2.0 * (size - 1) + (0.5+0.5j))      # 0.5 to 599.5
     return complex_as_reals(samples)
 
-import types
-types.signed = (int, float, np.signedinteger, np.floating)
-
 def assert_type(types, *args):
     assert np.all(map(lambda p: isinstance(p, types), args)), \
         "All arguments must be instances of %s, got:\n%s" % (types, map(type, args))
@@ -66,7 +65,7 @@ def line_bresenham(x0, y0, x1, y1, colour=1.0, indices=False):
     Bresenham line drawing algorithm.
     Converted from C version at http://free.pages.at/easyfilter/bresenham.html by Peter H.
     """
-    assert_type(types.signed, x0, y0, x1, y1)
+    assert_type(signed, x0, y0, x1, y1)
     sx = 1 if x0 < x1 else -1
     sy = 1 if y0 < y1 else -1
     dx =  np.abs(x1 - x0)
@@ -91,7 +90,7 @@ def line_bresenham(x0, y0, x1, y1, colour=1.0, indices=False):
         if (e2 <= dx): err += dx; y0 += sy # e_xy + e_y < 0
 
 def line_linspace(x0, y0, x1, y1, endpoint=True):
-    assert_type(types.signed, x0, y0, x1, y1)
+    assert_type(signed, x0, y0, x1, y1)
     size = np.max([np.abs(x1 - x0), np.abs(y1 - y0)]) + int(bool(endpoint))
     return complex_as_reals(np.linspace(x0 + y0 * 1j, x1 + y1 * 1j, size, endpoint=endpoint)).astype(np.int32)
 
