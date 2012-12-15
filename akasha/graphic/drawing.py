@@ -14,8 +14,8 @@ from cmath import phase
 from PIL import Image
 
 from akasha.funct import pairwise
-from akasha.graphics.colour import hsv2rgb, angle2hsv
-from akasha.graphics.primitive.line import line_linspace_cx
+from akasha.graphic.colour import hsv2rgb, angle2hsv
+from akasha.graphic.primitive.line import line_linspace_cx
 from akasha.timing import sampler
 from akasha.utils.decorators import memoized
 from akasha.utils.log import logger

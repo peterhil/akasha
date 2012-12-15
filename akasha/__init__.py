@@ -45,9 +45,10 @@ from .effects.filters import *
 from .funct.xoltar import functional as fx
 from .funct.xoltar import lazy
 
-from .graphics.animation import *
-from .graphics.drawing import *
-from .graphics.splines import *
+from .graphic.animation import *
+from .graphic.drawing import *
+from .graphic.primitive.line import *
+from .graphic.primitive.spline import *
 
 from .net.wiki import *
 

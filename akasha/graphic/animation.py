@@ -19,7 +19,7 @@ from twisted.internet import reactor
 
 from akasha.audio.generators import Generator
 from akasha.control.io.keyboard import *
-from akasha.graphics.drawing import *
+from akasha.graphic.drawing import *
 from akasha.timing import sampler, time_slice
 from akasha.tunings import WickiLayout
 from akasha.utils.math import pcm
