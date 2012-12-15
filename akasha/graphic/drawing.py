@@ -8,27 +8,21 @@ import os
 import pygame
 import tempfile
 import time
-import types
 
-from cmath import phase
 from PIL import Image
 
 from akasha.funct import pairwise
-from akasha.graphic.colour import hsv2rgb, angle2hsv
+from akasha.graphic.colour import hsv2rgb, angle2hsv, colorize, chords_to_hues
 from akasha.graphic.primitive.line import line_linspace_cx
 from akasha.timing import sampler
-from akasha.utils.decorators import memoized
 from akasha.utils.log import logger
-from akasha.utils.math import normalize, clip, deg, distances, pad, pcm, minfloat, complex_as_reals
+from akasha.utils.math import clip, pad, pcm, complex_as_reals
 
 try:
     import matplotlib.pyplot as plt
 except:
     logger.warn("Can't import pyplot from matplolib!")
     pass
-
-
-lowest_audible_hz = 16.35
 
 
 def hist_graph(samples, size=1000):
@@ -55,81 +49,6 @@ def get_points(samples, size=1000):
     # Scale to size and interpret values as pixel centers
     samples = ((clip(samples) + 1+1j) / 2.0 * (size - 1) + (0.5+0.5j))      # 0.5 to 599.5
     return complex_as_reals(samples)
-
-def angles2hues(cx_samples, padding=False, loglevel=logging.ANIMA):
-    """Converts angles of complex samples into hues"""
-
-    # Get angles from points
-    angles = np.angle(np.atleast_1d(cx_samples))
-    logger.log(loglevel, "Angles:\n%s", repr(angles[:100]))
-
-    # Get distances
-    angles = pad(distances(angles), 0) if padding else distances(angles)
-
-    # Get tau angles from points
-    angles = (-np.abs( angles - (np.pi) ) % np.pi) / (2.0*np.pi)
-    logger.log(loglevel, "Tau angles:\n%s", repr(angles[:100]))
-
-    angles *= sampler.rate  # 0..Fs/2
-    logger.log(loglevel, "Frequencies:\n%s", repr(angles[:100]))
-
-    # Convert rad to deg
-    low = np.log2(lowest_audible_hz)
-    angles = ((np.log2(np.abs(angles)+1) - low) / 10 * 240) % 360  # 10 octaves mapped to red..violet
-    logger.log(loglevel, "Scaled:\n%s\n", repr(angles[:100]))
-    return angles
-
-def chord_to_angle(length):
-    """Return angle for chord length. Restrict to unit circle, ie. max length is 2.0"""
-    # Limit highest freqs to Nyquist (blue or violet)
-    d = np.fmin(np.abs(length), 2.0)
-    # Limit lower freqs to lowest_audible_hz (red)
-    d = np.fmax(d, 4.0*lowest_audible_hz/float(sampler.rate))
-    return np.arcsin(d / 2.0) * 2
-
-def chord_to_hue(length):
-    return deg(chord_to_angle(length))
-
-def chord_to_tau(length):
-    return chord_to_angle(length) / (2.0 * np.pi)
-
-def tau_to_hue(tau, loglevel=logging.ANIMA):
-    # Hue 240 is violet, and 8.96 is a factor for scaling back to 1.0
-    #return (np.log2(np.abs(chord_to_tau(tau))+1)) * 8.96 * 240
-    low = np.log2(lowest_audible_hz)
-    taus = ((np.log2(np.abs(tau)+1) - low) / 8.96 * 240) % 360  # 10 octaves mapped to red..violet
-    #logger.log(loglevel, "Scaled:\n%s\n", repr(taus[:100]))
-    return taus
-
-def chords_to_hues(signal, padding=True, loglevel=logging.ANIMA):
-    phases = signal / np.fmax(np.abs(signal), minfloat(0.5)[0])
-
-    # Get distances
-    d = pad(distances(phases), -1) if padding else distances(phases)
-
-    logger.log(loglevel, "%s Distances: %s", __name__, d)
-
-    taus = np.apply_along_axis(chord_to_tau, 0, d) #np.append(d, d[-1])) # Append is a hack to get the same length back
-    logger.log(loglevel, "%s Taus: %s", __name__, taus)
-
-    #taus = taus / (2*np.pi) * sampler.rate
-    taus *= sampler.rate  # 0..Fs/2
-    logger.log(loglevel, "Frequency median: %s", np.median(taus))
-    logger.log(loglevel, "Frequencies:\n%s", repr(taus[:100]))
-    #return taus
-
-    hues = tau_to_hue(taus)
-    return hues
-
-@memoized
-def get_huemap(steps = 6 * 255):
-    #huemap = [ hsv2rgb(angle2hsv(angle)) for angle in np.arange(360) ] # step-size will become 4.2666... = 6 * 256 / 360.0
-    huemap = [ tuple(hsv2rgb(angle2hsv(angle))) for angle in np.arange(0, 360, 1.0 / (steps / 360.0)) ] # len = 1536 = 360 * 4.2666...
-    return np.array(huemap, dtype=np.uint8)
-
-def colorize(samples, steps = 6 * 255, use_chords=True):
-    #method = chords_to_hues if use_chords else angles2hues
-    return get_huemap(steps)[(chords_to_hues(samples) * (steps / 360.0)).astype(np.int)]
 
 def draw(samples, size=1000, dur=None, antialias=False, lines=False, axis=True, img=None, screen=None):
     """Draw the complex sound signal into specified size image."""
