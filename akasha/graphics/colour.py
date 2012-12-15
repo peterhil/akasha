@@ -7,7 +7,10 @@ import numpy as np
 from akasha.types import colour_values, colour_result
 
 
-# Colour conversions from: http://local.wasp.uwa.edu.au/~pbourke/texture_colour/convert/
+# Colour conversion function are from:
+# http://paulbourke.net/texture_colour/colourspace/
+# Section: "HSV Colour space" / "C code to transform between RGB and HSV is given below"
+
 
 # /*
 #    Calculate RGB from HSV, reverse of RGB2HSV()
