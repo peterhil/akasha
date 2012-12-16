@@ -50,8 +50,11 @@ def get_points(samples, size=1000):
     samples = ((clip(samples) + 1+1j) / 2.0 * (size - 1) + (0.5+0.5j))      # 0.5 to 599.5
     return complex_as_reals(samples)
 
-def draw(samples, size=1000, dur=None, antialias=False, lines=False, axis=True, img=None, screen=None):
-    """Draw the complex sound signal into specified size image."""
+def draw(samples, size=1000, dur=None, antialias=False, lines=False, colours=True,
+        axis=True, img=None, screen=None):
+    """
+    Draw the complex sound signal into specified size image.
+    """
     # See http://jehiah.cz/archive/creating-images-with-numpy
 
     # TODO: Buffering with frame rate for animations or realtime signal view.
@@ -60,8 +63,7 @@ def draw(samples, size=1000, dur=None, antialias=False, lines=False, axis=True, 
     # for start in indices:
     # samples = self[start:start+buffersize-1:buffersize] # TODO: Make this cleaner
 
-    # Draw into existing img?
-    if (img != None):
+    if img: # Draw into existing img?
         size = img.shape[0]-1
     else:
         img = get_canvas(size, axis=axis)
@@ -69,68 +71,96 @@ def draw(samples, size=1000, dur=None, antialias=False, lines=False, axis=True, 
     if dur:
         samples = samples[:int(round(dur * sampler.rate))]
 
+    samples = clip_samples(samples)
+
+    if lines:
+        if antialias:
+            draw_coloured_lines_aa(samples, screen, size, colours)
+        else:
+            return draw_coloured_lines(samples, img, size)
+    else:
+        if antialias:
+            return draw_points_aa(samples, img, size)
+        else:
+            return draw_points(samples, img, size)
+
+def clip_samples(samples):
     #clip_max = np.max(np.abs(samples)) # unit circle
     clip_max = np.max(np.fmax(np.abs(samples.real), np.abs(samples.imag))) # rectangular abs can be sqrt(2) > 1.0!
     if clip_max > 1.0:
         logger.warn("Clipping samples on draw() -- maximum magnitude was: %0.6f" % clip_max)
-        samples = clip(samples)
-
-    if lines:
-        if antialias: # Colorize
-            # raise exceptions.NotImplementedError("Drawing lines with antialias not implemented yet.")
-            # TODO: optimize colours with lines!
-            #scaled = (samples + 1+1j) / (2.0 * size)
-
-            if True: #lines and not antialias: #(img != None):
-                colors = colorize(samples)
-                pts = get_points(samples, size).T
-                for (i, ends) in enumerate(pairwise(pts)):
-                    #pts = get_points(np.array(ends), size).transpose()
-                    #color = hsv2rgb(angle2hsv(chords_to_hues(ends, padding=False)))
-                    #color = pygame.Color(*list(hsv2rgb(angle2hsv(chords_to_hues(ends, padding=False))))[:-1])
-                    pygame.draw.aaline(screen, colors[i], *ends)
-            else:
-                colors = colorize(samples)
-                pts = pad(samples, -1)
-                for i in xrange(len(samples)):
-                    line = line_linspace_cx(pts[i], pts[i + 1], endpoint=False)
-                    img[line[0], line[1]] = colors[i][-1] # Drop alpha
-
-        else:
-            # raise exceptions.NotImplementedError("Drawing lines without antialias not implemented yet.")
-            pts = get_points(samples, size).transpose()
-            pygame.draw.aalines(screen, pygame.Color('orange'), False, pts, 1)
+        return clip(samples)
     else:
-        points = get_points(samples, size)
-        if antialias:
-            centers = np.round(points)  # 1.0 to 600.0
-            bases = np.cast['int32'](centers) - 1  # 0 to 599
-            deltas = points - bases - 0.5
+        return samples
 
-            values_00 = deltas[1] * deltas[0]
-            values_01 = deltas[1] * (1.0 - deltas[0])
-            values_10 = (1.0 - deltas[1]) * deltas[0]
-            values_11 = (1.0 - deltas[1]) * (1.0 - deltas[0])
+def draw_coloured_lines_aa(samples, screen, size=1000, colours=True):
+    """
+    Draw antialiased lines with Pygame
+    """
+    if colours:
+        # FIXME draws wrong colours on high frequencies!
+        colors = colorize(samples)
+        pts = get_points(samples, size).T
+        for (i, ends) in enumerate(pairwise(pts)):
+            #pts = get_points(np.array(ends), size).transpose()
+            #color = hsv2rgb(angle2hsv(chords_to_hues(ends, padding=False)))
+            #color = pygame.Color(*list(hsv2rgb(angle2hsv(chords_to_hues(ends, padding=False))))[:-1])
+            pygame.draw.aaline(screen, colors[i], *ends)
+    else:
+        pts = get_points(samples, size).transpose()
+        pygame.draw.aalines(screen, pygame.Color('orange'), False, pts, 1)
 
-            pos = [
-                ( (size-1) - bases[1], bases[0] ),
-                ( (size-1) - bases[1], bases[0]+1 ),
-                ( (size) - (bases[1]+1), bases[0] ),
-                ( (size) - (bases[1]+1), bases[0]+1 ),
-            ]
+def draw_coloured_lines(samples, img, size=1000):
+    """
+    Draw antialiased lines with Numpy
+    """
+    # TODO: optimize this!
+    raise NotImplementedError("Drawing lines with Numpy is way too slow for now!")
+    colors = colorize(samples)
+    pts = pad(samples, -1)
+    for i in xrange(len(samples)): # This is WAY too slow!
+        line = line_linspace_cx(pts[i], pts[i + 1], endpoint=False)
+        img[line[0], line[1]] = colors[i][-1] # Drop alpha
+    return img
 
-            colors = colorize(samples) # or 255 for greyscale
-            # Add opaque alpha
-            colors = np.append(colors, np.array([0] * len(colors)).reshape(len(colors), 1), 1)
+def draw_points_aa(samples, img, size=1000):
+    """
+    Draw colourized antialiased points from samples
+    """
+    points = get_points(samples, size)
+    centers = np.round(points)  # 1.0 to 600.0
+    bases = np.cast['int32'](centers) - 1  # 0 to 599
+    deltas = points - bases - 0.5
 
-            img[pos[0][1], pos[0][0], :] += colors * np.repeat(values_11, 4).reshape(len(samples), 4)
-            img[pos[1][1], pos[1][0], :] += colors * np.repeat(values_10, 4).reshape(len(samples), 4)
-            img[pos[2][1], pos[2][0], :] += colors * np.repeat(values_01, 4).reshape(len(samples), 4)
-            img[pos[3][1], pos[3][0], :] += colors * np.repeat(values_00, 4).reshape(len(samples), 4)
-        else:
-            points = np.cast['uint32'](points)  # 0 to 599
-            img[points[0], (size - 1) - points[1]] = colorize(samples)
-        
+    values_00 = deltas[1] * deltas[0]
+    values_01 = deltas[1] * (1.0 - deltas[0])
+    values_10 = (1.0 - deltas[1]) * deltas[0]
+    values_11 = (1.0 - deltas[1]) * (1.0 - deltas[0])
+
+    pos = [
+        ( (size-1) - bases[1], bases[0] ),
+        ( (size-1) - bases[1], bases[0]+1 ),
+        ( (size) - (bases[1]+1), bases[0] ),
+        ( (size) - (bases[1]+1), bases[0]+1 ),
+    ]
+
+    colors = colorize(samples) # or 255 for greyscale
+    # Add opaque alpha
+    colors = np.append(colors, np.array([0] * len(colors)).reshape(len(colors), 1), 1)
+
+    img[pos[0][1], pos[0][0], :] += colors * np.repeat(values_11, 4).reshape(len(samples), 4)
+    img[pos[1][1], pos[1][0], :] += colors * np.repeat(values_10, 4).reshape(len(samples), 4)
+    img[pos[2][1], pos[2][0], :] += colors * np.repeat(values_01, 4).reshape(len(samples), 4)
+    img[pos[3][1], pos[3][0], :] += colors * np.repeat(values_00, 4).reshape(len(samples), 4)
+    return img
+
+def draw_points(samples, img, size=1000):
+    """
+    Draw colourized points from samples
+    """
+    points = get_points(samples, size)
+    points = np.cast['uint32'](points)  # 0 to 599
+    img[points[0], (size - 1) - points[1]] = colorize(samples) # FIXME: Gives ValueError: array is not broadcastable to correct shape
     return img
 
 
