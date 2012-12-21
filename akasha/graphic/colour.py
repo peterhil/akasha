@@ -18,9 +18,10 @@ from akasha.utils.math import deg, distances, pad, minfloat
 
 
 lowest_audible_hz = 16.35
+white = np.array([255, 255, 255, 255])
 
 
-# Colour conversion function are from:
+# Colour conversion functions hsv2rgb and rgb2hsv ported to Python from C sources at:
 # http://paulbourke.net/texture_colour/colourspace/
 # Section: "HSV Colour space" / "C code to transform between RGB and HSV is given below"
 

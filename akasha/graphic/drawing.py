@@ -12,7 +12,7 @@ import time
 from PIL import Image
 
 from akasha.funct import pairwise
-from akasha.graphic.colour import hsv2rgb, angle2hsv, colorize, chords_to_hues
+from akasha.graphic.colour import hsv2rgb, angle2hsv, colorize, chords_to_hues, white
 from akasha.graphic.primitive.line import line_linspace_cx
 from akasha.timing import sampler
 from akasha.utils.log import logger
@@ -63,7 +63,7 @@ def draw(samples, size=1000, dur=None, antialias=False, lines=False, colours=Tru
     # for start in indices:
     # samples = self[start:start+buffersize-1:buffersize] # TODO: Make this cleaner
 
-    if img: # Draw into existing img?
+    if img is not None: # Draw into existing img?
         size = img.shape[0]-1
     else:
         img = get_canvas(size, axis=axis)
@@ -74,15 +74,16 @@ def draw(samples, size=1000, dur=None, antialias=False, lines=False, colours=Tru
     samples = clip_samples(samples)
 
     if lines:
-        if antialias:
+        if antialias and screen is not None:
             draw_coloured_lines_aa(samples, screen, size, colours)
         else:
-            return draw_coloured_lines(samples, img, size)
+            # raise NotImplementedError("Drawing lines with Numpy is way too slow for now!")
+            return draw_coloured_lines(samples, img, size, colours)
     else:
         if antialias:
-            return draw_points_aa(samples, img, size)
+            return draw_points_aa(samples, img, size, colours)
         else:
-            return draw_points(samples, img, size)
+            return draw_points(samples, img, size, colours)
 
 def clip_samples(samples):
     #clip_max = np.max(np.abs(samples)) # unit circle
@@ -92,6 +93,9 @@ def clip_samples(samples):
         return clip(samples)
     else:
         return samples
+
+def add_alpha(rgb, alpha=255):
+    return np.append(rgb, np.array([alpha] * len(rgb)).reshape(len(rgb), 1), 1)
 
 def draw_coloured_lines_aa(samples, screen, size=1000, colours=True):
     """
@@ -110,20 +114,41 @@ def draw_coloured_lines_aa(samples, screen, size=1000, colours=True):
         pts = get_points(samples, size).transpose()
         pygame.draw.aalines(screen, pygame.Color('orange'), False, pts, 1)
 
-def draw_coloured_lines(samples, img, size=1000):
+def draw_coloured_lines(samples, img, size=1000, colours=True):
     """
     Draw antialiased lines with Numpy
     """
-    # TODO: optimize this!
-    raise NotImplementedError("Drawing lines with Numpy is way too slow for now!")
-    colors = colorize(samples)
-    pts = pad(samples, -1)
-    for i in xrange(len(samples)): # This is WAY too slow!
-        line = line_linspace_cx(pts[i], pts[i + 1], endpoint=False)
-        img[line[0], line[1]] = colors[i][-1] # Drop alpha
+    if len(samples) < 2:
+        raise ValueError("Can't draw lines with less than two samples.")
+
+    bg = get_canvas(size, axis=False)
+
+    if colours:
+        colors = add_alpha(colorize(samples))
+
+    for i, (start, end) in enumerate(pairwise(pad(samples, -1))):
+        line = np.linspace(start, end, np.abs(start - end) * size, endpoint=False)
+        img += draw_points(line, bg, size, colours=False) * (colors[i] if colours else white)
+
     return img
 
-def draw_points_aa(samples, img, size=1000):
+def draw_points_np_aa(samples, img, size=1000, colours=True):
+    """
+    Draw colourized antialiased points from samples
+    """
+    points = ((clip(samples) + 1+1j) / 2.0 * (size - 1) + (0.5+0.5j))
+    deltas = points - np.round(points)
+
+    color = add_alpha(colorize(samples)) if colours else white
+
+    img[:-1, :-1, :] = np.cast['int32'](complex_as_reals(deltas + -0.5-0.5j)) * color
+    img[:-1, :-1, :] = np.cast['int32'](complex_as_reals(deltas + -0.5-0.5j)) * color
+    img[:-1, :-1, :] = np.cast['int32'](complex_as_reals(deltas + -0.5-0.5j)) * color
+    img[:-1, :-1, :] = np.cast['int32'](complex_as_reals(deltas + -0.5-0.5j)) * color
+
+    return img
+
+def draw_points_aa(samples, img, size=1000, colours=True):
     """
     Draw colourized antialiased points from samples
     """
@@ -144,23 +169,23 @@ def draw_points_aa(samples, img, size=1000):
         ( (size) - (bases[1]+1), bases[0]+1 ),
     ]
 
-    colors = colorize(samples) # or 255 for greyscale
-    # Add opaque alpha
-    colors = np.append(colors, np.array([0] * len(colors)).reshape(len(colors), 1), 1)
+    color = add_alpha(colorize(samples)) if colours else white
 
-    img[pos[0][1], pos[0][0], :] += colors * np.repeat(values_11, 4).reshape(len(samples), 4)
-    img[pos[1][1], pos[1][0], :] += colors * np.repeat(values_10, 4).reshape(len(samples), 4)
-    img[pos[2][1], pos[2][0], :] += colors * np.repeat(values_01, 4).reshape(len(samples), 4)
-    img[pos[3][1], pos[3][0], :] += colors * np.repeat(values_00, 4).reshape(len(samples), 4)
+    img[pos[0][1], pos[0][0], :] += color * np.repeat(values_11, 4).reshape(len(samples), 4)
+    img[pos[1][1], pos[1][0], :] += color * np.repeat(values_10, 4).reshape(len(samples), 4)
+    img[pos[2][1], pos[2][0], :] += color * np.repeat(values_01, 4).reshape(len(samples), 4)
+    img[pos[3][1], pos[3][0], :] += color * np.repeat(values_00, 4).reshape(len(samples), 4)
     return img
 
-def draw_points(samples, img, size=1000):
+def draw_points(samples, img, size=1000, colours=True):
     """
     Draw colourized points from samples
     """
     points = get_points(samples, size)
     points = np.cast['uint32'](points)  # 0 to 599
-    img[points[0], (size - 1) - points[1]] = colorize(samples) # FIXME: Gives ValueError: array is not broadcastable to correct shape
+
+    color = add_alpha(colorize(samples)) if colours else white
+    img[points[0], (size - 1) - points[1]] = color
     return img
 
 
@@ -205,16 +230,13 @@ def video_transfer(signal, type='PAL', axis='real', horiz=720):
 
 # Showing images
 
-def show(img, plot=False):
+def show(img, plot=False, osx_open=False):
     if (plot and plt):
         plt.interactive(True)
         imgplot = plt.imshow(img[:,:,:3])
         imgplot.set_cmap('hot')
         plt.show(False)
-    else:
-        image = Image.fromarray(img[...,:3], 'RGB')
-        # image.show()
-        # return False
+    elif osx_open:
         try:
             tmp = tempfile.NamedTemporaryFile(dir='/var/tmp', suffix='akasha.bmp')
             logger.debug("Tempfile: %s" % tmp.name)
@@ -227,14 +249,21 @@ def show(img, plot=False):
             logger.error("Failed to open the image with a default app: %s" % err)
         finally:
             tmp.close()
+    else:
+        image = Image.fromarray(img[...,:3], 'RGB')
+        image.show()
+
 
 def fast_graph(samples, size=1000, plot=False):
     return graph(samples, size, plot, antialias=False)
 
-def graph(samples, size=1000, dur=None, plot=False, axis=True, antialias=True, lines=False, img=None):
+def graph(samples, size=1000, dur=None, plot=False, axis=True,
+        antialias=True, lines=False, colours=True, img=None):
     if dur:
         samples = samples[:int(round(dur * sampler.rate))]
-    img = draw(samples, size=size, antialias=antialias, lines=lines, axis=axis, img=img).transpose((1, 0, 2))
+    img = draw(samples, size=size,
+            antialias=antialias, lines=lines, colours=colours,
+            axis=axis, img=img).transpose((1, 0, 2))
     show(img, plot)
     return False
 

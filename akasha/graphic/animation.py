@@ -152,15 +152,15 @@ def init_mixer(*args):
 def blit(screen, img):
     pg.surfarray.blit_array(screen, img[:,:,:-1]) # Drop alpha
 
-def show_slice(screen, snd, size=800, name="Resonance", antialias=True, lines=False):
+def show_slice(screen, snd, size=800, name="Resonance", antialias=True, lines=False, colours=True):
     "Show a slice of the signal"
     snd = snd[0] # FIXME because xoltar uses 'is' to inspect the arguments, snd samples need to be wrapped into a list!
-    if lines:
+    if lines and antialias: # Using Pygame drawing, so blit before
         img = get_canvas(size)
         blit(screen, img)
-        img = draw(snd, size, antialias=antialias, lines=lines, screen=screen, img=img)
+        img = draw(snd, size, antialias=antialias, lines=lines, colours=colours, screen=screen, img=img)
     else:
-        img = draw(snd, size, antialias=antialias, lines=lines, screen=screen)
+        img = draw(snd, size, antialias=antialias, lines=lines, colours=colours, screen=screen)
         blit(screen, img)
     pg.display.flip()
 
@@ -183,7 +183,8 @@ def handleError(err):
     reactor.stop()
     raise err
 
-def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, init=None, loop='pygame'):
+def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, colours=True,
+        init=None, loop='pygame'):
     """
     Animate complex sound signal
     """
@@ -197,7 +198,7 @@ def anim(snd, size=800, dur=5.0, name="Resonance", antialias=True, lines=False, 
     ch = pg.mixer.find_channel()
     it = iter(snd)
 
-    paint_fn = fx.curry(show_slice, screen, size=size, name=name, antialias=antialias, lines=lines)
+    paint_fn = fx.curry(show_slice, screen, size=size, name=name, antialias=antialias, lines=lines, colours=colours)
     #paint_fn = fx.curry(show_transfer, screen, size=size, type='PAL', axis='imag')
 
     clock = pg.time.Clock()
