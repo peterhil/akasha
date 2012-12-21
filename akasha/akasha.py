@@ -41,9 +41,10 @@ if __name__ == '__main__':
     from effects.tape import *
     from effects.filters import *
 
-    from graphics.animation import *
-    from graphics.drawing import *
-    from graphics.splines import *
+    from graphic.animation import *
+    from graphic.drawing import *
+    from graphic.primitive.line import *
+    from graphic.primitive.spline import *
 
     from net.wiki import *
 

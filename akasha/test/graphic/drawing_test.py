@@ -9,7 +9,7 @@ from __future__ import absolute_import
 import numpy as np
 import unittest
 
-from akasha.graphics.drawing import *
+from akasha.graphic.drawing import *
 
 
 class GraphTest(unittest.TestCase):
