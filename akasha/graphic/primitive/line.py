@@ -41,9 +41,11 @@ def line_linspace(x0, y0, x1, y1, endpoint=True):
     size = np.max([np.abs(x1 - x0), np.abs(y1 - y0)]) + int(bool(endpoint))
     return complex_as_reals(np.linspace(x0 + y0 * 1j, x1 + y1 * 1j, size, endpoint=endpoint)).astype(np.int32)
 
-def line_linspace_cx(start, end, endpoint=True):
-    assert_type(complex, start, end)
+def line_linspace_cx(start, end, resolution=1000, endpoint=True):
+    # assert_type(complex, start, end)
+    start = complex(start)
+    end = complex(end)
     distance = np.abs(start - end)
-    size = np.max([distance.real, distance.imag]) + int(bool(endpoint))
-    return np.round(complex_as_reals(np.linspace(start, end, size, endpoint=endpoint))).astype(np.int32)
+    size = resolution * np.max([distance.real, distance.imag]) + int(bool(endpoint))
+    return np.round(resolution * complex_as_reals(np.linspace(start, end, size, endpoint=endpoint))).astype(np.int32)
 
