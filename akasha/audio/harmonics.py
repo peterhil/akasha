@@ -65,8 +65,8 @@ class Overtones(FrequencyRatioMixin, Generator):
 
     def gen_oscs(self):
         base = self.base.__class__
-        if base.__name__ == 'Super':
-            oscs = map(lambda f: base(f, *self.base.superness), float(self.frequency) * self.overtones)
+        if 'Super' == self.base.curve.__class__.__name__:
+            oscs = map(lambda f: base(f, curve=self.base.curve), float(self.frequency) * self.overtones)
         else:
             oscs = map(base, float(self.frequency) * self.overtones)
         return oscs
