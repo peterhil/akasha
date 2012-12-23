@@ -109,7 +109,7 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
         if not isinstance(hz, Real):
             raise TypeError("Argument 'hz' must be a real number.")
         self._unit = '_hz'
-        self._hz = float(hz) # Original frequency, independent of sampling rate or optimizations
+        self._hz = float(hz)  # Original frequency, independent of sampling rate or optimizations
         self.unwrapped = unwrapped
 
     @property
@@ -160,4 +160,3 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
 
     # __reduce__
     # __copy__, __deepcopy__
-

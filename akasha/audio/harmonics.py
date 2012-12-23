@@ -98,19 +98,21 @@ class Overtones(FrequencyRatioMixin, Generator):
                 break
 
             # square waves
-            # e = Exponential(0, amp=float(self.frequency / o.frequency * float(self.frequency)))
+            # amplitude = float(self.frequency / o.frequency * float(self.frequency))
+            # e = Exponential(0, amp=amplitude)
 
             # triangle waves
-            # e = Exponential(0, amp=float(self.frequency ** 2 / o.frequency ** 2 * float(self.frequency)))
+            # amplitude = float(self.frequency ** 2 / o.frequency ** 2 * float(self.frequency))
+            # e = Exponential(0, amp=amplitude)
 
             # sine waves
             # e = Exponential(-o.frequency / 100.0)
             e = Exponential(self.damping(o.frequency))
-            # damp = self.damping(o.frequency)
             # e = Gamma(-self.damping(o.frequency)[0], 1.0 / max(float(o.frequency) / 100.0, 1.0))
 
             if self.rand_phase:
-                frames += o[iterable] * random_phase() * e[iterable]  # Move phases to Osc/Frequency!
+                # TODO: Move phases to Osc/Frequency!
+                frames += o[iterable] * random_phase() * e[iterable]
             else:
                 frames += o[iterable] * e[iterable]
 
@@ -119,7 +121,8 @@ class Overtones(FrequencyRatioMixin, Generator):
             #sus_damping = lambda f: -0.5
             self.sustained = self.sustained or Exponential(sus_damping(self.frequency))
             if isinstance(iterable, slice):
-                frames *= self.sustained[slice(*list(np.array(iterable.indices(iterable.stop)) - self.sustain))]
+                indices = np.array(iterable.indices(iterable.stop))
+                frames *= self.sustained[slice(*list(indices - self.sustain))]
             elif isinstance(iterable, np.ndarray):
                 frames *= self.sustained[iterable - self.sustain]
             else:
@@ -142,7 +145,8 @@ class Overtones(FrequencyRatioMixin, Generator):
 class Multiosc(Overtones):
     """Multifrequency oscillator."""
     # MAKE A MULTIOSC without ENV, iow. sample using overtones and apply_along_axis with sum!!!!
-    # ratios = map(lambda r: Fraction.from_float(r).limit_denominator(sampler.rate), h.ratio*h.overtones)
+    # freq_ratios = lambda r: Fraction.from_float(r).limit_denominator(sampler.rate)
+    # ratios = map(freq_ratios, h.ratio*h.overtones)
     # samples = map(Frequency.rads, ratios)
     # map(len, samples)
     # Out[58]: [1960, 980, 1960, 490, 393, 980, 280]
@@ -186,4 +190,3 @@ class Multiosc(Overtones):
                 frames += o[iterable]
 
         return normalize(frames)
-

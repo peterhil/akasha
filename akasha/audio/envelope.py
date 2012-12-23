@@ -35,7 +35,8 @@ class Exponential(Generator):
     @classmethod
     def from_half_life(cls, time, amp=1.0):
         """
-        Returns an exponential decay envelope. Time parameter for half-life is measured in seconds.
+        Returns an exponential decay envelope.
+        Time parameter for half-life is measured in seconds.
         """
         if np.inf == np.abs(time):
             return cls(rate=0.0, amp=amp)
@@ -133,4 +134,3 @@ class Timbre(Generator):
 
     def __init__(self):
         super(self.__class__, self).__init__()
-

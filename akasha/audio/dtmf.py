@@ -64,8 +64,8 @@ class DTMF(Generator):
     * = (gsm: +)
     # = (gsm: shift)
     """
-    sp = [ 350,  440,  480,  620]
-    lo = [ 697,  770,  852,  941]
+    sp = [350,  440,  480,  620]
+    lo = [697,  770,  852,  941]
     hi = [1209, 1336, 1477, 1633]
 
     nkeys = '123A' + \
@@ -106,4 +106,3 @@ class DTMF(Generator):
 
     def __len__(self):
         int(round(len(self.number) * (self.pulselength + self.pause) * sampler.rate - self.pause))
-

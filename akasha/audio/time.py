@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import numpy as np
 from timeit import default_timer as clock
 
 from akasha.types.numeric import RealUnit
@@ -46,6 +45,5 @@ minutes = Chrono.prefix(60, 'min', long_name='minutes')
 hours = Chrono.prefix(3600, 'h', long_name='hours')
 days = Chrono.prefix(86400, 'd', long_name='days')
 weeks = Chrono.prefix(7 * 86400, 'w', long_name='weeks')
-months = Chrono.prefix(27.321661569284 * 86400, 'm', long_name='months') # sidereal month approx. for 2012
-years = Chrono.prefix(365.256363004 * 86400, 'a', long_name='years') # sidereal year
-
+months = Chrono.prefix(27.321661569284 * 86400, 'm', long_name='months')  # sidereal month
+years = Chrono.prefix(365.256363004 * 86400, 'a', long_name='years')  # sidereal year

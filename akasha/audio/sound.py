@@ -135,4 +135,3 @@ class Sound(Generator):
         else:
             self.sounds[sl] = [sndobj]
         return self
-

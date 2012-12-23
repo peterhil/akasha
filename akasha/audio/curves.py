@@ -126,7 +126,7 @@ class Super(Curve):
         return "%s%s" % (self.__class__.__name__, tuple(self.superness))
 
 
-def chirp_zeta(z1=-0.5-100j, z2=0.5+100j, dur=10):
+def chirp_zeta(z1=-0.5 - 100j, z2=0.5 + 100j, dur=10):
     """
     Chirp sound made by sampling a line z (z1 -> z2) from the complex plane,
     and using the function (k ** -z, k = 0..n) used for summation in the Riemann Zeta function.
@@ -140,4 +140,3 @@ def chirp_zeta(z1=-0.5-100j, z2=0.5+100j, dur=10):
     z = np.linspace(z1, z2, n)
     k = np.arange(n)
     return normalize(k ** -z)
-

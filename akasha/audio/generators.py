@@ -60,4 +60,3 @@ class PeriodicGenerator(Generator):
     # they're made into an object array...
     # def __len__(self):
     #     return self.period
-

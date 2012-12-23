@@ -3,6 +3,8 @@
 
 from __future__ import division
 
+from numbers import Real
+
 from akasha.audio.curves import Circle
 from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import PeriodicGenerator
@@ -13,6 +15,8 @@ class Osc(FrequencyRatioMixin, PeriodicGenerator):
 
     def __init__(self, freq, curve=Circle()):
         super(self.__class__, self).__init__()
+        if not isinstance(freq, Real):
+            raise TypeError("Argument 'freq' must be a real number.")
         self._hz = Frequency(freq)
         self.curve = curve
 
@@ -21,7 +25,9 @@ class Osc(FrequencyRatioMixin, PeriodicGenerator):
         return self.curve.at(Frequency.angles(self.ratio))
 
     def __repr__(self):
-        return "%s(%s, curve=%s)" % (self.__class__.__name__, self.frequency._hz, repr(self.curve))
+        tpl = "{0}({1}, curve={2})"
+        return tpl.format(self.__class__.__name__, self.frequency._hz, repr(self.curve))
 
     def __str__(self):
-        return "<%s: %s, curve=%s>" % (self.__class__.__name__, self.frequency, str(self.curve))
+        tpl = "<{0}: {1}, curve={2}>"
+        return tpl.format(self.__class__.__name__, self.frequency, str(self.curve))

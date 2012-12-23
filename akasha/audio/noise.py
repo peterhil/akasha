@@ -108,4 +108,3 @@ class Chaos(Generator):
         def mandelbrot(self, z):
             # mandel = np.poly1d([1, 0, self.c])
             return z ** 2 + self.c
-
