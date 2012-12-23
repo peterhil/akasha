@@ -9,14 +9,14 @@ import pygame
 import tempfile
 import time
 
-from PIL import Image
-
 from akasha.funct import pairwise
 from akasha.graphic.colour import hsv2rgb, angle2hsv, colorize, chords_to_hues, white
 from akasha.graphic.primitive.line import line_linspace_cx
 from akasha.timing import sampler
 from akasha.utils.log import logger
 from akasha.utils.math import clip, pad, pcm, complex_as_reals
+
+from PIL import Image
 
 try:
     import matplotlib.pyplot as plt

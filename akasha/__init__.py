@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__package__ = 'akasha'
+from __future__ import absolute_import
 
 import locale
 import logging
@@ -17,8 +17,6 @@ from numbers import Number
 from scipy.signal import hilbert
 
 
-import akasha
-
 from akasha import settings
 from akasha.utils.log import logger
 
@@ -26,6 +24,9 @@ if not hasattr(settings, 'basedir'):
 	settings.basedir = os.path.abspath(os.path.dirname(__file__))
 	logger.info("Started from: {0}".format(settings.basedir))
 
+settings.setup()
+
+from akasha.audio.curves import *
 from akasha.audio.dtmf import DTMF
 from akasha.audio.envelope import Attack, Exponential, Gamma
 from akasha.audio.frequency import Frequency
@@ -57,5 +58,5 @@ from akasha.utils.math import *
 
 
 if __name__ == '__main__':
-	from akasha import *
+    pass
 

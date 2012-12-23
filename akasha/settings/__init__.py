@@ -21,6 +21,3 @@ def setup():
         assert sys.stdin.encoding == 'UTF-8', \
         "Unicode input not enabled! Current input encoding is: %s" % sys.stdin.encoding
 
-
-setup()
-
