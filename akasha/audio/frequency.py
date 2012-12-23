@@ -7,7 +7,7 @@ import numpy as np
 import operator
 
 from fractions import Fraction
-from numbers import Number
+from numbers import Number, Real
 
 from akasha.audio.generators import PeriodicGenerator
 from akasha.timing import sampler
@@ -106,6 +106,8 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
 
     def __init__(self, hz, unwrapped=False):
         super(self.__class__, self).__init__()
+        if not isinstance(hz, Real):
+            raise TypeError("Argument 'hz' must be a real number.")
         self._unit = '_hz'
         self._hz = float(hz) # Original frequency, independent of sampling rate or optimizations
         self.unwrapped = unwrapped
@@ -145,9 +147,13 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
         """hash(self), takes into account any rounding done on Frequency's initialisation."""
         return hash(self.ratio)
 
-    def __eq__(self, other):
-        """a == b, takes into account any rounding done on Frequency's initialisation."""
-        return self.ratio == Frequency(other).ratio
+    # def __eq__(self, other):
+    #     """a == b, takes into account any rounding done on Frequency's initialisation."""
+    #     return self.ratio == Frequency(other).ratio
+
+    def __nonzero__(self):
+        """Nonzero?"""
+        return self._hz != 0
 
     # TODO: Implement pickling
     # http://docs.python.org/library/pickle.html#the-pickle-protocol

@@ -14,7 +14,7 @@ from akasha.audio.oscillator import Osc
 
 from akasha.timing import sampler
 from akasha.utils.decorators import memoized
-from akasha.utils.math import random_phase, normalize, pi2
+from akasha.utils.math import random_phase, map_array, normalize, pi2
 
 
 class Overtones(FrequencyRatioMixin, Generator):
@@ -75,11 +75,12 @@ class Overtones(FrequencyRatioMixin, Generator):
     def gen_oscs(self):
         """Generate oscillators based on overtones."""
         base = self.base.__class__
+        overtones = np.array(float(self.frequency) * self.overtones, dtype=np.float64)
         if 'Super' == self.base.curve.__class__.__name__:
-            oscs = map(lambda f: base(f, curve=self.base.curve), float(self.frequency) * self.overtones)
+            oscs = map_array(lambda f: base(f, curve=self.base.curve), overtones, 'vec')
         else:
-            oscs = map(base, float(self.frequency) * self.overtones)
-        return oscs
+            oscs = map_array(base, overtones, 'vec')
+        return oscs[np.nonzero(oscs)]
 
     def sample(self, iter):
         """Sample the overtones."""
