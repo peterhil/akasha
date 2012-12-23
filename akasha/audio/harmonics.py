@@ -82,12 +82,12 @@ class Overtones(FrequencyRatioMixin, Generator):
             oscs = map_array(base, overtones, 'vec')
         return oscs[np.nonzero(oscs)]
 
-    def sample(self, iter):
+    def sample(self, iterable):
         """Sample the overtones."""
-        if isinstance(iter, int):
+        if isinstance(iterable, int):
             frames = np.array([0j])
         else:
-            frames = np.zeros(len(iter), dtype=complex)
+            frames = np.zeros(len(iterable), dtype=complex)
 
         for o in self.oscs:
         # for f in self.overtones:
@@ -110,21 +110,21 @@ class Overtones(FrequencyRatioMixin, Generator):
             # e = Gamma(-self.damping(o.frequency)[0], 1.0 / max(float(o.frequency) / 100.0, 1.0))
 
             if self.rand_phase:
-                frames += o[iter] * random_phase() * e[iter]  # Move phases to Osc/Frequency!
+                frames += o[iterable] * random_phase() * e[iterable]  # Move phases to Osc/Frequency!
             else:
-                frames += o[iter] * e[iter]
+                frames += o[iterable] * e[iterable]
 
         if self.sustain is not None:
             sus_damping = lambda f, a = 1.0: -2 * np.log2(float(f)) / 5.0
             #sus_damping = lambda f: -0.5
             self.sustained = self.sustained or Exponential(sus_damping(self.frequency))
-            if isinstance(iter, slice):
-                frames *= self.sustained[slice(*list(np.array(iter.indices(iter.stop)) - self.sustain))]
-            elif isinstance(iter, np.ndarray):
-                frames *= self.sustained[iter - self.sustain]
+            if isinstance(iterable, slice):
+                frames *= self.sustained[slice(*list(np.array(iterable.indices(iterable.stop)) - self.sustain))]
+            elif isinstance(iterable, np.ndarray):
+                frames *= self.sustained[iterable - self.sustain]
             else:
                 raise exceptions.NotImplementedError(
-                    "Sustain with objects of type %s not implemented yet." % type(iter)
+                    "Sustain with objects of type %s not implemented yet." % type(iterable)
                 )
 
         return frames / self.limit  # normalize using a single value for whole sound!
@@ -172,18 +172,18 @@ class Multiosc(Overtones):
         """The circle curve for an oscillator at a ratio."""
         return np.exp(1j * pi2 * Frequency.angles(ratio))
 
-    def sample(self, iter):
+    def sample(self, iterable):
         """Sample multifrequency oscillator."""
-        frames = np.zeros(len(iter), dtype=complex)
+        frames = np.zeros(len(iterable), dtype=complex)
 
         for o in self.oscs:
             if o.frequency == 0:
                 break
 
             if self.rand_phase:
-                frames += o[iter] * random_phase()
+                frames += o[iterable] * random_phase()
             else:
-                frames += o[iter]
+                frames += o[iterable]
 
         return normalize(frames)
 

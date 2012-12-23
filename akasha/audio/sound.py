@@ -58,24 +58,24 @@ class Pcm(FrequencyRatioMixin, Generator):
         # http://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.resample.html
         return dsp.resample(self.snd, len(self))
 
-    def resample_at_freq(self, iter=None):
-        if iter is None:
-            iter = slice(0, len(self))
+    def resample_at_freq(self, iterable=None):
+        if iterable is None:
+            iterable = slice(0, len(self))
         ratio = (self.base_freq.ratio / self.frequency.ratio)
         if ratio == 0:
             return np.array([0j])
         elif ratio == 1:
-            return self.snd[iter]
+            return self.snd[iterable]
         else:
-            if isinstance(iter, slice) and iter.stop >= len(self):
-                logger.warn("Normalising {0} for length {1}".format(iter, len(self)))
-                iter = slice(iter.start, min(iter.stop, len(self), iter.step))
-            return self.resample(ratio)[iter]
-            #return self.sc_resample(ratio)[iter]
+            if isinstance(iterable, slice) and iterable.stop >= len(self):
+                logger.warn("Normalising {0} for length {1}".format(iterable, len(self)))
+                iterable = slice(iterable.start, min(iterable.stop, len(self), iterable.step))
+            return self.resample(ratio)[iterable]
+            #return self.sc_resample(ratio)[iterable]
 
-    def sample(self, iter):
-        #logger.debug(__name__ + " sample("+str(self)+"): " + str(iter))
-        return self.resample_at_freq(iter)
+    def sample(self, iterable):
+        #logger.debug(__name__ + " sample("+str(self)+"): " + str(iterable))
+        return self.resample_at_freq(iterable)
 
 
 class Group(FrequencyRatioMixin, Generator):
@@ -97,18 +97,18 @@ class Sound(Generator):
         for s in args:
             self.add(s)
 
-    def sample(self, iter):
+    def sample(self, iterable):
         """Pass parameters to all sound objects and update states."""
-        if isinstance(iter, Number):
+        if isinstance(iterable, Number):
             # FIXME should return scalar, not array!
-            start = int(iter)
+            start = int(iterable)
             stop = start + 1
-        elif isinstance(iter, np.ndarray):
+        elif isinstance(iterable, np.ndarray):
             start = 0
-            stop = len(iter)
+            stop = len(iterable)
         else:
-            start = iter.start or 0
-            stop = iter.stop
+            start = iterable.start or 0
+            stop = iterable.stop
         sl = (start, stop)
 
         sound = np.zeros((stop - start), dtype=complex)
@@ -116,7 +116,7 @@ class Sound(Generator):
             #print "Slice start %s, stop %s" % sl
             for sndobj in self.sounds[sl]:
                 #print "Sound object %s" % sndobj
-                sound += sndobj[iter]
+                sound += sndobj[iterable]
         return sound / max(len(self), 1.0)
 
     def add(self, sndobj, start=0, dur=None):
