@@ -21,6 +21,7 @@ class Pcm(FrequencyRatioMixin, Generator):
     A playable sampled (pcm) sound.
     """
     def __init__(self, snd, base=1):
+        super(self.__class__, self).__init__()
         self._hz = Frequency(base)
         self.base_freq = Frequency(base)
         self.snd = snd
@@ -81,6 +82,7 @@ class Group(FrequencyRatioMixin, Generator):
     """A group of sound objects."""
 
     def __init__(self, *args):
+        super(self.__class__, self).__init__()
         self.sounds = np.array(*args, dtype=object)
         # TODO handle zero-frequencies and non-periodic sounds:
         self.frequency = np.min(np.ma.masked_equal(args, 0).compressed())
@@ -90,6 +92,7 @@ class Sound(Generator):
     """A group of sound objects."""
 
     def __init__(self, *args):
+        super(self.__class__, self).__init__()
         self.sounds = {}
         for s in args:
             self.add(s)

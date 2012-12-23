@@ -105,6 +105,7 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
     """Frequency class"""
 
     def __init__(self, hz, unwrapped=False):
+        super(self.__class__, self).__init__()
         self._unit = '_hz'
         self._hz = float(hz) # Original frequency, independent of sampling rate or optimizations
         self.unwrapped = unwrapped

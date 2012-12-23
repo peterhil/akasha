@@ -128,5 +128,5 @@ class Timbre(Generator):
     """
 
     def __init__(self):
-        pass
+        super(self.__class__, self).__init__()
 

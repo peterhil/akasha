@@ -19,6 +19,7 @@ class Chrono(RealUnit):
     another 32 bits for parts of a second.
     """
     def __init__(self, seconds):
+        super(self.__class__, self).__init__()
         self._unit = '_sec'
         self._sec = Decimal(float(seconds))
 

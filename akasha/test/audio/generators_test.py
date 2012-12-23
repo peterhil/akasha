@@ -19,6 +19,7 @@ class LinearGenerator(Generator):
     """Simple generator for testing."""
 
     def __init__(self, rate=1):
+        super(self.__class__, self).__init__()
         self.ratio = Fraction.from_float(rate).limit_denominator(sampler.rate)
 
     def sample(self, iterable):

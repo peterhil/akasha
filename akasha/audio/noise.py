@@ -13,6 +13,7 @@ class Noise(Generator):
     """Round (magnitude 0..1 with random angle) or polar noise generator"""
 
     def __init__(self, domain_fn=None, random_fn=np.random.random):
+        super(self.__class__, self).__init__()
         self.function = domain_fn or self.unit_disc
         self.randomizer = random_fn
 
@@ -59,6 +60,7 @@ class Chaos(Generator):
     """Chaos generator"""
 
     def __init__(self):
+        super(self.__class__, self).__init__()
         self.gen = self.Mandelbrot()
 
     def sample(self, iter, e=Exponential(0, amp=0.5)):
