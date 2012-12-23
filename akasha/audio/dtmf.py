@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Dual-tone Multifrequency Tones
+"""
 
 import string
 
@@ -81,17 +84,21 @@ class DTMF(Generator):
         ''.join(['222', '333', '444', '555', '666', '7777', '888', '9999', '0', '-'])
     )
 
-    def __init__(self, str, pulselength=0.07, pause=0.05):
-        self.string = str.upper()
+    def __init__(self, sequence, pulselength=0.07, pause=0.05):
+        super(self.__class__, self).__init__()
+
+        self.sequence = sequence.upper()
         self.pulselength = pulselength
         self.pause = pause
+
         return None
 
     @property
     def number(self):
-        return self.string.upper().translate(self.alphabet_trans)
+        """The number to dial."""
+        return self.sequence.upper().translate(self.alphabet_trans)
 
-    def sample(self, iter):
+    def sample(self, iterable):
         """Make DTML dialing tone."""
         #snd = Sound()
         #snd.add()
@@ -99,3 +106,4 @@ class DTMF(Generator):
 
     def __len__(self):
         int(round(len(self.number) * (self.pulselength + self.pause) * sampler.rate - self.pause))
+

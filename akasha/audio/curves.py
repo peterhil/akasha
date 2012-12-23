@@ -11,7 +11,7 @@ import numpy as np
 from akasha.audio.generators import PeriodicGenerator
 from akasha.timing import sampler
 from akasha.utils import issequence
-from akasha.utils.math import clip, pad, pi2, normalize
+from akasha.utils.math import clip, pi2, normalize
 from akasha.utils.patterns import Singleton
 
 
@@ -19,11 +19,12 @@ class Curve(PeriodicGenerator):
     """Generic curve abstraction"""
 
     @staticmethod
-    def at(param):
+    def at(points):
+        """The curve path at points given."""
         raise NotImplementedError("Please implement static method at() in a subclass.")
 
-    def __call__(self, param):
-        return self.at(param)
+    def __call__(self, points):
+        return self.at(points)
 
     def __repr__(self):
         return "%s()" % (self.__class__.__name__,)
@@ -36,16 +37,17 @@ class Circle(Curve, Singleton):
     """Curve of the circle"""
 
     @staticmethod
-    def at(param):
-        return np.exp(1j * pi2 * param)
+    def at(points):
+        """Circle points of the unit circle at the complex plane."""
+        return np.exp(1j * pi2 * points)
 
 
 class Square(Curve, Singleton):
-    """Curve of the square wave (made with np.sign)"""
+    """Curve of the square wave. Made with np.sign()."""
 
     @staticmethod
-    def at(param):
-        return clip(Circle.at(param) * 2)
+    def at(points):
+        return clip(Circle.at(points) * 2)
 
 
 class Super(Curve):
@@ -58,6 +60,7 @@ class Super(Curve):
         See 'Superellipse' article at Wikipedia for explanation of what these parameters mean:
         http://en.wikipedia.org/wiki/Superellipse
         """
+        super(self.__class__, self).__init__()
         self.superness = self.get_superness(m, n, p, q, a, b)
 
     @staticmethod
@@ -89,8 +92,9 @@ class Super(Curve):
             b or a or 1.0,
         ], dtype=np.float64)
 
-    def at(self, param):
-        return normalize(self.formula(param, self.superness)) * Circle.at(param)
+    def at(self, points):
+        """Superformula curve at points."""
+        return normalize(self.formula(points, self.superness)) * Circle.at(points)
 
     @staticmethod
     def formula(at, superness):
@@ -136,3 +140,4 @@ def chirp_zeta(z1=-0.5-100j, z2=0.5+100j, dur=10):
     z = np.linspace(z1, z2, n)
     k = np.arange(n)
     return normalize(k ** -z)
+
