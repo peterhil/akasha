@@ -19,5 +19,4 @@ def setup():
 
     if isinstance(sys.stdin, file):
         assert sys.stdin.encoding == 'UTF-8', \
-        "Unicode input not enabled! Current input encoding is: %s" % sys.stdin.encoding
-
+            "Unicode input not enabled! Current input encoding is: %s" % sys.stdin.encoding

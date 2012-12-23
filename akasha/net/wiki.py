@@ -21,10 +21,12 @@ from akasha.utils.math import identity
 def user_agent(req):
     product = 'Akasha-Resonance'
     url = 'http://composed.nu/peterhil/'
-    system = '(' + ('; '.join(np.array(os.uname())[[0,2,4]])) + '; ' + car(locale.getlocale()) + ')'
+    platform = '; '.join(np.array(os.uname())[[0, 2, 4]])
+    system = '(' + platform + '; ' + car(locale.getlocale()) + ')'
     browser_platform = req.headers['User-agent'][0]
     python_version = 'Python/' + car(os.sys.version.split(' '))
     return (browser_platform, system, product + ' (' + url + ')', python_version)
+
 
 def get_interval_list():
     site = wiki.Wiki("http://en.wikipedia.org/w/api.php")
@@ -37,9 +39,10 @@ def get_interval_list():
         'format': 'json'
     }
     req = api.APIRequest(site, params)
-    req.headers['User-agent'] = user_agent(req) # Customize User Agent
+    req.headers['User-agent'] = user_agent(req)  # Customize User Agent
     res = req.query(querycontinue=True)
     return res
+
 
 def replacement(groups, template=u'', filter=identity):
     def repl(match):
@@ -49,35 +52,45 @@ def replacement(groups, template=u'', filter=identity):
             return template.format(filter(match.group(groups)))
     return repl
 
+
 def remove_wiki_links(string):
     wiki_link_tag = re.compile(r"\[\[([^\|]+\|)?(.*?)\]\]")
+
     def repl(m):
         return m.group(2)
+
     return re.sub(wiki_link_tag, repl, string)
+
 
 def filter_tags(string, tag, template=u'', filter=identity):
     wiki_tag = re.compile(r"<{0}( name=\"[^\"]+\")?(/>|>([^<]*?)</{0}>)".format(tag))
     return re.sub(wiki_tag, replacement(3, template, filter), string)
 
+
 def remove_templates(string, tags=None):
     """
-    Replaces all template tags (or just named tags) of the type '{{tag|value|other}}' with 'value|other' from the string.
+    Replaces all template tags (or just named tags) of the type '{{tag|value|other}}'
+    with 'value|other' from the string.
     """
     wiki_template = re.compile(r"{{([A-Za-z]+)\|(.*?)}}")
+
     def repl(m):
         if tags and not m.group(1) in tags:
-            return m.group(0) # Do not replace
+            return m.group(0)  # Do not replace
         return m.group(2)
-    res = re.sub(wiki_template, repl, string)
-    return res if res else u''
+
+    return re.sub(wiki_template, repl, string) or u''
+
 
 def template_items(string):
     wiki_template = re.compile(r"{{([A-Za-z]+)\|(.*)}}")
     res = re.findall(wiki_template, string)
     return car(res) if res else (u'', u'')
 
+
 def template_value(string):
     return template_items(string)[-1]
+
 
 def parse_interval_name(string, only_first=False):
     try:
@@ -91,9 +104,10 @@ def parse_interval_name(string, only_first=False):
         except ValueError:
             pass
         return (name, car(audio))
-    except KeyError, e:
+    except KeyError:
         logger.error("KeyError for string: %s" % string)
         return (name, "")
+
 
 def parse_freq_ratio(string):
     re_div = re.compile(ur" ?(:|÷|\xf7) ?", re.UNICODE)
@@ -103,6 +117,7 @@ def parse_freq_ratio(string):
     out = re.sub(re_div, u' / ', out, re.UNICODE)
     out = filter_tags(out, tag='sup', template=u' ** {0!r}', filter=Fraction)
     return unicode(out.encode('iso-8859-1'))
+
 
 def parse_wiki(res, loglevel=logging.ANIMA):
     pgs = res['query']['pages']
@@ -134,10 +149,10 @@ def parse_wiki(res, loglevel=logging.ANIMA):
                 err = (cts - rec[0])
                 if np.abs(err) >= 0.005:
                     logger.warn(
-                        "%s '%s' has a too big error %.5f with it's cents %.5f != %.5f" % (rec[2], rec[1], err, rec[0], cts)
+                        "%s '%s' has a too big error %.5f with it's cents %.5f != %.5f" %
+                        (rec[2], rec[1], err, rec[0], cts)
                     )
             else:
                 logger.warn("Parsed cents is %s for record:\n\t\t%s" % (cts, rec))
         out.append(rec)
     return (out, legend)
-

@@ -76,6 +76,7 @@ def ops(op):
 
     return forward, reverse
 
+
 class NumericUnit(numbers.Number):
     """
     Base numeric unit mixin for automatic arithmetic operations.
@@ -91,7 +92,6 @@ class NumericUnit(numbers.Number):
 
     def _normalize_value(self, value):
         return value.value if isinstance(value, type(self)) else value
-
 
     def __hash__(self):
         return hash(self.value)
@@ -186,7 +186,7 @@ class IntegralUnit(RationalUnit, numbers.Integral):
         return ~(self.value)
 
     __and__, __rand__ = ops(operator.and_)
-    __or__,  __ror__  = ops(operator.or_)
+    __or__, __ror__ = ops(operator.or_)
     __xor__, __rxor__ = ops(operator.xor)
 
     __lshift__, __rlshift__ = ops(operator.lshift)
@@ -198,4 +198,3 @@ NumericUnit.register(numbers.Complex)
 ComplexUnit.register(numbers.Real)
 RealUnit.register(numbers.Rational)
 RationalUnit.register(numbers.Integral)
-

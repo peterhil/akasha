@@ -10,7 +10,7 @@ import PIL.Image
 
 
 ITERATIONS = 100
-DENSITY = 1000 # warning: execution speed decreases with square of DENSITY
+DENSITY = 1000  # warning: execution speed decreases with square of DENSITY
 
 x_min, x_max = -2, 1
 y_min, y_max = -1.5, 1.5
@@ -18,7 +18,7 @@ y_min, y_max = -1.5, 1.5
 x, y = np.meshgrid(np.linspace(x_min, x_max, DENSITY),
                    np.linspace(y_min, y_max, DENSITY))
 
-c = x + 1j*y # complex grid
+c = x + 1j * y  # complex grid
 z = c.copy()
 fractal = np.zeros(z.shape, dtype=np.uint8) + 255
 
@@ -51,4 +51,3 @@ for n in range(ITERATIONS):
 
 f = PIL.Image.fromarray(fractal)
 f.save('images/fractal.png')
-

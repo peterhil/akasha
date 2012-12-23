@@ -5,12 +5,12 @@ Unit tests for generators
 """
 
 import numpy as np
-import pytest
 
+from fractions import Fraction
 from numpy.testing.utils import assert_array_equal
 from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
 
-from akasha.audio.generators import Generator, PeriodicGenerator
+from akasha.audio.generators import Generator
 from akasha.audio.oscillator import Osc
 from akasha.timing import sampler
 
@@ -92,13 +92,12 @@ class TestPeriodicGenerator(object):
             self.o[:3:2]
         )
         assert_array_equal(
-            self.p[7,2,5,0,3,6,1,4,7],
+            self.p[7, 2, 5, 0, 3, 6, 1, 4, 7],
             self.p[-1:8:3]
         )
 
     def test_sample_period_is_accurate(self):
         o = Osc(1)
         s = sampler.rate
-        assert_array_equal(o[0*s:1*s], o[1*s:2*s])
-        assert_array_equal(o[0*s:1*s], o[2*s:3*s])
-
+        assert_array_equal(o[0 * s: 1 * s], o[1 * s: 2 * s])
+        assert_array_equal(o[0 * s: 1 * s], o[2 * s: 3 * s])

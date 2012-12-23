@@ -8,8 +8,6 @@ import exceptions
 import math
 import numpy as np
 
-from timeit import default_timer as clock
-
 from akasha.utils.log import logger
 
 
@@ -18,7 +16,7 @@ class Sampler(object):
     A sampler object, providing parameters for sampling.
     """
 
-    def __init__(self, rate = 44100, frametime = 40, antialias = True, allow_negative = False):
+    def __init__(self, rate=44100, frametime=40, antialias=True, allow_negative=False):
         """
         Parameters:
         -----------
@@ -42,10 +40,10 @@ class Sampler(object):
     def videorate(self):
         return 1000 / self.frametime
 
-    def change_frametime(self, ms = None, rel = 0, mintime = 16):
-        if ms == None:
+    def change_frametime(self, ms=None, rel=0, mintime=16):
+        if ms is None:
             ms = self.frametime
-        ms = max(int(round(ms + rel)), mintime) # Limit to mintime (1000 / 16 = 62.5 Hz)
+        ms = max(int(round(ms + rel)), mintime)  # Limit to mintime (1000 / 16 = 62.5 Hz)
         logger.info("Changing video FRAME TIME to {0} ms ({1:.3f} FPS)".format(ms, 1000 / ms))
         self.frametime = ms
         return ms
@@ -66,12 +64,15 @@ def indices(snd, dur=False):
     elif dur:
         size = int(round(dur * sampler.rate))
     else:
-        raise exceptions.ValueError("indices(): Sound must have size, or duration argument must be specified.")
+        raise exceptions.ValueError(
+            "indices(): Sound must have size, or duration argument must be specified.")
     return np.append(np.arange(0, size, sampler.blocksize()), size)
+
 
 def timecode(t, precision=1000000):
     """t = time.clock(); t; int(math.floor(t)); int(round((t % 1.0) * 1000000))"""
     return (int(math.floor(t)), int(round((t % 1.0) * precision)))
+
 
 def times_at(frames):
     """Convert frame numbers to time.
@@ -81,9 +82,11 @@ def times_at(frames):
     """
     return frames / float(sampler.rate)
 
+
 def frames_at(times):
     """Convert time to frame numbers (ie. 1.0 => 44100)"""
     return np.array(int(round(times * sampler.rate)))
+
 
 def sample_times(start, end, rate=sampler.rate):
     """
@@ -96,7 +99,7 @@ def sample_times(start, end, rate=sampler.rate):
             1.49977324,  1.49979592,  1.49981859,  1.49984127,  1.49986395,
             1.49988662,  1.4999093 ,  1.49993197,  1.49995465,  1.49997732])
     """
-    return np.linspace(start, end, (end-start)*rate, endpoint=False)
+    return np.linspace(start, end, (end - start) * rate, endpoint=False)
 
 
 def time_slice(dur, start=0, time=False):
@@ -118,7 +121,11 @@ class Timeslice(object):
 
     @property
     def sample(self):
-        #return np.array(np.linspace(self.start, self.stop, sampler.rate, endpoint=False) * sampler.rate, dtype=int)
+        # return np.array(np.linspace(
+        #     self.start,
+        #     self.stop,
+        #     sampler.rate,
+        #     endpoint=False) * sampler.rate, dtype=int)
         return np.array(np.arange(self.start * sampler.rate, self.stop * sampler.rate), dtype=int)
 
     def __repr__(self):
@@ -128,6 +135,7 @@ class Timeslice(object):
 class OutputStream(object):
     pass
 
+
 class Timeline(object):
     """Class representing time, both physical and discrete."""
 
@@ -135,14 +143,18 @@ class Timeline(object):
         self.resolution = resolution
 
     def times(self, start_time, end_time=None):
-        if end_time == None:
+        if end_time is None:
             end_time = start_time
             start_time = 0
         return np.arange(start_time, end_time, self.resolution, dtype=np.float64)
 
     def frames(self, start_time, end_time=None):
-        if end_time == None:
+        if end_time is None:
             end_time = start_time
             start_time = 0
-        return np.arange(start_time / self.resolution, end_time / self.resolution, 1, dtype=np.int64)
-
+        return np.arange(
+            start_time / self.resolution,
+            end_time / self.resolution,
+            1,
+            dtype=np.int64
+        )

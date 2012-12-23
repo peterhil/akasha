@@ -28,7 +28,7 @@ class FrequencyRatioMixin(object):
         return self._hz
 
     @frequency.setter
-    def frequency(self, hz):
+    def set_frequency(self, hz):
         # Use Trellis or other Cells clone?
         self._hz = float(hz) if isinstance(self, Frequency) else Frequency(hz)
 

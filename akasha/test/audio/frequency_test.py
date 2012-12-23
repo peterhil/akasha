@@ -23,7 +23,9 @@ from akasha.utils.math import pi2
 
 
 class TestFrequencyRatioMixin(object):
-    """Test Frequency ratios."""
+    """
+    Test Frequency ratios.
+    """
 
     silence = 0
     a4 = 440.0
@@ -106,8 +108,9 @@ class TestFrequencyRatioMixin(object):
 
 
 class TestFrequencyAliasing(object):
-    """Test (preventing the) aliasing of frequencies out of range 0 to sample rate."""
-    
+    """
+    Test (preventing the) aliasing of frequencies out of range 0 to sample rate.
+    """
     silence = Frequency(0)
     negative = Fraction(-1, 7)
     over_nyquist = Fraction(9, 14)
@@ -148,7 +151,9 @@ class TestFrequencyAliasing(object):
 
 
 class TestFrequency(object):
-    """Test frequencies"""
+    """
+    Test frequencies
+    """
 
     def test_mro(self):
         print(Frequency.mro())
@@ -194,10 +199,10 @@ class TestFrequency(object):
             assert cents_diff(hz, Frequency(hz)) <= JND_CENTS_EPSILON
 
     @pytest.mark.parametrize(('ratio'), [
-        (Fraction(22, 2205)), # 440 Hz
-        (Fraction(-1, 7)), # Negative
-        (Fraction(9, 14)), # Over Nyquist
-        (Fraction(9, 7)) # Over one
+        (Fraction(22, 2205)),  # 440 Hz
+        (Fraction(-1, 7)),     # Negative
+        (Fraction(9, 14)),     # Over Nyquist
+        (Fraction(9, 7))       # Over one
     ])
     def test_ratio(self, ratio):
         """It should not wrap and antialias ratio when unwrapped."""
@@ -208,7 +213,7 @@ class TestFrequency(object):
         """Is should calculate the frequency angles correctly."""
         assert np.array([0.]) == Frequency.angles(0)
         assert_nulp_diff(
-            np.array([ 0.   , 0.125, 0.25 , 0.375, 0.5  , 0.625, 0.75 , 0.875], dtype=np.float64),
+            np.array([0., 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875], dtype=np.float64),
             Frequency.angles(Fraction(1, 8)),
             1
         )
@@ -252,7 +257,6 @@ class TestFrequency(object):
     def test_arithmetic(self):
         a4 = 440
         a3 = 220
-        a2 = 110
 
         # Forward
         assert Frequency(a4) == Frequency(a3) + Frequency(a3)
@@ -267,4 +271,3 @@ class TestFrequency(object):
         assert Frequency(a4) == a3 + Frequency(a3)
         assert Frequency(a4) == 2.0 * Frequency(a3)
         assert Frequency(a4) == Frequency(a3).__radd__(Frequency(a3))
-

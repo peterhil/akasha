@@ -11,6 +11,7 @@ def funcprinter(func):
         if feat[0:3] == 'co_':
             print feat, '=>', func.func_code.__getattribute__(feat)
 
+
 def macro(func):
     """Lisp style macros for Python"""
     # if inspect.getdourcefile(func): # OR
@@ -19,4 +20,3 @@ def macro(func):
     # expect IOError(e):
     #     return None
     pass
-

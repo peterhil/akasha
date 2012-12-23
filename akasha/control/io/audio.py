@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import string
 import numpy as np
 import os
 
@@ -37,6 +36,7 @@ def get_format(*args, **kwargs):
         res = Format(**params)
     return res
 
+
 # Audiolab read, write and play
 
 def play(sndobj, axis='imag', fs=sampler.rate, dur=5.0, start=0, time=False):
@@ -44,8 +44,10 @@ def play(sndobj, axis='imag', fs=sampler.rate, dur=5.0, start=0, time=False):
     Play out a sound.
     """
     time = time_slice(dur, start, time)
-    if isinstance(sndobj[0], np.floating): axis = 'real'
+    if isinstance(sndobj[0], np.floating):
+        axis = 'real'
     audiolab.play(getattr(sndobj[time], axis), fs)
+
 
 def write(sndobj, filename='test_sound', axis='imag', fmt=Format(**defaults),
           fs=sampler.rate, dur=5.0, start=0, time=False,
@@ -56,9 +58,9 @@ def write(sndobj, filename='test_sound', axis='imag', fmt=Format(**defaults),
     fmt = get_format(fmt)
 
     if filename[0] != '/':
-        filename = '/'.join([sdir, filename]) # Relative path
+        filename = '/'.join([sdir, filename])  # Relative path
 
-    filename = filename +'_'+ axis +'.'+ fmt.file_format
+    filename = filename + '_' + axis + '.' + fmt.file_format
 
     time = time_slice(dur, start, time)
     data = getattr(sndobj[time], axis)
@@ -76,6 +78,7 @@ def write(sndobj, filename='test_sound', axis='imag', fmt=Format(**defaults),
     finally:
         hdl.close()
 
+
 def read(filename, dur=5.0, start=0, time=False, fs=sampler.rate, complex=True,
          sdir=relative_path('../../Sounds/_Music samples/'), *args, **kwargs):
     """
@@ -86,7 +89,7 @@ def read(filename, dur=5.0, start=0, time=False, fs=sampler.rate, complex=True,
     # - If fs or enc differs from default do some conversion?
 
     if filename[0] != '/':
-        filename = '/'.join([sdir, filename]) # Relative path
+        filename = '/'.join([sdir, filename])  # Relative path
 
     format = os.path.splitext(filename)[1][1:]
     check_format(format)
@@ -104,8 +107,15 @@ def read(filename, dur=5.0, start=0, time=False, fs=sampler.rate, complex=True,
     else:
         return data
 
-write.__doc__ += "Available file formats are: %s." % (', '.join([f for f in available_file_formats()]))
-read.__doc__ += "Available file formats are: %s." % (', '.join([f for f in available_file_formats()]))
+
+write.__doc__ += "Available file formats are: {0}.".format(', '.join(
+    [f for f in available_file_formats()]
+))
+
+read.__doc__ += "Available file formats are: {0}.".format(', '.join(
+    [f for f in available_file_formats()]
+))
+
 
 def check_format(format):
     """Checks that a requested format is available (in libsndfile)."""
@@ -113,6 +123,8 @@ def check_format(format):
     if format not in available:
         raise ValueError("File format '%s' not available. Try one of: %s" % (format, available))
 
-def check_encoding(format):
-    pass
 
+def check_encoding(encoding):
+    available = available_encodings()
+    if encoding not in available:
+        raise ValueError("Encoding '%s' not available. Try one of: %s" % (encoding, available))

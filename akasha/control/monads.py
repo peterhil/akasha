@@ -15,26 +15,30 @@ class Monad:
         return self.bind(bindee)
 
     def __add__(self, bindee_without_arg):
-        return self.bind(lambda _ : bindee_without_arg())
+        return self.bind(lambda _: bindee_without_arg())
+
 
 def make_decorator(func, *dec_args):
     def decorator(undecorated):
         def decorated(*args, **kargs):
             return func(undecorated, args, kargs, *dec_args)
-        
+
         decorated.__name__ = undecorated.__name__
         return decorated
-    
+
     decorator.__name__ = func.__name__
     return decorator
+
 
 def make_decorator_with_args(func):
     def decorator_with_args(*dec_args):
         return make_decorator(func, *dec_args)
     return decorator_with_args
 
-decorator           = make_decorator
+
+decorator = make_decorator
 decorator_with_args = make_decorator_with_args
+
 
 @decorator_with_args
 def do(func, func_args, func_kargs, Monad):
@@ -47,11 +51,11 @@ def do(func, func_args, func_kargs, Monad):
             def send(val):
                 try:
                     # here's the real magic
-                    monad = itr.send(val) 
+                    monad = itr.send(val)
                     return monad.bind(send)
                 except StopIteration:
                     return Monad.unit(None)
-                
+
             return send(None)
         else:
             #not really a generator
@@ -61,6 +65,7 @@ def do(func, func_args, func_kargs, Monad):
                 return itr
 
     return run_maybe_iterator()
+
 
 @decorator_with_args
 def handle_monadic_throws(func, func_args, func_kargs, Monad):
@@ -72,21 +77,26 @@ def handle_monadic_throws(func, func_args, func_kargs, Monad):
         assert isinstance(done.monad, Monad)
         return done.monad
 
+
 class MonadReturn(Exception):
     def __init__(self, value):
         self.value = value
         Exception.__init__(self, value)
+
 
 class Done(Exception):
     def __init__(self, monad):
         self.monad = monad
         Exception.__init__(self, monad)
 
+
 def mreturn(val):
     raise MonadReturn(val)
 
+
 def done(val):
     raise Done(val)
+
 
 def fid(val):
     return val
@@ -94,14 +104,14 @@ def fid(val):
 
 class Failable(Monad):
     def __init__(self, value, success):
-        self.value   = value
+        self.value = value
         self.success = success
 
     def __repr__(self):
         if self.success:
             return "Success(%r)" % (self.value,)
         else:
-            return "Failure(%r)" % (self.value,)    
+            return "Failure(%r)" % (self.value,)
 
     def bind(self, bindee):
         if self.success:
@@ -113,13 +123,16 @@ class Failable(Monad):
     def unit(cls, val):
         return cls(val, True)
 
+
 class Success(Failable):
     def __init__(self, value):
         Failable.__init__(self, value, True)
 
+
 class Failure(Failable):
     def __init__(self, value):
         Failable.__init__(self, value, False)
+
 
 def failable_monad_examle():
     def fdiv(a, b):
@@ -154,14 +167,16 @@ class StateChanger(Monad):
 
     @classmethod
     def unit(cls, val):
-        return cls(lambda state : (val, state))
+        return cls(lambda state: (val, state))
 
-def get_state(view = fid):
+
+def get_state(view=fid):
     return change_state(fid, view)
 
-def change_state(changer, view = fid):
+
+def change_state(changer, view=fid):
     def make_new_state(old_state):
-        new_state    = changer(old_state)
+        new_state = changer(old_state)
         viewed_state = view(old_state)
         return (viewed_state, new_state)
     return StateChanger(make_new_state)
@@ -175,7 +190,7 @@ def state_changer_monad_example():
         mreturn(val)
 
     @do(StateChanger)
-    def dict_state_get(key, default = None):
+    def dict_state_get(key, default=None):
         dct = yield get_state()
         val = dct.get(key, default)
         mreturn(val)
@@ -196,30 +211,35 @@ def state_changer_monad_example():
         state = yield get_state()
         mreturn(val2)
 
-    print with_dict_state().run({}) # (2, {"a" : 2, "b" : 2})
+    print with_dict_state().run({})  # (2, {"a" : 2, "b" : 2})
 
 
 class ContinuationMonad(Monad):
     def __init__(self, run):
         self.run = run
 
-    def __call__(self, cont = fid):
-        return self.run(cont)        
+    def __call__(self, cont=fid):
+        return self.run(cont)
 
     def bind(self, bindee):
-        return ContinuationMonad(lambda cont : self.run(lambda val : bindee(val).run(cont)))
+        return ContinuationMonad(lambda cont: self.run(lambda val: bindee(val).run(cont)))
 
     @classmethod
     def unit(cls, val):
-        return cls(lambda cont : cont(val))
+        return cls(lambda cont: cont(val))
 
     @classmethod
     def zero(cls):
-        return cls(lambda cont : None)
-    
+        return cls(lambda cont: None)
+
+
 def callcc(usecc):
-    return ContinuationMonad(lambda cont : usecc(lambda val : ContinuationMonad(lambda _ : cont(val))).run(cont))
-    
+    return ContinuationMonad(
+        lambda cont: usecc(
+            lambda val: ContinuationMonad(
+                lambda _: cont(val))).run(cont))
+
+
 def continuation_monad_example():
     from collections import deque
 
@@ -263,7 +283,7 @@ def continuation_monad_example():
         while True:
             print (yield mb.receive())
 
-    original   = Mailbox()
+    original = Mailbox()
     multiplied = Mailbox()
 
     print_all(multiplied)()
@@ -275,4 +295,3 @@ if __name__ == '__main__':
     failable_monad_examle()
     state_changer_monad_example()
     continuation_monad_example()
-

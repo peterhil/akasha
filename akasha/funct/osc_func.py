@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import functools as fun
 import itertools as itr
 import numpy as np
-import types
 
-from cmath import rect, polar, phase, pi, exp
+from cmath import phase, pi
+from datetime import timedelta
 from fractions import Fraction
 
-from akasha.funct.xoltar import lazy
-from akasha.funct.xoltar.functional import *
+from akasha.funct.xoltar.functional import imap, islice, Functor
 
 
 # General flow:
@@ -19,20 +17,21 @@ from akasha.funct.xoltar.functional import *
 # 3. Apply frames to generating function
 # 4. ?
 
+
 ### Time related functions ###
+
 class sampler(object):
     rate = 44100
-
-from datetime import timedelta
 
 td = np.timedelta64
 
 us = lambda t: td(t)            # µs, microseconds
-ms = lambda t: us(t * 10**3)    # milliseconds
+ms = lambda t: us(t * 10 ** 3)    # milliseconds
 sec = lambda t: timedelta(seconds=t)
 minutes = lambda t: td(timedelta(minutes=t))
 
 Hz = lambda x: Fraction(1, x)
+
 
 def timeslice(iterable, unit=sec):
     """Convert frame numbers to time.
@@ -42,6 +41,7 @@ def timeslice(iterable, unit=sec):
     """
     result = np.divide(np.array(iterable), float(sampler.rate))
     return np.fromiter(imap(unit, result), dtype=td)
+
 
 def frames(iterable):
     """Convert time deltas to frame numbers (ie. 1.0 => 44100)"""
@@ -86,13 +86,16 @@ def sample(iterable, *times):
 # In [72]: %timeit l = np.fromiter(imap(v_root, np.arange(1,1000)), dtype=np.complex)
 # 10 loops, best of 3: 52.8 ms per loop
 
+
 def angfreq(f):
     return 2 * pi * f
+
 
 class oscf(Functor):
 
     def __call__(self, *args):
-        return np.exp( 1j*2*pi * (args % 1.0))
+        return np.exp(1j * 2 * pi * (args % 1.0))
+
 
 def oscillate(phases):
     """
@@ -117,34 +120,41 @@ def oscillate(phases):
     np.exp( 1j*2*pi * (np.linspace(0,1,8,endpoint=False) % 1.0))
 
     """
-    return np.exp( 1j*2*pi * (phases % 1.0))
+    return np.exp(1j * 2 * pi * (phases % 1.0))
+
 
 def osc_freq(iterable, frq):
-    return oscillate(iterable * frq * 1.0/sampler.rate)
+    return oscillate(iterable * frq * 1.0 / sampler.rate)
+
 
 def osc(n):
     return itr.cycle(roots(n))
 
+
 def freq(fl):
     """Calculate ratio for a frequency."""
-    ratio = Fraction.from_float(float(fl)/sampler.rate).limit_denominator(sampler.rate)
+    ratio = Fraction.from_float(float(fl) / sampler.rate).limit_denominator(sampler.rate)
     return ratio
 
+
 def freq2(fl):
-    ratio = Fraction(*(fl/sampler.rate).as_integer_ratio()).limit_denominator(sampler.rate)
+    ratio = Fraction(*(fl / sampler.rate).as_integer_ratio()).limit_denominator(sampler.rate)
     return ratio
+
 
 def roots(period):
     """Calculate n principal roots of unity."""
     return np.exp(np.linspace(0, 2 * pi, period, endpoint=False) * 1j)
 
+
 def nth_root(n):
     """Calculate principal nth root of unity."""
-    return np.exp(1.0/n * np.pi * 2 * 1j)
+    return np.exp(1.0 / n * np.pi * 2 * 1j)
+
 
 def to_phasor(x):
     return (abs(x), (phase(x) / (2 * pi) * 360))
 
-def reorder(arr, n):
-    return np.arange(self.period) * self.order % self.period
 
+def reorder(arr, n):
+    return arr[np.arange(len(arr)) * n % len(arr)]

@@ -5,14 +5,12 @@ from __future__ import division
 
 import numpy as np
 import quantities as pq
-import types
 
-from cmath import rect, pi, exp
+from cmath import pi
 from fractions import Fraction
 from numbers import Number
 
 from akasha.audio.generators import PeriodicGenerator
-from akasha.control.io.audio import play, write
 from akasha.timing import sampler
 from akasha.utils.decorators import memoized
 from akasha.utils.math import to_phasor
@@ -34,10 +32,10 @@ class Unitsampler(object):
         return self._rate
 
     def _set_frame_time(self):
-        pq.frame = pq.UnitTime('frame', sampler.rate**-1, symbol='frame')
+        pq.frame = pq.UnitTime('frame', sampler.rate ** -1, symbol='frame')
 
     @rate.setter
-    def rate(self, value):
+    def set_rate(self, value):
         self._rate = value
         self._set_frame_time()
 
@@ -63,12 +61,12 @@ class Osc(object, PeriodicGenerator):
     @classmethod
     def freq(cls, freq):
         """Oscillator can be initialized using a frequency. Can be a float."""
-        ratio = Fraction.from_float(float(freq)/sampler.rate).limit_denominator(sampler.rate)
+        ratio = Fraction.from_float(float(freq) / sampler.rate).limit_denominator(sampler.rate)
         return cls(ratio)
 
     @staticmethod
     def limit_ratio(f):
-        if Osc.prevent_aliasing and abs(f) > Fraction(1,2):
+        if Osc.prevent_aliasing and abs(f) > Fraction(1, 2):
             return Fraction(0, 1)
         if Osc.prevent_aliasing and not Osc.negative_frequencies and f < 0:
             return Fraction(0, 1)
@@ -79,17 +77,20 @@ class Osc(object, PeriodicGenerator):
     ### Properties ###
 
     @property
-    def ratio(self): return self._ratio
+    def ratio(self):
+        return self._ratio
 
     @ratio.setter
-    def ratio(self, value):
+    def set_ratio(self, value):
         self._ratio = value
 
     @property
-    def period(self): return self.ratio.denominator
+    def period(self):
+        return self.ratio.denominator
 
     @property
-    def order(self): return self.ratio.numerator
+    def order(self):
+        return self.ratio.numerator
 
     @property
     def frequency(self):
@@ -105,7 +106,7 @@ class Osc(object, PeriodicGenerator):
             return np.exp(np.array([0j]))
         pi2 = 2 * pi
         # return np.exp(1j * np.linspace(0, pi2, ratio.denominator, endpoint=False))
-        return np.exp(ratio.numerator * 1j * pi2 * np.arange(0, 1, 1.0/ratio.denominator))  # 53.3 us per loop
+        return np.exp(ratio.numerator * 1j * pi2 * np.arange(0, 1, 1.0 / ratio.denominator))
 
     # Older alternative (and sometimes more precise) ways to generate roots
 
@@ -173,4 +174,3 @@ if __name__ == '__main__':
     o = Osc(Fraction(1, 8))
     print o.np_exp(o.period)
     print to_phasor(o.sample)
-

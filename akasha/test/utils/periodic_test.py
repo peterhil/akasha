@@ -31,14 +31,14 @@ class TestPeriod(object):
         assert pa.shape == shape
 
     @pytest.mark.parametrize(("seq"), [
-        [None,],
-        [(),],
-        [[],],
+        [None],
+        [()],
+        [[]],
         [(1, 2, 3)],
         [u'foo'],
-        [np.inf,],
-        [[2+5j, -3+6j],],
-        [np.array([[4.1, 5.2], [6.3, 7.4]]),],
+        [np.inf],
+        [[2 + 5j, -3 + 6j]],
+        [np.array([[4.1, 5.2], [6.3, 7.4]])],
         [np.arange(6)],
     ])
     def test_array(self, seq):
@@ -70,10 +70,10 @@ class TestPeriod(object):
         assert_array_equal(ar[0], pa[4])
 
         # assert_array_equal(ar[0:1, 1:-2], pa[0:1, 1:-2])
-        # assert_array_equal(ar[:,   1:-2], pa[:,   1:-2])
+        # assert_array_equal(ar[:, 1:-2], pa[:, 1:-2])
 
     def test_view(self):
-        ar = np.arange(6).reshape(2,3)
+        ar = np.arange(6).reshape(2, 3)
         pa = ar.view(period)
         assert np.array_equal(ar, pa)
 
@@ -106,5 +106,3 @@ class TestPeriod(object):
         pa[::] = ar
 
         assert_array_equal(ar, pa)
-
-

@@ -7,7 +7,7 @@ Unit tests for drawing functions
 import numpy as np
 import unittest
 
-from akasha.graphic.drawing import *
+from akasha.graphic.drawing import graph
 
 
 class GraphTest(unittest.TestCase):
@@ -52,4 +52,3 @@ class GraphTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

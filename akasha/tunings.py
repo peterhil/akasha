@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
 from __future__ import division
 
 import exceptions
@@ -34,8 +33,10 @@ def cents(*args):
     """
     return 1200.0 * np.log2(args)
 
+
 def cents_diff(a, b):
     return np.abs(cents(float(a)) - cents(float(b)))
+
 
 def interval(*cnt):
     """Calculate interval ratio from cents.
@@ -46,14 +47,16 @@ def interval(*cnt):
     >>> interval(386.31371386)
     array([ 1.25])          # 5:4, perfect fifth
 
-    >> [map(Fraction.limit_denominator, map(Fraction.from_float, i)) for i in interval(np.arange(5) * 386.31371386)]
+    >> frac = lambda f: map(Fraction.limit_denominator, map(Fraction.from_float, f))
+    >> [frac for i in interval(np.arange(5) * 386.31371386)]
     [[Fraction(1, 1),
       Fraction(5, 4),
       Fraction(25, 16),
       Fraction(125, 64),
       Fraction(625, 256)]]
     """
-    return np.power(2, np.asanyarray(cnt)/1200.0)
+    return np.power(2, np.asanyarray(cnt) / 1200.0)
+
 
 def freq_plus_cents(f, cnt):
     """Calculate freq1 + cents = freq2"""
@@ -61,7 +64,7 @@ def freq_plus_cents(f, cnt):
 
 
 class EqualTemperament(object):
-    def __init__(self, n = 12, scale = 2.0):
+    def __init__(self, n=12, scale=2.0):
         self.n = n
         self.__scale = scale
 
@@ -75,10 +78,10 @@ class EqualTemperament(object):
 
     @staticmethod
     def get_generators(scale, n, large=Fraction(3, 2), small=Fraction(9, 8)):
-        return scale[map(lambda x: find_closest_index(scale, x), [large, small] )]
+        return scale[map(lambda x: find_closest_index(scale, x), [large, small])]
 
     @staticmethod
-    def octave(n, scale = 2.0):
+    def octave(n, scale=2.0):
         return scale ** (np.arange(n + 1.0, dtype=np.float64) / n)
 
     def __repr__(self):
@@ -87,7 +90,8 @@ class EqualTemperament(object):
     def __str__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.n)
 
-# In [128]: sorted(Fraction(3,2) ** np.array(map(Fraction.from_float, xrange(28))) % Fraction(3,2) + Fraction(1))
+# In [127]: ivals = np.array(map(Fraction.from_float, xrange(28)))
+# In [128]: sorted(Fraction(3,2) ** ivals % Fraction(3,2) + Fraction(1))
 # Out[128]:
 # [1.0,
 #  1.09375,
@@ -114,16 +118,18 @@ class LucyTuning(object):
     """
     http://www.lucytune.com/
 
-    "The natural scale of music is associated with the ratio of the diameter of a circle to its circumference."
+    "The natural scale of music is associated with the ratio of the
+    diameter of a circle to its circumference."
     (i.e. pi = 3.14159265358979323846 etc.) -- John Harrison (1693-1776)
-    
-    This scale is based on two intervals:
-    
-    1) (L), The Larger note as he calls it -- this is the ratio of the 2*pi root of 2,
-       which equals a ratio of 1.116633 or 190.9858 cents.
 
-    2) (s), The lesser note, which is half the difference between five Larger notes (5L) and an octave.
-       giving a ratio of 1.073344 or 122.5354 cents.
+    This scale is based on two intervals:
+
+    1) (L), The Larger note as he calls it -- this is the ratio of the 2*pi root of 2,
+            which equals a ratio of 1.116633 or 190.9858 cents.
+
+    2) (s), The lesser note, which is half the difference between
+            five Larger notes (5L) and an octave
+            giving a ratio of 1.073344 or 122.5354 cents.
 
     The fifth (V) is composed of three Large (3L) plus one small note (s) i.e. (3L+s)
         = (190.986*3) + (122.535)
@@ -149,7 +155,8 @@ class WickiLayout(object):
     # Why 432 Hz?
     #
     # > factors(432)
-    # array([  1,   2,   3,   4,   6,   8,   9,  12,  16,  18,  24,  27,  36, 48,  54,  72, 108, 144, 216, 432])
+    # array([  1,   2,   3,   4,   6,   8,   9,  12,  16,  18,
+    #         24,  27,  36, 48,  54,  72, 108, 144, 216, 432])
     #
     # See:
     # http://en.wikipedia.org/wiki/Concert_pitch#Pitch_inflation
@@ -171,28 +178,30 @@ class WickiLayout(object):
             # EqualTemperament(5).generators
             EqualTemperament(12).generators
             # EqualTemperament(19).generators
-        )):
-        """Wicki keyboard layout. Generators are given in (y, x) order.
-        Origo defaults to 'C' key, being on the position(1,4 + 1 for columns 'tilting' to the left)."""
+    )):
+        """
+        Wicki keyboard layout. Generators are given in (y, x) order.
+
+        Origo defaults to 'C' key, being on the position
+        (1,4) + 1 for columns 'tilting' to the left.
+        """
         if len(generators) == 2:
             self.base = base
             self.gen = generators
             self.origo = origo
         else:
-            raise exceptions.AttributeError("Expected two generators, got: {0!r}".format(generators))
-    
+            raise exceptions.AttributeError(
+                "Expected two generators, got: {0!r}".format(generators))
+
     def get(self, *pos):
         logger.debug("Getting position: %s %s" % pos)
         if pos == kb.shape:
             return Frequency(0.0)
         else:
-            return (
-                self.base * \
-                    (self.gen[0] ** (pos[0] - self.origo[0])) * \
-                    (self.gen[1] ** (pos[1] - self.origo[1]))
-            )
+            return self.base * \
+                (self.gen[0] ** (pos[0] - self.origo[0])) * \
+                (self.gen[1] ** (pos[1] - self.origo[1]))
 
     def move(self, *pos):
         assert len(pos) == 2, "Expected two arguments or tuple of length two."
         self.origo = (self.origo[0] + pos[0], self.origo[1] + pos[1])
-

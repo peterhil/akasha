@@ -4,15 +4,12 @@
 Unit tests for time
 """
 
-import numpy as np
-import operator
 import pytest
 import timeit
 
 from akasha.audio.time import Chrono, ps, ns, us, ms, seconds, minutes, hours, days, months, years
 from akasha.types.numeric import RealUnit
 from cdecimal import Decimal, getcontext
-from timeit import default_timer as clock
 
 
 class TestChrono(object):
@@ -56,4 +53,3 @@ class TestChrono(object):
         latency = timeit.timeit(chrono, number=3)
         diff = -(chrono() - chrono())
         assert 0 < diff < latency
-

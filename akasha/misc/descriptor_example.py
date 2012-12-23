@@ -12,11 +12,11 @@ class RevealAccess(object):
         self.name = name
 
     def __get__(self, obj, objtype):
-        print 'Retrieving', self.name, self.val
+        print('Retrieving', self.name, self.val)
         return self.val
 
     def __set__(self, obj, value):
-        print 'Updating' , self.name, value
+        print('Updating', self.name, value)
         self.val = value
 
 
@@ -31,7 +31,7 @@ class samplerate(object):
 
     def __get__(self, obj, objtype):
         print "Self: %s, Obj: %s, Object type: %s" % (self.val, obj, objtype)
-        return self.val #or self.__set__(objtype, self.default_rate)
+        return self.val  # or self.__set__(objtype, self.default_rate)
 
     def __set__(self, obj, val):
         print "Setting sampling rate %s for %s" % (val, obj)
@@ -63,4 +63,3 @@ if __name__ == '__main__':
     m.x
     m.x = 40
     m.y
-

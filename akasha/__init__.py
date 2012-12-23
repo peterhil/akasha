@@ -21,8 +21,8 @@ from akasha import settings
 from akasha.utils.log import logger
 
 if not hasattr(settings, 'basedir'):
-	settings.basedir = os.path.abspath(os.path.dirname(__file__))
-	logger.info("Started from: {0}".format(settings.basedir))
+    settings.basedir = os.path.abspath(os.path.dirname(__file__))
+    logger.info("Started from: {0}".format(settings.basedir))
 
 settings.setup()
 
@@ -59,4 +59,3 @@ from akasha.utils.math import *
 
 if __name__ == '__main__':
     pass
-

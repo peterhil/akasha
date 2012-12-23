@@ -33,14 +33,15 @@ class period(np.ndarray, object):
 
     """
     def __new__(cls, *args, **kwargs):
-        if debug: print 'In __new__ with class %s' % cls
+        if debug:
+            print('In __new__ with class %s' % cls)
         return np.ndarray.__new__(cls, *args, **kwargs)
 
     def __array_finalize__(self, obj):
         if debug:
-            print 'In array_finalize:'
-            print '   self type is %s' % type(self)
-            print '   obj type is %s' % type(obj)
+            print('In array_finalize:')
+            print('   self type is %s' % type(self))
+            print('   obj type is %s' % type(obj))
 
     @classmethod
     def array(cls, seq, *args, **kwargs):
@@ -57,7 +58,9 @@ class period(np.ndarray, object):
         return out
 
     def _mod(self, index, dim=None):
-        if debug_gs: print "Type in _mod: %s %s" % (index, type(index))
+        if debug_gs:
+            print("Type in _mod: %s %s" % (index, type(index)))
+
         # if np.isscalar(index):
         if isinstance(index, Number):
             return np.mod(index, self.shape[dim])
@@ -65,12 +68,14 @@ class period(np.ndarray, object):
             return self._mod_slice(index, dim)
         elif isinstance(index, np.ndarray):
             return self._mod_seq(index, dim)
-        elif isinstance(index, (tuple, list)): # sequence
-            if debug_gs: print "Enumerating mixed index:"
+        elif isinstance(index, (tuple, list)):  # sequence
+            if debug_gs:
+                print("Enumerating mixed index:")
 
             out = np.array(index)
             for i, item in enumerate(index):
-                if debug_gs: print (i, item)
+                if debug_gs:
+                    print(i, item)
 
                 if np.isscalar(item):
                     out[i] = np.mod(item, self.shape[dim])
@@ -79,8 +84,9 @@ class period(np.ndarray, object):
             return out
         else:
             raise ValueError(
-                "Expected 'index' to be either an int, slice or sequence, " + \
-                "or a tuple of the previous items, got: %s" % type(index)
+                "Expected 'index' to be either an int, slice or sequence, "
+                "or a tuple of the previous items, got: %s" %
+                type(index)
             )
 
     def _mod_seq(self, seq, dim=None):
@@ -117,17 +123,21 @@ class period(np.ndarray, object):
             raise ValueError("Expected a slice, got: %s" % type(sl))
 
     def __getitem__(self, index):
-        if debug_gs: print "\nIn %s %s: i=%s" % (__name__, whoami(), index)
+        if debug_gs:
+            print("\nIn %s %s: i=%s" % (__name__, whoami(), index))
 
         out = self._mod(index, 0)
-        if debug_gs: print "Modded to: %s %s" % (out, type(out))
+
+        if debug_gs:
+            print("Modded to: %s %s" % (out, type(out)))
 
         return _super(self).__getitem__(
             out
         )
 
     def __setitem__(self, index, value):
-        if debug_gs: print "In %s %s: i=%s y=%s" % (__name__, whoami(), index, value)
+        if debug_gs:
+            print("In %s %s: i=%s y=%s" % (__name__, whoami(), index, value))
 
         _super(self).__setitem__(
             self._mod(index, 0),
@@ -148,4 +158,3 @@ class period(np.ndarray, object):
     #         j, #self._mod(j, 1),
     #         y
     #     )
-

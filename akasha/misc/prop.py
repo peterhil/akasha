@@ -3,7 +3,8 @@
 
 
 def prop(func):
-    '''A decorator function for easy property creation.
+    """
+    A decorator function for easy property creation.
     http://code.activestate.com/recipes/576742/
 
     >>> class CLS(object):
@@ -64,12 +65,10 @@ def prop(func):
 
     Trying to get cls.crazy will get:
     AttributeError: 'CLS' object has no attribute 'CLS_crazy'
-
-    '''
+    """
     ops = func() or {}
-    name=ops.get('prefix','_')+func.__name__ # property name
-    fget=ops.get('fget',lambda self:getattr(self, name))
-    fset=ops.get('fset',lambda self,value:setattr(self,name,value))
-    fdel=ops.get('fdel',lambda self:delattr(self,name))
-    return property ( fget, fset, fdel, ops.get('doc','') )
-
+    name = ops.get('prefix', '_') + func.__name__  # property name
+    fget = ops.get('fget', lambda self: getattr(self, name))
+    fset = ops.get('fset', lambda self, value: setattr(self, name, value))
+    fdel = ops.get('fdel', lambda self: delattr(self, name))
+    return property(fget, fset, fdel, ops.get('doc', ''))
