@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Unit tests for envelope.py
+Unit tests for Exponential
 """
 
 import unittest
@@ -79,5 +79,7 @@ After:\n%s
 """ % (e, i, msg, end, after_end)
             )
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     unittest.main()
+

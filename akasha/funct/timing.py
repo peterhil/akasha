@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-
 import numpy as np
 
 
@@ -14,3 +12,4 @@ def samples(start, end, rate=sampler.rate):
 
 def times(start, end, rate=sampler.rate):
     return samples(start, end, rate) / float(rate)
+

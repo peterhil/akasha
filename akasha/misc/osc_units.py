@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
 from __future__ import division
 
 import numpy as np
@@ -12,11 +11,11 @@ from cmath import rect, pi, exp
 from fractions import Fraction
 from numbers import Number
 
-from ..audio.generators import PeriodicGenerator
-from ..control.io.audio import play, write
-from ..timing import sampler
-from ..utils.decorators import memoized
-from ..utils.math import to_phasor
+from akasha.audio.generators import PeriodicGenerator
+from akasha.control.io.audio import play, write
+from akasha.timing import sampler
+from akasha.utils.decorators import memoized
+from akasha.utils.math import to_phasor
 
 
 pq.markup.config.use_unicode = True  # Use unicode units representation
@@ -173,3 +172,4 @@ if __name__ == '__main__':
     o = Osc(Fraction(1, 8))
     print o.np_exp(o.period)
     print to_phasor(o.sample)
+

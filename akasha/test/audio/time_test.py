@@ -56,3 +56,4 @@ class TestChrono(object):
         latency = timeit.timeit(chrono, number=3)
         diff = -(chrono() - chrono())
         assert 0 < diff < latency
+

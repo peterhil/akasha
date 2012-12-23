@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
 from __future__ import division
 
 import exceptions
@@ -9,10 +8,10 @@ import numpy as np
 
 from fractions import Fraction
 
-from .audio.oscillator import Frequency
-from .control.io.keyboard import kb
-from .utils.log import logger
-from .utils.math import pi2, find_closest_index
+from akasha.audio.oscillator import Frequency
+from akasha.control.io.keyboard import kb
+from akasha.utils.log import logger
+from akasha.utils.math import pi2, find_closest_index
 
 
 # See "Pitch Systems in Tonal Music" series on YouTube:
@@ -58,6 +57,7 @@ def interval(*cnt):
 def freq_plus_cents(f, cnt):
     """Calculate freq1 + cents = freq2"""
     return f * interval(cnt)
+
 
 class EqualTemperament(object):
     def __init__(self, n = 12, scale = 2.0):
@@ -108,6 +108,7 @@ class EqualTemperament(object):
 #  2.0,
 # ]
 
+
 class LucyTuning(object):
     """
     http://www.lucytune.com/
@@ -140,6 +141,7 @@ class LucyTuning(object):
     @classmethod
     def s(cls, n):
         return (2.0 / cls.L(5)) ** (n / 2.0)
+
 
 class WickiLayout(object):
 

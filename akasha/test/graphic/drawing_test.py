@@ -4,8 +4,6 @@
 Unit tests for drawing functions
 """
 
-from __future__ import absolute_import
-
 import numpy as np
 import unittest
 
@@ -51,5 +49,7 @@ class GraphTest(unittest.TestCase):
         #         1.+0.3333j,  1.+1.j    ])
         graph(samples)
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     unittest.main()
+

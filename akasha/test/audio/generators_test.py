@@ -101,4 +101,3 @@ class TestPeriodicGenerator(object):
         assert_array_equal(o[0*s:1*s], o[1*s:2*s])
         assert_array_equal(o[0*s:1*s], o[2*s:3*s])
 
-

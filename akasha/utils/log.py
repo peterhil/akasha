@@ -1,17 +1,14 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
-log.py
+Copyright (c) 2011 Peter. All rights reserved.
 
-Created by Peter on 2011-12-06.
-Copyright (c) 2011 Loihde. All rights reserved.
+Author: Peter Hillerström
+Date: 2011-12-06
 """
-
-from __future__ import absolute_import
 
 import sys
 import logging
-import string
 
 
 class ansi(object):

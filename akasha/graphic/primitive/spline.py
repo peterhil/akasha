@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
 from __future__ import division
 
 import numpy as np
@@ -95,3 +94,4 @@ def line(a, b, n=100):
 
 def linediff(a, d, n=100):
     return line(a, a+d, n)
+

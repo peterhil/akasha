@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-
 import inspect
 
 from types import FunctionType, CodeType
@@ -21,3 +19,4 @@ def macro(func):
     # expect IOError(e):
     #     return None
     pass
+

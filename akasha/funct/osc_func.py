@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-
 import functools as fun
 import itertools as itr
 import numpy as np
@@ -11,8 +9,8 @@ import types
 from cmath import rect, polar, phase, pi, exp
 from fractions import Fraction
 
-from .xoltar import lazy
-from .xoltar.functional import *
+from akasha.funct.xoltar import lazy
+from akasha.funct.xoltar.functional import *
 
 
 # General flow:
@@ -149,3 +147,4 @@ def to_phasor(x):
 
 def reorder(arr, n):
     return np.arange(self.period) * self.order % self.period
+

@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-
 import numpy as np
 
 from cmath import rect, phase, pi
@@ -108,3 +106,4 @@ class Chaos(Generator):
         def mandelbrot(self, z):
             # mandel = np.poly1d([1, 0, self.c])
             return z ** 2 + self.c
+

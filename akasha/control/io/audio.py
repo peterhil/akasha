@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-
 import string
 import numpy as np
 import os
@@ -11,8 +9,8 @@ from scipy.signal import hilbert
 from scikits import audiolab
 from scikits.audiolab import Format, Sndfile, available_file_formats, available_encodings
 
-from ...timing import sampler, time_slice
-from . import relative_path
+from akasha.timing import sampler, time_slice
+from akasha.control.io import relative_path
 
 
 defaults = {
@@ -22,6 +20,7 @@ defaults = {
 }
 
 default_format = Format(**defaults)
+
 
 def get_format(*args, **kwargs):
     """

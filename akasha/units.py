@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-
 import numpy as np
 import quantities as pq
 
@@ -14,3 +12,4 @@ pq.markup.config.use_unicode = True  # Use unicode units representation
 
 Qt = pq.Quantity
 Hz = pq.Hz
+

@@ -1,12 +1,11 @@
-###### Monad in Python (with nice syntax!) #######
-###### http://www.valuedlessons.com/2008/01/monads-in-python-with-nice-syntax.html
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
+# Monad in Python (with nice syntax!)
+# http://www.valuedlessons.com/2008/01/monads-in-python-with-nice-syntax.html
 
 import types
 
-
-###### Base Monad and @do syntax#########
 
 class Monad:
     def bind(self, func):
@@ -92,7 +91,6 @@ def done(val):
 def fid(val):
     return val
 
-##### Failable Monad ######
 
 class Failable(Monad):
     def __init__(self, value, success):
@@ -140,7 +138,6 @@ def failable_monad_examle():
     print with_failable(0.0)
     print with_failable(1.0)
 
-###### StateChanger Monad #########
 
 class StateChanger(Monad):
     def __init__(self, run):
@@ -201,7 +198,6 @@ def state_changer_monad_example():
 
     print with_dict_state().run({}) # (2, {"a" : 2, "b" : 2})
 
-###### Continuation Monad #########
 
 class ContinuationMonad(Monad):
     def __init__(self, run):
@@ -274,7 +270,9 @@ def continuation_monad_example():
     multiply(original, multiplied, 2)()
     insert(original, [1, 2, 3])()
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     failable_monad_examle()
     state_changer_monad_example()
     continuation_monad_example()
+

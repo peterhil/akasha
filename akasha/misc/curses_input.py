@@ -4,7 +4,6 @@
 Keyboard and mouse input using curses
 """
 
-
 import curses
 import locale
 
@@ -24,5 +23,6 @@ def func(self):
         else:
             stdscr.addstr(0, 0, unicode(c) + u' ' + unichr(c).encode('utf-8'))
 
-if __name__=='__main__':
+if __name__ == '__main__':
     curses.wrapper(func)
+

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
 from __future__ import division
 
 import locale
@@ -13,10 +12,10 @@ import re
 from wikitools import wiki, api
 from fractions import Fraction
 
-from ..funct.xoltar.functional import car, cdr
-from ..tunings import cents
-from ..utils.log import logger
-from ..utils.math import identity
+from akasha.funct.xoltar.functional import car, cdr
+from akasha.tunings import cents
+from akasha.utils.log import logger
+from akasha.utils.math import identity
 
 
 def user_agent(req):

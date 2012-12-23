@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Unit tests for oscillator.py
+Unit tests for periodic arrays
 """
 
 import pytest
@@ -68,7 +68,6 @@ class TestPeriod(object):
 
         assert_array_equal(ar[1], pa[1])
         assert_array_equal(ar[0], pa[4])
-
 
         # assert_array_equal(ar[0:1, 1:-2], pa[0:1, 1:-2])
         # assert_array_equal(ar[:,   1:-2], pa[:,   1:-2])

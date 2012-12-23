@@ -1,7 +1,6 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
 from __future__ import division
 
 import numpy as np
@@ -154,3 +153,4 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
 
     # __reduce__
     # __copy__, __deepcopy__
+

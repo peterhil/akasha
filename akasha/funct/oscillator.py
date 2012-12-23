@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
 from __future__ import division
 
 import functools as fun
@@ -11,9 +10,9 @@ import operator
 
 from fractions import Fraction
 
-from .timing import sampler, samples, times
-from .xoltar import lazy
-from .xoltar.functional import *
+from akasha.timing import sampler, samples, times
+from akasha.funct.xoltar import lazy
+from akasha.funct.xoltar.functional import *
 
 
 ### Limiter functions
@@ -133,6 +132,8 @@ def exp(rate):
     exp.rate = rate
     return exp
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     import doctest
     doctest.testmod()
+

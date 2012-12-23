@@ -2,16 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import colorsys
-import numpy as np
-
-from akasha.types import colour_values, colour_result
-
-
-import colorsys
 import logging
 import numpy as np
 
 from akasha.timing import sampler
+from akasha.types import colour_values, colour_result
 from akasha.utils.decorators import memoized
 from akasha.utils.log import logger
 from akasha.utils.math import deg, distances, pad, minfloat

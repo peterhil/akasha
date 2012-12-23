@@ -47,3 +47,4 @@ days = Chrono.prefix(86400, 'd', long_name='days')
 weeks = Chrono.prefix(7 * 86400, 'w', long_name='weeks')
 months = Chrono.prefix(27.321661569284 * 86400, 'm', long_name='months') # sidereal month approx. for 2012
 years = Chrono.prefix(365.256363004 * 86400, 'a', long_name='years') # sidereal year
+

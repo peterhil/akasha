@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Unit tests for frequency.py
+Unit tests for Frequency
 """
 
 import numbers
@@ -267,5 +267,4 @@ class TestFrequency(object):
         assert Frequency(a4) == a3 + Frequency(a3)
         assert Frequency(a4) == 2.0 * Frequency(a3)
         assert Frequency(a4) == Frequency(a3).__radd__(Frequency(a3))
-
 

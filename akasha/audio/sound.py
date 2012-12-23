@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
 
 import numpy as np
 
@@ -8,13 +7,13 @@ from numbers import Number
 from scipy import signal as dsp
 from scikits import samplerate as src
 
-from .frequency import FrequencyRatioMixin, Frequency
-from .generators import Generator
-from ..funct import blockwise
-from ..timing import sampler
+from akasha.audio.frequency import FrequencyRatioMixin, Frequency
+from akasha.audio.generators import Generator
+from akasha.funct import blockwise
+from akasha.timing import sampler
 
-from ..utils.decorators import memoized
-from ..utils.log import logger
+from akasha.utils.decorators import memoized
+from akasha.utils.log import logger
 
 
 class Pcm(FrequencyRatioMixin, Generator):
@@ -133,3 +132,4 @@ class Sound(Generator):
         else:
             self.sounds[sl] = [sndobj]
         return self
+

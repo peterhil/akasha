@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
 class RevealAccess(object):
     """A data descriptor that sets and returns values
        normally and prints a message logging their access.
@@ -14,6 +18,7 @@ class RevealAccess(object):
     def __set__(self, obj, value):
         print 'Updating' , self.name, value
         self.val = value
+
 
 class samplerate(object):
     """A descriptor object for sample rate.
@@ -32,9 +37,11 @@ class samplerate(object):
         print "Setting sampling rate %s for %s" % (val, obj)
         self.val = val
 
+
 class MyClass(object):
     x = RevealAccess(10, 'var "x"')
     y = RevealAccess(5, 'var "y"')
+
 
 # >>> m = MyClass()
 # >>> m.x
@@ -48,6 +55,7 @@ class MyClass(object):
 # >>> m.y
 # 5
 
+
 if __name__ == '__main__':
     m = MyClass()
     m.x
@@ -55,3 +63,4 @@ if __name__ == '__main__':
     m.x
     m.x = 40
     m.y
+

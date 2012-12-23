@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-
 import numpy as np
 
 from scipy import signal as dsp
 
-from ..audio.oscillator import Osc
-from ..timing import sampler
-from ..utils.math import *
+from akasha.audio.oscillator import Osc
+from akasha.timing import sampler
+from akasha.utils.math import *
 
 
 def unosc(signal):

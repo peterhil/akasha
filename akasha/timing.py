@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
 from __future__ import division
 
 import exceptions
@@ -10,7 +9,7 @@ import numpy as np
 
 from timeit import default_timer as clock
 
-from .utils.log import logger
+from akasha.utils.log import logger
 
 
 class Sampler(object):

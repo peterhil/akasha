@@ -1,8 +1,12 @@
-# Code from: http://mentat.za.net/numpy/intro/intro.html#the-misunderstood-for-loop
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import numpy as np
 # import matplotlib.pyplot as plt
 import PIL.Image
+
+
+# Code from: http://mentat.za.net/numpy/intro/intro.html#the-misunderstood-for-loop
 
 
 ITERATIONS = 100
@@ -47,3 +51,4 @@ for n in range(ITERATIONS):
 
 f = PIL.Image.fromarray(fractal)
 f.save('images/fractal.png')
+

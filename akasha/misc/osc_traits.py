@@ -2,15 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-# from cmath import rect, polar, phase, pi, exp
+
+from enthought.traits.api import HasTraits, DelegatesTo, PrototypedFrom, CFloat, Instance
 from fractions import Fraction
 
-from enthought.traits.api import HasTraits, \
-     DelegatesTo, PrototypedFrom, Float, CFloat, Int, Instance, Property, Str
-
-# My modules
-# from generators import PeriodicGenerator
-# from timing import sampler
+from akasha.timing import sampler
 
 
 class sampler(HasTraits):
@@ -39,3 +35,4 @@ class Osc(HasTraits):
 
     def __init__(self, freq):
         self.freq = freq
+

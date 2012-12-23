@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-
 import numpy as np
 
 from exceptions import TypeError, AttributeError
 from numbers import Number
 
-from .monads import fid, decorator_with_args
+from akasha.control.monads import fid, decorator_with_args
 
 
 class Arrow(object):
@@ -189,3 +187,4 @@ class typed(object):
             return decorated
         wrap.__name__ = func.__name__
         return wrap(*args)
+

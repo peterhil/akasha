@@ -1,12 +1,10 @@
-#! /usr/bin/python
-
-from __future__ import absolute_import
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import string
 
-from .generators import Generator
-
-from ..timing import sampler
+from akasha.audio.generators import Generator
+from akasha.timing import sampler
 
 
 class DTMF(Generator):

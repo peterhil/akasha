@@ -97,4 +97,3 @@ class TestOscRoots(object):
             assert_nulp_diff(a.real, b.real, nulp=25) # @FIXME nulp should be smaller!
             assert_nulp_diff(a.imag, b.imag, nulp=1)
 
-

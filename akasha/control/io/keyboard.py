@@ -1,20 +1,18 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
-keyboard.py
+Copyright (c) 2011 Peter Hillerström. All rights reserved.
 
-Created by Peter on 2011-12-06.
-Copyright (c) 2011 Loihde. All rights reserved.
+Author: Peter Hillerström
+Date: 2011-12-06
 """
-
-from __future__ import absolute_import
 
 import json
 import numpy as np
 import os
 
-from ... import settings
-from . import relative_path
+from akasha import settings
+from akasha.control.io import relative_path
 
 
 #  E1234567890123 456 789E
@@ -35,6 +33,7 @@ from . import relative_path
 # Defined by:
 # - Mapping from key to position
 # - Mapping from position to frequency (by index)
+
 
 def get_layout(path='settings/keymaps/fi.json'):
     mappath = relative_path(path)
@@ -88,3 +87,4 @@ def get_map(kb, key='key'):
 kb = get_keyboard()
 pos = get_map(kb, 'key')
 scan = get_map(kb, 'scancode')
+

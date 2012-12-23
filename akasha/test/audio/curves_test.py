@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Unit tests for curves.py
+Unit tests for curves
 """
 
 import pytest
@@ -157,5 +157,4 @@ class TestSuper(object):
     def test_repr(self):
         o = Super()
         assert o == eval(repr(o))
-
 

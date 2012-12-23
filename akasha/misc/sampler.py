@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
 class MyClass:
     """A simple example class"""
     i = 12345
@@ -10,6 +14,7 @@ from oscillator import samplerate
 from utils.prop import prop
 from utils.borg import Borg
 
+
 class Singleton(type):
     def __init__(cls, name, bases, dict):
         super(Singleton, cls).__init__(name, bases, dict)
@@ -19,6 +24,7 @@ class Singleton(type):
         if cls.instance is None:
             cls.instance = super(Singleton, cls).__call__(*args, **kw)
         return cls.instance
+
 
 class sampler_(object):
     __metaclass__ = Singleton
@@ -71,3 +77,4 @@ class sampler:
     def _set_tuning(cls, rate):
         cls.rate = rate
     tuning = property(_get_tuning, _set_tuning)
+

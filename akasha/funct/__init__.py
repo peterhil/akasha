@@ -1,17 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-
 import collections
 import numpy as np
 
 from itertools import *
 
-from ..utils.log import logger
+from akasha.utils.log import logger
 
 
-# function objects - or a kund of function composition?
+# function objects - or a kind of function composition?
 
 def _findvars(*funcs):
     import re

@@ -3,6 +3,8 @@
 """
 Control module includes typing decorators, Monads and Arrows
 
-Created by Peter on 2011-12-04.
-Copyright (c) 2011 Loihde. All rights reserved.
+Copyright (c) 2011 Peter Hillerström. All rights reserved.
+
+Author: Peter Hillerström
+Date: 2011-12-04
 """

@@ -1,17 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-
 import cmath
 import numpy as np
 
 from fractions import Fraction
 
-from .log import logger
+from akasha.utils.log import logger
 
-from ..funct import blockwise
-from ..timing import sampler
+from akasha.funct import blockwise
+from akasha.timing import sampler
 
 
 pi2 = np.pi * 2.0

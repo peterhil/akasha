@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-
-import math
 import numpy as np
 import scipy as sp
 
@@ -25,7 +22,7 @@ class Exponential(Generator):
     @property
     def half_life(self):
         """Returns the time required to reach half-life from a starting amplitude."""
-        return np.inf if self.rate == 0 else math.log(2.0) / -self.rate * sampler.rate
+        return np.inf if self.rate == 0 else np.log(2.0) / -self.rate * sampler.rate
 
     @classmethod
     def from_half_life(cls, time, amp=1.0):
@@ -37,7 +34,7 @@ class Exponential(Generator):
             return cls(rate=0.0, amp=amp)
         else:
             # TODO simplify!
-            return cls(rate=sampler.rate / (-(time * sampler.rate) / math.log(2.0)), amp=amp)
+            return cls(rate=sampler.rate / (-(time * sampler.rate) / np.log(2.0)), amp=amp)
 
     @property
     def scale(self):
@@ -54,7 +51,7 @@ class Exponential(Generator):
         return self.amp * np.exp(self.rate * frames)
 
     # def __len__(self):
-    #     return int(math.ceil(np.abs(self.scale)))
+    #     return int(np.ceil(np.abs(self.scale)))
 
     def __repr__(self):
         return "%s(%s, %s)" % (self.__class__.__name__, self.rate, self.amp)
@@ -109,3 +106,4 @@ class Timbre(Generator):
 
     def __init__(self):
         pass
+

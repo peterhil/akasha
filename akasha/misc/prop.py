@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
 def prop(func):
     '''A decorator function for easy property creation.
     http://code.activestate.com/recipes/576742/
@@ -68,3 +72,4 @@ def prop(func):
     fset=ops.get('fset',lambda self,value:setattr(self,name,value))
     fdel=ops.get('fdel',lambda self:delattr(self,name))
     return property ( fget, fset, fdel, ops.get('doc','') )
+

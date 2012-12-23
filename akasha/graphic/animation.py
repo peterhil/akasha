@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
 from __future__ import division
 
 import akasha.funct.xoltar.functional as fx
@@ -27,6 +26,7 @@ from akasha.utils.math import pcm
 
 w = WickiLayout()
 VIDEOFRAME = pg.NUMEVENTS - 1
+
 
 def change_frequency(snd, key):
     f = w.get(*(pos.get(key, pos[None])))
@@ -272,9 +272,4 @@ class Window(object):
         deferred.addCallback(lambda ign: self.display.quit())
 
         reactor.run()
-
-
-
-if __name__ == '__main__':
-    pass
 

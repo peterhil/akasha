@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+
 def chaff(dic, pred = lambda x: x < 5):
 	"""
 	Weed out (pun intended) some items in a dictionary, returning those items and modifying the dictionary.

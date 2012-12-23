@@ -1,13 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-
-import numpy as np
-
 import inspect
-def whoami():
-    return inspect.stack()[1][3]
+import numpy as np
 
 from numbers import Number
 
@@ -15,6 +10,10 @@ from akasha.utils import _super
 
 debug = False
 debug_gs = False
+
+
+def whoami():
+    return inspect.stack()[1][3]
 
 
 class period(np.ndarray, object):
