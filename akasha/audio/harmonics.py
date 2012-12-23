@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Harmonic overtones module
+"""
 
 import exceptions
 import numpy as np
@@ -46,23 +49,31 @@ class Overtones(FrequencyRatioMixin, Generator):
 
     @property
     def max_overtones(self):
+        """Maximum number of overtones to generate for a frequency."""
         low_freq_overtone_limit = 10
         return int(sampler.rate / (2.0 * max(self.frequency, low_freq_overtone_limit)))
 
     @property
     def limit(self):
+        """Get the number of overtones to generate for a frequency."""
         return max(min(self.max_overtones, self.n), 1)
 
     @property
     def overtones(self):
+        """
+        Generate overtones using the function given in init.
+        The number of overtones is limited by self.limit.
+        """
         return np.apply_along_axis(self.func, 0, np.arange(0, self.limit, dtype=np.float64))
 
     @property
     def oscs(self):
+        """Property to get oscillators."""
         # TODO cleanup - make an interface for different Oscs!
         return self.gen_oscs()
 
     def gen_oscs(self):
+        """Generate oscillators based on overtones."""
         base = self.base.__class__
         if 'Super' == self.base.curve.__class__.__name__:
             oscs = map(lambda f: base(f, curve=self.base.curve), float(self.frequency) * self.overtones)
@@ -71,6 +82,7 @@ class Overtones(FrequencyRatioMixin, Generator):
         return oscs
 
     def sample(self, iter):
+        """Sample the overtones."""
         if isinstance(iter, int):
             frames = np.array([0j])
         else:
@@ -127,6 +139,7 @@ class Overtones(FrequencyRatioMixin, Generator):
 
 
 class Multiosc(Overtones):
+    """Multifrequency oscillator."""
     # MAKE A MULTIOSC without ENV, iow. sample using overtones and apply_along_axis with sum!!!!
     # ratios = map(lambda r: Fraction.from_float(r).limit_denominator(sampler.rate), h.ratio*h.overtones)
     # samples = map(Frequency.rads, ratios)
@@ -147,6 +160,7 @@ class Multiosc(Overtones):
     @staticmethod
     @memoized
     def angles(ratio, limit):
+        """Frequency angles"""
         if ratio == 0:
             return np.array([0.], dtype=np.float64)
         return pi2 * ratio.numerator * np.arange(0, 1, 1.0 / ratio.denominator, dtype=np.float64)
@@ -154,9 +168,11 @@ class Multiosc(Overtones):
     @staticmethod
     @memoized
     def circle(ratio):
+        """The circle curve for an oscillator at a ratio."""
         return np.exp(1j * pi2 * Frequency.angles(ratio))
 
     def sample(self, iter):
+        """Sample multifrequency oscillator."""
         frames = np.zeros(len(iter), dtype=complex)
 
         for o in self.oscs:
@@ -169,3 +185,4 @@ class Multiosc(Overtones):
                 frames += o[iter]
 
         return normalize(frames)
+
