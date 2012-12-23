@@ -82,13 +82,13 @@ class Attack(Exponential):
         """
         Sample the attack envelope.
         """
-        attack = super(Attack, self).sample(iterable)[::-1]
-        attack = filter(lambda x: x > threshold, attack)  # filter silence
-        sus_level = attack[-1]
+        attack = super(self.__class__, self).sample(iterable)
+        attack = attack[attack > threshold][::-1]  # Filter silence and reverse
 
         frames = np.zeros(len(iterable))
-        frames.fill(sus_level)
+        frames.fill(attack[-1])  # Sustain level
         frames[:len(attack)] = attack
+
         del(attack)
         return frames
 
