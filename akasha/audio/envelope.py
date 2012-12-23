@@ -76,7 +76,7 @@ class Attack(Exponential):
     """
 
     def __init__(self, rate=0.0, amp=1.0, *args, **kwargs):
-        super(Attack, self).__init__(rate, amp, *args, **kwargs)
+        super(self.__class__, self).__init__(rate, amp, *args, **kwargs)
 
     def sample(self, iterable, threshold=1.0e-6):
         """
