@@ -16,7 +16,7 @@ from cdecimal import Decimal
 from fractions import Fraction
 
 
-class NumericUnit(NumericUnit):
+class NumericUnit(object):
     def __init__(self, value):
         self._unit = '_value'
         self._value = self._normalize_value(value)
