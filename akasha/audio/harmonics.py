@@ -115,7 +115,7 @@ class Overtones(FrequencyRatioMixin, Generator):
                 frames += o[iter] * e[iter]
 
         if self.sustain is not None:
-            sus_damping = lambda f, a=1.0: -2 * np.log2(float(f)) / 5.0
+            sus_damping = lambda f, a = 1.0: -2 * np.log2(float(f)) / 5.0
             #sus_damping = lambda f: -0.5
             self.sustained = self.sustained or Exponential(sus_damping(self.frequency))
             if isinstance(iter, slice):
@@ -160,7 +160,7 @@ class Multiosc(Overtones):
 
     @staticmethod
     @memoized
-    def angles(ratio, limit):
+    def angles(ratio):
         """Frequency angles"""
         if ratio == 0:
             return np.array([0.], dtype=np.float64)
