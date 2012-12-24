@@ -47,7 +47,8 @@ class GraphTest(unittest.TestCase):
         # Out[286]:
         # array([-1.-1.j    , -1.-0.3333j, -1.+0.3333j, ...,  1.-0.3333j,
         #         1.+0.3333j,  1.+1.j    ])
-        graph(samples)
+
+        # graph(samples)
 
 
 if __name__ == '__main__':
