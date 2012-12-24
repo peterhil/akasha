@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Mathematical utility functions module.
+"""
 
 import cmath
 import exceptions
@@ -29,49 +32,92 @@ def to_phasor(x):
 
 
 def nth_root(n):
+    """
+    Return nth primitive root of unity - a complex number
+    located on the 1/nth tau angle on the unit circle.
+
+    http://en.wikipedia.org/wiki/Roots_of_unity
+    """
     return np.exp(1j * pi2 * 1.0 / n)
 
 
 def deg(radians):
+    """Degrees to radians conversion."""
     return 180 * (radians / np.pi)
 
 
 def rad(degrees):
+    """Radians to degrees conversion."""
     return np.pi * (degrees / 180.0)
 
 
 # Utils for frequency ratios etc...
 
 def logn(x, base=np.e):
+    """Logarithm of x on some base."""
     return np.log2(x) / np.log2(base)
 
 
 def roots_periods(base, limit=44100.0):
     """
-    Enumerates the roots for base form 0 to limit.
+    Enumerates the roots for base from 0 to limit.
+
     For example:
-    >>> roots_count(2)
-    array([ 0.00003052,  0.00006104,  0.00012207,  0.00024414,  0.00048828,
-            0.00097656,  0.00195312,  0.00390625,  0.0078125 ,  0.015625  ,
-            0.03125   ,  0.0625    ,  0.125     ,  0.25      ,  0.5       ])
+    >>> roots_periods(2)
+    array([     1.,      2.,      4.,      8.,     16.,     32.,     64.,    128.,
+              256.,    512.,   1024.,   2048.,   4096.,   8192.,  16384.,  32768.])
+
+    >>> 44100 / roots_periods(2)
+    array([ 44100.             ,  22050.             ,  11025.             ,
+             5512.5            ,   2756.25           ,   1378.125          ,
+              689.0625         ,    344.53125        ,    172.265625       ,
+               86.1328125      ,     43.06640625     ,     21.533203125    ,
+               10.7666015625   ,      5.38330078125  ,      2.691650390625 ,
+                1.3458251953125])
     """
+    # FIXME What this really does?
+    # TODO Write a test to ensure it does it right!
     if (base <= 1):
         raise(ValueError("Base can not be less than or equal to one."))
-    ex = np.floor(logn(limit, base))
+    ex = np.ceil(logn(limit, base))
     return base ** np.arange(ex)
 
 
 def roots_counts(base, limit=44100.0):
+    """
+    >>> roots_counts(2)
+    array([ 0.000030517578125,  0.00006103515625 ,  0.0001220703125  ,
+            0.000244140625   ,  0.00048828125    ,  0.0009765625     ,
+            0.001953125      ,  0.00390625       ,  0.0078125        ,
+            0.015625         ,  0.03125          ,  0.0625           ,
+            0.125            ,  0.25             ,  0.5              ,  1.               ])
+
+    >>> roots_counts(2) * 44100
+    array([     1.3458251953125,      2.691650390625 ,      5.38330078125  ,
+               10.7666015625   ,     21.533203125    ,     43.06640625     ,
+               86.1328125      ,    172.265625       ,    344.53125        ,
+              689.0625         ,   1378.125          ,   2756.25           ,
+             5512.5            ,  11025.             ,  22050.             ,
+            44100.             ])
+    """
+    # FIXME What this really does? It's not used anywhere anymore.
+    # TODO Write a test to ensure it does it right!
     ex = np.floor(logn(limit, base))
     return roots_periods(base, limit) / base ** float(ex)
 
 
 # Floats
 
-# Following two methods are modified from:
-# http://seun-python.blogspot.com/2009/06/floating-point-min-max.html
+def minfloat(guess=1.0):
+    """
+    >>> minfloat(1.0)   # minimum positive value of a float
+    (5e-324, 1074)
 
-def minfloat(guess):
+    >>> minfloat(-1.0)  # minimum negative value of a float
+    (-5e-324, 1074)
+
+    From: http://seun-python.blogspot.com/2009/06/floating-point-min-max.html
+    """
     i = 0
     while(guess * 0.5 != 0):
         guess = guess * 0.5
@@ -80,6 +126,15 @@ def minfloat(guess):
 
 
 def maxfloat(guess=1.0):
+    """
+    >>> maxfloat(1.0)   # maximum positive value of a float
+    (inf, 1024)
+
+    >>> maxfloat(-1.0)  # maximum negative value of a float
+    (-inf, 1024)
+
+    From: http://seun-python.blogspot.com/2009/06/floating-point-min-max.html
+    """
     guess = float(guess)
     i = 0
     while(guess * 2 != guess):
@@ -112,19 +167,23 @@ def map_array(func, arr, method='numpy', dtype=object):
         vf = np.vectorize(func)
         res = vf(arr.flat)
     elif method == 'map':
-        res = np.array(map(func, arr.flat), dtype=dtype)
+        res = np.array(map(func, arr.flat), dtype=dtype)  # pylint: disable=W0141
     else:
         raise exceptions.NotImplementedError("map_array(): method '{0}' missing.".format(method))
     return res.reshape(shape)
 
 
 def as_complex(a):
-    """Convert real number coordinate points to complex samples"""
+    """
+    Convert real number coordinate points to complex samples.
+    """
     return a.transpose().flatten().view(np.complex128)
 
 
 def complex_as_reals(samples):
-    """Convert complex samples to real number coordinate points"""
+    """
+    Convert complex samples to real number coordinate points.
+    """
     return samples.view(np.float64).reshape(len(samples), 2).transpose()    # 0.5 to 599.5
 
 
@@ -137,17 +196,28 @@ def find_closest_index(arr, target):
 
 
 def blockiter(snd):
+    """
+    Iterate sound using blocks of size sampler.blocksize().
+    """
     return blockwise(snd, sampler.blocksize())
 
 
 # Random
 
-def rand_between(min, max, size=1, random=np.random.random):
-    return np.atleast_1d((max - min) * random(size) + min)
+def rand_between(inf, sup, n=1, random=np.random.random):
+    """
+    Generate n random numbers using given function (defaults to np.random.random())
+    on the half open interval [inf, sup).
+    """
+    return np.atleast_1d((sup - inf) * random(n) + inf)
 
 
-def random_phase(random=np.random.random):
-    return np.atleast_1d(cmath.rect(1.0, pi2 * random() - np.pi))
+def random_phase(n=1, random=np.random.random):
+    """
+    Generate n complex numbers on the unit circle with random phase (angle)
+    using the function given (defaults to np.random.random()).
+    """
+    return np.atleast_1d(cmath.rect(1.0, pi2 * random(n) - np.pi))
 
 
 # Primes
@@ -168,20 +238,27 @@ def primes(min, max):
     return np.array(primes)
 
 
-def gcd(m, n):
-    while n:
-        m, n = n, m % n
-    return m
+
+def gcd(a, b):
+    """
+    Greatest common divisor of a and b.
+    """
+    while b:
+        a, b = b, a % b
+    return a
 
 
 def lcm(a, b):
+    """
+    Least common multiple of a and b.
+    """
     return a * b / gcd(a, b)
 
 
 # Vectorized functions
 
-np.gcd = lambda a, axis=None: reduce(gcd, a)
-np.lcm = lambda a, axis=None: reduce(lcm, a)
+np.gcd = lambda a, axis = None: reduce(gcd, a)
+np.lcm = lambda a, axis = None: reduce(lcm, a)
 
 np.getattr = np.vectorize(lambda x, attr: getattr(x, attr), otypes=['object'])
 
