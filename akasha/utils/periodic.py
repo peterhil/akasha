@@ -73,7 +73,7 @@ class period(np.ndarray, object):
 
         # if np.isscalar(index):
         if isinstance(index, Number):
-            return np.mod(index, self.shape[dim])
+            return np.mod(index, self.shape[dim])  # pylint: disable=E1101
         elif isinstance(index, slice):
             return self._mod_slice(index, dim)
         elif isinstance(index, np.ndarray):
@@ -88,7 +88,7 @@ class period(np.ndarray, object):
                     print(i, item)
 
                 if np.isscalar(item):
-                    out[i] = np.mod(item, self.shape[dim])
+                    out[i] = np.mod(item, self.shape[dim])  # pylint: disable=E1101
                 else:
                     out[i] = self._mod(item, dim)
             return out
@@ -104,7 +104,7 @@ class period(np.ndarray, object):
         if np.isscalar(seq):
             raise ValueError("Expected a sequence, got: %s %s" % (seq, type(seq)))
         index = np.array(seq, dtype=np.int64)
-        return np.mod(index, self.shape[dim])
+        return np.mod(index, self.shape[dim])  # pylint: disable=E1101
 
     def _mod_slice(self, sl, dim=None):
         """
@@ -117,6 +117,8 @@ class period(np.ndarray, object):
         - Element count is multiplied with step to produce the same
         - number of elements for different step values.
         """
+        # pylint: disable=E1101
+
         # if isinstance(sl, slice):
         #     return slice(
         #         sl.start and (sl.start % self.shape[dim]) or 0,
