@@ -222,21 +222,24 @@ def random_phase(n=1, random=np.random.random):
 
 # Primes
 
-def primes(min, max):
+def primes(inf, sup, dtype=np.uint64):
     """
-    Primes in the range min, max. Returns a numpy array.
+    Primes in the closed interval [inf, sup].
+    Returns a numpy array.
     """
-    primes = [2]
+    primes = [2]  # pylint: disable=W0621
     i = 3
-    while i <= max:
+
+    while i <= sup:
         for p in primes:
-            if i % p == 0 or p * p > i:
+            if i % p == 0 or p ** 2 > i:
                 break
-        if i % p != 0:
+        if i % p != 0:  # pylint: disable=W0623
             primes.append(i)
         i = i + 2
-    return np.array(primes)
 
+    primes = np.array(primes, dtype=dtype)
+    return primes[primes >= inf]
 
 
 def gcd(a, b):
