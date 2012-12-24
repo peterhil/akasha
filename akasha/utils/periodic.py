@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Periodic (and tesselation) arrays.
+"""
 
 import inspect
 import numpy as np
@@ -13,6 +16,9 @@ debug_gs = False
 
 
 def whoami():
+    """
+    What's my name?
+    """
     return inspect.stack()[1][3]
 
 
@@ -45,6 +51,9 @@ class period(np.ndarray, object):
 
     @classmethod
     def array(cls, seq, *args, **kwargs):
+        """
+        Create a periodic array from a sequence. Accepts the same arguments as numpy.array().
+        """
         seq = np.array(seq)
 
         if not hasattr(kwargs, 'dtype'):
@@ -58,6 +67,7 @@ class period(np.ndarray, object):
         return out
 
     def _mod(self, index, dim=None):
+        """Modulate indices to self.shape."""
         if debug_gs:
             print("Type in _mod: %s %s" % (index, type(index)))
 
@@ -90,6 +100,7 @@ class period(np.ndarray, object):
             )
 
     def _mod_seq(self, seq, dim=None):
+        """Modulate sequence to self.shape."""
         if np.isscalar(seq):
             raise ValueError("Expected a sequence, got: %s %s" % (seq, type(seq)))
         index = np.array(seq, dtype=np.int64)
