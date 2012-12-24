@@ -1,0 +1,14 @@
+include *.rst
+include *.txt
+include setup.py
+include tox.ini
+include install/requires.pip
+include install/test-requires.pip
+include akasha/*.py
+recursive-include akasha *.py
+recursive-include akasha/funct/xoltar *.txt *.py
+recursive-include akasha/settings/keymaps *.json
+prune *.bak
+prune .DS_Store
+prune .coverage
+prune __pycache__
