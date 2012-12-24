@@ -5,8 +5,10 @@ import locale
 import numpy as np
 import sys
 
+class config(object):
+    pass
 
-def setup():
+def np_setup():
     np.set_printoptions(precision=16, threshold=1000, edgeitems=40, linewidth=78, suppress=True)
 
     # Set the user's default locale, see http:// docs.python.org/library/locale.html

@@ -16,15 +16,14 @@ from fractions import Fraction
 from numbers import Number
 from scipy.signal import hilbert
 
-
-from akasha import settings
+from akasha.settings import config, np_setup
 from akasha.utils.log import logger
 
-if not hasattr(settings, 'basedir'):
-    settings.basedir = os.path.abspath(os.path.dirname(__file__))
-    logger.info("Started from: {0}".format(settings.basedir))
+np_setup()
 
-settings.setup()
+if not hasattr(config, 'basedir'):
+    config.basedir = os.path.abspath(os.path.dirname(__file__))
+    logger.info("Started from: {0}".format(config.basedir))
 
 from akasha.audio.curves import *
 from akasha.audio.dtmf import DTMF

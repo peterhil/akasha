@@ -3,8 +3,8 @@
 
 import os
 
-from akasha import settings
+from akasha.settings import config
 
 
-def relative_path(path, base=settings.basedir):
+def relative_path(path, base=config.basedir):
     return os.path.abspath('/'.join([base, path]))
