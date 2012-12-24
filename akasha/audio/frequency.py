@@ -28,7 +28,7 @@ class FrequencyRatioMixin(object):
         return self._hz
 
     @frequency.setter
-    def set_frequency(self, hz):
+    def frequency(self, hz):
         # Use Trellis or other Cells clone?
         self._hz = float(hz) if isinstance(self, Frequency) else Frequency(hz)
 
@@ -147,9 +147,12 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
         """hash(self), takes into account any rounding done on Frequency's initialisation."""
         return hash(self.ratio)
 
-    # def __eq__(self, other):
-    #     """a == b, takes into account any rounding done on Frequency's initialisation."""
-    #     return self.ratio == Frequency(other).ratio
+    def __eq__(self, other):
+        """a == b, takes into account any rounding done on Frequency's initialisation."""
+        if isinstance(other, Real):
+            return self.ratio == Frequency(float(other)).ratio
+        else:
+            return NotImplemented
 
     def __nonzero__(self):
         """Nonzero?"""
