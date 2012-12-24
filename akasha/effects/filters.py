@@ -7,7 +7,7 @@ from scipy import signal as dsp
 
 from akasha.audio.oscillator import Osc
 from akasha.timing import sampler
-from akasha.utils.math import PI2, get_impulses, normalize, complex_as_reals, pad
+from akasha.utils.math import pi2, get_impulses, normalize, complex_as_reals, pad
 
 
 def unosc(signal):
@@ -17,7 +17,7 @@ def unosc(signal):
     """
     s = np.log(signal)
 
-    #d = distances(s / PI2)
+    #d = distances(s / pi2)
     #impulses = np.round(d - d[0])
     #impulses = np.fmax(np.sign(d-0.9999), 0)
     #impulses = np.fmax(np.sign(d - 0.5), 0)
@@ -30,7 +30,7 @@ def unosc(signal):
 
     impulses = get_impulses(signal, tau=False)
     unwrap = np.cumsum(impulses)
-    return s.real + ((s.imag % PI2) + unwrap) * 1j
+    return s.real + ((s.imag % pi2) + unwrap) * 1j
 
 
 def freq_shift(signal, a=12.1, b=0.290147):
@@ -38,7 +38,7 @@ def freq_shift(signal, a=12.1, b=0.290147):
     #scale = (1+f/sampler.rate)
     w = unosc(signal)
     # remove - before exp and - np.pi?
-    out = -np.exp(w.real + (normalize((w.imag * a) % (PI2 / b)) * PI2 - np.pi) * 1j)
+    out = -np.exp(w.real + (normalize((w.imag * a) % (pi2 / b)) * pi2 - np.pi) * 1j)
     return out
 
 
