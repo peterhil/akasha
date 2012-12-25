@@ -15,10 +15,9 @@ else:
     from ordereddict import OrderedDict
 from fractions import Fraction
 
-from akasha.utils.log import logger
-
 from akasha.funct import blockwise
 from akasha.timing import sampler
+from akasha.utils.log import logger
 
 
 pi2 = np.pi * 2.0
@@ -234,7 +233,7 @@ def primes(inf, sup, dtype=np.uint64):
         for p in primes:
             if i % p == 0 or p ** 2 > i:
                 break
-        if i % p != 0:  # pylint: disable=W0623
+        if i % p != 0:  # pylint: disable=W0631
             primes.append(i)
         i = i + 2
 
@@ -263,19 +262,25 @@ def lcm(a, b):
 np.gcd = lambda a, axis = None: reduce(gcd, a)
 np.lcm = lambda a, axis = None: reduce(lcm, a)
 
-np.getattr = np.vectorize(lambda x, attr: getattr(x, attr), otypes=['object'])
+np.getattr = np.vectorize(
+    lambda x, attr: getattr(x, attr),  # pylint: disable=W0108
+    otypes=['object']
+)
 
 
-def as_fractions(a, limit=1000000):
+def as_fractions(arr, limit=1000000):
+    """
+    Return array as Fractions with denominators up to the limit given.
+    """
     from_float = np.vectorize(lambda y: Fraction.from_float(y).limit_denominator(limit))
-    return from_float(a)
+    return from_float(arr)
 
 
 # Factors
 
 def sq_factors(n):
     """
-    Find factors of n, by trying to divide with integers between 1 and sqrt(n).
+    Find factors of integer n, by trying to divide with integers between 1 and sqrt(n).
     If the modulus is zero, it's a factor.
     Note! This only returns factors less or equal to sqrt(n)!
     """
@@ -286,20 +291,50 @@ def sq_factors(n):
 
 
 def factors(n):
+    """
+    Return factors of integer n.
+    """
     assert np.all(np.equal(np.mod(n, 1), 0)), "Value %s is not an integer!" % n
     f = sq_factors(n)
     return np.unique(np.append(f, np.array(n, dtype=np.int) / f[::-1]))
 
 
 def arr_factors(arr, method='map'):
+    """
+    Maps factors() to an array.
+    """
     return map_array(factors, arr, method=method, dtype=object)
 
 
 def get_factorsets(n):
+    """
+    Get a dict of factors from 0 to integer n as sets.
+    """
+    # pylint: disable=W0141
     return dict(enumerate(map(lambda x: set(factors(x)), np.arange(n + 1))))
 
 
 def factor_supersets(factors_in, redundant=None, limit=None):
+    """
+    Try to find smallest set of integers with most unique factors
+    that are supremum to the limit (usually sampling rate).
+
+    Arguments
+    =========
+    factors_in:
+        Should be an output from get_factorsets(),
+        that is, a dictionary with integers as keys and their factors in sets as values.
+
+    redundant:
+        Can be the redundant factors from a previous run.
+
+    limit:
+        Upper limit is either the number given (usually sampling rate),
+        or the length of the factors_in.
+
+    Returns the 'essential' set and the redundant factor sets as a tuple.
+    """
+    # TODO: Refactor factor_supersets!
     lim = limit if limit else len(factors_in) - 1  # Change if factors_in doesn't include n + 1!
     length_of_value = lambda x: len(x[1])
 
@@ -307,7 +342,7 @@ def factor_supersets(factors_in, redundant=None, limit=None):
     red = redundant if redundant else OrderedDict()
     #logger.info("STARTING\tEssential keys: %s redundant keys: %s" % (ess.keys(), red.keys()))
 
-    for (j, fset) in filter(lambda y: 0 <= y[0] < lim, ess.items()):
+    for (j, fset) in [item for item in ess.items() if 0 <= item[0] < lim]:
         ind = (lim, j)
         logger.debug("\t#%s" % (ind, ))
         if fset.issubset(factors_in[lim]):
@@ -342,26 +377,38 @@ def factor_supersets(factors_in, redundant=None, limit=None):
 # Signal processing utils
 
 def identity(x):
+    """
+    Identity function -- return the argument unchagned. Useful in functional programming.
+    """
     return x
 
 
-def pcm(snd, bits=16, axis='imag'):
-    #if isinstance(snd[0], np.floating): axis = 'real'
-    return np.cast['int' + str(bits)](getattr(snd, axis) * (2 ** bits / 2.0 - 1))
+def pcm(signal, bits=16, axis='imag'):
+    """
+    Get a pcm sound with integer samples from the complex signal,
+    that is playable and usable with most audio libraries.
+    """
+    #if isinstance(signal[0], np.floating): axis = 'real'
+    return np.cast['int' + str(bits)](getattr(signal, axis) * (2 ** bits / 2.0 - 1))
 
 
 def normalize(signal):
-    max = np.max(np.abs(signal))
+    """
+    Normalises signal into interval [-1, +1] and replaces ±NaN and ±Inf values with zeros.
+    """
+    sup = np.max(np.abs(signal))
+
     if not np.all(np.isfinite(signal)):
-        logger.debug("Normalize() substituting non-numeric max: %s" % max)
+        logger.debug("Normalize() substituting non-numeric max: %s" % sup)
         signal = np.ma.masked_invalid(signal).filled(0)
-        max = np.max(np.abs(signal))
-        logger.debug("Normalize() substituted max: %s" % max)
-    if max == 0:
-        logger.debug("Normalize() got silence!" % max)
+        sup = np.max(np.abs(signal))
+        logger.debug("Normalize() substituted max: %s" % sup)
+
+    if sup == 0:
+        logger.debug("Normalize() got silence!" % sup)
         return signal
-    #logger.debug("Normalize() by a factor: %s" % max)
-    return signal / max
+
+    return signal / sup
 
 
 def clip(signal, inplace=False):
@@ -370,10 +417,13 @@ def clip(signal, inplace=False):
     """
     if np.any(np.isnan(signal)):
         signal = np.nan_to_num(signal)
+
     if not inplace:
         signal = signal.copy()
+
     reals = signal.view(np.float)
-    np.clip(reals, a_min=-1, a_max=1, out=reals)    # Uses out=reals to transform in-place!
+    np.clip(reals, a_min=-1, a_max=1, out=reals)  # Do clipping in-place!
+
     return signal
 
 
@@ -389,7 +439,12 @@ def pad(signal, index=-1, count=1, value=None):
 
 
 def distances(signal):
-    # See also np.diff!
+    """
+    Get the absolute distances from consecutive samples of the signal.
+    Signal must have at least two samples.
+
+    See also: np.diff()
+    """
     if hasattr(signal, '__len__') and (len(signal) >= 2):
         return np.abs(signal[1:] - signal[:-1])
     else:
@@ -397,18 +452,37 @@ def distances(signal):
 
 
 def diffs(signal, start=0, end=0):
+    """
+    The same as np.ediff1d(). Get the difference of the consecutive samples in signal.
+    This differs from distances(), in that the signal is padded with start and end values.
+
+    Signal must have at least two samples.
+
+    See also: distances()
+    """
     # Could use np.apply_over_axes - profile with time?
-    # There is also np.ediff1d!!!
     return np.append(start, signal[1:]) - np.append(signal[:-1], end)
 
 
 def get_zerocrossings(signal):
+    """
+    Get the signal transformed so it is one where the signal crosses zero level,
+    and zero everywhere else.
+
+    In other words:
+
+    The result will have 1 where the signal crosses the x-axis from
+    positive to negative values or vice versa, and 0 elsewhere.
+    """
     peaks = pad(distances(np.angle(signal) / np.pi), 0)
     res = np.round((peaks - peaks[1]) * 1.1) * np.sign(np.angle(signal))
     return res
 
 
 def get_impulses(signal, tau=False):
+    """
+    Can be used to find where the angle of complex signal crosses zero angle.
+    """
     if tau:
         peaks = pad(distances(np.angle(signal) / np.pi % 2), 0)
         res = np.fmax(np.sign((peaks - 1)) * 2, 0)
