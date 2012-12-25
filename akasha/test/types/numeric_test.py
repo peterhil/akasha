@@ -25,9 +25,8 @@ from fractions import Fraction
 
 
 class Numeric(NumericUnit):
-    # pylint: disable=R0903
+    # pylint: disable=R0903,W0231
     def __init__(self, value):
-        super(self.__class__, self).__init__(value)
         self._unit = '_value'
         self._value = self._normalize_value(value)
 
