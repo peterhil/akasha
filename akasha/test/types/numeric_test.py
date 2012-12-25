@@ -4,11 +4,10 @@
 # C0111: Missing docstring
 # R0201: Method could be a function
 # E1101: Module 'x' has no 'y' member
-# W0223: Method 'x' is abstract in class 'y' but is not overridden
 # R0901: Too many ancestors (n/k)
 # C0321: More than one statement on a single line
 #
-# pylint: disable=C0111,R0201,E1101,W0223,R0901,C0321
+# pylint: disable=C0111,R0201,E1101,R0901,C0321
 """
 Unit tests for numeric types
 """
@@ -25,11 +24,14 @@ from fractions import Fraction
 
 
 class Numeric(NumericUnit):
-    # pylint: disable=R0903,W0231
+    # pylint: disable=W0231,R0903
+
     def __init__(self, value):
-        self._unit = '_value'
         self._value = self._normalize_value(value)
 
+    @property
+    def _unit(self):
+        return '_value'
 
 class Complex(ComplexUnit, Numeric): pass
 class Real(RealUnit, Complex): pass

@@ -110,9 +110,12 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
         super(self.__class__, self).__init__()
         if not isinstance(hz, Real):
             raise TypeError("Argument 'hz' must be a real number.")
-        self._unit = '_hz'
         self._hz = float(hz)  # Original frequency, independent of sampling rate or optimizations
         self.unwrapped = unwrapped
+
+    @property
+    def _unit(self):
+        return '_hz'
 
     @property
     def ratio(self):

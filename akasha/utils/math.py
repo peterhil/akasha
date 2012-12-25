@@ -159,6 +159,8 @@ def map_array(func, arr, method='vec', dtype=None):
     dtype : Numpy dtype or str
         Datatype
     """
+    # pylint: disable=E1103
+
     arr = np.atleast_1d(arr)
     shape = arr.shape
 

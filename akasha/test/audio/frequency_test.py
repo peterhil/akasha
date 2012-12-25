@@ -10,6 +10,7 @@
 Unit tests for Frequency
 """
 
+import abc
 import numbers
 import numpy as np
 import operator
@@ -163,20 +164,20 @@ class TestFrequency(object):
     """
 
     def test_mro(self):
-        print(Frequency.mro())
         assert [
             Frequency,
             FrequencyRatioMixin,
             RealUnit,
             ComplexUnit,
             NumericUnit,
-            numbers.Real,
-            numbers.Complex,
-            numbers.Number,
             PeriodicGenerator,
             Generator,
             object
         ] == Frequency.mro()
+
+    def test_meta(self):
+        assert issubclass(Frequency, numbers.Real)
+        assert isinstance(Frequency, abc.ABCMeta)
 
     def test_class(self):
         assert issubclass(Frequency, RealUnit)
