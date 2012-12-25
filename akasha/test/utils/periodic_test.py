@@ -53,6 +53,7 @@ class TestPeriod(object):
         )
 
     def test_index_mod(self):
+        # pylint: disable=W0212
         n = 4
         pa = period.array(np.arange(n))
         for i in np.arange(-2, n + 2):

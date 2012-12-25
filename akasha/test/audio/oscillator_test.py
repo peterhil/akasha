@@ -19,7 +19,7 @@ from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import PeriodicGenerator
 from akasha.audio.oscillator import Osc
 from akasha.timing import sampler
-from akasha.utils.math import to_phasor, pi2
+from akasha.utils.math import map_array, to_phasor, pi2
 
 from fractions import Fraction
 from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
@@ -91,7 +91,7 @@ class TestOscRoots(object):
             o = Osc.from_ratio(1, period)
 
             fractional_angle = lambda n: float(Fraction(n, period) % 1) * 360
-            angles = np.array(map(fractional_angle, range(0, period)))
+            angles = map_array(fractional_angle, np.arange(0, period), method='vec')
             angles = 180 - ((180 - angles) % 360)  # wrap 'em to -180..180!
 
             a = to_phasor(o.sample)

@@ -22,12 +22,14 @@ class TestChrono(object):
     """
     Tests of time
     """
+    @classmethod
     def setup_class(cls):
         assert issubclass(Chrono, RealUnit)
         assert issubclass(Chrono, object)
 
     def test_init(self):
         """It should intialize"""
+        # pylint: disable=W0212
         t = 0.1
         c = Chrono(t)
         assert isinstance(c, Chrono)
@@ -55,7 +57,6 @@ class TestChrono(object):
         assert (value * factor) == prefix(value) == getattr(Chrono, prefix.__name__)(value)
 
     def test_now(self):
-        chrono = lambda: Chrono.now()
-        latency = timeit.timeit(chrono, number=3)
-        diff = -(chrono() - chrono())
+        latency = timeit.timeit(Chrono.now, number=3)
+        diff = -(Chrono.now() - Chrono.now())
         assert 0 < diff < latency

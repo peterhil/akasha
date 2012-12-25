@@ -45,6 +45,7 @@ class TestFrequencyRatioMixin(object):
         [Osc, Frequency]
     ]
 
+    @classmethod
     def setup_class(cls):
         assert issubclass(Frequency, FrequencyRatioMixin)
 
@@ -71,8 +72,8 @@ class TestFrequencyRatioMixin(object):
         assert self.a2 == o.frequency
         assert isinstance(o.frequency, hz)
 
-    @pytest.mark.parametrize(('cls', 'hz'), hz_types)
-    def test_ratio(self, cls, hz):
+    @pytest.mark.parametrize(('cls',), [[Frequency], [Osc]])
+    def test_ratio(self, cls):
         o = cls(self.a4)
         assert Frequency(self.a4).ratio == o.ratio
         assert isinstance(o.ratio, Fraction)
@@ -185,24 +186,31 @@ class TestFrequency(object):
 
     def test_init(self):
         """It should intialize using a frequency"""
+        # pylint: disable=W0212
         hz = 440.001
         f = Frequency(hz)
-        assert isinstance(f, Frequency)
         assert isinstance(f.frequency, float)
         assert isinstance(f._hz, float)
-        assert hz == f
-        assert hz == f.frequency
+        assert hz == f == f.frequency
         assert hz == f._hz
 
-    def test_rounding_frequencies(self):
+    @pytest.mark.parametrize(('hz',), [
+        [20.899],
+        [30.0001],
+        [220.0001],
+        [440.899],
+        [2201.34],
+        [8001.378],
+        [12003.989],
+        [20000.1]
+    ])
+    def test_rounding_frequencies(self, hz):
         """It should not exceed the just noticeable difference for hearing of frequencies."""
         # Just noticeable difference allowance for Frequency rounding
         # See http://en.wikipedia.org/wiki/Cent_(music)#Human_perception
         # This should probably be much smaller than the suggested 3-6 cents...
         JND_CENTS_EPSILON = 1.0e-02
-
-        for hz in [20.899, 30.0001, 220.0001, 440.899, 2201.34, 8001.378, 12003.989, 20000.1]:
-            assert cents_diff(hz, Frequency(hz)) <= JND_CENTS_EPSILON
+        assert cents_diff(hz, Frequency(hz)) <= JND_CENTS_EPSILON
 
     @pytest.mark.parametrize(('ratio'), [
         (Fraction(22, 2205)),  # 440 Hz

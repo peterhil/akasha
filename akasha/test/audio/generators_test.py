@@ -80,6 +80,7 @@ class TestGenerator(object):
 class TestPeriodicGenerator(object):
     """Test periodic generator"""
 
+    @classmethod
     def setup_class(cls):
         cls.o = Osc.from_ratio(1, 6)
         cls.p = Osc.from_ratio(3, 8)
