@@ -18,6 +18,8 @@ from akasha.utils.decorators import memoized
 
 class FrequencyRatioMixin(object):
 
+    _hz = 0.0
+
     @classmethod
     def from_ratio(cls, ratio, den=False, *args, **kwargs):
         if den:
