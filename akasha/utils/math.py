@@ -144,7 +144,7 @@ def maxfloat(guess=1.0):
 
 # Arrays
 
-def map_array(func, arr, method='numpy', dtype=object):
+def map_array(func, arr, method='vec', dtype=None):
     """
     Map over an array pointwise with a function.
 
@@ -159,16 +159,21 @@ def map_array(func, arr, method='numpy', dtype=object):
     dtype : Numpy dtype or str
         Datatype
     """
+    arr = np.atleast_1d(arr)
     shape = arr.shape
+
     if method == 'numpy':
-        res = np.apply_along_axis(func, 0, arr.flat)
+        res = np.apply_along_axis(np.vectorize(func), 0, arr.flat)
     elif method == 'vec':
-        vf = np.vectorize(func)
-        res = vf(arr.flat)
+        res = np.vectorize(func)(arr.flat)
     elif method == 'map':
-        res = np.array(map(func, arr.flat), dtype=dtype)  # pylint: disable=W0141
+        res = np.array(map(func, arr.flat))  # pylint: disable=W0141
     else:
         raise exceptions.NotImplementedError("map_array(): method '{0}' missing.".format(method))
+
+    if dtype is not None:
+        res = res.astype(dtype)
+
     return res.reshape(shape)
 
 
