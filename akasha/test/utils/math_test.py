@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# C0111: Missing docstring
+# R0201: Method could be a function
+# E1101: Module 'x' has no 'y' member
+#
+# pylint: disable=C0111,R0201,E1101
 """
 Unit tests for mathematical functions
 """
@@ -16,6 +22,7 @@ from akasha.utils.math import *
 class TestPrimes(object):
     """Test prime functions."""
 
+    @pytest.mark.slow
     def test_primes(self):
         assert_array_equal(
             np.array([
@@ -28,12 +35,17 @@ class TestPrimes(object):
             primes(0, 350)
         )
 
+    @pytest.mark.slow
     def test_primes_peak_to_peak(self):
         assert_array_equal(
             np.array([19, 32, 26, 26, 28, 30, 28, 28, 32], dtype=np.uint64),
-            np.array([np.ptp(distances(primes(i, j))) for i, j in pairwise(np.arange(0, 10000, 1000))])
+            np.array([
+                np.ptp(distances(primes(i, j)))
+                for i, j in pairwise(np.arange(0, 10000, 1000))
+            ])
         )
 
+    @pytest.mark.slow
     def test_primes_from_inf(self):
         assert_array_equal(
             np.array([7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47], dtype=np.uint64),

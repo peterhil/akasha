@@ -35,7 +35,7 @@ class period(np.ndarray, object):
     Examples
     ========
 
-    @todo
+    # TODO: Write some examples of using period arrays...
 
     """
     def __new__(cls, *args, **kwargs):
