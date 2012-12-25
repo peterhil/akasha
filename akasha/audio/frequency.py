@@ -17,6 +17,7 @@ from akasha.utils.decorators import memoized
 
 
 class FrequencyRatioMixin(object):
+
     @classmethod
     def from_ratio(cls, ratio, den=False, *args, **kwargs):
         if den:
@@ -72,10 +73,11 @@ class FrequencyRatioMixin(object):
         """Zero frequency should be considered False"""
         return self.ratio != 0
 
-    def _cmp(op):
+    def _cmp(op):  # pylint: disable=E0213
         """Generate comparison methods."""
 
         def comparison(self, other):
+            # pylint: disable=E1102
             if isinstance(other, FrequencyRatioMixin):
                 return op(self.ratio, other.ratio)
             elif isinstance(other, Number):
