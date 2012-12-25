@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-
 import numpy as np
 
 from cmath import rect, phase, pi
@@ -15,27 +13,28 @@ class Noise(Generator):
     """Round (magnitude 0..1 with random angle) or polar noise generator"""
 
     def __init__(self, domain_fn=None, random_fn=np.random.random):
+        super(self.__class__, self).__init__()
         self.function = domain_fn or self.unit_disc
         self.randomizer = random_fn
 
     @staticmethod
-    def unit_disc(iter, randomizer, *args, **kwargs):
-        amps = randomizer(*args, size=len(iter), **kwargs)
-        angles = randomizer(*args, size=len(iter), **kwargs) * 1j * 2.0 * pi
+    def unit_disc(iterable, randomizer, *args, **kwargs):
+        amps = randomizer(*args, size=len(iterable), **kwargs)
+        angles = randomizer(*args, size=len(iterable), **kwargs) * 1j * 2.0 * pi
         noise = amps * np.exp(angles)
         # noise = (2.0 * amps - 1.0) * 1j   # flat
         return noise
 
     @staticmethod
-    def unit_square(iter, randomizer, *args, **kwargs):
-        x = 2 * randomizer(*args, size=len(iter), **kwargs) - 1.0
-        y = 2j * randomizer(*args, size=len(iter), **kwargs) - 1.0j
+    def unit_square(iterable, randomizer, *args, **kwargs):
+        x = 2 * randomizer(*args, size=len(iterable), **kwargs) - 1.0
+        y = 2j * randomizer(*args, size=len(iterable), **kwargs) - 1.0j
         noise = x + y
         print noise, type(noise)
         return noise
 
-    def sample(self, iter):
-        return self.function(iter, self.randomizer)
+    def sample(self, iterable):
+        return self.function(iterable, self.randomizer)
 
 
 class Rustle(Generator):
@@ -61,11 +60,12 @@ class Chaos(Generator):
     """Chaos generator"""
 
     def __init__(self):
+        super(self.__class__, self).__init__()
         self.gen = self.Mandelbrot()
 
-    def sample(self, iter, e=Exponential(0, amp=0.5)):
-        chaos = np.fromiter(self.gen, count=len(iter), dtype=complex)
-        return chaos[iter] * e[iter]
+    def sample(self, iterable, e=Exponential(0, amp=0.5)):
+        chaos = np.fromiter(self.gen, count=len(iterable), dtype=complex)
+        return chaos[iterable] * e[iterable]
 
     def __repr__(self):
         return "Mandelbrot: c=%s, z=%s" % (self.gen.c, self.gen.z)

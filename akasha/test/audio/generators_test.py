@@ -1,16 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# C0111: Missing docstring
+# R0201: Method could be a function
+# E1101: Module 'x' has no 'y' member
+#
+# pylint: disable=C0111,R0201,E1101
 """
 Unit tests for generators
 """
 
 import numpy as np
-import pytest
 
+from fractions import Fraction
 from numpy.testing.utils import assert_array_equal
 from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
 
-from akasha.audio.generators import Generator, PeriodicGenerator
+from akasha.audio.generators import Generator
 from akasha.audio.oscillator import Osc
 from akasha.timing import sampler
 
@@ -19,6 +25,7 @@ class LinearGenerator(Generator):
     """Simple generator for testing."""
 
     def __init__(self, rate=1):
+        super(self.__class__, self).__init__()
         self.ratio = Fraction.from_float(rate).limit_denominator(sampler.rate)
 
     def sample(self, iterable):
@@ -73,6 +80,7 @@ class TestGenerator(object):
 class TestPeriodicGenerator(object):
     """Test periodic generator"""
 
+    @classmethod
     def setup_class(cls):
         cls.o = Osc.from_ratio(1, 6)
         cls.p = Osc.from_ratio(3, 8)
@@ -91,14 +99,12 @@ class TestPeriodicGenerator(object):
             self.o[:3:2]
         )
         assert_array_equal(
-            self.p[7,2,5,0,3,6,1,4,7],
+            self.p[7, 2, 5, 0, 3, 6, 1, 4, 7],
             self.p[-1:8:3]
         )
 
     def test_sample_period_is_accurate(self):
         o = Osc(1)
         s = sampler.rate
-        assert_array_equal(o[0*s:1*s], o[1*s:2*s])
-        assert_array_equal(o[0*s:1*s], o[2*s:3*s])
-
-
+        assert_array_equal(o[0 * s: 1 * s], o[1 * s: 2 * s])
+        assert_array_equal(o[0 * s: 1 * s], o[2 * s: 3 * s])

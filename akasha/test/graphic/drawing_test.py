@@ -1,21 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# C0111: Missing docstring
+# R0201: Method could be a function
+# E1101: Module 'x' has no 'y' member
+#
+# pylint: disable=C0111,R0201,E1101
 """
 Unit tests for drawing functions
 """
 
-from __future__ import absolute_import
-
 import numpy as np
-import unittest
+import pytest
 
-from akasha.graphics.drawing import *
+# from akasha.graphic.drawing import graph
 
 
-class GraphTest(unittest.TestCase):
+class TestGraph(object):
     """Tests for graph()"""
 
-    def testCoords(self):
+    @pytest.skip("Incomplete")
+    def test_graph_coord_bounds(self):
         """Test coordinate boundaries"""
 
         ### Make complex signal containing grid points
@@ -49,7 +54,5 @@ class GraphTest(unittest.TestCase):
         # Out[286]:
         # array([-1.-1.j    , -1.-0.3333j, -1.+0.3333j, ...,  1.-0.3333j,
         #         1.+0.3333j,  1.+1.j    ])
-        graph(samples)
 
-if __name__ == "__main__":
-    unittest.main()
+        # graph(samples)

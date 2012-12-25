@@ -1,7 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# C0111: Missing docstring
+# R0201: Method could be a function
+# E1101: Module 'x' has no 'y' member
+#
+# pylint: disable=C0111,R0201,E1101
 """
-Unit tests for oscillator.py
+Unit tests for periodic arrays
 """
 
 import pytest
@@ -22,8 +28,7 @@ class TestPeriod(object):
         [0,                     (0, )],
         [1,                     (1, )],
         [[2, 3],                (2, 3)],
-        [np.array([4, 5, 6]),   (4, 5, 6)],
-        [np.ndarray(3),         (0, 0, 0)],
+        [[4, 5, 6],             (4, 5, 6)],
     ])
     def test_init(self, param, shape):
         pa = period(param)
@@ -31,14 +36,14 @@ class TestPeriod(object):
         assert pa.shape == shape
 
     @pytest.mark.parametrize(("seq"), [
-        [None,],
-        [(),],
-        [[],],
+        [None],
+        [()],
+        [[]],
         [(1, 2, 3)],
         [u'foo'],
-        [np.inf,],
-        [[2+5j, -3+6j],],
-        [np.array([[4.1, 5.2], [6.3, 7.4]]),],
+        [np.inf],
+        [[2 + 5j, -3 + 6j]],
+        [np.array([[4.1, 5.2], [6.3, 7.4]])],
         [np.arange(6)],
     ])
     def test_array(self, seq):
@@ -48,6 +53,7 @@ class TestPeriod(object):
         )
 
     def test_index_mod(self):
+        # pylint: disable=W0212
         n = 4
         pa = period.array(np.arange(n))
         for i in np.arange(-2, n + 2):
@@ -69,12 +75,11 @@ class TestPeriod(object):
         assert_array_equal(ar[1], pa[1])
         assert_array_equal(ar[0], pa[4])
 
-
         # assert_array_equal(ar[0:1, 1:-2], pa[0:1, 1:-2])
-        # assert_array_equal(ar[:,   1:-2], pa[:,   1:-2])
+        # assert_array_equal(ar[:, 1:-2], pa[:, 1:-2])
 
     def test_view(self):
-        ar = np.arange(6).reshape(2,3)
+        ar = np.arange(6).reshape(2, 3)
         pa = ar.view(period)
         assert np.array_equal(ar, pa)
 
@@ -107,5 +112,3 @@ class TestPeriod(object):
         pa[::] = ar
 
         assert_array_equal(ar, pa)
-
-

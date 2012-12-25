@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
-__init__.py
+Copyright (c) 2011-2012 Peter Hillerström. All rights reserved.
 
-Created by Peter on 2011-12-11.
-Copyright (c) 2011 Loihde. All rights reserved.
+Author: Peter Hillerström
+Date: 2011-12-11
 """
-
-from __future__ import absolute_import

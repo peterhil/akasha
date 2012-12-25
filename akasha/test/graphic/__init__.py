@@ -1,5 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Unit tests for audio objects.
+Unit tests for module graphic
 """
