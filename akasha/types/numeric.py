@@ -48,8 +48,6 @@ def ops(op):
             return calc(Fraction(self.value), Fraction(other), cls)
         elif isinstance(other, numbers.Complex):
             return calc(complex(self), complex(other), cls)
-        # elif isinstance(other, numbers.Number):
-        #     return calc(self.value, other, cls)
         else:
             return NotImplemented
     forward.__name__ = '__' + op.__name__ + '__'
@@ -64,15 +62,6 @@ def ops(op):
 
         elif isinstance(other, Decimal):
             return calc(Decimal(other), Decimal(self.value), cls)
-
-        # elif isinstance(other, numbers.Integral):
-        #     return calc(int(other), int(self), cls)
-        # elif isinstance(other, numbers.Rational):
-        #     return calc(Fraction(other), Fraction(self), cls)
-        # elif isinstance(other, numbers.Real):
-        #     return calc(float(other), float(self), cls)
-        # elif isinstance(other, numbers.Complex):
-        #     return calc(complex(other), complex(self), cls)
 
         elif isinstance(other, numbers.Number):
             return calc(other, self.value, cls)
