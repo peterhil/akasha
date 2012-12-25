@@ -22,6 +22,8 @@ except:
     logger.warn("Can't import pyplot from matplolib!")
     pass
 
+# TODO: Use scipy.sparse matrices to speed up things?
+# Use sparse.coo (coordinate matrix) to build the matrix, and convert to csc/csr for math.
 
 def hist_graph(samples, size=1000):
     """Uses numpy histogram2d to make an image from complex signal."""
