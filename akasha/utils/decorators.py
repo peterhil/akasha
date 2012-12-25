@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Decorators module
+"""
 
 from akasha.utils.log import logger
 

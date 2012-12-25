@@ -1,8 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Utilities for Akasha
+"""
 
 
 def _super(self):
+    """
+    Easier to remember function to get the super class for self (or passed in instance).
+    """
     return super(self.__class__, self)
 
 
@@ -14,6 +20,8 @@ def issequence(arg):
     http://stackoverflow.com/questions/1835018/
     python-check-if-an-object-is-a-list-or-tuple-but-not-string/1835259#1835259
     """
-    return (not hasattr(arg, "strip") and
-            hasattr(arg, "__getitem__") or
-            hasattr(arg, "__iter__"))
+    return (
+        not hasattr(arg, "strip")
+        and hasattr(arg, "__getitem__")
+        or hasattr(arg, "__iter__")
+    )

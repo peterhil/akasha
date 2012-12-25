@@ -1,9 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Oop design patterns module
+"""
 
 
 class Singleton(object):
-    """Use to create a singleton"""
+    """
+    Create a singleton.
+    Use as a mixin to make all instances of a class singletons.
+    """
     def __new__(cls, *args, **kwds):
         """
         >>> s = Singleton()
@@ -19,4 +25,5 @@ class Singleton(object):
         return getattr(cls, self)
 
     def init(self, *args, **kwds):
+        """Disable init"""
         pass

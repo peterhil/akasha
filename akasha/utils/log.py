@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
+Logging for Akasha.
+
 Copyright (c) 2011 Peter. All rights reserved.
 
 Author: Peter Hillerström
@@ -12,8 +14,13 @@ import logging
 
 
 class ansi(object):
-    BLACK = '\033[90m'
-    RED = '\033[91m'
+    """
+    ANSI colour codes
+    """
+    # pylint: disable=W1401
+
+    BLACK = "\033[90m"
+    RED = '\\033[91m'
     GREEN = '\033[92m'
     YELLOW = '\033[93m'
 
@@ -37,6 +44,7 @@ class ansi(object):
     END = NORMAL = RESET
 
     # Logging
+
     NOTSET = RESET
     ANIMA = DIM_WHITE
     BORING = BLACK
@@ -46,13 +54,18 @@ class ansi(object):
     ERROR = BRIGHT + RED
     CRITICAL = FATAL = DIM_RED
 
-    # TODO: API like ansi.color('DEBUG', ansi.BRIGHT)
-
     @classmethod
     def color(cls, name):
+        """
+        Usage: ansi.color('red')
+        """
+        # TODO: API like ansi.color('DEBUG', ansi.BRIGHT)
         return cls.__dict__[name.upper()]
 
     def disable(self):
+        """
+        Disable all colors
+        """
         self.BLACK = ''
         self.RED = ''
         self.GREEN = ''
@@ -65,6 +78,9 @@ class ansi(object):
 
 
 class ColorFormatter(logging.Formatter, object):
+    """
+    Color log formatter, that maps log levels to colors.
+    """
     def format(self, record):
         record.color = ansi.color(record.__dict__['levelname'])
         return super(ColorFormatter, self).format(record)

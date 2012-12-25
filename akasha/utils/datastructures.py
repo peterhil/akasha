@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+"""
+Generally useful datastructures
+"""
 
 def chaff(dic, pred=lambda x: x < 5):
     """
