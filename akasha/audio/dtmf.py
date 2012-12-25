@@ -4,7 +4,12 @@
 Dual-tone Multifrequency Tones
 """
 
-import string
+import sys
+
+if sys.version_info <= (3, 0):
+    import string  # pylint: disable=W0402
+else:
+    import bytes as string
 
 from akasha.audio.generators import Generator
 from akasha.timing import sampler
