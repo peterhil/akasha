@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# C0111: Missing docstring
+# R0201: Method could be a function
+# E1101: Module 'x' has no 'y' member
+#
+# pylint: disable=C0111,R0201,E1101
 """
-Unit tests for curves.py
+Unit tests for curves
 """
 
 import pytest
 import numpy as np
 
-from numbers import Number
 from numpy.testing.utils import assert_array_equal
 from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
 
@@ -54,11 +59,11 @@ class TestCircle(object):
 
     def test_at_complex(self):
         c = Circle()
-        pts = np.linspace(0, 1+1j, 7, endpoint=False)
+        pts = np.linspace(0, 1 + 1j, 7, endpoint=False)
         assert_nulp_diff(c.at(pts), np.exp(pi2 * 1j * pts), 1)
 
     def test_at_isperiodic(self):
-        assert_nulp_diff(Circle.at(np.arange(-1, 3, 1)), 1+0j, 3)
+        assert_nulp_diff(Circle.at(np.arange(-1, 3, 1)), 1 + 0j, 3)
 
     def test_repr(self):
         o = Circle()
@@ -67,7 +72,7 @@ class TestCircle(object):
 
 class TestSquare(object):
 
-    pts = np.arange(0, 1, 1.0/8, dtype=np.float64)
+    pts = np.arange(0, 1, 1.0 / 8, dtype=np.float64)
 
     def test_super(self):
         assert issubclass(Square, Curve)
@@ -77,10 +82,10 @@ class TestSquare(object):
         s = Square()
 
         octants = np.array([
-             +1, +1+1j,
-            +1j, -1+1j,
-             -1, -1-1j,
-            -1j, +1-1j,
+            +1, +1 + 1j,
+            1j, -1 + 1j,
+            -1, -1 - 1j,
+            -1j, 1 - 1j,
         ], dtype=np.complex128)
         assert_nulp_diff(octants, s.at(self.pts), 2)
 
@@ -91,7 +96,7 @@ class TestSquare(object):
 
 class TestSuper(object):
 
-    pts = np.arange(0, 1, 1.0/8, dtype=np.float64)
+    pts = np.arange(0, 1, 1.0 / 8, dtype=np.float64)
 
     def test_super(self):
         assert issubclass(Super, Curve)
@@ -116,11 +121,17 @@ class TestSuper(object):
 
     @pytest.mark.parametrize(('args', 'exp'), superness_params)
     def test_get_superness(self, args, exp):
-        assert_array_equal(np.array(exp, dtype=np.float64), Super.get_superness(args), verbose=False)
+        assert_array_equal(
+            np.array(exp, dtype=np.float64),
+            Super.get_superness(args),
+            verbose=False)
 
     @pytest.mark.parametrize(('args', 'exp'), superness_params)
     def test_normalise_superness_from_init(self, args, exp):
-        assert_array_equal(np.array(exp, dtype=np.float64), Super(args).superness, verbose=False)
+        assert_array_equal(
+            np.array(exp, dtype=np.float64),
+            Super(args).superness,
+            verbose=False)
 
     def test_normalise_superness_with_invalid_values(self):
         with pytest.raises(ValueError):
@@ -128,13 +139,13 @@ class TestSuper(object):
 
     super_amps = [
         [(4, 2),
-            np.repeat(1, 8)],
+            list(np.repeat(1, 8))],
         [(5, 3),
-            [ 1.    ,  1.1025,  1.0579,  1.0169,  1.1225,  1.0169,  1.0579,  1.1025]],
+            [1.0000, 1.1025, 1.0579, 1.0169, 1.1225, 1.0169, 1.0579, 1.1025]],
         [(12, 4, 12),
-            [ 1.    ,  2.3784,  1.    ,  2.3784,  1.    ,  2.3784,  1.    ,  2.3784]],
-        [(7,1),
-            [ 1.    ,  0.8504,  0.7654,  0.721 ,  0.7071,  0.721 ,  0.7654,  0.8504]],
+            [1.0000, 2.3784, 1.0000, 2.3784, 1.0000, 2.3784, 1.0000, 2.3784]],
+        [(7, 1),
+            [1.0000, 0.8504, 0.7654, 0.7210, 0.7071, 0.7210, 0.7654, 0.8504]],
     ]
 
     @pytest.mark.parametrize(('superness', 'exp'), super_amps)
@@ -157,5 +168,3 @@ class TestSuper(object):
     def test_repr(self):
         o = Super()
         assert o == eval(repr(o))
-
-

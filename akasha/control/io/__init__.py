@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-
 import os
 
-from akasha import settings
+from akasha.settings import config
 
 
-def relative_path(path, base=settings.basedir):
-	return os.path.abspath('/'.join([base, path]))
-
+def relative_path(path, base=config.basedir):
+    return os.path.abspath('/'.join([base, path]))

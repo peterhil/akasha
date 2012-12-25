@@ -1,14 +1,13 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
 from __future__ import division
 
 import numpy as np
 import operator
 
 from fractions import Fraction
-from numbers import Number
+from numbers import Number, Real
 
 from akasha.audio.generators import PeriodicGenerator
 from akasha.timing import sampler
@@ -18,6 +17,9 @@ from akasha.utils.decorators import memoized
 
 
 class FrequencyRatioMixin(object):
+
+    _hz = 0.0
+
     @classmethod
     def from_ratio(cls, ratio, den=False, *args, **kwargs):
         if den:
@@ -73,10 +75,11 @@ class FrequencyRatioMixin(object):
         """Zero frequency should be considered False"""
         return self.ratio != 0
 
-    def _cmp(op):
+    def _cmp(op):  # pylint: disable=E0213
         """Generate comparison methods."""
 
         def comparison(self, other):
+            # pylint: disable=E1102
             if isinstance(other, FrequencyRatioMixin):
                 return op(self.ratio, other.ratio)
             elif isinstance(other, Number):
@@ -106,9 +109,15 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
     """Frequency class"""
 
     def __init__(self, hz, unwrapped=False):
-        self._unit = '_hz'
-        self._hz = float(hz) # Original frequency, independent of sampling rate or optimizations
+        super(self.__class__, self).__init__()
+        if not isinstance(hz, Real):
+            raise TypeError("Argument 'hz' must be a real number.")
+        self._hz = float(hz)  # Original frequency, independent of sampling rate or optimizations
         self.unwrapped = unwrapped
+
+    @property
+    def _unit(self):
+        return '_hz'
 
     @property
     def ratio(self):
@@ -147,7 +156,14 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
 
     def __eq__(self, other):
         """a == b, takes into account any rounding done on Frequency's initialisation."""
-        return self.ratio == Frequency(other).ratio
+        if isinstance(other, Real):
+            return self.ratio == Frequency(float(other)).ratio
+        else:
+            return NotImplemented
+
+    def __nonzero__(self):
+        """Nonzero?"""
+        return self._hz != 0
 
     # TODO: Implement pickling
     # http://docs.python.org/library/pickle.html#the-pickle-protocol

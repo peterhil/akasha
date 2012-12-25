@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-
 import locale
 import numpy as np
 import sys
 
+class config(object):
+    pass
 
-def setup():
+def np_setup():
     np.set_printoptions(precision=16, threshold=1000, edgeitems=40, linewidth=78, suppress=True)
 
     # Set the user's default locale, see http:// docs.python.org/library/locale.html
@@ -21,7 +21,4 @@ def setup():
 
     if isinstance(sys.stdin, file):
         assert sys.stdin.encoding == 'UTF-8', \
-        "Unicode input not enabled! Current input encoding is: %s" % sys.stdin.encoding
-
-
-setup()
+            "Unicode input not enabled! Current input encoding is: %s" % sys.stdin.encoding

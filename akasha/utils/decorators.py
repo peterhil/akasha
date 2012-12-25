@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Decorators module
+"""
 
-from __future__ import absolute_import
-
-from .log import logger
+from akasha.utils.log import logger
 
 
 class memoized(object):
@@ -30,5 +31,3 @@ class memoized(object):
     def __repr__(self):
         """Return the function's docstring."""
         return self.func.__doc__
-
-

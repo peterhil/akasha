@@ -3,8 +3,6 @@
 
 from __future__ import absolute_import
 
-__package__ = 'akasha'
-
 import locale
 import logging
 import numpy as np
@@ -18,44 +16,45 @@ from fractions import Fraction
 from numbers import Number
 from scipy.signal import hilbert
 
+from akasha.settings import config, np_setup
+from akasha.utils.log import logger
 
-import akasha
+np_setup()
 
-from . import settings
-from .utils.log import logger
+if not hasattr(config, 'basedir'):
+    config.basedir = os.path.abspath(os.path.dirname(__file__))
+    logger.info("Started from: {0}".format(config.basedir))
 
-if not hasattr(settings, 'basedir'):
-	settings.basedir = os.path.abspath(os.path.dirname(__file__))
-	logger.info("Started from: {0}".format(settings.basedir))
+from akasha.audio.curves import *
+from akasha.audio.dtmf import DTMF
+from akasha.audio.envelope import Attack, Exponential, Gamma
+from akasha.audio.frequency import Frequency
+from akasha.audio.harmonics import Overtones
+from akasha.audio.noise import *
+from akasha.audio.oscillator import *
+from akasha.audio.sound import Sound, Group, Pcm
 
-from .audio.dtmf import DTMF
-from .audio.envelope import Attack, Exponential, Gamma
-from .audio.frequency import Frequency
-from .audio.harmonics import Overtones
-from .audio.noise import *
-from .audio.oscillator import *
-from .audio.sound import Sound, Group, Pcm
+from akasha.control.io.audio import play, write, read
+from akasha.control.io.keyboard import *
 
-from .control.io.audio import play, write, read
-from .control.io.keyboard import *
+from akasha.effects.tape import *
+from akasha.effects.filters import *
 
-from .effects.tape import *
-from .effects.filters import *
+from akasha.funct.xoltar import functional as fx
+from akasha.funct.xoltar import lazy
 
-from .funct.xoltar import functional as fx
-from .funct.xoltar import lazy
+from akasha.graphic.animation import *
+from akasha.graphic.drawing import *
+from akasha.graphic.primitive.line import *
+from akasha.graphic.primitive.spline import *
 
-from .graphic.animation import *
-from .graphic.drawing import *
-from .graphic.primitive.line import *
-from .graphic.primitive.spline import *
+from akasha.net.wiki import *
 
-from .net.wiki import *
+from akasha.timing import sampler
+from akasha.tunings import WickiLayout
 
-from .timing import sampler
-from .tunings import WickiLayout
+from akasha.utils.math import *
 
-from .utils.math import *
 
 if __name__ == '__main__':
-	from akasha import *
+    pass

@@ -1,12 +1,18 @@
-#! /usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Dual-tone Multifrequency Tones
+"""
 
-from __future__ import absolute_import
+import sys
 
-import string
+if sys.version_info <= (3, 0):
+    import string  # pylint: disable=W0402
+else:
+    import bytes as string
 
-from .generators import Generator
-
-from ..timing import sampler
+from akasha.audio.generators import Generator
+from akasha.timing import sampler
 
 
 class DTMF(Generator):
@@ -63,8 +69,8 @@ class DTMF(Generator):
     * = (gsm: +)
     # = (gsm: shift)
     """
-    sp = [ 350,  440,  480,  620]
-    lo = [ 697,  770,  852,  941]
+    sp = [350,  440,  480,  620]
+    lo = [697,  770,  852,  941]
     hi = [1209, 1336, 1477, 1633]
 
     nkeys = '123A' + \
@@ -83,17 +89,21 @@ class DTMF(Generator):
         ''.join(['222', '333', '444', '555', '666', '7777', '888', '9999', '0', '-'])
     )
 
-    def __init__(self, str, pulselength=0.07, pause=0.05):
-        self.string = str.upper()
+    def __init__(self, sequence, pulselength=0.07, pause=0.05):
+        super(self.__class__, self).__init__()
+
+        self.sequence = sequence.upper()
         self.pulselength = pulselength
         self.pause = pause
+
         return None
 
     @property
     def number(self):
-        return self.string.upper().translate(self.alphabet_trans)
+        """The number to dial."""
+        return self.sequence.upper().translate(self.alphabet_trans)
 
-    def sample(self, iter):
+    def sample(self, iterable):
         """Make DTML dialing tone."""
         #snd = Sound()
         #snd.add()

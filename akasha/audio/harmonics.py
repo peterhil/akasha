@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-from __future__ import absolute_import
+"""
+Harmonic overtones module
+"""
 
 import exceptions
 import numpy as np
@@ -13,7 +14,7 @@ from akasha.audio.oscillator import Osc
 
 from akasha.timing import sampler
 from akasha.utils.decorators import memoized
-from akasha.utils.math import random_phase, normalize, pi2
+from akasha.utils.math import random_phase, map_array, normalize, pi2
 
 
 class Overtones(FrequencyRatioMixin, Generator):
@@ -26,6 +27,7 @@ class Overtones(FrequencyRatioMixin, Generator):
             func=lambda x: 1 + x,
             damping=None,
             rand_phase=False):
+        super(self.__class__, self).__init__()
         self.base = sndobj
         # TODO Setting ovt.frequency (ovt._hz) leaves ovt.base.frequency (ovt.base._hz)
         # where it was -- is this the desired behaviour?
@@ -47,35 +49,45 @@ class Overtones(FrequencyRatioMixin, Generator):
 
     @property
     def max_overtones(self):
+        """Maximum number of overtones to generate for a frequency."""
         low_freq_overtone_limit = 10
         return int(sampler.rate / (2.0 * max(self.frequency, low_freq_overtone_limit)))
 
     @property
     def limit(self):
+        """Get the number of overtones to generate for a frequency."""
         return max(min(self.max_overtones, self.n), 1)
 
     @property
     def overtones(self):
+        """
+        Generate overtones using the function given in init.
+        The number of overtones is limited by self.limit.
+        """
         return np.apply_along_axis(self.func, 0, np.arange(0, self.limit, dtype=np.float64))
 
     @property
     def oscs(self):
+        """Property to get oscillators."""
         # TODO cleanup - make an interface for different Oscs!
         return self.gen_oscs()
 
     def gen_oscs(self):
+        """Generate oscillators based on overtones."""
         base = self.base.__class__
+        overtones = np.array(float(self.frequency) * self.overtones, dtype=np.float64)
         if 'Super' == self.base.curve.__class__.__name__:
-            oscs = map(lambda f: base(f, curve=self.base.curve), float(self.frequency) * self.overtones)
+            oscs = map_array(lambda f: base(f, curve=self.base.curve), overtones, 'vec')
         else:
-            oscs = map(base, float(self.frequency) * self.overtones)
-        return oscs
+            oscs = map_array(base, overtones, 'vec')
+        return oscs[np.nonzero(oscs)]
 
-    def sample(self, iter):
-        if isinstance(iter, int):
+    def sample(self, iterable):
+        """Sample the overtones."""
+        if isinstance(iterable, int):
             frames = np.array([0j])
         else:
-            frames = np.zeros(len(iter), dtype=complex)
+            frames = np.zeros(len(iterable), dtype=complex)
 
         for o in self.oscs:
         # for f in self.overtones:
@@ -86,33 +98,36 @@ class Overtones(FrequencyRatioMixin, Generator):
                 break
 
             # square waves
-            # e = Exponential(0, amp=float(self.frequency / o.frequency * float(self.frequency)))
+            # amplitude = float(self.frequency / o.frequency * float(self.frequency))
+            # e = Exponential(0, amp=amplitude)
 
             # triangle waves
-            # e = Exponential(0, amp=float(self.frequency ** 2 / o.frequency ** 2 * float(self.frequency)))
+            # amplitude = float(self.frequency ** 2 / o.frequency ** 2 * float(self.frequency))
+            # e = Exponential(0, amp=amplitude)
 
             # sine waves
             # e = Exponential(-o.frequency / 100.0)
             e = Exponential(self.damping(o.frequency))
-            # damp = self.damping(o.frequency)
             # e = Gamma(-self.damping(o.frequency)[0], 1.0 / max(float(o.frequency) / 100.0, 1.0))
 
             if self.rand_phase:
-                frames += o[iter] * random_phase() * e[iter]  # Move phases to Osc/Frequency!
+                # TODO: Move phases to Osc/Frequency!
+                frames += o[iterable] * random_phase() * e[iterable]
             else:
-                frames += o[iter] * e[iter]
+                frames += o[iterable] * e[iterable]
 
         if self.sustain is not None:
-            sus_damping = lambda f, a=1.0: -2 * np.log2(float(f)) / 5.0
+            sus_damping = lambda f, a = 1.0: -2 * np.log2(float(f)) / 5.0
             #sus_damping = lambda f: -0.5
             self.sustained = self.sustained or Exponential(sus_damping(self.frequency))
-            if isinstance(iter, slice):
-                frames *= self.sustained[slice(*list(np.array(iter.indices(iter.stop)) - self.sustain))]
-            elif isinstance(iter, np.ndarray):
-                frames *= self.sustained[iter - self.sustain]
+            if isinstance(iterable, slice):
+                indices = np.array(iterable.indices(iterable.stop))
+                frames *= self.sustained[slice(*list(indices - self.sustain))]
+            elif isinstance(iterable, np.ndarray):
+                frames *= self.sustained[iterable - self.sustain]
             else:
                 raise exceptions.NotImplementedError(
-                    "Sustain with objects of type %s not implemented yet." % type(iter)
+                    "Sustain with objects of type %s not implemented yet." % type(iterable)
                 )
 
         return frames / self.limit  # normalize using a single value for whole sound!
@@ -128,8 +143,10 @@ class Overtones(FrequencyRatioMixin, Generator):
 
 
 class Multiosc(Overtones):
+    """Multifrequency oscillator."""
     # MAKE A MULTIOSC without ENV, iow. sample using overtones and apply_along_axis with sum!!!!
-    # ratios = map(lambda r: Fraction.from_float(r).limit_denominator(sampler.rate), h.ratio*h.overtones)
+    # freq_ratios = lambda r: Fraction.from_float(r).limit_denominator(sampler.rate)
+    # ratios = map(freq_ratios, h.ratio*h.overtones)
     # samples = map(Frequency.rads, ratios)
     # map(len, samples)
     # Out[58]: [1960, 980, 1960, 490, 393, 980, 280]
@@ -147,7 +164,8 @@ class Multiosc(Overtones):
 
     @staticmethod
     @memoized
-    def angles(ratio, limit):
+    def angles(ratio):
+        """Frequency angles"""
         if ratio == 0:
             return np.array([0.], dtype=np.float64)
         return pi2 * ratio.numerator * np.arange(0, 1, 1.0 / ratio.denominator, dtype=np.float64)
@@ -155,18 +173,20 @@ class Multiosc(Overtones):
     @staticmethod
     @memoized
     def circle(ratio):
+        """The circle curve for an oscillator at a ratio."""
         return np.exp(1j * pi2 * Frequency.angles(ratio))
 
-    def sample(self, iter):
-        frames = np.zeros(len(iter), dtype=complex)
+    def sample(self, iterable):
+        """Sample multifrequency oscillator."""
+        frames = np.zeros(len(iterable), dtype=complex)
 
         for o in self.oscs:
             if o.frequency == 0:
                 break
 
             if self.rand_phase:
-                frames += o[iter] * random_phase()
+                frames += o[iterable] * random_phase()
             else:
-                frames += o[iter]
+                frames += o[iterable]
 
         return normalize(frames)
