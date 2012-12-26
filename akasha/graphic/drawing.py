@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Graphics drawing module.
+"""
 
 import numpy as np
 import os
@@ -12,7 +15,7 @@ from akasha.graphic.colour import colorize, white
 # from akasha.graphic.colour import hsv2rgb, angle2hsv, chords_to_hues
 from akasha.timing import sampler
 from akasha.utils.log import logger
-from akasha.utils.math import clip, pad, pcm, complex_as_reals
+from akasha.utils.math import clip, pad, pcm, complex_as_reals, normalize
 
 from PIL import Image
 
@@ -25,25 +28,34 @@ except ImportError:
 # TODO: Use scipy.sparse matrices to speed up things?
 # Use sparse.coo (coordinate matrix) to build the matrix, and convert to csc/csr for math.
 
+
 def hist_graph(samples, size=1000):
-    """Uses numpy histogram2d to make an image from complex signal."""
+    """
+    Use Numpy histogram2d to make an image from the complex signal.
+    """
     # NP Doc: http://docs.scipy.org/doc/numpy/reference/generated/numpy.histogram2d.html
-    # TODO see also np.bincount and
+    #
+    # TODO: see also np.bincount and Numpy histogram with 3x3d arrays as indices
     # http://stackoverflow.com/questions/7422713/numpy-histogram-with-3x3d-arrays-as-indices
     c = samples.view(np.float64).reshape(len(samples), 2).transpose()
     x, y = c[0], -c[1]
-    hist, y_edges, x_edges = np.histogram2d(
+    histogram, _, _ = np.histogram2d(
         y,
         x,
         bins=size,
         range=[[-1., 1.], [-1., 1.]],
-        normed=False
+        normed=True
     )
-    image = Image.fromarray(np.array(hist / hist.mean() * 255, dtype=np.uint8), 'L')
+    histogram = normalize(histogram)
+    image = Image.fromarray(np.array(histogram * 255, dtype=np.uint8), 'L')
     image.show()
+    return histogram
 
 
 def get_canvas(x_size=1000, y_size=None, axis=True):
+    """
+    Get a Numpy array suitable for use as a drawing canvas.
+    """
     if not y_size:
         y_size = x_size
     img = np.zeros((y_size + 1, x_size + 1, 4), np.uint8)  # Note: y, x
@@ -53,10 +65,14 @@ def get_canvas(x_size=1000, y_size=None, axis=True):
     return img
 
 
-def get_points(samples, size=1000):
+def get_points(signal, size=1000):
+    """
+    Get coordinate points from a signal.
+    """
+    # TODO: Move to math or dsp module
     # Scale to size and interpret values as pixel centers
-    samples = ((clip(samples) + 1 + 1j) / 2.0 * (size - 1) + (0.5 + 0.5j))  # 0.5 to 599.5
-    return complex_as_reals(samples)
+    signal = ((clip(signal) + 1 + 1j) / 2.0 * (size - 1) + (0.5 + 0.5j))  # 0.5 to 599.5
+    return complex_as_reals(signal)
 
 
 def draw(
@@ -73,7 +89,7 @@ def draw(
     """
     Draw the complex sound signal into specified size image.
     """
-    # See http://jehiah.cz/archive/creating-images-with-numpy
+    # See: http://jehiah.cz/archive/creating-images-with-numpy
 
     # TODO: Buffering with frame rate for animations or realtime signal view.
     # buffersize = int(round(float(sampler.rate) / framerate))    # 44100.0/30 = 1470
@@ -104,27 +120,35 @@ def draw(
             return draw_points(samples, img, size, colours)
 
 
-def clip_samples(samples):
-    #clip_max = np.max(np.abs(samples)) # unit circle
+def clip_samples(signal):
+    """
+    Clip a signal into unit rectangle area.
+    """
+    # TODO: Move to math or dsp module
+
+    # clip_max = np.max(np.abs(signal)) # unit circle
     # rectangular abs can be sqrt(2) > 1.0!
-    clip_max = np.max(np.fmax(np.abs(samples.real), np.abs(samples.imag)))
+    clip_max = np.max(np.fmax(np.abs(signal.real), np.abs(signal.imag)))
     if clip_max > 1.0:
-        logger.warn("Clipping samples on draw() -- maximum magnitude was: %0.6f" % clip_max)
-        return clip(samples)
+        logger.warn("Clipping signal -- maximum magnitude was: %0.6f" % clip_max)
+        return clip(signal)
     else:
-        return samples
+        return signal
 
 
-def add_alpha(rgb, alpha=255):
-    return np.append(rgb, np.array([alpha] * len(rgb)).reshape(len(rgb), 1), 1)
+def add_alpha(rgb, opacity=255):
+    """
+    Add alpha channel with specified opacity to the rgb signal.
+    """
+    return np.append(rgb, np.array([opacity] * len(rgb)).reshape(len(rgb), 1), 1)
 
 
 def draw_coloured_lines_aa(samples, screen, size=1000, colours=True):
     """
-    Draw antialiased lines with Pygame
+    Draw antialiased lines with Pygame.
     """
     if colours:
-        # FIXME draws wrong colours on high frequencies!
+        # FIXME: draws wrong colours on high frequencies!
         colors = colorize(samples)
         pts = get_points(samples, size).T
         for (i, ends) in enumerate(pairwise(pts)):
@@ -139,7 +163,7 @@ def draw_coloured_lines_aa(samples, screen, size=1000, colours=True):
 
 def draw_coloured_lines(samples, img, size=1000, colours=True):
     """
-    Draw antialiased lines with Numpy
+    Draw antialiased lines with Numpy.
     """
     if len(samples) < 2:
         raise ValueError("Can't draw lines with less than two samples.")
@@ -158,7 +182,7 @@ def draw_coloured_lines(samples, img, size=1000, colours=True):
 
 def draw_points_np_aa(samples, img, size=1000, colours=True):
     """
-    Draw colourized antialiased points from samples
+    Draw colourized antialiased points from samples.
     """
     points = ((clip(samples) + 1 + 1j) / 2.0 * (size - 1) + (0.5 + 0.5j))
     deltas = points - np.round(points)
@@ -175,7 +199,7 @@ def draw_points_np_aa(samples, img, size=1000, colours=True):
 
 def draw_points_aa(samples, img, size=1000, colours=True):
     """
-    Draw colourized antialiased points from samples
+    Draw colourized antialiased points from samples.
     """
     points = get_points(samples, size)
     centers = np.round(points)  # 1.0 to 600.0
@@ -217,10 +241,13 @@ def draw_points(samples, img, size=1000, colours=True):
     return img
 
 
-def video_transfer(signal, type='PAL', axis='real', horiz=720):
-    # See http://en.wikipedia.org/wiki/44100_Hz#Recording_on_video_equipment
-    # Stereo?
-    #
+def video_transfer(signal, standard='PAL', axis='real', horiz=720):
+    """
+    Draw a sound signal using the old video tape audio recording technique.
+    See: http://en.wikipedia.org/wiki/44100_Hz#Recording_on_video_equipment
+    """
+    # TODO: Make Stereo video transfer?
+
     # PAL:
     # 294 × 50 × 3 = 44,100
     # 294 active lines/field × 50 fields/second × 3 samples/line = 44,100 samples/second
@@ -236,7 +263,7 @@ def video_transfer(signal, type='PAL', axis='real', horiz=720):
         'PAL': 588,
         'NTSC': 490,
     }
-    vert = formats[type]
+    vert = formats[standard]
 
     linewidth = 3   # samples per line
     framesize = vert * linewidth   # 1764 for PAL, 1470 for NTSC
@@ -262,6 +289,9 @@ def video_transfer(signal, type='PAL', axis='real', horiz=720):
 # Showing images
 
 def show(img, plot=False, osx_open=False):
+    """
+    Show an image from a Numpy array.
+    """
     if (plot and plt):
         plt.interactive(True)
         imgplot = plt.imshow(img[:, :, :3])
@@ -286,31 +316,39 @@ def show(img, plot=False, osx_open=False):
         image.show()
 
 
-def fast_graph(samples, size=1000, plot=False):
-    return graph(samples, size, plot and plt, antialias=False)
-
-
-def graph(samples, size=1000, dur=None, plot=False, axis=True,
+def graph(signal, size=1000, dur=None, plot=False, axis=True,
           antialias=True, lines=False, colours=True, img=None):
+    """
+    Make an image from the sound signal and show it.
+    """
     if dur:
-        samples = samples[:int(round(dur * sampler.rate))]
-    img = draw(samples, size=size, antialias=antialias, lines=lines, colours=colours,
-               axis=axis, img=img).transpose((1, 0, 2))
+        signal = signal[:int(round(dur * sampler.rate))]
+
+    img = draw(
+        signal,
+        size=size,
+        antialias=antialias, lines=lines, colours=colours,
+        axis=axis,
+        img=img
+    ).transpose((1, 0, 2))
+
     show(img, plot and plt)
 
 
 if plt:
-    def plot(samples, cmap='hot'):
+    def plot_signal(signal, cmap='hot'):
         """
-        Plot samples using matplotlib.pyplot
+        Plot complex signal using matplotlib.pyplot.
         """
         plt.interactive(True)
-        im = plt.imshow([samples.real, samples.imag], cmap)
+        im = plt.imshow([signal.real, signal.imag], cmap)
         plt.show(block=False)
         return im
 
-
-    def plot_real_fn(fn, x, cmap='hot'):
+    def plot_real_fn(fn, x):
+        """
+        Plot a real valued function with x values using matplotlib.pyplot.
+        """
         plt.interactive(True)
         plt.plot(x, fn(x))
         plt.show(block=False)
