@@ -134,11 +134,6 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
             return zero
         return ratio.numerator * np.arange(0, 1, 1.0 / ratio.denominator, dtype=np.float64)
 
-    @staticmethod
-    def rads(ratio):
-        """Radian angles for one full period at ratio."""
-        return 2 * np.pi * Frequency.angles(ratio)
-
     @property
     def sample(self):
         return self.angles(self.ratio)

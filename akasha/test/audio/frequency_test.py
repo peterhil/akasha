@@ -233,14 +233,6 @@ class TestFrequency(object):
             1
         )
 
-    def test_rads(self):
-        ratio = Fraction(1, 7)
-        angles = Frequency.angles(ratio)
-        assert_array_equal(
-            pi2 * angles,
-            Frequency.rads(ratio)
-        )
-
     def test_sample(self):
         ratio = Fraction(3, 17)
         assert_array_equal(
