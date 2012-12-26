@@ -40,14 +40,22 @@ def nth_root(n):
     return np.exp(1j * pi2 * 1.0 / n)
 
 
-def deg(radians):
-    """Degrees to radians conversion."""
-    return 180 * (radians / np.pi)
-
-
-def rad(degrees):
+def rad_to_deg(angles):
     """Radians to degrees conversion."""
-    return np.pi * (degrees / 180.0)
+    return 180 * (angles / np.pi)
+
+
+def deg_to_rad(angles):
+    """Degrees to radians conversion."""
+    return np.pi * (angles / 180.0)
+
+
+def tau_to_rad(angles):
+    return pi2 * angles
+
+
+def rad_to_tau(angles):
+    return angles / pi2
 
 
 # Utils for frequency ratios etc...

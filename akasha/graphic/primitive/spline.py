@@ -11,7 +11,7 @@ import scipy as sc
 
 from cmath import rect, polar
 
-from akasha.utils.math import as_complex, deg
+from akasha.utils.math import as_complex, rad_to_deg
 
 
 def clothoid(points):
@@ -113,7 +113,7 @@ def curvature(prev, p, next):
     """
     v1 = p - prev
     v2 = next - p
-    print polar(v1), polar(v2), deg(angle_between(v1, v2))
+    print polar(v1), polar(v2), rad_to_deg(angle_between(v1, v2))
     return 2 * np.sin(angle_between2(v1, v2) / 2) / np.sqrt(np.abs(v1) * np.abs(v2))
 
 

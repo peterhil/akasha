@@ -12,7 +12,7 @@ from akasha.timing import sampler
 from akasha.types import colour_values, colour_result
 from akasha.utils.decorators import memoized
 from akasha.utils.log import logger
-from akasha.utils.math import deg, distances, pad, minfloat
+from akasha.utils.math import distances, minfloat, pad, rad_to_deg
 
 
 lowest_audible_hz = 16.35
@@ -198,7 +198,7 @@ def chord_to_hue(length):
     """
     Return degrees from a chord length between a point on unit circle and 1+0j.
     """
-    return deg(chord_to_angle(length))
+    return rad_to_deg(chord_to_angle(length))
 
 
 def chord_to_tau(length):
