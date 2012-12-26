@@ -53,7 +53,6 @@ class FrequencyRatioMixin(object):
         return self.ratio.numerator
 
     @staticmethod
-    @memoized
     def to_ratio(freq, limit=sampler.rate):
         # @TODO investigate what is the right limit, and take beating tones into account!
         return Fraction.from_float(float(freq) / sampler.rate).limit_denominator(limit)
