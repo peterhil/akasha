@@ -18,9 +18,9 @@ from PIL import Image
 
 try:
     import matplotlib.pyplot as plt
-except:
+except ImportError:
     logger.warn("Can't import pyplot from matplolib!")
-    pass
+    plt = None
 
 # TODO: Use scipy.sparse matrices to speed up things?
 # Use sparse.coo (coordinate matrix) to build the matrix, and convert to csc/csr for math.
@@ -287,7 +287,7 @@ def show(img, plot=False, osx_open=False):
 
 
 def fast_graph(samples, size=1000, plot=False):
-    return graph(samples, size, plot, antialias=False)
+    return graph(samples, size, plot and plt, antialias=False)
 
 
 def graph(samples, size=1000, dur=None, plot=False, axis=True,
@@ -296,19 +296,22 @@ def graph(samples, size=1000, dur=None, plot=False, axis=True,
         samples = samples[:int(round(dur * sampler.rate))]
     img = draw(samples, size=size, antialias=antialias, lines=lines, colours=colours,
                axis=axis, img=img).transpose((1, 0, 2))
-    show(img, plot)
-    return False
+    show(img, plot and plt)
 
 
-def plot(samples):
-    "Plot samples using matplotlib"
-    imgplot = plt.imshow([samples.real, samples.imag])
-    imgplot.set_cmap('hot')
-    return False
+if plt:
+    def plot(samples, cmap='hot'):
+        """
+        Plot samples using matplotlib.pyplot
+        """
+        plt.interactive(True)
+        im = plt.imshow([samples.real, samples.imag], cmap)
+        plt.show(block=False)
+        return im
 
 
-def plot_real_fn(fn, x, cmap='hot'):
-    plt.set_cmap(cmap)
-    y = fn(x)
-    plt.plot(x, y)
-    return False
+    def plot_real_fn(fn, x, cmap='hot'):
+        plt.interactive(True)
+        plt.plot(x, fn(x))
+        plt.show(block=False)
+        return False
