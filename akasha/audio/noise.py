@@ -81,7 +81,9 @@ class Rustle(Generator):
         """
         Let it rumble and rustle.
         """
-        return self.envelope[items] * normalize(self.gen(numberof(items)) * Circle.at(self.frequency[items]))
+        return self.envelope[items] * normalize(
+            self.gen(numberof(items)) * Circle.at(self.frequency[items])
+        )
 
 
 class Mandelbrot(Generator):
