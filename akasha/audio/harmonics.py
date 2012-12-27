@@ -14,7 +14,7 @@ from akasha.audio.oscillator import Osc
 
 from akasha.timing import sampler
 from akasha.utils.decorators import memoized
-from akasha.utils.math import random_phase, map_array, normalize, pi2
+from akasha.utils.math import random_phasor, map_array, normalize, pi2
 
 
 class Overtones(FrequencyRatioMixin, Generator):
@@ -112,7 +112,7 @@ class Overtones(FrequencyRatioMixin, Generator):
 
             if self.rand_phase:
                 # TODO: Move phases to Osc/Frequency!
-                frames += o[iterable] * random_phase() * e[iterable]
+                frames += o[iterable] * random_phasor() * e[iterable]
             else:
                 frames += o[iterable] * e[iterable]
 
@@ -185,7 +185,7 @@ class Multiosc(Overtones):
                 break
 
             if self.rand_phase:
-                frames += o[iterable] * random_phase()
+                frames += o[iterable] * random_phasor()
             else:
                 frames += o[iterable]
 

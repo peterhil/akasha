@@ -226,12 +226,40 @@ def rand_between(inf, sup, n=1, random=np.random.random):
     return np.atleast_1d((sup - inf) * random(n) + inf)
 
 
-def random_phase(n=1, random=np.random.random):
+def random_phasor(n=1, amp=1.0, random=np.random.random):
     """
     Generate n complex numbers on the unit circle with random phase (angle)
     using the function given (defaults to np.random.random()).
+
+    Arguments
+    =========
+
+    n:
+        The number of items to generate
+    amp, one of:
+        - scalar real value
+        - sequence of length n
+        - callable of one argument (same as n)
+    random:
+        - callable of one argument (same as n)
+
+    Example
+    =======
+
+    from akasha.funct.xoltar import functional as fx
+
+    rf = fx.curry(np.random.poisson, 100)  # Try different values and random functions
+    snd = normalize(random_phase(44100 * 5, amp=rf))
+    graph(snd)  # or anim(Pcm(snd))
     """
-    return np.atleast_1d(cmath.rect(1.0, pi2 * random(n) - np.pi))
+    if np.isscalar(amp):
+        return np.atleast_1d(cmath.rect(amp, pi2 * random(n) - np.pi))
+    elif callable(amp):
+        return np.array(map(cmath.rect, *np.array([amp(n), pi2 * random(n) - np.pi])))
+    else:
+        assert n == len(amp), "Arguments (n, amp) should have the same length, "
+        "got: ({0}, {1})".format(n, len(amp))
+        return np.array(map(cmath.rect, *np.array([amp, pi2 * random(n) - np.pi])))
 
 
 # Primes
