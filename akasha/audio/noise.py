@@ -78,6 +78,9 @@ class Rustle(Generator):
         self.envelope = envelope
 
     def sample(self, items):
+        """
+        Let it rumble and rustle.
+        """
         n = items if np.isscalar(items) else len(items)
         return self.envelope[items] * normalize(self.gen(n) * Circle.at(self.frequency[items]))
 
