@@ -426,6 +426,13 @@ def identity(x):
     return x
 
 
+def numberof(items):
+    """
+    Get the number of items.
+    If items is scalar, interpret items as a number, otherwise the length of items.
+    """
+    return items if np.isscalar(items) else len(items)
+
 def pcm(signal, bits=16, axis='imag'):
     """
     Get a pcm sound with integer samples from the complex signal,

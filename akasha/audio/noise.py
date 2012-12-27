@@ -13,7 +13,7 @@ from akasha.audio.envelope import Exponential
 from akasha.audio.frequency import Frequency
 from akasha.audio.generators import Generator
 from akasha.funct.xoltar import functional as fx
-from akasha.utils.math import normalize, pi2, random_phasor
+from akasha.utils.math import normalize, numberof, pi2, random_phasor
 
 
 class Noise(Generator):
@@ -81,8 +81,7 @@ class Rustle(Generator):
         """
         Let it rumble and rustle.
         """
-        n = items if np.isscalar(items) else len(items)
-        return self.envelope[items] * normalize(self.gen(n) * Circle.at(self.frequency[items]))
+        return self.envelope[items] * normalize(self.gen(numberof(items)) * Circle.at(self.frequency[items]))
 
 
 class Mandelbrot(Generator):
@@ -127,7 +126,7 @@ class Mandelbrot(Generator):
         """
         Chaos reigns.
         """
-        return np.fromiter(self, count=(items if np.isscalar(items) else len(items)), dtype=complex)
+        return np.fromiter(self, count=numberof(items), dtype=complex)
 
     def __repr__(self):
         return "%s(z=%s, c=%s)" % (self.__class__.__name__, self.c, self.z)
