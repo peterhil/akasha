@@ -4,12 +4,7 @@
 Sampler module.
 """
 
-from __future__ import absolute_import
 from __future__ import division
-
-import exceptions
-import math
-import numpy as np
 
 from akasha.utils.log import logger
 
