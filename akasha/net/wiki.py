@@ -11,8 +11,8 @@ import re
 
 from wikitools import wiki, api
 from fractions import Fraction
+from funckit.datastruct import head as car, tail as cdr
 
-from akasha.funct.xoltar.functional import car, cdr
 from akasha.tunings import cents
 from akasha.utils.log import logger
 from akasha.utils.math import identity

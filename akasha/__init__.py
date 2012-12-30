@@ -40,8 +40,7 @@ from akasha.control.io.keyboard import *
 from akasha.effects.tape import *
 from akasha.effects.filters import *
 
-from akasha.funct.xoltar import functional as fx
-from akasha.funct.xoltar import lazy
+from funckit import xoltar as fx
 
 from akasha.graphic.animation import *
 from akasha.graphic.drawing import *

@@ -8,12 +8,11 @@ Animation module
 
 from __future__ import division
 
-import akasha.funct.xoltar.functional as fx
 import logging
 import pygame as pg
 
+from funckit import xoltar as fx
 from timeit import default_timer as timer
-
 from twisted.internet.task import LoopingCall
 from twisted.internet import reactor
 
@@ -254,9 +253,9 @@ def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=T
     ch = pg.mixer.find_channel()
     it = iter(snd)
 
-    paint_fn = fx.curry(show_slice, screen, size=size,
+    paint_fn = fx.curry_function(show_slice, screen, size=size,
                         antialias=antialias, lines=lines, colours=colours)
-    #paint_fn = fx.curry(show_transfer, screen, size=size, standard='PAL', axis='imag')
+    #paint_fn = fx.curry_function(show_transfer, screen, size=size, standard='PAL', axis='imag')
 
     clock = pg.time.Clock()
 

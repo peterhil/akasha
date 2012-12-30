@@ -8,7 +8,7 @@ from cmath import phase, pi
 from datetime import timedelta
 from fractions import Fraction
 
-from akasha.funct.xoltar.functional import imap, islice, Functor
+from funckit.xoltar import imap, islice, Functor
 
 
 # General flow:

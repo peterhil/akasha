@@ -246,7 +246,7 @@ def random_phasor(n=1, amp=1.0, random=np.random.random):
     Example
     =======
 
-    from akasha.funct.xoltar import functional as fx
+    from funckit import xoltar as fx
 
     rf = fx.curry(np.random.poisson, 100)  # Try different values and random functions
     snd = normalize(random_phase(44100 * 5, amp=rf))

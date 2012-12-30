@@ -12,7 +12,7 @@ from akasha.audio.curves import Circle
 from akasha.audio.envelope import Exponential
 from akasha.audio.frequency import Frequency
 from akasha.audio.generators import Generator
-from akasha.funct.xoltar import functional as fx
+from funckit import xoltar as fx
 from akasha.utils.math import normalize, numberof, pi2, random_phasor
 
 

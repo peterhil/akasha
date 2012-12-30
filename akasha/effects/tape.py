@@ -10,7 +10,7 @@ Date: 2011-12-11
 import cmath
 import numpy as np
 
-from akasha.funct.xoltar import functional as fx
+from funckit import xoltar as fx
 from akasha.utils.math import normalize
 
 
