@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Sampler module.
+"""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -38,9 +41,15 @@ class Sampler(object):
 
     @property
     def videorate(self):
+        """
+        Sampler video frame rate.
+        """
         return 1000 / self.frametime
 
     def change_frametime(self, ms=None, rel=0, mintime=16):
+        """
+        Changes video frame time (in ms).
+        """
         if ms is None:
             ms = self.frametime
         ms = max(int(round(ms + rel)), mintime)  # Limit to mintime (1000 / 16 = 62.5 Hz)
@@ -49,9 +58,15 @@ class Sampler(object):
         return ms
 
     def blocksize(self):
+        """
+        Calculate how may audio samples fit on one video frame. 
+        """
         return int(round(self.rate / self.videorate))
 
     def pause(self):
+        """
+        Pause the playback.
+        """
         self.paused = not self.paused
         logger.info("Pause" if self.paused else "Play")
 
@@ -132,26 +147,21 @@ class Timeslice(object):
         return "<%s: start = %s, stop = %s>" % (self.__class__.__name__, self.start, self.stop)
 
 
-class OutputStream(object):
-    pass
-
-
 class Timeline(object):
-    """Class representing time, both physical and discrete."""
-
+    """
+    Class representing timeline of events.
+    """
     def __init__(self, resolution=sampler.rate):
         self.resolution = resolution
 
     def times(self, start_time, end_time=None):
         if end_time is None:
-            end_time = start_time
-            start_time = 0
+            start_time, end_time = 0, start_time
         return np.arange(start_time, end_time, self.resolution, dtype=np.float64)
 
     def frames(self, start_time, end_time=None):
         if end_time is None:
-            end_time = start_time
-            start_time = 0
+            start_time, end_time = 0, start_time
         return np.arange(
             start_time / self.resolution,
             end_time / self.resolution,
