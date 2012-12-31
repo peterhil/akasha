@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Functional oscillator module using functor objects.
+"""
 
 from __future__ import division
 
@@ -9,19 +12,28 @@ import operator
 from fractions import Fraction
 
 from akasha.timing import sampler
+from akasha.utils.math import pi2
 
 
 ### Limiter functions
 
 def step_function(op=operator.le, limit=0, default=0):
+    """
+    Limit the range of the function with an operator function and
+    a limit (number or callable). Return the default value outside the range.
+    """
     def fn(value):
+        """
+        Calculate the result from step_function().
+        """
         other = limit() if callable(limit) else limit
         return value if op(value, other) else default
     return fn
 
 
 def limit_below(limit, default=0):
-    """Make a brick wall low pass filter.
+    """
+    Make a brick wall low pass filter.
 
     Example:
     =======
@@ -31,16 +43,20 @@ def limit_below(limit, default=0):
     >>> lp(6.5)
     6.5
     """
-    return step_function(operator.le, limit, default=0)
+    return step_function(operator.le, limit, default)
 
 
 def limit_negative(f):
+    """
+    Limit negative values to zero.
+    """
     fn = step_function(operator.ge, 0, 0)
     return fn(f)
 
 
 def nyquist(ratio):
-    """Limit ratio on the normalized Nyquist Frequency band: Fraction(-1, 2)..Fraction(1, 2)
+    """
+    Limit ratio on the normalized Nyquist Frequency band: Fraction(-1, 2)..Fraction(1, 2)
 
     >>> nyquist(Fraction(22050, 44100))
     Fraction(1, 2)
@@ -58,7 +74,8 @@ def nyquist(ratio):
 
 
 def wrap(f, modulo=1):
-    """Wrap roots: 9/8 == 1/8 in Osc! This also helps with numeric accuracy.
+    """
+    Wrap roots: 9/8 == 1/8 in Osc! This also helps with numeric accuracy.
 
     Examples:
     =========
@@ -74,12 +91,16 @@ def wrap(f, modulo=1):
 
 ### Frequencies
 
-def limit_resolution(f, max=sampler.rate):
-    return Fraction(int(round(f * max)), max)
+def limit_resolution(freq, limit=sampler.rate):
+    """
+    Limit frequency resolution.
+    """
+    return Fraction(int(round(freq * limit)), limit)
 
 
 def hz(f, fs=sampler.rate, rounding='native'):
-    """Return normalized frequency (as a Fraction) from physical frequency.
+    """
+    Return normalized frequency (as a Fraction) from physical frequency.
 
     Examples:
     =========
@@ -110,9 +131,14 @@ def hz(f, fs=sampler.rate, rounding='native'):
 ### Generators
 
 def accumulator(n):
-    """Function object using closure, see:
-    http://en.wikipedia.org/wiki/Function_object#In_Python"""
+    """
+    Function object using closure, see:
+    http://en.wikipedia.org/wiki/Function_object#In_Python
+    """
     def inc(x):
+        """
+        Increment accumulator.
+        """
         inc.n += x
         return inc.n
     inc.n = n
@@ -120,22 +146,36 @@ def accumulator(n):
 
 
 def osc(freq):
-    def osc(times):
-        osc.gen = 1j * 2 * np.pi
-        return np.exp(osc.gen * osc.freq * (times % (1.0 / osc.freq)))
-    osc.freq = freq
+    """
+    Oscillator functor.
+    """
+    def at(times):
+        """
+        Sample oscillator at times.
+        """
+        return np.exp(1j * pi2 * freq * (times % 1.0))
+    at.freq = freq
 
     def ratio():
-        return osc.freq / float(sampler.rate)
-    osc.ratio = ratio
-    return osc
+        """
+        The frequency ratio of the oscillator.
+        """
+        return freq / float(sampler.rate)
+    at.ratio = ratio
+    return at
 
 
 def exp(rate):
-    def exp(times):
-        return np.exp(exp.rate * times)
-    exp.rate = rate
-    return exp
+    """
+    Exponential envelope for a rate.
+    """
+    def at(times):
+        """
+        Sample exponential at times.
+        """
+        return np.exp(rate * times)
+    at.rate = rate
+    return at
 
 
 if __name__ == '__main__':
