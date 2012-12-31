@@ -97,22 +97,22 @@ def angle_between(a, b):
 
 def angle_between2(a, b):
     """
-    Angle in radians between two non-zero vectors.
+    Angle in radians between two nonzero vectors.
     See: http://en.wikipedia.org/wiki/Vector_dot_product#Geometric_interpretation
     """
     # vdot is for complex numbers, but this seems to not work correctly?!
     return np.real(np.vdot(a, b)) / (np.abs(a) * np.abs(b))
 
 
-def curvature(prev, p, next):
+def curvature(previous_pt, point, next_pt):
     """
     Discrete curvature estimation.
 
     See section "2.6.1 Discrete curvature estimation" at:
     http://www.dgp.toronto.edu/~mccrae/mccraeMScthesis.pdf
     """
-    v1 = p - prev
-    v2 = next - p
+    v1 = point - previous_pt
+    v2 = next_pt - point
     print polar(v1), polar(v2), rad_to_deg(angle_between(v1, v2))
     return 2 * np.sin(angle_between2(v1, v2) / 2) / np.sqrt(np.abs(v1) * np.abs(v2))
 
@@ -128,12 +128,19 @@ def circumcircle_radius(a, b, c):
 
 # Circular arcs
 
-def arc(points, curvature=1.0):
+def arc(points, s=1.0):
     """
     An arc is an arc.
+
+    Parameters
+    ==========
+    points:
+        An array of points at which to sample the arc.
+    s:
+        The curvature parameter.
     """
     points = np.atleast_1d(points)
-    return (1.0 / curvature) * (np.exp(1j * np.pi * 2.0 * points) - 1.0)
+    return (1.0 / s) * (np.exp(1j * np.pi * 2.0 * points) - 1.0)
 
 
 # Line segments

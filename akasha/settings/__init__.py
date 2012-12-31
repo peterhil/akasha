@@ -1,14 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Akasha settings module.
+"""
 
 import locale
 import numpy as np
 import sys
 
 class config(object):
+    """
+    Configuration class.
+    """
     pass
 
 def np_setup():
+    """
+    Setup numpy and locale settings.
+    """
     np.set_printoptions(precision=16, threshold=1000, edgeitems=40, linewidth=78, suppress=True)
 
     # Set the user's default locale, see http:// docs.python.org/library/locale.html
