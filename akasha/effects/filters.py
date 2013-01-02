@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+IIR and other filters.
+"""
 
 import numpy as np
 
@@ -7,7 +10,7 @@ from scipy import signal as dsp
 
 from akasha.audio.oscillator import Osc
 from akasha.timing import sampler
-from akasha.utils.math import pi2, get_impulses, normalize, complex_as_reals, pad
+from akasha.utils.math import pi2, get_impulses, normalize, complex_as_reals, as_complex, pad
 
 
 def unosc(signal):
@@ -30,48 +33,69 @@ def unosc(signal):
 
     impulses = get_impulses(signal, tau=False)
     unwrap = np.cumsum(impulses)
+
     return s.real + ((s.imag % pi2) + unwrap) * 1j
 
 
 def freq_shift(signal, a=12.1, b=0.290147):
+    """
+    Shift frequencies of a signal without affecting time.
+    """
     #f = 440
     #scale = (1+f/sampler.rate)
     w = unosc(signal)
     # remove - before exp and - np.pi?
     out = -np.exp(w.real + (normalize((w.imag * a) % (pi2 / b)) * pi2 - np.pi) * 1j)
+
     return out
 
 
-def transform(signal, scale=[1, 1], translate=[0, 0]):
-    # TODO affine transformations!
-    # http://en.wikipedia.org/wiki/Affine_transformation
-    signal = signal.copy()
-    cx_plane = unosc(signal)
-    tr = complex_as_reals(cx_plane)
-    tr *= np.atleast_2d(scale).T  # np.array([[1, 0.5]]).T
+def transform(signal, scale=np.array([1, 1]), translate=np.array([0, 0])):
+    """
+    Transform a signal with scale and/or translate in the frequency domain (complex plane).
+    """
+    # E1103: Instance of 'list' has no 'T' member (but some types could not be inferred)
+    # pylint: disable=E1103
+
+    # TODO: Affine transformations! http://en.wikipedia.org/wiki/Affine_transformation
+
+    tr = complex_as_reals(unosc(signal))
+    tr *= np.atleast_2d(scale).T
     tr += np.atleast_2d(translate).T
-    return np.exp(cx_plane)
+
+    return np.exp(as_complex(tr))
 
 
 def highpass(signal, freq, bins=256, pass_zero=True, scale=False, nyq=sampler.rate / 2.0):
+    """
+    Highpass filter.
+    """
     a = 1
     b = dsp.firwin(bins, cutoff=freq, pass_zero=pass_zero, scale=scale, nyq=nyq)
+
     return dsp.lfilter(b, a, signal)
 
 
 def lowpass(signal, cutoff=sampler.rate / 2.0, bins=256):
+    """
+    Lowpass filter.
+    """
     fs = float(sampler.rate)
     fc = cutoff / fs
     a = 1
     b = dsp.firwin(bins, cutoff=fc, window='hamming')
-    y = dsp.lfilter(b, a, signal)
-    return y
+
+    return dsp.lfilter(b, a, signal)
 
 
-def resonate(signal, poles, zeros=[], gain=1.0, zi=None):
+def resonate(signal, poles, zeros=np.array([]), gain=1.0, zi=None):
+    """
+    Resonate a signal with a zero-pole IIR filter.
+    """
     b, a = dsp.filter_design.zpk2tf(zeros, poles, gain)
     print b, a, max(len(a), len(b))
     #zi = dsp.lfilter_zi(b, a)
+
     if zi is None:
         return dsp.lfilter(b, a, signal, axis=0, zi=zi)
     else:
@@ -87,6 +111,9 @@ def resonator_comb(
         sp_dur=2,
         fx_dur=4,
         playtime=10):
+    """
+    Apply a resonating IIR filter comb to a signal.
+    """
     # Is dampen double the Q value?
     roots = Osc(1).sample
     fs = sampler.rate
@@ -101,4 +128,5 @@ def resonator_comb(
         )
     )
     #anim(out, dur=playtime, antialias=False)
+
     return out[:int(round(playtime * fs))]
