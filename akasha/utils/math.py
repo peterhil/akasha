@@ -41,27 +41,39 @@ def nth_root(n):
 
 
 def rad_to_deg(angles):
-    """Radians to degrees conversion."""
+    """
+    Radians to degrees conversion.
+    """
     return 180 * (angles / np.pi)
 
 
 def deg_to_rad(angles):
-    """Degrees to radians conversion."""
+    """
+    Degrees to radians conversion.
+    """
     return np.pi * (angles / 180.0)
 
 
 def tau_to_rad(angles):
+    """
+    Tau angles to radians conversion.
+    """
     return pi2 * angles
 
 
 def rad_to_tau(angles):
+    """
+    Radians to tau angles conversion.
+    """
     return angles / pi2
 
 
 # Utils for frequency ratios etc...
 
 def logn(x, base=np.e):
-    """Logarithm of x on some base."""
+    """
+    Logarithm of x on some base.
+    """
     return np.log2(x) / np.log2(base)
 
 
