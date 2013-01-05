@@ -50,7 +50,7 @@ class TestChrono(object):
         [hours, 3600],
         [days, 86400],
         [months, 27.321661569284 * 86400],
-        [years, 365.256363004 * 86400],
+        [years, 365.24219265 * 86400],
     ])
     def test_prefix(self, prefix, factor):
         value = 500

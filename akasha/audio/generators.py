@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Sound generating objects’ base classes.
+"""
 
 import numpy as np
 
@@ -9,13 +12,13 @@ from akasha.timing import sampler
 
 
 class Generator(object):
-    # Could be new style class, but this causes many problems because numpy
-    # uses obj[0] (arrays first element) to determine it's type and then
-    # automatically broadcasts oscs to their complex samples!
-    # This could maybe be prevented by using custom __get* methods or descriptors.
-
+    """
+    Sound generator base class.
+    """
     def __getitem__(self, item):
-        """Slicing support."""
+        """
+        Slicing support.
+        """
         if isinstance(item, slice):
             if hasattr(self, '__len__'):
                 # Mimick ndarray slicing, ie. clip the slice indices
@@ -33,20 +36,29 @@ class Generator(object):
         return blockwise(self, sampler.blocksize())
 
     def play(self, *args, **kwargs):
+        """
+        Play sound.
+        """
         audio.play(self, *args, **kwargs)
 
 
 class PeriodicGenerator(Generator):
-
+    """
+    Sound objects with some repeating period.
+    """
     def __getitem__(self, item):
-        """Slicing support. If given a slice the behaviour will be:
+        """
+        Slicing support.
 
-        # Step defaults to 1, is wrapped modulo period, and can't be zero!
-        # Start defaults to 0, is wrapped modulo period
-        # Number of elements returned is the absolute differerence of
-        # stop - start (or period and 0 if either value is missing)
-        # Element count is multiplied with step to produce the same
-        # number of elements for different step values.
+        If given a slice the behaviour will be:
+
+        - Step defaults to 1, is wrapped modulo period, and can't be zero!
+        - Start defaults to 0, is wrapped modulo period
+        - Number of elements returned is the absolute differerence of
+          stop - start (or period and 0 if either value is missing)
+
+        Element count is multiplied with step to produce the same
+        number of elements for different step values.
         """
         if isinstance(item, slice):
             step = ((item.step or 1) % self.period or 1)

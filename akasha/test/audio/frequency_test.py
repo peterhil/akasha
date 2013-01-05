@@ -26,7 +26,6 @@ from akasha.audio.oscillator import Osc
 from akasha.timing import sampler
 from akasha.tunings import cents_diff
 from akasha.types.numeric import NumericUnit, ComplexUnit, RealUnit
-from akasha.utils.math import pi2
 
 
 class TestFrequencyRatioMixin(object):
@@ -231,14 +230,6 @@ class TestFrequency(object):
             np.array([0., 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875], dtype=np.float64),
             Frequency.angles(Fraction(1, 8)),
             1
-        )
-
-    def test_rads(self):
-        ratio = Fraction(1, 7)
-        angles = Frequency.angles(ratio)
-        assert_array_equal(
-            pi2 * angles,
-            Frequency.rads(ratio)
         )
 
     def test_sample(self):

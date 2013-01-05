@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Wikipedia API client module.
+"""
 
 from __future__ import division
 
@@ -11,14 +14,17 @@ import re
 
 from wikitools import wiki, api
 from fractions import Fraction
+from funckit.datastruct import head as car, tail as cdr
 
-from akasha.funct.xoltar.functional import car, cdr
 from akasha.tunings import cents
 from akasha.utils.log import logger
 from akasha.utils.math import identity
 
 
 def user_agent(req):
+    """
+    Return the user agent string.
+    """
     product = 'Akasha-Resonance'
     url = 'http://composed.nu/peterhil/'
     platform = '; '.join(np.array(os.uname())[[0, 2, 4]])
@@ -29,6 +35,9 @@ def user_agent(req):
 
 
 def get_interval_list():
+    """
+    Get the list of musical pitch intervals table from Wikipedia.
+    """
     site = wiki.Wiki("http://en.wikipedia.org/w/api.php")
     params = {
         'action': 'query',
@@ -44,27 +53,39 @@ def get_interval_list():
     return res
 
 
-def replacement(groups, template=u'', filter=identity):
+def replacement(groups, template=u'', func=identity):
+    """
+    Apply a function to matched regexp and format the results using a template.
+    """
     def repl(match):
+        # pylint: disable=C0111
         if isinstance(groups, (list, tuple)):
-            return template.format(*filter(match.group(*groups)))
+            return template.format(*func(match.group(*groups)))
         else:
-            return template.format(filter(match.group(groups)))
+            return template.format(func(match.group(groups)))
     return repl
 
 
 def remove_wiki_links(string):
+    """
+    Remove links in wiki syntax.
+    """
     wiki_link_tag = re.compile(r"\[\[([^\|]+\|)?(.*?)\]\]")
 
     def repl(m):
+        # pylint: disable=C0111
         return m.group(2)
 
     return re.sub(wiki_link_tag, repl, string)
 
 
-def filter_tags(string, tag, template=u'', filter=identity):
+def filter_tags(string, tag, template=u'', func=identity):
+    """
+    Filter out html tags and change their values by calling replacement()
+    with a function and a template.
+    """
     wiki_tag = re.compile(r"<{0}( name=\"[^\"]+\")?(/>|>([^<]*?)</{0}>)".format(tag))
-    return re.sub(wiki_tag, replacement(3, template, filter), string)
+    return re.sub(wiki_tag, replacement(3, template, func), string)
 
 
 def remove_templates(string, tags=None):
@@ -75,6 +96,7 @@ def remove_templates(string, tags=None):
     wiki_template = re.compile(r"{{([A-Za-z]+)\|(.*?)}}")
 
     def repl(m):
+        # pylint: disable=C0111
         if tags and not m.group(1) in tags:
             return m.group(0)  # Do not replace
         return m.group(2)
@@ -83,16 +105,25 @@ def remove_templates(string, tags=None):
 
 
 def template_items(string):
+    """
+    Find wiki syntax templates from a string.
+    """
     wiki_template = re.compile(r"{{([A-Za-z]+)\|(.*)}}")
     res = re.findall(wiki_template, string)
     return car(res) if res else (u'', u'')
 
 
 def template_value(string):
+    """
+    Get values from wiki syntax templates.
+    """
     return template_items(string)[-1]
 
 
 def parse_interval_name(string, only_first=False):
+    """
+    Parse interval name as plain text from a string.
+    """
     try:
         value = template_value(string)
         name = car(value.split('|'))
@@ -110,16 +141,27 @@ def parse_interval_name(string, only_first=False):
 
 
 def parse_freq_ratio(string):
+    """
+    Parse frequency ratio from the expression in the factors column of the table.
+
+    Example
+    -------
+    >>> parse_freq_ratio("2<sup>7</sup> : 5.0<sup>3</sup>")
+    u'2 ** Fraction(7, 1) / 5.0 ** Fraction(3, 1)'
+    """
     re_div = re.compile(ur" ?(:|÷|\xf7) ?", re.UNICODE)
     re_mul = re.compile(ur" ?(·|\xc2\xb7|\xb7|&middot;) ?", re.UNICODE)
     out = remove_templates(string)
     out = re.sub(re_mul, u' * ', out, re.UNICODE)
     out = re.sub(re_div, u' / ', out, re.UNICODE)
-    out = filter_tags(out, tag='sup', template=u' ** {0!r}', filter=Fraction)
+    out = filter_tags(out, tag='sup', template=u' ** {0!r}', func=Fraction)
     return unicode(out.encode('iso-8859-1'))
 
 
 def parse_wiki(res, loglevel=logging.ANIMA):
+    """
+    Parse the interval dictionary from the fetched wikipedia page in the wiki syntax.
+    """
     pgs = res['query']['pages']
     content = pgs[pgs.keys()[0]]['revisions'][0]['*']
     table = remove_wiki_links(filter_tags(content, 'ref')).split('|+')[1].split('\n|-\n|')[:-1]

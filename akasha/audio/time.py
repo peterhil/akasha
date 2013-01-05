@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+High precision time module
+"""
 
 from timeit import default_timer as clock
 
@@ -12,15 +15,16 @@ getcontext().prec = 32
 
 class Chrono(RealUnit):
     """
-    Chrono is a nanosecond precision time class, that is compatible with OSC.
+    Chrono is a nanosecond precision time class, that is compatible
+    with OSC (Open Sound Control).
 
     Internal format is 64-bit fixed number with 32 bits for seconds and
     another 32 bits for parts of a second.
     """
 
-    def __init__(self, seconds):
+    def __init__(self, secs):
         super(self.__class__, self).__init__()
-        self._sec = Decimal(float(seconds))
+        self._sec = Decimal(float(secs))
 
     @property
     def _unit(self):
@@ -28,27 +32,38 @@ class Chrono(RealUnit):
 
     @classmethod
     def now(cls):
+        """
+        Current time as unix timestamp.
+
+        Convert to datetime: datetime.fromtimestamp(Chrono.now())
+        datetime.datetime(2012, 12, 27, 3, 41, 9, 206083)
+        """
         return cls(clock())
 
     @classmethod
-    def prefix(cls, factor, prefix, long_name=None):
-        def derived(seconds):
-            return cls(seconds * factor)
-        derived.__name__ = long_name or prefix
-        setattr(cls, prefix, staticmethod(derived))
-        if long_name:
-            setattr(cls, long_name, staticmethod(derived))
+    def add_prefix(cls, factor, name, symbol=None):
+        """
+        Add a derived time unit with a name, prefixed symbol and a factor to multiply seconds.
+        """
+        def derived(secs):
+            # pylint: disable=C0111
+            return cls(secs * factor)
+        derived.__doc__ = "Chrono time as {0}.".format(name)
+        derived.__name__ = name
+        setattr(cls, name, staticmethod(derived))
+        if symbol:
+            setattr(cls, symbol, staticmethod(derived))
         return derived
 
 
-ps = picoseconds = Chrono.prefix(1e-12, 'ps', long_name='picoseconds')
-ns = nanoseconds = Chrono.prefix(1e-9, 'ns', long_name='nanoseconds')
-us = microseconds = Chrono.prefix(1e-6, 'us', long_name='microseconds')
-ms = milliseconds = Chrono.prefix(1e-3, 'ms', long_name='milliseconds')
-sec = seconds = Chrono.prefix(1, 'sec', long_name='seconds')
-minutes = Chrono.prefix(60, 'min', long_name='minutes')
-hours = Chrono.prefix(3600, 'h', long_name='hours')
-days = Chrono.prefix(86400, 'd', long_name='days')
-weeks = Chrono.prefix(7 * 86400, 'w', long_name='weeks')
-months = Chrono.prefix(27.321661569284 * 86400, 'm', long_name='months')  # sidereal month
-years = Chrono.prefix(365.256363004 * 86400, 'a', long_name='years')  # sidereal year
+ps = picoseconds = Chrono.add_prefix(1e-12, 'picoseconds', symbol='ps')
+ns = nanoseconds = Chrono.add_prefix(1e-9, 'nanoseconds', symbol='ns')
+us = microseconds = Chrono.add_prefix(1e-6, 'microseconds', symbol='us')
+ms = milliseconds = Chrono.add_prefix(1e-3, 'milliseconds', symbol='ms')
+sec = seconds = Chrono.add_prefix(1, 'seconds', symbol='sec')
+minutes = Chrono.add_prefix(60, 'minutes', symbol='min')
+hours = Chrono.add_prefix(3600, 'hours', symbol='h')
+days = Chrono.add_prefix(86400, 'days', symbol='d')
+weeks = Chrono.add_prefix(7 * 86400, 'weeks', symbol='w')
+months = Chrono.add_prefix(27.321661569284 * 86400, 'months', symbol='m')  # sidereal month
+years = Chrono.add_prefix(365.24219265 * 86400, 'years', symbol='a')  # Annum = avg. tropical year

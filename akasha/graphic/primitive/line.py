@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Graphic line drawing functions.
+"""
 
 import numpy as np
 
@@ -46,6 +49,9 @@ def line_bresenham(x0, y0, x1, y1, colour=1.0, indices=False):
 
 
 def line_linspace(x0, y0, x1, y1, endpoint=True):
+    """
+    Draw a line using np.linspace using real x and y coordinates.
+    """
     assert_type(signed, x0, y0, x1, y1)
     size = np.max([np.abs(x1 - x0), np.abs(y1 - y0)]) + int(bool(endpoint))
     points = complex_as_reals(np.linspace(x0 + y0 * 1j, x1 + y1 * 1j, size, endpoint=endpoint))
@@ -53,6 +59,9 @@ def line_linspace(x0, y0, x1, y1, endpoint=True):
 
 
 def line_linspace_cx(start, end, resolution=1000, endpoint=True):
+    """
+    Draw a line using np.linspace from a start point to an end point (both on the complex plane).
+    """
     # assert_type(complex, start, end)
     start = complex(start)
     end = complex(end)

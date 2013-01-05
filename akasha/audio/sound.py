@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Generic sound object group containers.
+"""
 
 import numpy as np
 
@@ -18,7 +21,7 @@ from akasha.utils.log import logger
 
 class Pcm(FrequencyRatioMixin, Generator):
     """
-    A playable sampled (pcm) sound.
+    Playable PCM (pulse-code modulated aka sampled) sound.
     """
     def __init__(self, snd, base=1):
         super(self.__class__, self).__init__()
@@ -34,13 +37,18 @@ class Pcm(FrequencyRatioMixin, Generator):
             return 1
         else:
             return int(np.floor(float(
-                len(self.snd) * (self.base_freq.ratio / self.frequency.ratio))))
+                len(self.snd) * (self.base_freq.ratio / self.frequency.ratio)
+            )))
 
     @memoized
     def resample(self, ratio, window='linear'):
+        """
+        Resample the PCM sound with a new normalized frequency (ratio).
+        """
         logger.info(
-            "Resample at {0} ({1:.3f}). Hilbert transform may cause clipping!".format(
-                ratio, float(ratio)))
+            "Resample at {0} ({1:.3f}). Hilbert transform may cause clipping!"
+            .format(ratio, float(ratio))
+        )
         orig_state = sampler.paused
         sampler.paused = True
         out = dsp.hilbert(src.resample(self.snd.real, float(ratio), window)).astype(np.complex128)
@@ -50,6 +58,10 @@ class Pcm(FrequencyRatioMixin, Generator):
 
     @memoized
     def sc_resample(self, ratio, window='blackman'):
+        """
+        Resample the PCM sound with a new normalized frequency (ratio).
+        Uses scipy.signal.resample.
+        """
         # TODO: This sounds better than scikits.samplerate, but try
         # if something else is faster with complex samples!
         #
@@ -58,29 +70,35 @@ class Pcm(FrequencyRatioMixin, Generator):
         # http://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.resample.html
         return dsp.resample(self.snd, len(self))
 
-    def resample_at_freq(self, iterable=None):
-        if iterable is None:
-            iterable = slice(0, len(self))
+    def resample_at_freq(self, items=None):
+        """
+        Resample and get items at self frequency.
+        """
+        if items is None:
+            items = slice(0, len(self))
         ratio = (self.base_freq.ratio / self.frequency.ratio)
         if ratio == 0:
             return np.array([0j])
         elif ratio == 1:
-            return self.snd[iterable]
+            return self.snd[items]
         else:
-            if isinstance(iterable, slice) and iterable.stop >= len(self):
-                logger.warn("Normalising {0} for length {1}".format(iterable, len(self)))
-                iterable = slice(iterable.start, min(iterable.stop, len(self), iterable.step))
-            return self.resample(ratio)[iterable]
-            #return self.sc_resample(ratio)[iterable]
+            if isinstance(items, slice) and items.stop >= len(self):
+                logger.warn("Normalising {0} for length {1}".format(items, len(self)))
+                items = slice(items.start, min(items.stop, len(self), items.step))
+            return self.resample(ratio)[items]
+            # return self.sc_resample(ratio, items)
 
-    def sample(self, iterable):
-        #logger.debug(__name__ + " sample("+str(self)+"): " + str(iterable))
-        return self.resample_at_freq(iterable)
+    def sample(self, items):
+        """
+        Sample the pcm sampled sound signal.
+        """
+        return self.resample_at_freq(items)
 
 
 class Group(FrequencyRatioMixin, Generator):
-    """A group of sound objects."""
-
+    """
+    Group of sound objects.
+    """
     def __init__(self, *args):
         super(self.__class__, self).__init__()
         self.sounds = np.array(*args, dtype=object)
@@ -89,26 +107,29 @@ class Group(FrequencyRatioMixin, Generator):
 
 
 class Sound(Generator):
-    """A group of sound objects."""
-
+    """
+    Collection or composition of sound objects.
+    """
     def __init__(self, *args):
         super(self.__class__, self).__init__()
         self.sounds = {}
         for s in args:
             self.add(s)
 
-    def sample(self, iterable):
-        """Pass parameters to all sound objects and update states."""
-        if isinstance(iterable, Number):
+    def sample(self, items):
+        """
+        Sample all sound objects.
+        """
+        if isinstance(items, Number):
             # FIXME should return scalar, not array!
-            start = int(iterable)
+            start = int(items)
             stop = start + 1
-        elif isinstance(iterable, np.ndarray):
+        elif isinstance(items, np.ndarray):
             start = 0
-            stop = len(iterable)
+            stop = len(items)
         else:
-            start = iterable.start or 0
-            stop = iterable.stop
+            start = items.start or 0
+            stop = items.stop
         sl = (start, stop)
 
         sound = np.zeros((stop - start), dtype=complex)
@@ -116,11 +137,13 @@ class Sound(Generator):
             #print "Slice start %s, stop %s" % sl
             for sndobj in self.sounds[sl]:
                 #print "Sound object %s" % sndobj
-                sound += sndobj[iterable]
+                sound += sndobj[items]
         return sound / max(len(self), 1.0)
 
     def add(self, sndobj, start=0, dur=None):
-        """Add a new sndobj to self."""
+        """
+        Add a sound object.
+        """
         if dur:
             end = start + dur
         elif hasattr(sndobj, "len"):
