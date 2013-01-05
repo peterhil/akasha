@@ -1,20 +1,17 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
-keyboard.py
+Copyright (c) 2011 Peter Hillerström. All rights reserved.
 
-Created by Peter on 2011-12-06.
-Copyright (c) 2011 Loihde. All rights reserved.
+Author: Peter Hillerström
+Date: 2011-12-06
 """
-
-from __future__ import absolute_import
 
 import json
 import numpy as np
-import os
 
-from ... import settings
-from . import relative_path
+from akasha import settings
+from akasha.control.io import relative_path
 
 
 #  E1234567890123 456 789E
@@ -36,6 +33,7 @@ from . import relative_path
 # - Mapping from key to position
 # - Mapping from position to frequency (by index)
 
+
 def get_layout(path='settings/keymaps/fi.json'):
     mappath = relative_path(path)
     fp = None
@@ -49,7 +47,8 @@ def get_layout(path='settings/keymaps/fi.json'):
         if hasattr(fp, 'close'):
             fp.close()
 
-def get_mapping(layout, section='main', mapping=np.empty([6,25], dtype=object)):
+
+def get_mapping(layout, section='main', mapping=np.empty([6, 25], dtype=object)):
     if section == 'main':
         basecol = 0
     elif section == 'arrows':
@@ -62,17 +61,19 @@ def get_mapping(layout, section='main', mapping=np.empty([6,25], dtype=object)):
     for row in xrange(len(kbsect)):
         for col in xrange(len(kbsect[row])):
             key = kbsect[row][col]
-            mapping[row, col+basecol] = key
+            mapping[row, col + basecol] = key
             #print "({0:d}, {1:d}) = {2!s}".format(row, col+basecol, key)
     return mapping
 
+
 def get_keyboard(layout=get_layout()):
-    kb = np.empty([6,25], dtype=object)
+    kb = np.empty([6, 25], dtype=object)
     kb.fill({})
     kb = get_mapping(layout, 'main', kb)
     kb = get_mapping(layout, 'arrows', kb)
     kb = get_mapping(layout, 'keypad', kb)
     return kb
+
 
 def get_map(kb, key='key'):
     mp = {}
@@ -82,7 +83,7 @@ def get_map(kb, key='key'):
         if code:
             mp[code] = divmod(i, cols)
         else:
-            mp[code] = kb.shape # Key disabled
+            mp[code] = kb.shape  # Key disabled
     return mp
 
 kb = get_keyboard()

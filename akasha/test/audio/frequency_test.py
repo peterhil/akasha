@@ -1,9 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# C0111: Missing docstring
+# R0201: Method could be a function
+# E1101: Module 'x' has no 'y' member
+#
+# pylint: disable=C0111,R0201,E1101
 """
-Unit tests for frequency.py
+Unit tests for Frequency
 """
 
+import abc
 import numbers
 import numpy as np
 import operator
@@ -19,11 +26,12 @@ from akasha.audio.oscillator import Osc
 from akasha.timing import sampler
 from akasha.tunings import cents_diff
 from akasha.types.numeric import NumericUnit, ComplexUnit, RealUnit
-from akasha.utils.math import pi2
 
 
 class TestFrequencyRatioMixin(object):
-    """Test Frequency ratios."""
+    """
+    Test Frequency ratios.
+    """
 
     silence = 0
     a4 = 440.0
@@ -37,6 +45,7 @@ class TestFrequencyRatioMixin(object):
         [Osc, Frequency]
     ]
 
+    @classmethod
     def setup_class(cls):
         assert issubclass(Frequency, FrequencyRatioMixin)
 
@@ -63,8 +72,8 @@ class TestFrequencyRatioMixin(object):
         assert self.a2 == o.frequency
         assert isinstance(o.frequency, hz)
 
-    @pytest.mark.parametrize(('cls', 'hz'), hz_types)
-    def test_ratio(self, cls, hz):
+    @pytest.mark.parametrize(('cls',), [[Frequency], [Osc]])
+    def test_ratio(self, cls):
         o = cls(self.a4)
         assert Frequency(self.a4).ratio == o.ratio
         assert isinstance(o.ratio, Fraction)
@@ -106,8 +115,9 @@ class TestFrequencyRatioMixin(object):
 
 
 class TestFrequencyAliasing(object):
-    """Test (preventing the) aliasing of frequencies out of range 0 to sample rate."""
-    
+    """
+    Test (preventing the) aliasing of frequencies out of range 0 to sample rate.
+    """
     silence = Frequency(0)
     negative = Fraction(-1, 7)
     over_nyquist = Fraction(9, 14)
@@ -148,23 +158,25 @@ class TestFrequencyAliasing(object):
 
 
 class TestFrequency(object):
-    """Test frequencies"""
+    """
+    Test frequencies
+    """
 
     def test_mro(self):
-        print(Frequency.mro())
         assert [
             Frequency,
             FrequencyRatioMixin,
             RealUnit,
             ComplexUnit,
             NumericUnit,
-            numbers.Real,
-            numbers.Complex,
-            numbers.Number,
             PeriodicGenerator,
             Generator,
             object
         ] == Frequency.mro()
+
+    def test_meta(self):
+        assert issubclass(Frequency, numbers.Real)
+        assert isinstance(Frequency, abc.ABCMeta)
 
     def test_class(self):
         assert issubclass(Frequency, RealUnit)
@@ -174,30 +186,37 @@ class TestFrequency(object):
 
     def test_init(self):
         """It should intialize using a frequency"""
+        # pylint: disable=W0212
         hz = 440.001
         f = Frequency(hz)
-        assert isinstance(f, Frequency)
         assert isinstance(f.frequency, float)
         assert isinstance(f._hz, float)
-        assert hz == f
-        assert hz == f.frequency
+        assert hz == f == f.frequency
         assert hz == f._hz
 
-    def test_rounding_frequencies(self):
+    @pytest.mark.parametrize(('hz',), [
+        [20.899],
+        [30.0001],
+        [220.0001],
+        [440.899],
+        [2201.34],
+        [8001.378],
+        [12003.989],
+        [20000.1]
+    ])
+    def test_rounding_frequencies(self, hz):
         """It should not exceed the just noticeable difference for hearing of frequencies."""
         # Just noticeable difference allowance for Frequency rounding
         # See http://en.wikipedia.org/wiki/Cent_(music)#Human_perception
         # This should probably be much smaller than the suggested 3-6 cents...
         JND_CENTS_EPSILON = 1.0e-02
-
-        for hz in [20.899, 30.0001, 220.0001, 440.899, 2201.34, 8001.378, 12003.989, 20000.1]:
-            assert cents_diff(hz, Frequency(hz)) <= JND_CENTS_EPSILON
+        assert cents_diff(hz, Frequency(hz)) <= JND_CENTS_EPSILON
 
     @pytest.mark.parametrize(('ratio'), [
-        (Fraction(22, 2205)), # 440 Hz
-        (Fraction(-1, 7)), # Negative
-        (Fraction(9, 14)), # Over Nyquist
-        (Fraction(9, 7)) # Over one
+        (Fraction(22, 2205)),  # 440 Hz
+        (Fraction(-1, 7)),     # Negative
+        (Fraction(9, 14)),     # Over Nyquist
+        (Fraction(9, 7))       # Over one
     ])
     def test_ratio(self, ratio):
         """It should not wrap and antialias ratio when unwrapped."""
@@ -208,17 +227,9 @@ class TestFrequency(object):
         """Is should calculate the frequency angles correctly."""
         assert np.array([0.]) == Frequency.angles(0)
         assert_nulp_diff(
-            np.array([ 0.   , 0.125, 0.25 , 0.375, 0.5  , 0.625, 0.75 , 0.875], dtype=np.float64),
+            np.array([0., 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875], dtype=np.float64),
             Frequency.angles(Fraction(1, 8)),
             1
-        )
-
-    def test_rads(self):
-        ratio = Fraction(1, 7)
-        angles = Frequency.angles(ratio)
-        assert_array_equal(
-            pi2 * angles,
-            Frequency.rads(ratio)
         )
 
     def test_sample(self):
@@ -252,7 +263,6 @@ class TestFrequency(object):
     def test_arithmetic(self):
         a4 = 440
         a3 = 220
-        a2 = 110
 
         # Forward
         assert Frequency(a4) == Frequency(a3) + Frequency(a3)
@@ -267,5 +277,3 @@ class TestFrequency(object):
         assert Frequency(a4) == a3 + Frequency(a3)
         assert Frequency(a4) == 2.0 * Frequency(a3)
         assert Frequency(a4) == Frequency(a3).__radd__(Frequency(a3))
-
-

@@ -1,14 +1,16 @@
-#!/usr/local/bin/python
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
+"""
+Numeric types
+"""
 
 from __future__ import division
 
 import numbers
-import numpy as np
 import operator
 
+from abc import ABCMeta, abstractproperty
 from cdecimal import Decimal
-from copy import copy
 from fractions import Fraction
 
 
@@ -20,7 +22,12 @@ def ops(op):
     This function is borrowed and modified from fractions.Fraction.operator_fallbacks(),
     which generates forward and backward operator functions automagically.
     """
+    # pylint: disable=C0111,R0911,R0912
+
     def calc(self, other, cls):
+        """
+        Closure to calculate the operation with other and return results as instances of cls.
+        """
         return cls(op(self, other))
 
     def forward(self, other):
@@ -41,8 +48,6 @@ def ops(op):
             return calc(Fraction(self.value), Fraction(other), cls)
         elif isinstance(other, numbers.Complex):
             return calc(complex(self), complex(other), cls)
-        # elif isinstance(other, numbers.Number):
-        #     return calc(self.value, other, cls)
         else:
             return NotImplemented
     forward.__name__ = '__' + op.__name__ + '__'
@@ -58,15 +63,6 @@ def ops(op):
         elif isinstance(other, Decimal):
             return calc(Decimal(other), Decimal(self.value), cls)
 
-        # elif isinstance(other, numbers.Integral):
-        #     return calc(int(other), int(self), cls)
-        # elif isinstance(other, numbers.Rational):
-        #     return calc(Fraction(other), Fraction(self), cls)
-        # elif isinstance(other, numbers.Real):
-        #     return calc(float(other), float(self), cls)
-        # elif isinstance(other, numbers.Complex):
-        #     return calc(complex(other), complex(self), cls)
-
         elif isinstance(other, numbers.Number):
             return calc(other, self.value, cls)
         else:
@@ -76,7 +72,8 @@ def ops(op):
 
     return forward, reverse
 
-class NumericUnit(numbers.Number):
+
+class NumericUnit(object):
     """
     Base numeric unit mixin for automatic arithmetic operations.
     """
@@ -85,13 +82,21 @@ class NumericUnit(numbers.Number):
     # PEP 3141 -- A Type Hierarchy for Numbers: http://www.python.org/dev/peps/pep-3141/
     # Python Docs: Data Model -- http://docs.python.org/2/reference/datamodel.html
 
+    __metaclass__ = ABCMeta
+
+    @abstractproperty
+    def _unit(self):
+        """The name of the property as string to use as unit."""
+        return NotImplemented
+
     @property
-    def value(obj):
-        return getattr(obj, obj._unit)
+    def value(self):
+        """The value of this numeric unit."""
+        return getattr(self, self._unit)
 
     def _normalize_value(self, value):
+        """Prevents type errors by normalising the value to the non-unit value."""
         return value.value if isinstance(value, type(self)) else value
-
 
     def __hash__(self):
         return hash(self.value)
@@ -106,7 +111,7 @@ class NumericUnit(numbers.Number):
         return "<%s: %s %s>" % (self.__class__.__name__, self.value, self._unit.strip('_'))
 
 
-class ComplexUnit(NumericUnit, numbers.Complex):
+class ComplexUnit(NumericUnit):
     """
     Complex valued unit mixin for automatic arithmetic operations.
     """
@@ -123,12 +128,15 @@ class ComplexUnit(NumericUnit, numbers.Complex):
         return self.__class__(+self.value)
 
     def conjugate(self):
+        """Value of conjugate to self."""
         return self.__class__(self.value.conjugate())
 
     def real(self):
+        """Real value."""
         return self.__class__(self.value.real)
 
     def imag(self):
+        """Imaginary value."""
         return self.__class__(self.value.imag)
 
     __add__, __radd__ = ops(operator.add)
@@ -140,7 +148,7 @@ class ComplexUnit(NumericUnit, numbers.Complex):
     __mod__, __rmod__ = ops(operator.mod)
 
 
-class RealUnit(ComplexUnit, numbers.Real):
+class RealUnit(ComplexUnit):
     """
     Real valued unit mixin for automatic arithmetic operations.
     """
@@ -159,20 +167,22 @@ class RealUnit(ComplexUnit, numbers.Real):
     __floordiv__, __rfloordiv__ = ops(operator.floordiv)
 
 
-class RationalUnit(RealUnit, numbers.Rational):
+class RationalUnit(RealUnit):
     """
     Rational valued unit mixin for automatic arithmetic operations.
     """
     @property
     def numerator(self):
+        """Numerator property."""
         return self.value.numerator
 
     @property
     def denominator(self):
+        """Deniminator property."""
         return self.value.denominator
 
 
-class IntegralUnit(RationalUnit, numbers.Integral):
+class IntegralUnit(RationalUnit):
     """
     Integral valued unit mixin for automatic arithmetic operations.
     """
@@ -186,16 +196,16 @@ class IntegralUnit(RationalUnit, numbers.Integral):
         return ~(self.value)
 
     __and__, __rand__ = ops(operator.and_)
-    __or__,  __ror__  = ops(operator.or_)
+    __or__, __ror__ = ops(operator.or_)
     __xor__, __rxor__ = ops(operator.xor)
 
     __lshift__, __rlshift__ = ops(operator.lshift)
     __rshift__, __rrshift__ = ops(operator.rshift)
 
 
-# Numerical hierarchy
-NumericUnit.register(numbers.Complex)
-ComplexUnit.register(numbers.Real)
-RealUnit.register(numbers.Rational)
-RationalUnit.register(numbers.Integral)
-
+# Numerical hierarchy  pylint: disable=E1101
+numbers.Number.register(NumericUnit)
+numbers.Complex.register(ComplexUnit)
+numbers.Real.register(RealUnit)
+numbers.Rational.register(RationalUnit)
+numbers.Integral.register(IntegralUnit)

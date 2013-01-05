@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Envelopes
+"""
 
-from __future__ import absolute_import
 
-import math
 import numpy as np
 import scipy as sp
 
@@ -13,9 +14,13 @@ from akasha.utils.math import minfloat
 
 
 class Exponential(Generator):
-    """Exponential decay and growth for envelopes."""
+    """
+    Exponential decay and growth for envelopes.
+    """
 
     def __init__(self, rate=0.0, amp=1.0):
+        super(self.__class__, self).__init__()
+
         if isinstance(rate, tuple):
             self.rate, self.amp = rate
         else:
@@ -25,7 +30,7 @@ class Exponential(Generator):
     @property
     def half_life(self):
         """Returns the time required to reach half-life from a starting amplitude."""
-        return np.inf if self.rate == 0 else math.log(2.0) / -self.rate * sampler.rate
+        return np.inf if self.rate == 0 else np.log(2.0) / -self.rate * sampler.rate
 
     @classmethod
     def from_half_life(cls, time, amp=1.0):
@@ -36,25 +41,32 @@ class Exponential(Generator):
         if np.inf == np.abs(time):
             return cls(rate=0.0, amp=amp)
         else:
-            # TODO simplify!
-            return cls(rate=sampler.rate / (-(time * sampler.rate) / math.log(2.0)), amp=amp)
+            return cls(rate=sampler.rate / (-(time * sampler.rate) / np.log(2.0)), amp=amp)
 
     @property
     def scale(self):
-        """Returns the time required to reach a (discrete) zero from a starting amplitude."""
+        """
+        Returns the time required to reach a (discrete) zero from a starting amplitude.
+        """
         return self.half_life * (minfloat(np.max(self.amp))[1] + 1)
 
     @classmethod
     def from_scale(cls, time, amp=1.0):
+        """
+        Create an exponential that reaches zero in the time given.
+        """
         return cls.from_half_life((time / sampler.rate) / (minfloat(np.max(amp))[1] + 1), amp)
 
-    def sample(self, iterable):
+    def sample(self, frames):
+        """
+        Sample the exponential.
+        """
         # Convert frame numbers to time (ie. 44100 => 1.0)
-        frames = np.array(iterable) / float(sampler.rate)
-        return self.amp * np.exp(self.rate * frames)
+        time = np.array(frames) / float(sampler.rate)
+        return self.amp * np.exp(self.rate * time)
 
     # def __len__(self):
-    #     return int(math.ceil(np.abs(self.scale)))
+    #     return int(np.ceil(np.abs(self.scale)))
 
     def __repr__(self):
         return "%s(%s, %s)" % (self.__class__.__name__, self.rate, self.amp)
@@ -64,28 +76,36 @@ class Exponential(Generator):
 
 
 class Attack(Exponential):
-    """Exponential attack (reversed decay/growth) envelope"""
+    """
+    Exponential attack (reversed decay/growth) envelope
+    """
 
     def __init__(self, rate=0.0, amp=1.0, *args, **kwargs):
-        super(Attack, self).__init__(rate, amp, *args, **kwargs)
+        super(self.__class__, self).__init__(rate, amp, *args, **kwargs)
 
-    def sample(self, iter, threshold=1.0e-6):
-        orig_length = len(iter)
-        frames = np.zeros(orig_length)
+    def sample(self, iterable, threshold=1.0e-6):
+        """
+        Sample the attack envelope.
+        """
+        attack = super(self.__class__, self).sample(iterable)
+        attack = attack[attack > threshold][::-1]  # Filter silence and reverse
 
-        atck = super(Attack, self).sample(iter)
-        atck = filter(lambda x: x > threshold, atck)[::-1]  # filter silence and reverse
-        sus_level = atck[-1]
-        frames.fill(sus_level)
-        frames[:len(atck)] = atck
-        del(atck)
+        frames = np.zeros(len(iterable))
+        frames.fill(attack[-1])  # Sustain level
+        frames[:len(attack)] = attack
+
+        del(attack)
         return frames
 
 
 class Gamma(Generator):
-    """Gamma cumulative distribution function derived envelope."""
+    """
+    Gamma cumulative distribution function derived envelope.
+    """
 
     def __init__(self, shape=1.0, scale=1.0):
+        super(self.__class__, self).__init__()
+
         if isinstance(shape, tuple):
             self.shape, self.scale = shape
         else:
@@ -93,6 +113,9 @@ class Gamma(Generator):
             self.scale = scale  # Inverse rate
 
     def sample(self, iterable):
+        """
+        Sample the gamma exponential.
+        """
         rate = (1.0 / max(self.scale, 1e-06))
         frames = (np.array(iterable) / float(sampler.rate)) * rate
         return sp.special.gammaincc(self.shape, frames)
@@ -105,7 +128,9 @@ class Gamma(Generator):
 
 
 class Timbre(Generator):
-    """Defines an envelope timbre for frequencies."""
+    """
+    Defines an envelope timbre for frequencies.
+    """
 
     def __init__(self):
-        pass
+        super(self.__class__, self).__init__()

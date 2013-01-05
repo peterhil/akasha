@@ -1,25 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Musical tuning systems module.
 
-from __future__ import absolute_import
+See "Pitch Systems in Tonal Music" series on YouTube:
+http://www.youtube.com/watch?v=0j-YXgXTpoA
+"""
+
 from __future__ import division
 
 import exceptions
 import numpy as np
+import operator as op
 
 from fractions import Fraction
+from funckit import xoltar as fx
 
-from .audio.oscillator import Frequency
-from .control.io.keyboard import kb
-from .utils.log import logger
-from .utils.math import pi2, find_closest_index
+from akasha.audio.oscillator import Frequency
+from akasha.control.io.keyboard import kb
+from akasha.utils.log import logger
+from akasha.utils.math import pi2, find_closest_index, map_array
 
-
-# See "Pitch Systems in Tonal Music" series on YouTube:
-# http://www.youtube.com/watch?v=0j-YXgXTpoA&feature=related
 
 def cents(*args):
-    """Calculate cents from interval or frequency ratio(s).
+    """
+    Calculate cents from interval or frequency ratio(s).
     When using frequencies, give greater frequencies first.
 
     >>> cents(float(Fraction(5,4)))
@@ -34,11 +39,17 @@ def cents(*args):
     """
     return 1200.0 * np.log2(args)
 
+
 def cents_diff(a, b):
+    """
+    Calculate the difference of two frequencies in cents."
+    """
     return np.abs(cents(float(a)) - cents(float(b)))
 
+
 def interval(*cnt):
-    """Calculate interval ratio from cents.
+    """
+    Calculate interval ratio from cents.
 
     >>> interval(100)
     array([ 1.05946309])    # one equal temperament semitone
@@ -46,38 +57,66 @@ def interval(*cnt):
     >>> interval(386.31371386)
     array([ 1.25])          # 5:4, perfect fifth
 
-    >> [map(Fraction.limit_denominator, map(Fraction.from_float, i)) for i in interval(np.arange(5) * 386.31371386)]
+    >> frac = lambda f: map(Fraction.limit_denominator, map(Fraction.from_float, f))
+    >> [frac for i in interval(np.arange(5) * 386.31371386)]
     [[Fraction(1, 1),
       Fraction(5, 4),
       Fraction(25, 16),
       Fraction(125, 64),
       Fraction(625, 256)]]
     """
-    return np.power(2, np.asanyarray(cnt)/1200.0)
+    return np.power(2, np.asanyarray(cnt) / 1200.0)
+
 
 def freq_plus_cents(f, cnt):
-    """Calculate freq1 + cents = freq2"""
+    """
+    Calculate what frequency is given cents apart from a frequency f.
+    """
     return f * interval(cnt)
 
+
 class EqualTemperament(object):
-    def __init__(self, n = 12, scale = 2.0):
+    """
+    Equal temperament tuning: 
+    http://en.wikipedia.org/wiki/Equal_temperament
+    """
+    def __init__(self, n=12, scale=2.0):
         self.n = n
         self.__scale = scale
 
     @property
     def generators(self):
-        return tuple(self.get_generators(self.octave(self.n, self.__scale), self.n))
+        """
+        Get the generators for the lattice.
+        """
+        return tuple(self.get_generators(self.octave(self.n, self.__scale)))
 
     @property
     def scale(self):
+        """
+        Get the interval ratios for one octave.
+        """
         return self.octave(self.n, self.__scale)
 
     @staticmethod
-    def get_generators(scale, n, large=Fraction(3, 2), small=Fraction(9, 8)):
-        return scale[map(lambda x: find_closest_index(scale, x), [large, small] )]
+    def get_generators(scale, large=Fraction(3, 2), small=Fraction(9, 8)):
+        """
+        Find the generators for the lattice from the scale
+        closest to the large and the small base interval.
+        """
+        return op.getitem(scale, map_array(
+            fx.curry_function(find_closest_index, scale),
+            [large, small]
+        ))
 
     @staticmethod
-    def octave(n, scale = 2.0):
+    def octave(n, scale=2.0):
+        """
+        Calculate the interval ratios for one octave with n notes of Equal temperament scale.
+
+        The scale parameter defines the biggest interval of the scale.
+        It's usually 2.0 for octave, but is 3.0 (a tritave) for example in Bohlen–Pierce scale.
+        """
         return scale ** (np.arange(n + 1.0, dtype=np.float64) / n)
 
     def __repr__(self):
@@ -86,42 +125,24 @@ class EqualTemperament(object):
     def __str__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.n)
 
-# In [128]: sorted(Fraction(3,2) ** np.array(map(Fraction.from_float, xrange(28))) % Fraction(3,2) + Fraction(1))
-# Out[128]:
-# [1.0,
-#  1.09375,
-#  1.12890625,
-#  1.1682940423488617,
-#  1.2524410635232925,
-#  1.375,
-#  1.3850951194763184,
-#  1.3918800354003906,
-#  1.5625,
-#  1.5859375,
-#  1.6650390625,
-#  1.746337890625,
-#  1.75,
-#  1.890625,
-#  1.92926025390625,
-#  1.943359375,
-#  1.99755859375,
-#  2.0,
-# ]
 
 class LucyTuning(object):
     """
+    Lucy tuning:
     http://www.lucytune.com/
 
-    "The natural scale of music is associated with the ratio of the diameter of a circle to its circumference."
+    "The natural scale of music is associated with the ratio of the
+    diameter of a circle to its circumference."
     (i.e. pi = 3.14159265358979323846 etc.) -- John Harrison (1693-1776)
-    
-    This scale is based on two intervals:
-    
-    1) (L), The Larger note as he calls it -- this is the ratio of the 2*pi root of 2,
-       which equals a ratio of 1.116633 or 190.9858 cents.
 
-    2) (s), The lesser note, which is half the difference between five Larger notes (5L) and an octave.
-       giving a ratio of 1.073344 or 122.5354 cents.
+    This scale is based on two intervals:
+
+    1) (L), The Larger note as he calls it -- this is the ratio of the 2*pi root of 2,
+            which equals a ratio of 1.116633 or 190.9858 cents.
+
+    2) (s), The lesser note, which is half the difference between
+            five Larger notes (5L) and an octave
+            giving a ratio of 1.073344 or 122.5354 cents.
 
     The fifth (V) is composed of three Large (3L) plus one small note (s) i.e. (3L+s)
         = (190.986*3) + (122.535)
@@ -135,18 +156,25 @@ class LucyTuning(object):
     """
     @classmethod
     def L(cls, n):
+        """Large base interval."""
         return 2.0 ** (n / pi2)
 
     @classmethod
     def s(cls, n):
+        """Small base interval."""
         return (2.0 / cls.L(5)) ** (n / 2.0)
 
-class WickiLayout(object):
 
+class WickiLayout(object):
+    """
+    Wicki-Hayden note layout:
+    http://en.wikipedia.org/wiki/Wicki-Hayden_note_layout
+    """
     # Why 432 Hz?
     #
     # > factors(432)
-    # array([  1,   2,   3,   4,   6,   8,   9,  12,  16,  18,  24,  27,  36, 48,  54,  72, 108, 144, 216, 432])
+    # array([  1,   2,   3,   4,   6,   8,   9,  12,  16,  18,
+    #         24,  27,  36, 48,  54,  72, 108, 144, 216, 432])
     #
     # See:
     # http://en.wikipedia.org/wiki/Concert_pitch#Pitch_inflation
@@ -168,28 +196,36 @@ class WickiLayout(object):
             # EqualTemperament(5).generators
             EqualTemperament(12).generators
             # EqualTemperament(19).generators
-        )):
-        """Wicki keyboard layout. Generators are given in (y, x) order.
-        Origo defaults to 'C' key, being on the position(1,4 + 1 for columns 'tilting' to the left)."""
+    )):
+        """
+        Wicki keyboard layout. Generators are given in (y, x) order.
+
+        Origo defaults to 'C' key, being on the position
+        (1,4) + 1 for columns 'tilting' to the left.
+        """
         if len(generators) == 2:
             self.base = base
             self.gen = generators
             self.origo = origo
         else:
-            raise exceptions.AttributeError("Expected two generators, got: {0!r}".format(generators))
-    
+            raise exceptions.AttributeError(
+                "Expected two generators, got: {0!r}".format(generators))
+
     def get(self, *pos):
+        """
+        Get a frequency on key position.
+        """
         logger.debug("Getting position: %s %s" % pos)
         if pos == kb.shape:
             return Frequency(0.0)
         else:
-            return (
-                self.base * \
-                    (self.gen[0] ** (pos[0] - self.origo[0])) * \
-                    (self.gen[1] ** (pos[1] - self.origo[1]))
-            )
+            return self.base * \
+                (self.gen[0] ** (pos[0] - self.origo[0])) * \
+                (self.gen[1] ** (pos[1] - self.origo[1]))
 
     def move(self, *pos):
+        """
+        Move the placement of keys (or origo) on the generator lattice.
+        """
         assert len(pos) == 2, "Expected two arguments or tuple of length two."
         self.origo = (self.origo[0] + pos[0], self.origo[1] + pos[1])
-
