@@ -128,12 +128,15 @@ class ComplexUnit(NumericUnit):
         return self.__class__(+self.value)
 
     def conjugate(self):
+        """Value of conjugate to self."""
         return self.__class__(self.value.conjugate())
 
     def real(self):
+        """Real value."""
         return self.__class__(self.value.real)
 
     def imag(self):
+        """Imaginary value."""
         return self.__class__(self.value.imag)
 
     __add__, __radd__ = ops(operator.add)
@@ -170,10 +173,12 @@ class RationalUnit(RealUnit):
     """
     @property
     def numerator(self):
+        """Numerator property."""
         return self.value.numerator
 
     @property
     def denominator(self):
+        """Deniminator property."""
         return self.value.denominator
 
 

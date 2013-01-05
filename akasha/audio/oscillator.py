@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+The oscillating module.
+"""
 
 from __future__ import division
 
@@ -11,8 +14,9 @@ from akasha.audio.generators import PeriodicGenerator
 
 
 class Osc(FrequencyRatioMixin, PeriodicGenerator):
-    """Generic oscillator class with a frequency and a parametric curve."""
-
+    """
+    Generic oscillator which has a closed curve and a frequency.
+    """
     def __init__(self, freq, curve=Circle()):
         super(self.__class__, self).__init__()
         if not isinstance(freq, Real):
@@ -22,6 +26,9 @@ class Osc(FrequencyRatioMixin, PeriodicGenerator):
 
     @property
     def sample(self):
+        """
+        Sample one period of the oscillator curve with the current frequency.
+        """
         return self.curve.at(Frequency.angles(self.ratio))
 
     def __repr__(self):

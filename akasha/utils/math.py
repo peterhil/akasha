@@ -40,20 +40,40 @@ def nth_root(n):
     return np.exp(1j * pi2 * 1.0 / n)
 
 
-def deg(radians):
-    """Degrees to radians conversion."""
-    return 180 * (radians / np.pi)
+def rad_to_deg(angles):
+    """
+    Radians to degrees conversion.
+    """
+    return 180 * (angles / np.pi)
 
 
-def rad(degrees):
-    """Radians to degrees conversion."""
-    return np.pi * (degrees / 180.0)
+def deg_to_rad(angles):
+    """
+    Degrees to radians conversion.
+    """
+    return np.pi * (angles / 180.0)
+
+
+def tau_to_rad(angles):
+    """
+    Tau angles to radians conversion.
+    """
+    return pi2 * angles
+
+
+def rad_to_tau(angles):
+    """
+    Radians to tau angles conversion.
+    """
+    return angles / pi2
 
 
 # Utils for frequency ratios etc...
 
 def logn(x, base=np.e):
-    """Logarithm of x on some base."""
+    """
+    Logarithm of x on some base.
+    """
     return np.log2(x) / np.log2(base)
 
 
@@ -193,6 +213,21 @@ def complex_as_reals(samples):
     return samples.view(np.float64).reshape(len(samples), 2).transpose()    # 0.5 to 599.5
 
 
+def as_polar(signal, dtype=np.complex128):
+    """
+    Return a complex signal in polar coordinates.
+    """
+    return np.array([np.abs(signal), np.angle(signal)], dtype=dtype).T
+
+
+def as_rect(polar, dtype=np.complex128):
+    """
+    Return a complex cartesian coordinate signal from polar coordinates.
+    """
+    magnitude, angle = polar.T
+    return np.array(magnitude * np.exp(1j * angle), dtype=dtype)
+
+
 def find_closest_index(arr, target):
     """
     Finds the index of the first item in array 'arr', which
@@ -218,12 +253,40 @@ def rand_between(inf, sup, n=1, random=np.random.random):
     return np.atleast_1d((sup - inf) * random(n) + inf)
 
 
-def random_phase(n=1, random=np.random.random):
+def random_phasor(n=1, amp=1.0, random=np.random.random):
     """
     Generate n complex numbers on the unit circle with random phase (angle)
     using the function given (defaults to np.random.random()).
+
+    Arguments
+    =========
+
+    n:
+        The number of items to generate
+    amp, one of:
+        - scalar real value
+        - sequence of length n
+        - callable of one argument (same as n)
+    random:
+        - callable of one argument (same as n)
+
+    Example
+    =======
+
+    from funckit import xoltar as fx
+
+    rf = fx.curry(np.random.poisson, 100)  # Try different values and random functions
+    snd = normalize(random_phase(44100 * 5, amp=rf))
+    graph(snd)  # or anim(Pcm(snd))
     """
-    return np.atleast_1d(cmath.rect(1.0, pi2 * random(n) - np.pi))
+    if np.isscalar(amp):
+        return np.atleast_1d(cmath.rect(amp, pi2 * random(n) - np.pi))
+    elif callable(amp):
+        return np.array(map(cmath.rect, *np.array([amp(n), pi2 * random(n) - np.pi])))
+    else:
+        assert n == len(amp), "Arguments (n, amp) should have the same length, "
+        "got: ({0}, {1})".format(n, len(amp))
+        return np.array(map(cmath.rect, *np.array([amp, pi2 * random(n) - np.pi])))
 
 
 # Primes
@@ -389,6 +452,13 @@ def identity(x):
     """
     return x
 
+
+def numberof(items):
+    """
+    Get the number of items.
+    If items is scalar, interpret items as a number, otherwise the length of items.
+    """
+    return items if np.isscalar(items) else len(items)
 
 def pcm(signal, bits=16, axis='imag'):
     """

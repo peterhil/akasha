@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Colour conversions and other colour utility functions.
+"""
+
 
 import logging
 import numpy as np
@@ -8,7 +12,7 @@ from akasha.timing import sampler
 from akasha.types import colour_values, colour_result
 from akasha.utils.decorators import memoized
 from akasha.utils.log import logger
-from akasha.utils.math import deg, distances, pad, minfloat
+from akasha.utils.math import distances, minfloat, pad, rad_to_deg
 
 
 lowest_audible_hz = 16.35
@@ -24,7 +28,7 @@ def hsv2rgb(hsv, alpha=None, dtype=colour_result):
     """
     Calculate RGB from HSV.
 
-    Hue is in degrees
+    Hue is in degrees between 0 and 360
     Lightness is between 0 and 1
     Saturation is between 0 and 1
     """
@@ -66,6 +70,13 @@ def hsv2rgb(hsv, alpha=None, dtype=colour_result):
 
 
 def hsv_to_rgb(hsv, alpha=None, dtype=colour_result):
+    """
+    Calculate RGB from HSV using Numpy.
+
+    Hue is in degrees between 0 and 360
+    Lightness is between 0 and 1
+    Saturation is between 0 and 1
+    """
     hsv = np.array(np.atleast_1d(hsv), dtype=colour_values)
     rgb = np.array([0, 0, 0], dtype=colour_values)
     sat = np.array([0, 0, 0], dtype=colour_values)
@@ -131,18 +142,22 @@ def rgb2hsv(rgb, dtype=colour_result):
     return hsv.astype(dtype)
 
 
-def angle2hsv(deg, dtype=colour_result):
+def angle2hsv(angles, dtype=colour_result):
+    """
+    Convert hue angle to rgb colour.
+    """
     # dtype uint8 loses precision, but doesn't matter here.
     # It gets over a problem with hsv_to_rgb.
     return np.append(
-        np.atleast_1d(deg % 360),
+        np.atleast_1d(angles % 360),
         np.array([1, 255, 255], dtype=colour_values)
     ).astype(dtype)
 
 
-def angles2hues(cx_samples, padding=False, loglevel=logging.ANIMA):
-    """Converts angles of complex samples into hues"""
-
+def angles2hues(cx_samples, padding=True, loglevel=logging.ANIMA):
+    """
+    Convert angles of complex samples into hues.
+    """
     # Get angles from points
     angles = np.angle(np.atleast_1d(cx_samples))
     logger.log(loglevel, "Angles:\n%s", repr(angles[:100]))
@@ -161,14 +176,17 @@ def angles2hues(cx_samples, padding=False, loglevel=logging.ANIMA):
     low = np.log2(lowest_audible_hz)
 
     # 10 octaves mapped to red..violet
-    angles = ((np.log2(np.abs(angles) + 1) - low) / 10 * 240) % 360
+    angles = ((np.log2(np.abs(angles) + 1) - low) / 8.96 * 240) % 360
 
     logger.log(loglevel, "Scaled:\n%s\n", repr(angles[:100]))
     return angles
 
 
 def chord_to_angle(length):
-    """Return angle for chord length. Restrict to unit circle, ie. max length is 2.0"""
+    """
+    Return radian angle of a point on unit circle with the specified chord length from 1+0j.
+    Restrict to unit circle, ie. max length is 2.0.
+    """
     # Limit highest freqs to Nyquist (blue or violet)
     d = np.fmin(np.abs(length), 2.0)
     # Limit lower freqs to lowest_audible_hz (red)
@@ -177,26 +195,35 @@ def chord_to_angle(length):
 
 
 def chord_to_hue(length):
-    return deg(chord_to_angle(length))
+    """
+    Return degrees from a chord length between a point on unit circle and 1+0j.
+    """
+    return rad_to_deg(chord_to_angle(length))
 
 
 def chord_to_tau(length):
+    """
+    Return tau angle from a chord length between a point on unit circle and 1+0j.
+    """
     return chord_to_angle(length) / (2.0 * np.pi)
 
 
-def tau_to_hue(tau, loglevel=logging.ANIMA):
+def tau_to_hue(tau_angles):
+    """
+    Return hue angles (in degrees) from tau angles.
+    """
     # Hue 240 is violet, and 8.96 is a factor for scaling back to 1.0
-    #return (np.log2(np.abs(chord_to_tau(tau))+1)) * 8.96 * 240
+    #return (np.log2(np.abs(chord_to_tau(tau_angles))+1)) * 8.96 * 240
     low = np.log2(lowest_audible_hz)
 
     # 10 octaves mapped to red..violet
-    taus = ((np.log2(np.abs(tau) + 1) - low) / 8.96 * 240) % 360
-
-    #logger.log(loglevel, "Scaled:\n%s\n", repr(taus[:100]))
-    return taus
+    return ((np.log2(np.abs(tau_angles) + 1) - low) / 8.96 * 240) % 360
 
 
 def chords_to_hues(signal, padding=True, loglevel=logging.ANIMA):
+    """
+    Return hue angles from instantaneous frequencies of a signal.
+    """
     phases = signal / np.fmax(np.abs(signal), minfloat(0.5)[0])
 
     # Get distances
@@ -212,14 +239,16 @@ def chords_to_hues(signal, padding=True, loglevel=logging.ANIMA):
     taus *= sampler.rate  # 0..Fs/2
     logger.log(loglevel, "Frequency median: %s", np.median(taus))
     logger.log(loglevel, "Frequencies:\n%s", repr(taus[:100]))
-    #return taus
 
-    hues = tau_to_hue(taus)
-    return hues
+    return tau_to_hue(taus)
 
 
 @memoized
 def get_huemap(steps=6 * 255):
+    """
+    Get a hue map (a spectrum) of n evenly spaced steps.
+    Returns an array of rgb colours.
+    """
     # step-size will become 4.2666... = 6 * 256 / 360.0
     # huemap = [hsv2rgb(angle2hsv(angle)) for angle in np.arange(360)]
 
@@ -230,6 +259,9 @@ def get_huemap(steps=6 * 255):
     return np.array(huemap, dtype=np.uint8)
 
 
-def colorize(samples, steps=6 * 255, use_chords=True):
-    #method = chords_to_hues if use_chords else angles2hues
-    return get_huemap(steps)[(chords_to_hues(samples) * (steps / 360.0)).astype(np.int)]
+def colorize(signal, steps=6 * 255, use_chords=True):
+    """
+    Colorize a signal according to it's instantaneous frequency.
+    """
+    colourizer = chords_to_hues if use_chords else angles2hues
+    return get_huemap(steps)[(colourizer(signal) * (steps / 360.0)).astype(np.int)]

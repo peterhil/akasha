@@ -1,16 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Noise and chaos module.
+"""
 
 import numpy as np
 
-from cmath import rect, phase, pi
+from cmath import rect
 
+from akasha.audio.curves import Circle
 from akasha.audio.envelope import Exponential
+from akasha.audio.frequency import Frequency
 from akasha.audio.generators import Generator
+from funckit import xoltar as fx
+from akasha.utils.math import normalize, numberof, pi2, random_phasor
 
 
 class Noise(Generator):
-    """Round (magnitude 0..1 with random angle) or polar noise generator"""
+    """
+    Noise generator with a domain function (unit square or disc).
+    """
 
     def __init__(self, domain_fn=None, random_fn=np.random.random):
         super(self.__class__, self).__init__()
@@ -19,26 +28,35 @@ class Noise(Generator):
 
     @staticmethod
     def unit_disc(iterable, randomizer, *args, **kwargs):
+        """
+        Noise generating function for the unit disc domain.
+        """
         amps = randomizer(*args, size=len(iterable), **kwargs)
-        angles = randomizer(*args, size=len(iterable), **kwargs) * 1j * 2.0 * pi
+        angles = randomizer(*args, size=len(iterable), **kwargs) * 1j * pi2
         noise = amps * np.exp(angles)
         # noise = (2.0 * amps - 1.0) * 1j   # flat
         return noise
 
     @staticmethod
     def unit_square(iterable, randomizer, *args, **kwargs):
+        """
+        Noise generating function for the unit square domain.
+        """
         x = 2 * randomizer(*args, size=len(iterable), **kwargs) - 1.0
         y = 2j * randomizer(*args, size=len(iterable), **kwargs) - 1.0j
         noise = x + y
-        print noise, type(noise)
         return noise
 
     def sample(self, iterable):
+        """
+        Commence noise.
+        """
         return self.function(iterable, self.randomizer)
 
 
 class Rustle(Generator):
-    """Rustle noise generator.
+    """
+    Rustle noise generator.
 
     Rustle noise is noise consisting of aperiodic pulses characterized by
     the average time between those pulses (such as the mean time interval
@@ -53,58 +71,87 @@ class Rustle(Generator):
 
     See: http://en.wikipedia.org/wiki/Rustle_noise
     """
-    pass
+    def __init__(self, expected=1, frequency=1, envelope=Exponential(0)):
+        self.frequency = Frequency(frequency)
+        self.expected = expected
+        self.gen = fx.curry(np.random.poisson, self.expected)
+        self.envelope = envelope
+
+    def sample(self, items):
+        """
+        Let it rumble and rustle.
+        """
+        return self.envelope[items] * normalize(
+            self.gen(numberof(items)) * Circle.at(self.frequency[items])
+        )
+
+
+class Mandelbrot(Generator):
+    """
+    Mandelbrot set generator for Chaos.
+
+    The regular Mandelbrot set is slightly different from this:
+    The iterator is always kept inside the unit disc.
+    """
+    def __init__(self, z=None, c=None, random=False):
+        super(self.__class__, self).__init__()
+
+        if random:
+            self.z = random_phasor()
+        else:
+            self.z = z if z is not None else 0
+        self.c = c if c is not None else random_phasor()
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        """
+        Get the next sample from mandelbrot set, and if the diverges,
+        make it's magnitude to be 1/abs(z) to keep it inside unit circle.
+        """
+        self.z = self.poly(self.z)
+        if np.abs(self.z) > 1.0:
+            self.z = np.array(rect(1.0 / np.abs(self.z), np.angle(self.z)), dtype=complex)
+        return self.z
+
+    def poly(self, z):
+        """
+        Mandelbrot set generating function.
+        """
+        # TODO: Generalize the kernel (the variable mandel) using np.poly1d
+        # vvvv     z ** 2 (+ 0 ** 1) + c =
+        # mandel = np.poly1d([1, 0, self.c])
+        return z ** 2 + self.c
+
+    def sample(self, items):
+        """
+        Chaos reigns.
+        """
+        return np.fromiter(self, count=numberof(items), dtype=complex)
+
+    def __repr__(self):
+        return "%s(z=%s, c=%s)" % (self.__class__.__name__, self.c, self.z)
 
 
 class Chaos(Generator):
-    """Chaos generator"""
+    """
+    Chaos ensues.
+    """
+    # TODO: Make into generic iterator using Generator
 
-    def __init__(self):
+    def __init__(self, gen=Mandelbrot, envelope=Exponential(0, amp=0.5)):
         super(self.__class__, self).__init__()
-        self.gen = self.Mandelbrot()
+        self.gen = gen
+        self.envelope = envelope  # TODO: Leave out of sound objects, and compose when sampling?
 
-    def sample(self, iterable, e=Exponential(0, amp=0.5)):
+    def sample(self, iterable):
+        """
+        Chaos reigns.
+        """
+        print(self.gen, len(iterable))
         chaos = np.fromiter(self.gen, count=len(iterable), dtype=complex)
-        return chaos[iterable] * e[iterable]
+        return chaos[iterable] * self.envelope[iterable]
 
     def __repr__(self):
-        return "Mandelbrot: c=%s, z=%s" % (self.gen.c, self.gen.z)
-
-    # Generator function class for Chaos
-    class Mandelbrot:
-
-        @staticmethod
-        def random_phasor():
-            return rect(np.random.random(), 2 * pi * np.random.random())
-
-        def __init__(self, c=None, random=False):
-            if c:
-                self.c = c
-            else:
-                self.c = rect(np.random.random(), 2 * pi * np.random.random() * 1.0 / 8.0)
-            if random:
-                self.seed()
-            else:
-                self.z = 0
-
-        def next(self):
-            self.z = self.mandelbrot(self.z)
-            if abs(self.z) > 1.0:
-                self.z = rect(1.0 / abs(self.z), phase(self.z))
-            return self.z
-
-        def seed(self):
-            self.z = self.random_phasor()
-
-        def __iter__(self):
-            return self
-
-        def __contains__(self, z):
-            if abs(z) < 1.0:
-                return True
-            else:
-                return False
-
-        def mandelbrot(self, z):
-            # mandel = np.poly1d([1, 0, self.c])
-            return z ** 2 + self.c
+        return "%s(gen=%s)" % (self.__class__.__name__, repr(self.gen))

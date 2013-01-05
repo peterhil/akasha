@@ -56,6 +56,7 @@ setup(
         'Twisted (==12.2.0)',
         'cdecimal (>=2.3)',
         'distribute (>=0.6.32)',
+        'funckit (==0.8.0)',
         'ipython (>=0.13)',
         'matplotlib (>=1.1.1)',
         'numpy (>=1.6.2)',
