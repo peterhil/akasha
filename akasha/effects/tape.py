@@ -14,7 +14,7 @@ import cmath
 import numpy as np
 
 from funckit import xoltar as fx
-from akasha.utils.math import map_array, normalize
+from akasha.utils.math import map_array, normalize, as_polar
 
 
 def magnetize(x0, x1, m, norm_level=0.95):
@@ -84,13 +84,6 @@ def cx_tape_compress(signal, norm_level=0.95):
 
 
 # 10.9.2012
-
-def as_polar(signal):
-    """
-    Return a complex signal in polar coordinates.
-    """
-    return np.array([np.abs(signal), np.angle(signal)]).T
-
 
 def gamma(g, amp, signal):
     """

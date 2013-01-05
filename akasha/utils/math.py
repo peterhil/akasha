@@ -213,6 +213,21 @@ def complex_as_reals(samples):
     return samples.view(np.float64).reshape(len(samples), 2).transpose()    # 0.5 to 599.5
 
 
+def as_polar(signal, dtype=np.complex128):
+    """
+    Return a complex signal in polar coordinates.
+    """
+    return np.array([np.abs(signal), np.angle(signal)], dtype=dtype).T
+
+
+def as_rect(polar, dtype=np.complex128):
+    """
+    Return a complex cartesian coordinate signal from polar coordinates.
+    """
+    magnitude, angle = polar.T
+    return np.array(magnitude * np.exp(1j * angle), dtype=dtype)
+
+
 def find_closest_index(arr, target):
     """
     Finds the index of the first item in array 'arr', which
