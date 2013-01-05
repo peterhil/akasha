@@ -1,12 +1,16 @@
-# Code from: http://mentat.za.net/numpy/intro/intro.html#the-misunderstood-for-loop
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import numpy as np
 # import matplotlib.pyplot as plt
 import PIL.Image
 
 
+# Code from: http://mentat.za.net/numpy/intro/intro.html#the-misunderstood-for-loop
+
+
 ITERATIONS = 100
-DENSITY = 1000 # warning: execution speed decreases with square of DENSITY
+DENSITY = 1000  # warning: execution speed decreases with square of DENSITY
 
 x_min, x_max = -2, 1
 y_min, y_max = -1.5, 1.5
@@ -14,7 +18,7 @@ y_min, y_max = -1.5, 1.5
 x, y = np.meshgrid(np.linspace(x_min, x_max, DENSITY),
                    np.linspace(y_min, y_max, DENSITY))
 
-c = x + 1j*y # complex grid
+c = x + 1j * y  # complex grid
 z = c.copy()
 fractal = np.zeros(z.shape, dtype=np.uint8) + 255
 

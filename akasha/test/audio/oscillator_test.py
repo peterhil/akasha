@@ -1,11 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# C0111: Missing docstring
+# R0201: Method could be a function
+# E1101: Module 'x' has no 'y' member
+#
+# pylint: disable=C0111,R0201,E1101
 """
 Unit tests for oscillator.py
 """
 
 import pytest
-import unittest
 
 import numpy as np
 
@@ -13,12 +18,10 @@ from akasha.audio.curves import Circle, Curve
 from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import PeriodicGenerator
 from akasha.audio.oscillator import Osc
-from akasha.timing import sampler, time_slice
-from akasha.tunings import cents_diff
-from akasha.utils.math import to_phasor, pi2
+from akasha.timing import sampler
+from akasha.utils.math import map_array, to_phasor, pi2
 
 from fractions import Fraction
-from numpy.testing.utils import assert_array_equal
 from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
 
 
@@ -43,7 +46,7 @@ class TestOscillator(object):
 
     def test_sample(self):
         o, p = 1, sampler.rate
-        expected = np.exp(1j * pi2 * o * np.arange(0, 1.0, 1.0/p, dtype=np.float64))
+        expected = np.exp(1j * pi2 * o * np.arange(0, 1.0, 1.0 / p, dtype=np.float64))
         assert_nulp_diff(
             Osc.from_ratio(o, p).sample,
             expected,
@@ -67,10 +70,10 @@ class TestOscRoots(object):
         wi = 2 * np.pi * 1j
         a = Osc.from_ratio(1, 8).sample
         b = np.array([
-            +1+0j, np.exp(wi*1/8),
-            +0+1j, np.exp(wi*3/8),
-            -1+0j, np.exp(wi*5/8),
-            -0-1j, np.exp(wi*7/8),
+            +1 + 0j, np.exp(wi * 1 / 8),
+            +0 + 1j, np.exp(wi * 3 / 8),
+            -1 + 0j, np.exp(wi * 5 / 8),
+            -0 - 1j, np.exp(wi * 7 / 8),
         ], dtype=np.complex128)
 
         assert np.allclose(a.real, b.real, atol=1e-13), \
@@ -84,17 +87,15 @@ class TestOscRoots(object):
         """It should be accurate.
         Uses angles to make testing easier.
         """
-        for period in (5, 7, 8, 23): #, 2202):
+        for period in (5, 7, 8, 23):
             o = Osc.from_ratio(1, period)
 
             fractional_angle = lambda n: float(Fraction(n, period) % 1) * 360
-            angles = np.array( map( fractional_angle, range(0,period) ) )
-            angles = 180 - ( (180 - angles) % 360) # wrap 'em to -180..180!
+            angles = map_array(fractional_angle, np.arange(0, period), method='vec')
+            angles = 180 - ((180 - angles) % 360)  # wrap 'em to -180..180!
 
             a = to_phasor(o.sample)
-            b = np.array( zip( [1] * period,  angles ) )
+            b = np.array(zip([1] * period, angles))
 
-            assert_nulp_diff(a.real, b.real, nulp=25) # @FIXME nulp should be smaller!
+            assert_nulp_diff(a.real, b.real, nulp=25)  # FIXME: nulp should be smaller!
             assert_nulp_diff(a.imag, b.imag, nulp=1)
-
-

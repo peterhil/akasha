@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+"""
+Generic sound object group containers.
+"""
 
 import numpy as np
 
@@ -8,20 +10,21 @@ from numbers import Number
 from scipy import signal as dsp
 from scikits import samplerate as src
 
-from .frequency import FrequencyRatioMixin, Frequency
-from .generators import Generator
-from ..funct import blockwise
-from ..timing import sampler
+from akasha.audio.frequency import FrequencyRatioMixin, Frequency
+from akasha.audio.generators import Generator
+from akasha.funct import blockwise
+from akasha.timing import sampler
 
-from ..utils.decorators import memoized
-from ..utils.log import logger
+from akasha.utils.decorators import memoized
+from akasha.utils.log import logger
 
 
 class Pcm(FrequencyRatioMixin, Generator):
     """
-    A playable sampled (pcm) sound.
+    Playable PCM (pulse-code modulated aka sampled) sound.
     """
     def __init__(self, snd, base=1):
+        super(self.__class__, self).__init__()
         self._hz = Frequency(base)
         self.base_freq = Frequency(base)
         self.snd = snd
@@ -34,13 +37,18 @@ class Pcm(FrequencyRatioMixin, Generator):
             return 1
         else:
             return int(np.floor(float(
-                len(self.snd) * (self.base_freq.ratio / self.frequency.ratio))))
+                len(self.snd) * (self.base_freq.ratio / self.frequency.ratio)
+            )))
 
     @memoized
     def resample(self, ratio, window='linear'):
+        """
+        Resample the PCM sound with a new normalized frequency (ratio).
+        """
         logger.info(
-            "Resample at {0} ({1:.3f}). Hilbert transform may cause clipping!".format(
-                ratio, float(ratio)))
+            "Resample at {0} ({1:.3f}). Hilbert transform may cause clipping!"
+            .format(ratio, float(ratio))
+        )
         orig_state = sampler.paused
         sampler.paused = True
         out = dsp.hilbert(src.resample(self.snd.real, float(ratio), window)).astype(np.complex128)
@@ -50,6 +58,10 @@ class Pcm(FrequencyRatioMixin, Generator):
 
     @memoized
     def sc_resample(self, ratio, window='blackman'):
+        """
+        Resample the PCM sound with a new normalized frequency (ratio).
+        Uses scipy.signal.resample.
+        """
         # TODO: This sounds better than scikits.samplerate, but try
         # if something else is faster with complex samples!
         #
@@ -58,55 +70,66 @@ class Pcm(FrequencyRatioMixin, Generator):
         # http://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.resample.html
         return dsp.resample(self.snd, len(self))
 
-    def resample_at_freq(self, iter=None):
-        if iter is None:
-            iter = slice(0, len(self))
+    def resample_at_freq(self, items=None):
+        """
+        Resample and get items at self frequency.
+        """
+        if items is None:
+            items = slice(0, len(self))
         ratio = (self.base_freq.ratio / self.frequency.ratio)
         if ratio == 0:
             return np.array([0j])
         elif ratio == 1:
-            return self.snd[iter]
+            return self.snd[items]
         else:
-            if isinstance(iter, slice) and iter.stop >= len(self):
-                logger.warn("Normalising {0} for length {1}".format(iter, len(self)))
-                iter = slice(iter.start, min(iter.stop, len(self), iter.step))
-            return self.resample(ratio)[iter]
-            #return self.sc_resample(ratio)[iter]
+            if isinstance(items, slice) and items.stop >= len(self):
+                logger.warn("Normalising {0} for length {1}".format(items, len(self)))
+                items = slice(items.start, min(items.stop, len(self), items.step))
+            return self.resample(ratio)[items]
+            # return self.sc_resample(ratio, items)
 
-    def sample(self, iter):
-        #logger.debug(__name__ + " sample("+str(self)+"): " + str(iter))
-        return self.resample_at_freq(iter)
+    def sample(self, items):
+        """
+        Sample the pcm sampled sound signal.
+        """
+        return self.resample_at_freq(items)
 
 
 class Group(FrequencyRatioMixin, Generator):
-    """A group of sound objects."""
-
+    """
+    Group of sound objects.
+    """
     def __init__(self, *args):
+        super(self.__class__, self).__init__()
         self.sounds = np.array(*args, dtype=object)
         # TODO handle zero-frequencies and non-periodic sounds:
         self.frequency = np.min(np.ma.masked_equal(args, 0).compressed())
 
 
 class Sound(Generator):
-    """A group of sound objects."""
-
+    """
+    Collection or composition of sound objects.
+    """
     def __init__(self, *args):
+        super(self.__class__, self).__init__()
         self.sounds = {}
         for s in args:
             self.add(s)
 
-    def sample(self, iter):
-        """Pass parameters to all sound objects and update states."""
-        if isinstance(iter, Number):
+    def sample(self, items):
+        """
+        Sample all sound objects.
+        """
+        if isinstance(items, Number):
             # FIXME should return scalar, not array!
-            start = int(iter)
+            start = int(items)
             stop = start + 1
-        elif isinstance(iter, np.ndarray):
+        elif isinstance(items, np.ndarray):
             start = 0
-            stop = len(iter)
+            stop = len(items)
         else:
-            start = iter.start or 0
-            stop = iter.stop
+            start = items.start or 0
+            stop = items.stop
         sl = (start, stop)
 
         sound = np.zeros((stop - start), dtype=complex)
@@ -114,11 +137,13 @@ class Sound(Generator):
             #print "Slice start %s, stop %s" % sl
             for sndobj in self.sounds[sl]:
                 #print "Sound object %s" % sndobj
-                sound += sndobj[iter]
+                sound += sndobj[items]
         return sound / max(len(self), 1.0)
 
     def add(self, sndobj, start=0, dur=None):
-        """Add a new sndobj to self."""
+        """
+        Add a sound object.
+        """
         if dur:
             end = start + dur
         elif hasattr(sndobj, "len"):
