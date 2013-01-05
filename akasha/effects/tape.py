@@ -100,7 +100,7 @@ def gamma_compress(signal, g, amp=1.0, normal=True):
     if normal:
         phi[:, 0] = normalize(phi[:, 0])
 
-    vgamma = np.vectorize(fx.curry(gamma, g, amp))
+    vgamma = np.vectorize(fx.curry_function(gamma, g, amp))
     phi[:, 0] = np.apply_along_axis(vgamma, 0, phi[:, 0]) * (1.0 / amp)  # @TODO amp can't be zero
 
     return np.array(map_array(lambda x: cmath.rect(*x), phi)).T
