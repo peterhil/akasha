@@ -13,7 +13,12 @@ Unit tests for drawing functions
 import numpy as np
 import pytest
 
+from akasha.audio.oscillator import Osc
 from akasha.graphic.drawing import *
+from akasha.utils.log import logger
+
+from mock import patch
+from numpy.testing.utils import assert_array_equal
 
 
 class TestDrawing(object):
@@ -21,17 +26,112 @@ class TestDrawing(object):
     Unit tests for drawing module.
     """
 
-    def test_get_canvas(self):
-        pass
+    def test_draw_axis(self):
+        img = get_canvas(width=4, height=3, channels=1, axis=False)
+        o = [0]
+        x = [92]
+        assert_array_equal(
+            np.array([
+                [o, o, x, o],
+                [x, x, x, x],
+                [o, o, x, o],
+            ]),
+            draw_axis(img, colour=[x])
+        )
 
-    def test_draw(self):
-        pass
+    def test_draw_axis_rgba(self):
+        img = get_canvas(width=3, height=3, channels=4, axis=False)
+        o = [0, 0, 0, 0]
+        x = [33, 42, 51, 192]
+        assert_array_equal(
+            np.array([
+                [o, x, o],
+                [x, x, x],
+                [o, x, o],
+            ]),
+            draw_axis(img, colour=[x])
+        )
+
+    @pytest.mark.parametrize(('width', 'height', 'channels'), [
+        [5, None, 4],
+        [3, 4, 2],
+        [2, 1, 3],
+        [1, 0, 1],
+    ])
+    def test_get_canvas(self, width, height, channels):
+        assert_array_equal(
+            np.zeros([height if height is not None else width, width, channels]),
+            get_canvas(width, height, channels, axis=False)
+        )
+
+    @pytest.mark.parametrize(('func', 'args'), [
+        ['draw_lines_aa', {
+            'lines': True,
+            'antialias': True,
+            'screen': True,
+        }],
+        ['draw_lines', {
+            'lines': True,
+            'antialias': False,
+            'screen': None,
+        }],
+        ['draw_points_aa', {
+            'lines': False,
+            'antialias': True,
+            'screen': None,
+        }],
+        ['draw_points', {
+            'lines': False,
+            'antialias': False,
+            'screen': None,
+        }],
+    ])
+    def test_draw(self, func, args):
+        draw_defaults = {
+            'size': 7,
+            'dur': None,
+            'antialias': False,
+            'lines': False,
+            'colours': True,
+            'axis': True,
+            'img': None,
+            'screen': None,
+        }
+
+        signal = Osc.from_ratio(1, 3).sample
+        d = draw_defaults.copy()
+        d.update(args)
+
+        with patch('akasha.graphic.drawing.clip_samples') as clip_mock:
+            with patch('akasha.graphic.drawing.' + func) as mock:
+                draw(signal, **d)
+                assert clip_mock.called_once_with(signal)
+                assert mock.called_once_with(signal, d['screen'], d['size'], d['colours'])
 
     def test_clip_samples(self):
-        pass
+        with patch('akasha.utils.log.logger.warn') as log:
+            assert -1+1j == clip_samples(-3+4j)
+            assert log.called_once_with("Clipping signal -- maximum magnitude was: 5.000000")
 
-    def test_add_alpha(self):
-        pass
+    def test_clip_samples_noop(self):
+        o = Osc.from_ratio(1, 16)
+        assert_array_equal(o.sample, clip_samples(o.sample))
+
+    @pytest.mark.parametrize('rgb', [
+        [
+            [41, 42, 43, 127],
+            [51, 52, 53, 127],
+        ],
+        [
+            [23, 127],
+            [24, 127],
+        ],
+    ])
+    def test_add_alpha(self, rgb):
+        assert_array_equal(
+            np.array(rgb),
+            add_alpha(np.array(rgb)[..., :-1], 127)
+        )
 
     def test_draw_coloured_lines_aa(self):
         pass
