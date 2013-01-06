@@ -30,16 +30,28 @@ except ImportError:
 # Use sparse.coo (coordinate matrix) to build the matrix, and convert to csc/csr for math.
 
 
-def get_canvas(x_size=1000, y_size=None, axis=True):
+def draw_axis(img, colour=[42, 42, 42, 127]):
+    """
+    Draw axis on the image with the colour.
+    """
+    height, width, channels = img.shape
+    img[height / 2.0, :] = img[:, width / 2.0] = colour[:channels]
+
+    return img
+
+
+def get_canvas(width=1000, height=None, channels=4, axis=True):
     """
     Get a Numpy array suitable for use as a drawing canvas.
     """
-    if not y_size:
-        y_size = x_size
-    img = np.zeros((y_size + 1, x_size + 1, 4), np.uint8)  # Note: y, x
+    if height is None:
+        height = width
+
+    img = np.zeros((height, width, channels), np.uint8)  # Note: y, x
+
     if axis:
-        # Draw axis
-        img[y_size / 2.0, :] = img[:, x_size / 2.0] = [42, 42, 42, 127]
+        img = draw_axis(img)
+
     return img
 
 
@@ -96,6 +108,7 @@ def clip_samples(signal):
 
     # clip_max = np.max(np.abs(signal)) # unit circle
     # rectangular abs can be sqrt(2) > 1.0!
+    signal = np.atleast_1d(signal)
     clip_max = np.max(np.fmax(np.abs(signal.real), np.abs(signal.imag)))
     if clip_max > 1.0:
         logger.warn("Clipping signal -- maximum magnitude was: %0.6f" % clip_max)
