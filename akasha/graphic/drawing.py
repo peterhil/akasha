@@ -89,10 +89,10 @@ def draw(
 
     if lines:
         if antialias and screen is not None:
-            draw_coloured_lines_aa(signal, screen, size, colours)
+            draw_lines_aa(signal, screen, size, colours)
         else:
-            raise NotImplementedError("Drawing lines with Numpy is way too slow for now!")
-            # return draw_coloured_lines(signal, img, size, colours)
+            # raise NotImplementedError("Drawing lines with Numpy is way too slow for now!")
+            return draw_lines(signal, img, size, colours)
     else:
         if antialias:
             return draw_points_aa(signal, img, size, colours)
@@ -124,7 +124,7 @@ def add_alpha(rgb, opacity=255):
     return np.append(rgb, np.array([opacity] * len(rgb)).reshape(len(rgb), 1), 1)
 
 
-def draw_coloured_lines_aa(signal, screen, size=1000, colours=True):
+def draw_lines_aa(signal, screen, size=1000, colours=True):
     """
     Draw antialiased lines with Pygame.
     """
@@ -141,7 +141,7 @@ def draw_coloured_lines_aa(signal, screen, size=1000, colours=True):
         pygame.draw.aalines(screen, pygame.Color('orange'), False, pts, 1)
 
 
-def draw_coloured_lines(signal, img, size=1000, colours=True):
+def draw_lines(signal, img, size=1000, colours=True):
     """
     Draw antialiased lines with Numpy.
     """
