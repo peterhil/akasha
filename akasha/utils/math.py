@@ -541,6 +541,29 @@ def diffs(signal, start=0, end=0):
     return np.append(start, signal[1:]) - np.append(signal[:-1], end)
 
 
+def get_points(signal, size=1000, dtype=np.float64):
+    """
+    Get coordinate points from a complex signal.
+    """
+    return complex_as_reals(scale(signal, size), dtype)
+
+
+def scale(signal, size):
+    """
+    Scale complex signal in unit rectangle area to size and interpret values as pixel centers.
+    Range of the coordinates will be from 0.5 to size - 0.5.
+    """
+    # TODO: Move to math or dsp module
+    return ((clip(signal) + 1 + 1j) / 2.0 * (size - 1) + (0.5 + 0.5j))
+
+
+def flip_vertical(signal):
+    """
+    Flip signal on vertical (imaginary) axis.
+    """
+    return np.array(signal.real - signal.imag * 1j, dtype=np.complex128)
+
+
 def get_zerocrossings(signal):
     """
     Get the signal transformed so it is one where the signal crosses zero level,

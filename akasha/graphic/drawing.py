@@ -15,7 +15,7 @@ from akasha.graphic.colour import colorize, white
 # from akasha.graphic.colour import hsv2rgb, angle2hsv, chords_to_hues
 from akasha.timing import sampler
 from akasha.utils.log import logger
-from akasha.utils.math import clip, pad, pcm, complex_as_reals, normalize
+from akasha.utils.math import clip, pad, pcm, complex_as_reals, normalize, get_points, flip_vertical
 
 from PIL import Image
 from scipy import sparse
@@ -41,29 +41,6 @@ def get_canvas(x_size=1000, y_size=None, axis=True):
         # Draw axis
         img[y_size / 2.0, :] = img[:, x_size / 2.0] = [42, 42, 42, 127]
     return img
-
-
-def get_points(signal, size=1000, dtype=np.float64):
-    """
-    Get PIL coordinate points (origin on top left) from a complex signal.
-    """
-    return complex_as_reals(scale(signal, size), dtype)
-
-
-def scale(signal, size):
-    """
-    Scale complex signal in unit rectangle area to size and interpret values as pixel centers.
-    Range of the coordinates will be from 0.5 to size - 0.5.
-    """
-    # TODO: Move to math or dsp module
-    return ((clip(signal) + 1 + 1j) / 2.0 * (size - 1) + (0.5 + 0.5j))
-
-
-def flip_vertical(signal):
-    """
-    Flip signal on vertical (imaginary) axis.
-    """
-    return np.array(signal.real - signal.imag * 1j, dtype=np.complex128)
 
 
 def draw(
