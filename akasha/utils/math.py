@@ -206,11 +206,11 @@ def as_complex(a):
     return a.transpose().flatten().view(np.complex128)
 
 
-def complex_as_reals(samples):
+def complex_as_reals(signal, dtype=np.float64):
     """
-    Convert complex samples to real number coordinate points.
+    Convert complex signal to real number coordinate points.
     """
-    return samples.view(np.float64).reshape(len(samples), 2).transpose()    # 0.5 to 599.5
+    return signal.view(dtype).reshape(len(signal), 2).transpose()
 
 
 def as_polar(signal, dtype=np.complex128):
@@ -490,7 +490,7 @@ def normalize(signal):
 
 def clip(signal, inplace=False):
     """
-    Clips complex samples to unit area (-1-1j, +1+1j).
+    Clips complex signal to unit rectangle area (-1-1j, +1+1j).
     """
     if np.any(np.isnan(signal)):
         signal = np.nan_to_num(signal)
