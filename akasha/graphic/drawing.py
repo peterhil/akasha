@@ -52,7 +52,7 @@ def get_points(signal, size=1000, dtype=np.float64):
 
 def scale(signal, size):
     """
-    Scale to size and interpret values as pixel centers.
+    Scale complex signal in unit rectangle area to size and interpret values as pixel centers.
     Range of the coordinates will be from 0.5 to size - 0.5.
     """
     # TODO: Move to math or dsp module
