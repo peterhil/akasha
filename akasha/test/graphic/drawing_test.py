@@ -89,7 +89,6 @@ class TestDrawing(object):
     def test_draw(self, func, args):
         draw_defaults = {
             'size': 7,
-            'dur': None,
             'antialias': False,
             'lines': False,
             'colours': True,

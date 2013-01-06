@@ -58,7 +58,6 @@ def get_canvas(width=1000, height=None, channels=4, axis=True):
 def draw(
     signal,
     size=1000,
-    dur=None,
     antialias=False,
     lines=False,
     colours=True,
@@ -81,9 +80,6 @@ def draw(
         size = img.shape[0] - 1
     else:
         img = get_canvas(size, axis=axis)
-
-    if dur:
-        signal = signal[:int(round(dur * sampler.rate))]
 
     signal = clip_samples(signal)
 
