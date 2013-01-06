@@ -13,7 +13,7 @@ Unit tests for drawing functions
 import numpy as np
 import pytest
 
-# from akasha.graphic.drawing import graph
+from akasha.graphic.drawing import *
 
 
 class TestGraph(object):
@@ -56,3 +56,51 @@ class TestGraph(object):
         #         1.+0.3333j,  1.+1.j    ])
 
         # graph(samples)
+
+
+class TestDrawing(object):
+    """
+    Unit tests for drawing module.
+    """
+
+    def test_get_canvas(self):
+        pass
+
+    def test_draw(self):
+        pass
+
+    def test_clip_samples(self):
+        pass
+
+    def test_add_alpha(self):
+        pass
+
+    def test_draw_coloured_lines_aa(self):
+        pass
+
+    def test_draw_coloured_lines(self):
+        pass
+
+    def test_draw_points_np_aa(self):
+        pass
+
+    def test_draw_points_aa(self):
+        pass
+
+    def test_draw_points(self):
+        pass
+
+    def test_draw_points_coo(self):
+        pass
+
+    def test_hist_graph(self):
+        pass
+
+    def test_video_transfer(self):
+        pass
+
+    def test_show(self):
+        pass
+
+    def test_graph(self):
+        pass
