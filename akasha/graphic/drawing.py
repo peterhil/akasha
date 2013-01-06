@@ -76,8 +76,10 @@ def draw(
     # for start in indices:
     # signal = self[start:start+buffersize-1:buffersize] # TODO: Make this cleaner
 
+    # TODO: Enable using non-square size.
+
     if img is not None:  # Draw into existing img?
-        size = img.shape[0] - 1
+        size = img.shape[0]
     else:
         img = get_canvas(size, axis=axis)
 
