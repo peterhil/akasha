@@ -206,11 +206,11 @@ def as_complex(a):
     return a.transpose().flatten().view(np.complex128)
 
 
-def complex_as_reals(samples):
+def complex_as_reals(signal, dtype=np.float64):
     """
-    Convert complex samples to real number coordinate points.
+    Convert complex signal to real number coordinate points.
     """
-    return samples.view(np.float64).reshape(len(samples), 2).transpose()    # 0.5 to 599.5
+    return signal.view(dtype).reshape(len(signal), 2).transpose()
 
 
 def as_polar(signal, dtype=np.complex128):
@@ -490,7 +490,7 @@ def normalize(signal):
 
 def clip(signal, inplace=False):
     """
-    Clips complex samples to unit area (-1-1j, +1+1j).
+    Clips complex signal to unit rectangle area (-1-1j, +1+1j).
     """
     if np.any(np.isnan(signal)):
         signal = np.nan_to_num(signal)
@@ -539,6 +539,29 @@ def diffs(signal, start=0, end=0):
     """
     # Could use np.apply_over_axes - profile with time?
     return np.append(start, signal[1:]) - np.append(signal[:-1], end)
+
+
+def get_points(signal, size=1000, dtype=np.float64):
+    """
+    Get coordinate points from a complex signal.
+    """
+    return complex_as_reals(scale(np.atleast_1d(signal), size), dtype)
+
+
+def scale(signal, size):
+    """
+    Scale complex signal in unit rectangle area to size and interpret values as pixel centers.
+    Range of the coordinates will be from 0.5 to size - 0.5.
+    """
+    # TODO: Move to math or dsp module
+    return ((clip(signal) + 1 + 1j) / 2.0 * (size - 1) + (0.5 + 0.5j))
+
+
+def flip_vertical(signal):
+    """
+    Flip signal on vertical (imaginary) axis.
+    """
+    return np.array(signal.real - signal.imag * 1j, dtype=np.complex128)
 
 
 def get_zerocrossings(signal):

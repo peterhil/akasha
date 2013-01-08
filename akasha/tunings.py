@@ -104,10 +104,10 @@ class EqualTemperament(object):
         Find the generators for the lattice from the scale
         closest to the large and the small base interval.
         """
-        return op.getitem(scale, map_array(
-            fx.curry_function(find_closest_index, scale),
+        return scale[map(
+            lambda x: find_closest_index(scale, x),
             [large, small]
-        ))
+        )]
 
     @staticmethod
     def octave(n, scale=2.0):
@@ -190,11 +190,11 @@ class WickiLayout(object):
     #
     # Good for testing with 44100 Hz sampling rate
 
-    def __init__(self, base=Frequency(432.0), origo=(1, 5), generators=(
+    def __init__(self, base=Frequency(441.0), origo=(1, 5), generators=(
             # LucyTuning.L(3) * LucyTuning.s(1), LucyTuning.s(1)
-            # (Fraction(3,2), Fraction(9,8)) # Pythagorean or Just intonation (3-limit)
+            (Fraction(3,2), Fraction(9,8)) # Pythagorean or Just intonation (3-limit)
             # EqualTemperament(5).generators
-            EqualTemperament(12).generators
+            # EqualTemperament(12).generators
             # EqualTemperament(19).generators
     )):
         """
