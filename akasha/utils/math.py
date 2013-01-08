@@ -545,7 +545,7 @@ def get_points(signal, size=1000, dtype=np.float64):
     """
     Get coordinate points from a complex signal.
     """
-    return complex_as_reals(scale(signal, size), dtype)
+    return complex_as_reals(scale(np.atleast_1d(signal), size), dtype)
 
 
 def scale(signal, size):
