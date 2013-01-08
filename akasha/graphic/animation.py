@@ -69,14 +69,14 @@ def handle_input(snd, it, event):
             if event.mod & (pg.KMOD_LALT | pg.KMOD_RALT):
                 set_timer(sampler.change_frametime(rel=step_size))
             else:
-                w.move(-2, 0)
-                #w.base *= 2.0
+                # w.move(-2, 0)
+                w.base *= 2.0
         elif pg.K_DOWN == event.key:
             if event.mod & (pg.KMOD_LALT | pg.KMOD_RALT):
                 set_timer(sampler.change_frametime(rel=-step_size))
             else:
-                w.move(2, 0)
-                #w.base /= 2.0
+                # w.move(2, 0)
+                w.base /= 2.0
         elif pg.K_LEFT == event.key:
             w.move(0, 1)
         elif pg.K_RIGHT == event.key:
