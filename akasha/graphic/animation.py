@@ -199,11 +199,11 @@ def show_slice(screen, snd, size=800, antialias=True, lines=False, colours=True)
         img = get_canvas(size)
         blit(screen, img)
         img = draw(snd, size,
-                   antialias=antialias, lines=lines, colours=colours
+                   antialias=antialias, lines=lines, colours=colours,
                    screen=screen, img=img)
     else:
         img = draw(snd, size,
-                   antialias=antialias, lines=lines, colours=colours
+                   antialias=antialias, lines=lines, colours=colours,
                    screen=screen)
         blit(screen, img)
     pg.display.flip()
