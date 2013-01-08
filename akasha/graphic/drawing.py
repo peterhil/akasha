@@ -13,12 +13,15 @@ import time
 from akasha.funct import pairwise
 from akasha.graphic.colour import colorize, white
 # from akasha.graphic.colour import hsv2rgb, angle2hsv, chords_to_hues
+from akasha.graphic.primitive.line import bresenham
 from akasha.timing import sampler
 from akasha.utils.log import logger
 from akasha.utils.math import clip, pad, pcm, complex_as_reals, normalize, get_points, flip_vertical
 
+from itertools import izip
 from PIL import Image
 from scipy import sparse
+from skimage import draw as skdraw
 
 try:
     import matplotlib.pyplot as plt
@@ -49,6 +52,7 @@ def get_canvas(width=1000, height=None, channels=4, axis=True):
 
     img = np.zeros((height, width, channels), np.uint8)  # Note: y, x
 
+    # FIXME: axis argument for get_canvas should accept a colour value, or it shouldn't exist
     if axis:
         img = draw_axis(img)
 
@@ -63,7 +67,7 @@ def draw(
     colours=True,
     axis=True,
     img=None,
-    screen=None
+    screen=None,
 ):
     """
     Draw the complex sound signal into specified size image.
@@ -144,16 +148,17 @@ def draw_lines(signal, img, size=1000, colours=True):
     Draw antialiased lines with Numpy.
     """
     if len(signal) < 2:
-        raise ValueError("Can't draw lines with less than two samples.")
-
-    bg = get_canvas(size, axis=False)
+        signal = pad(signal, -1)
 
     if colours:
         colors = add_alpha(colorize(signal))
 
-    for i, (start, end) in enumerate(pairwise(pad(signal, -1))):
-        line = np.linspace(start, end, np.abs(start - end) * size, endpoint=False)
-        img += draw_points(line, bg, size, colours=False) * (colors[i] if colours else white)
+    points = np.rint(get_points(flip_vertical(signal), size) - 0.5).astype(np.uint32)
+
+    segments = np.array(list(pairwise(izip(*points))), dtype=np.uint32).reshape(len(points.T) - 1, 4)
+
+    for i, coords in enumerate(segments):
+        img[skdraw.bresenham(*coords)] = colors[i] if colours else white
 
     return img
 
@@ -175,14 +180,52 @@ def draw_points_np_aa(signal, img, size=1000, colours=True):
     return img
 
 
+def get_pixels(signal, size):
+    """
+    Get pixel coordinates and pixel values from complex signal on some size.
+    """
+    # Change bottom-left coordinates to top-left with flip_vertical
+    points = get_points(flip_vertical(signal), size) - 0.5
+
+    # Note! np.fix rounds towards zero (rint would round to closest int)
+    pixels = np.fix(points).astype(np.int32)
+    values = 1 - ((points - pixels) % 1)
+
+    return pixels, values
+
+
+def inside(arr, low, high):
+    return np.ma.masked_outside(arr, low, high).compressed()
+
 def draw_points_aa(signal, img, size=1000, colours=True):
     """
     Draw colourized antialiased points from signal.
     """
-    points = get_points(signal, size)
-    centers = np.round(points)  # 1.0 to float(size)
-    bases = np.cast['int32'](centers) - 1  # 0 .. size - 1
-    deltas = points - bases - 0.5
+    # Fixme: Ignores size argument as it is now
+
+    width, height, ch = img.shape
+
+    iw = lambda a: inside(a, 0, width)
+    ih = lambda a: inside(a, 0, height)
+    area = lambda w: np.repeat(w, ch).reshape(len(signal), ch)
+
+    px, value = get_pixels(signal, width - 1)
+    color = add_alpha(colorize(signal)) if colours else white
+
+    img[px[0],         px[1], :]         += color * area(value[0] * value[1])
+    img[px[0],         iw(px[1] + 1), :] += color * area(value[0] * (1 - value[1]))
+    img[ih(px[0] + 1), px[1], :]         += color * area((1 - value[0]) * value[1])
+    img[ih(px[0] + 1), iw(px[1] + 1), :] += color * area((1 - value[0]) * (1 - value[1]))
+
+    return img
+
+
+def draw_points_aa_old(signal, img, size=1000, colours=True):
+    """
+    Draw colourized antialiased points from signal.
+    """
+    size -= 1
+    bases, deltas = get_pixels(signal, size)
 
     values_00 = deltas[1] * deltas[0]
     values_01 = deltas[1] * (1.0 - deltas[0])
@@ -192,8 +235,8 @@ def draw_points_aa(signal, img, size=1000, colours=True):
     pos = [
         ((size - 1) - bases[1], bases[0]),
         ((size - 1) - bases[1], bases[0] + 1),
-        ((size) - (bases[1] + 1), bases[0]),
-        ((size) - (bases[1] + 1), bases[0] + 1),
+        ((size - 1) - (bases[1] + 1), bases[0]),
+        ((size - 1) - (bases[1] + 1), bases[0] + 1),
     ]
 
     color = add_alpha(colorize(signal)) if colours else white
@@ -210,12 +253,11 @@ def draw_points(signal, img, size=1000, colours=True):
     """
     Draw colourized points from signal
     """
-    points = get_points(flip_vertical(signal), size)
-    points = np.cast['uint32'](points)  # 0 .. size - 1
+    points = np.rint(get_points(flip_vertical(signal), size) - 0.5).astype(np.uint32)
 
     color = add_alpha(colorize(signal)) if colours else white
-    img[points[0], points[1]] = color
 
+    img[points[0], points[1]] = color[..., :img.shape[2]]
     return img
 
 
@@ -223,29 +265,12 @@ def draw_points_coo(signal, img, size=1000, colours=True):
     """
     Draw a bitmap image from a complex signal with optionally colourized pixels.
     """
-    # TODO: This is still slower than draw_points, probably because
-    # of the matrix->array and other manipulations
-    points = get_points(flip_vertical(signal), size)
-    points = np.cast['uint32'](points)  # 0 .. size - 1
+    points = np.rint(get_points(flip_vertical(signal), size) - 0.5).astype(np.uint32)
+    coords = sparse.coo_matrix(points, dtype=np.uint32).todense()
 
     color = add_alpha(colorize(signal)) if colours else white
 
-    img = sparse.coo_matrix(
-        (
-            np.ones(len(signal), dtype=np.uint32),
-            points
-        ),
-        dtype=np.uint32,
-        shape=(size + 1, size + 1)
-    )
-
-    img = np.asarray(img.todense())
-
-    img = img[..., np.newaxis]
-    img = np.repeat(img.T, 4, 0).T
-
-    img[points[0], points[1]] *= color
-
+    img[coords[0], coords[1]] = color[..., :img.shape[2]]
     return img
 
 
