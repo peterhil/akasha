@@ -16,6 +16,7 @@ import pytest
 from akasha.audio.oscillator import Osc
 from akasha.graphic.drawing import *
 from akasha.utils.log import logger
+from akasha.test import assert_equal_image
 
 from mock import patch
 from numpy.testing.utils import assert_array_equal
@@ -141,14 +142,127 @@ class TestDrawing(object):
     def test_draw_points_np_aa(self):
         pass
 
-    def test_draw_points_aa(self):
-        pass
+    ### Test for point drawing functions
 
-    def test_draw_points(self):
-        pass
+    @pytest.mark.parametrize(('palette'), [
+        [[255], [0], [42]],
+        [[255, 255, 255, 255], [  0,   0,   0,   0], [ 40,  41,  42, 127]],
+    ])
+    @pytest.mark.parametrize(('draw_func'), [
+        draw_points,
+        draw_points_coo,
+    ])
+    def test_draw_points(self, palette, draw_func):
+        """
+        All point drawing functions should draw correctly.
+        """
+        osc = Osc.from_ratio(1, 8)
+        size = 7
+        x, _, a = palette
 
-    def test_draw_points_coo(self):
-        pass
+        assert_equal_image(
+            np.array([
+                [x, _, _, x, _, _, x],
+                [_, _, _, a, _, _, _],
+                [_, _, _, a, _, _, _],
+                [x, a, a, a, a, a, x],
+                [_, _, _, a, _, _, _],
+                [_, _, _, a, _, _, _],
+                [x, _, _, a, _, _, _],
+            ], dtype=np.uint8).transpose(1, 0, 2),
+            draw_func(
+                osc[:6] * 2,
+                img=draw_axis(
+                    get_canvas(size, channels=len(palette[0]), axis=False),
+                    colour=palette[2]
+                ),
+                size=size,
+                colours=False
+            )
+        )
+
+    @pytest.mark.parametrize(('draw_func'), [
+        draw_points,
+        draw_points_coo,
+        draw_points_aa,
+        draw_points_aa_old,
+    ])
+    def test_draw_points_coordinates_should_match(self, draw_func):
+        """
+        Test that coordinates and origin are headed in the right orientation.
+        """
+        size = 9
+        channels = 4
+        c = np.repeat(np.arange(256)[..., np.newaxis], channels, 1)
+        x, _ = [c[255], c[0]]
+
+        assert_equal_image(
+            np.array([
+                [ _, _, _, _, _, _, _, _, x,],
+                [ _, _, _, _, _, _, _, x, _,],
+                [ _, _, _, _, _, _, x, _, _,],
+                [ _, _, _, _, _, x, _, _, _,],
+                [ _, _, _, _, x, _, _, _, _,],
+                [ _, _, _, _, _, _, _, _, _,],
+                [ _, _, _, _, _, _, _, _, _,],
+                [ _, _, _, _, _, _, _, _, _,],
+                [ _, _, _, _, _, _, _, _, _,],
+            ], dtype=np.uint8).transpose(1, 0, 2),
+            draw_func(
+                np.linspace(0, 1+1j, 5, endpoint=True),
+                img=get_canvas(size, channels=channels, axis=False),
+                size=size,
+                colours=False
+            )
+        )
+
+    @pytest.mark.parametrize(('palette'), [
+        # [[255], [0], [42]],
+        [[255, 255, 255, 255], [  0,   0,   0,   0], [ 127,  127,  127, 127]],
+    ])
+    @pytest.mark.parametrize(('draw_func'), [
+        draw_points_aa,
+        draw_points_aa_old,
+    ])
+    def test_draw_points_antialiased(self, palette, draw_func):
+        """
+        All point drawing functions should draw correctly.
+        """
+        osc = Osc.from_ratio(1, 12)
+        size = 17
+        x, _, a = palette
+        l = np.repeat(np.arange(256)[..., np.newaxis], len(palette[2]), 1)
+
+        assert_equal_image(
+            np.array([
+                [      _,      _,      _,      _,      _,      _,      _,   l[3],  l[43],      _,      _,      _,      _,      _,      _,      _,   _],
+                [      _,      _,      _,      _,  l[29],   l[9],      _, l[124], l[164],      _,   l[9],  l[29],      _,      _,      _,      _,   _],
+                [      _,      _,      _,      _, l[165],  l[51],      _,      _,      a,      _,  l[51], l[165],      _,      _,      _,      _,   _],
+                [      _,      _,      _,      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _,      _,      _,   _],
+                [      _,  l[29], l[165],      _,      _,      _,      _,      _,      a,      _,      _,      _,      _, l[165],  l[29],      _,   _],
+                [      _,   l[9],  l[51],      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,  l[51],   l[9],      _,   _],
+                [      _,      _,      _,      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _,      _,      _,   _],
+                [   l[3], l[124],      _,      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _, l[124],   l[3],   _],
+                [  l[43], l[164],      a,      a,      a,      a,      a,      a,      a,      a,      a,      a,      a,      a, l[164],  l[43],   a],
+                [      _,      _,      _,      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _,      _,      _,   _],
+                [      _,   l[9],  l[51],      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _,      _,      _,   _],
+                [      _,  l[29], l[165],      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _,      _,      _,   _],
+                [      _,      _,      _,      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _,      _,      _,   _],
+                [      _,      _,      _,      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _,      _,      _,   _],
+                [      _,      _,      _,      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _,      _,      _,   _],
+                [      _,      _,      _,      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _,      _,      _,   _],
+                [      _,      _,      _,      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _,      _,      _,   _],
+            ], dtype=np.uint8),
+            draw_func(
+                osc[:8] * 0.87,
+                img=draw_axis(
+                    get_canvas(size, channels=len(palette[0]), axis=False),
+                    colour=palette[2]
+                ),
+                size=size,
+                colours=False
+            )
+        )
 
     def test_hist_graph(self):
         pass
