@@ -247,7 +247,7 @@ def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=T
     init_mixer(init)
     pg.display.set_caption(name)
 
-    resolution = (size + 1, size + 1)  # FIXME get resolution some other way.
+    resolution = (size, size)  # FIXME get resolution some other way.
     screen = pg.display.set_mode(resolution, pg.SRCALPHA, 32)
 
     ch = pg.mixer.find_channel()
