@@ -10,6 +10,7 @@ from __future__ import division
 
 import logging
 import pygame as pg
+import time
 
 from funckit import xoltar as fx
 from timeit import default_timer as timer
@@ -272,6 +273,7 @@ def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=T
         done = False
         while not done:
             done = handle_events(snd, it, ch, paint_fn, clock)
+            time.sleep(1 / 1000)  # Fixme: This reduces calls to handle_events, but is it necessary?
     else:
         pg.display.init()
 
