@@ -198,10 +198,13 @@ def show_slice(screen, snd, size=800, antialias=True, lines=False, colours=True)
     if lines and antialias:  # Using Pygame drawing, so blit before
         img = get_canvas(size)
         blit(screen, img)
-        img = draw(snd, size, antialias=antialias, lines=lines, colours=colours,
+        img = draw(snd, size,
+                   antialias=antialias, lines=lines, colours=colours
                    screen=screen, img=img)
     else:
-        img = draw(snd, size, antialias=antialias, lines=lines, colours=colours, screen=screen)
+        img = draw(snd, size,
+                   antialias=antialias, lines=lines, colours=colours
+                   screen=screen)
         blit(screen, img)
     pg.display.flip()
 
@@ -260,7 +263,7 @@ def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=T
         size=size,
         antialias=antialias,
         lines=lines,
-        colours=colours
+        colours=colours,
     )
     # paint_fn = fx.curry_function(show_slice, screen, size=size,
     #                     antialias=antialias, lines=lines, colours=colours)
