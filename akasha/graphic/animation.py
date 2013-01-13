@@ -10,6 +10,7 @@ from __future__ import division
 
 import logging
 import pygame as pg
+import time
 
 from funckit import xoltar as fx
 from timeit import default_timer as timer
@@ -69,14 +70,14 @@ def handle_input(snd, it, event):
             if event.mod & (pg.KMOD_LALT | pg.KMOD_RALT):
                 set_timer(sampler.change_frametime(rel=step_size))
             else:
-                w.move(-2, 0)
-                #w.base *= 2.0
+                # w.move(-2, 0)
+                w.base *= 2.0
         elif pg.K_DOWN == event.key:
             if event.mod & (pg.KMOD_LALT | pg.KMOD_RALT):
                 set_timer(sampler.change_frametime(rel=-step_size))
             else:
-                w.move(2, 0)
-                #w.base /= 2.0
+                # w.move(2, 0)
+                w.base /= 2.0
         elif pg.K_LEFT == event.key:
             w.move(0, 1)
         elif pg.K_RIGHT == event.key:
@@ -197,10 +198,13 @@ def show_slice(screen, snd, size=800, antialias=True, lines=False, colours=True)
     if lines and antialias:  # Using Pygame drawing, so blit before
         img = get_canvas(size)
         blit(screen, img)
-        img = draw(snd, size, antialias=antialias, lines=lines, colours=colours,
+        img = draw(snd, size,
+                   antialias=antialias, lines=lines, colours=colours,
                    screen=screen, img=img)
     else:
-        img = draw(snd, size, antialias=antialias, lines=lines, colours=colours, screen=screen)
+        img = draw(snd, size,
+                   antialias=antialias, lines=lines, colours=colours,
+                   screen=screen)
         blit(screen, img)
     pg.display.flip()
 
@@ -247,14 +251,22 @@ def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=T
     init_mixer(init)
     pg.display.set_caption(name)
 
-    resolution = (size + 1, size + 1)  # FIXME get resolution some other way.
+    resolution = (size, size)  # FIXME get resolution some other way.
     screen = pg.display.set_mode(resolution, pg.SRCALPHA, 32)
 
     ch = pg.mixer.find_channel()
     it = iter(snd)
 
-    paint_fn = fx.curry_function(show_slice, screen, size=size,
-                        antialias=antialias, lines=lines, colours=colours)
+    paint_fn = lambda snd: show_slice(
+        screen,
+        snd,
+        size=size,
+        antialias=antialias,
+        lines=lines,
+        colours=colours,
+    )
+    # paint_fn = fx.curry_function(show_slice, screen, size=size,
+    #                     antialias=antialias, lines=lines, colours=colours)
     #paint_fn = fx.curry_function(show_transfer, screen, size=size, standard='PAL', axis='imag')
 
     clock = pg.time.Clock()
@@ -264,6 +276,7 @@ def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=T
         done = False
         while not done:
             done = handle_events(snd, it, ch, paint_fn, clock)
+            time.sleep(1 / 1000)  # Fixme: This reduces calls to handle_events, but is it necessary?
     else:
         pg.display.init()
 

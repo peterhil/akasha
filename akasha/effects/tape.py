@@ -14,7 +14,7 @@ import cmath
 import numpy as np
 
 from funckit import xoltar as fx
-from akasha.utils.math import map_array, normalize, as_polar
+from akasha.utils.math import map_array, normalize, as_polar, as_rect
 
 
 def magnetize(x0, x1, m, norm_level=0.95):
@@ -80,7 +80,7 @@ def cx_tape_compress(signal, norm_level=0.95):
     """
     Model tape compression hysteresis on a complex analytic signal.
     """
-    return tape_compress(signal, norm_level) * np.exp(np.angle(signal) * 1j)
+    return tape_compress(np.abs(signal), norm_level) * np.exp(np.angle(signal) * 1j)
 
 
 # 10.9.2012
@@ -95,16 +95,20 @@ def gamma(g, amp, signal):
 def gamma_compress(signal, g, amp=1.0, normal=True):
     """
     Apply gamma compression on the amplitude of a complex signal.
+
+    Example usage
+    -------------
+    dur = 30
+    eine = normalize(read("Amadeus - Eine Kleine.aiff", fs=44100, dur=dur))
+    compressed = gamma_compress(eine[:dur * 44100], 0.487, 105)
+    anim(Pcm(normalize(compressed[:dur * 44100]) * 0.5, 1), antialias=True)
     """
     phi = as_polar(signal)
+
     if normal:
         phi[:, 0] = normalize(phi[:, 0])
 
     vgamma = np.vectorize(fx.curry_function(gamma, g, amp))
     phi[:, 0] = np.apply_along_axis(vgamma, 0, phi[:, 0]) * (1.0 / amp)  # @TODO amp can't be zero
 
-    return np.array(map_array(lambda x: cmath.rect(*x), phi)).T
-
-# eine = normalize(read("Amadeus - Eine Kleine.aiff", fs=44100, dur=6*60+32))
-# gr082 = gamma_compress(eine, 0.81968, 105)
-# anim(Pcm(gr082), antialias=True, dur=60*6+30)
+    return as_rect(phi).T

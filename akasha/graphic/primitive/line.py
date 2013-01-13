@@ -9,6 +9,17 @@ import numpy as np
 from akasha.types import assert_type, signed
 from akasha.utils.math import complex_as_reals
 
+from skimage import draw as skdraw
+
+
+def bresenham(coords):
+    """
+    Return coordinates for a line using the bresenham algorithm.
+
+    Wraps the function from scikits-image (skimage), so that it's usable with map and numpy.
+    The original function is written using pyrex, so it's very fast.
+    """
+    return np.array(skdraw.bresenham(*coords), dtype=np.uint32)
 
 def line_bresenham(x0, y0, x1, y1, colour=1.0, indices=False):
     """
