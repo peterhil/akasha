@@ -177,10 +177,10 @@ def handle_events(snd, it, ch, paint_fn, clock):
             done = handle_input(snd, it, event)
             if done:
                 break
-        logger.debug("Handled %s inputs in %.4f seconds: %s" % (len(inputs), timer() - input_start, inputs))
+        logger.debug("Handled %s inputs in %.4f seconds." % (len(inputs), timer() - input_start))
 
     # Paint
-    if frames and not done:
+    if frames and not sampler.paused and not done:
         draw_start = timer()
 
         done |= do_audio_video(it, ch, paint_fn)
@@ -195,7 +195,7 @@ def handle_events(snd, it, ch, paint_fn, clock):
         done |= drop_frames(frames, it)
 
     if len(events) > 1:
-        logger.debug("Handled %s events in %.4f seconds: %s" % (len(events), timer() - start, events))
+        logger.debug("Handled %s events in %.4f seconds." % (len(events), timer() - start))
 
     if reactor.running and done:
         reactor.stop()  # pylint: disable=E1101
@@ -286,19 +286,24 @@ def handle_input(snd, it, event):
         logger.info("Quitting.")
         return True
     # Pause
-    elif (event.type == pg.KEYDOWN and event.key == pg.K_F8) or \
+    elif (event.type in [pg.KEYDOWN, pg.KEYUP] and event.key == pg.K_F8) or \
          (event.type == pg.ACTIVEEVENT and event.state == 3):
-        sampler.pause()
+        if event.type is not pg.KEYUP:
+            sampler.pause()
+        return False
     # Key down
     elif event.type == pg.KEYDOWN:
-        logger.debug("Key down: '%s' %s" % (pg.key.name(event.key), event.key))
+        logger.debug("Key '%s' (%s) down." % (pg.key.name(event.key), event.key))
         step_size = (5 if event.mod & (pg.KMOD_LSHIFT | pg.KMOD_RSHIFT) else 1)
         # Rewind
         if pg.K_F7 == event.key:
             if isinstance(snd, Generator):
                 snd.sustain = None
             logger.info("Rewind")
-            it.send('reset')
+            try:
+                it.send('reset')
+            except TypeError, err:
+                logger.warn(err)
         # Arrows
         elif pg.K_UP == event.key:
             if event.mod & (pg.KMOD_LALT | pg.KMOD_RALT):
@@ -328,7 +333,7 @@ def handle_input(snd, it, event):
         else:
             if isinstance(snd, Generator):
                 snd.sustain = it.send('current')[0]
-                logger.debug("Key up:   '%s' %s, sustain: %s" % (pg.key.name(event.key), event.key, snd.sustain))
+                logger.debug("Key '%s' (%s) up, sustain: %s" % (pg.key.name(event.key), event.key, snd.sustain))
     else:
         logger.debug("Other: %s" % event)
 
