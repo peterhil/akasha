@@ -224,11 +224,9 @@ def show_transfer(screen, snd, size=720, standard='PAL', axis='imag'):
     Show a sound signal using the old video tape audio recording technique.
     See: http://en.wikipedia.org/wiki/44100_Hz#Recording_on_video_equipment
     """
-    # FIXME because xoltar uses 'is' to inspect the arguments,
-    # snd samples need to be wrapped into a list!
     img = get_canvas(size)
-
     tfer = video_transfer(snd, standard=standard, axis=axis, horiz=size)
+
     black = (size - tfer.shape[0]) / 2.0
     img[:, black:-black, :] = tfer[:, :img.shape[1], :].transpose(1, 0, 2)
 
