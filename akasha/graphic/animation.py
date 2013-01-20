@@ -38,9 +38,8 @@ def change_frequency(snd, key):
     snd.frequency = f
     if isinstance(snd, Generator):
         snd.sustain = None
-    logger.info(
-        "Setting NEW frequency: %r for %s, now at frequency: %s" %
-        (f, snd, snd.frequency))
+
+    logger.info("Changed frequency: %s." % snd)
 
 
 def handle_input(snd, it, event):
@@ -57,7 +56,7 @@ def handle_input(snd, it, event):
         sampler.pause()
     # Key down
     elif event.type == pg.KEYDOWN:
-        logger.debug("Key down: %s" % event)
+        logger.debug("Key down: '%s' %s" % (pg.key.name(event.key), event.key))
         step_size = (5 if event.mod & (pg.KMOD_LSHIFT | pg.KMOD_RSHIFT) else 1)
         # Rewind
         if pg.K_F7 == event.key:
@@ -94,9 +93,10 @@ def handle_input(snd, it, event):
         else:
             if isinstance(snd, Generator):
                 snd.sustain = it.send('current')[0]
-                logger.debug("Key up:   %s, sustain: %s" % (event, snd.sustain))
+                logger.debug("Key up:   '%s' %s, sustain: %s" % (pg.key.name(event.key), event.key, snd.sustain))
     else:
         logger.debug("Other: %s" % event)
+
     return False
 
 
