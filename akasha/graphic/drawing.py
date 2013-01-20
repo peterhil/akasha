@@ -108,10 +108,11 @@ def draw(
 
     if lines:
         if antialias and screen is not None:
-            draw_lines_aa(signal, screen, size, colours)
+            draw_lines_pg(signal, screen, size, colours, antialias=True)
         else:
             # raise NotImplementedError("Drawing lines with Numpy is way too slow for now!")
-            return draw_lines(signal, img, size, colours)
+            # return draw_lines(signal, img, size, colours)
+            return draw_lines_pg(signal, screen, size, colours, antialias=False)
     else:
         if antialias:
             return draw_points_aa(signal, img, size, colours)
@@ -143,21 +144,22 @@ def add_alpha(rgb, opacity=255):
     return np.append(rgb, np.array([opacity] * len(rgb)).reshape(len(rgb), 1), 1)
 
 
-def draw_lines_aa(signal, screen, size=1000, colours=True):
+def draw_lines_pg(signal, screen, size=1000, colours=True, antialias=False):
     """
-    Draw antialiased lines with Pygame.
+    Draw (antialiased) lines with Pygame.
     """
+    img = get_canvas(size, axis=True)
+    blit(screen, img)
+
+    method = 'aaline' if antialias else 'line'
     pts = get_points(flip_vertical(signal), size).T
     if colours:
-        # FIXME: draws wrong colours on high frequencies!
-        colors = colorize(signal)
+        # FIXME: aaline draws wrong colours on high frequencies!
+        colors = add_alpha(colorize(signal))
         for (i, ends) in enumerate(pairwise(pts)):
-            # pts = get_points(np.array(ends), size).T
-            # rgb = hsv2rgb(angle2hsv(chords_to_hues(ends, padding=False)))
-            # color = pygame.Color(*list(rgb)[:-1])
-            pygame.draw.aaline(screen, colors[i], *ends)
+            getattr(pygame.draw, method)(screen, colors[i], *ends)
     else:
-        pygame.draw.aalines(screen, pygame.Color('orange'), False, pts, 1)
+        getattr(pygame.draw, method + 's')(screen, pygame.Color('orange'), False, pts, 1)
 
 
 def draw_lines(signal, img, size=1000, colours=True):
@@ -166,13 +168,12 @@ def draw_lines(signal, img, size=1000, colours=True):
     """
     if len(signal) < 2:
         signal = pad(signal, -1)
-
     if colours:
         colors = add_alpha(colorize(signal))
 
     points = np.rint(get_points(flip_vertical(signal), size) - 0.5).astype(np.uint32).T
-
     segments = np.hstack((points[:-1], points[1:]))
+
     for i, coords in enumerate(segments):
         img[skdraw.bresenham(*coords)] = colors[i] if colours else white
 
