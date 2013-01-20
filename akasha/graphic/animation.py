@@ -99,32 +99,33 @@ def handle_input(snd, it, event):
     return False
 
 
-def paint_frame(it, ch, paint_fn, clock):
+def next_block(it):
     """
-    Queue audio and paint a frame.
+    Get a next block of samples.
     """
-    done = False
-    if sampler.paused:
-        return done
-    draw_start = timer()
     try:
-        samples = it.next()
-        audio = pg.sndarray.make_sound(pcm(samples))
-        ch.queue(audio)
-        paint_fn(samples)
+        return it.next()
     except StopIteration:
         logger.debug("Sound ended!")
-        done = True
-        return done
+        return None
 
-    dc = timer() - draw_start
-    fps = clock.get_fps()
-    t = clock.tick_busy_loop(sampler.videorate)
-    logger.log(
-        logging.BORING,
-        "Animation: clock tick %d, FPS: %3.3f, drawing took: %.4f", t, fps, dc)
 
-    return done
+def queue_audio(samples, ch):
+    """
+    Queue samples into a mixer channel.
+    """
+    ch.queue(pg.sndarray.make_sound(pcm(samples)))
+
+
+def do_audio_video(it, ch, paint_fn):
+    if not sampler.paused:
+        samples = next_block(it)
+        if samples is not None:
+            queue_audio(samples, ch)
+            paint_fn(samples)
+        else:
+            return True  # done
+    return False
 
 
 def handle_events(snd, it, ch, paint_fn, clock):
@@ -149,23 +150,43 @@ def handle_events(snd, it, ch, paint_fn, clock):
 
     # Paint
     if frames and not done:
-        frames_start = timer()
-        done |= paint_frame(it, ch, paint_fn, clock)
-        if len(frames) != 1:
-            logger.debug("Painted %s frames in %.4f seconds: %s" % (len(frames), timer() - frames_start, frames))
-        if len(frames) > 1:
-            drop = len(frames) - 1
-            for i in xrange(drop):
-                try:
-                    it.next()
-                except StopIteration:
-                    done = True
-                    break
-            logger.warn("Dropped %s frames!" % drop)
+        draw_start = timer()
+
+        done |= do_audio_video(it, ch, paint_fn)
+
+        dc = timer() - draw_start
+        fps = clock.get_fps()
+        t = clock.tick_busy_loop(sampler.videorate)
+
+        logger.log(logging.BORING,
+            "Animation: clock tick %d, FPS: %3.3f, drawing took: %.4f", t, fps, dc)
+
+        done |= drop_frames(frames, it)
 
     if len(events) > 1:
         logger.debug("Handled %s events in %.4f seconds: %s" % (len(events), timer() - start, events))
 
+    if reactor.running and done:
+        reactor.stop()  # pylint: disable=E1101
+        cleanup()
+    else:
+        return done
+
+
+def drop_frames(frames, it):
+    """
+    Drop the number of frame events over one from the iterator.
+    """
+    done = False
+    if len(frames) > 1:
+        drop = len(frames) - 1
+        for i in xrange(drop):
+            try:
+                it.next()
+            except StopIteration:
+                done = True
+                break
+        logger.warn("Dropped %s frames!" % drop)
     return done
 
 
@@ -204,16 +225,9 @@ def show_slice(screen, snd, size=800, antialias=True, lines=False, colours=True)
     """
     Show a sound signal on screen.
     """
-    img = None
-
-    # Make sure there are axis for pygame
-    if lines and antialias:
-        img = get_canvas(size, axis=True)
-        blit(screen, img)
-
     img = draw(snd, size,
                antialias=antialias, lines=lines, colours=colours,
-               axis=True, screen=screen, img=img)
+               axis=True, screen=screen)
 
     blit(screen, img)
     pg.display.flip()
@@ -275,33 +289,31 @@ def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=T
 
     clock = pg.time.Clock()
 
+    set_timer()
     if loop == 'pygame':
-        set_timer()
         done = False
         while not done:
             done = handle_events(snd, it, ch, paint_fn, clock)
             time.sleep(1 / 1000)  # Fixme: This reduces calls to handle_events, but is it necessary?
+        cleanup(it)
     else:
         # See: http://bazaar.launchpad.net/~game-hackers/game/trunk/view/head:/game/view.py
+
         pg.display.init()
 
-        renderCall = LoopingCall(paint_frame, it, ch, paint_fn, clock)
+        # renderCall = LoopingCall(do_audio_video, it, ch, paint_fn)
+        # renderdef = renderCall.start(1 / sampler.videorate, now=False)
+        # renderdef.addErrback(handle_error)
+
         inputCall = LoopingCall(handle_events, snd, it, ch, paint_fn, clock)
-
-        renderdef = renderCall.start(1 / sampler.videorate, now=False)
-        renderdef.addErrback(handle_error)
-
-        finished = inputCall.start(1 / sampler.videorate / 10, now=False)
+        finished = inputCall.start(1 / (sampler.videorate * 2), now=False)
         finished.addErrback(handle_error)
 
-        finished.addCallback(lambda ign: renderCall.stop())
-        finished.addCallback(lambda ign: cleanup())
+        # finished.addCallback(lambda ign: renderCall.stop())
+        # finished.addCallback(lambda ign: cleanup())
 
         if not reactor.running:
             reactor.run()  # pylint: disable=E1101
-
-    cleanup(it)
-
 
 def cleanup(it=None):
     """
