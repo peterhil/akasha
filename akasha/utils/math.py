@@ -488,7 +488,7 @@ def normalize(signal):
     return signal / sup
 
 
-def clip(signal, inplace=False):
+def clip(signal, limit=1.0, inplace=False):
     """
     Clips complex signal to unit rectangle area (-1-1j, +1+1j).
     """
@@ -499,7 +499,7 @@ def clip(signal, inplace=False):
         signal = signal.copy()
 
     reals = signal.view(np.float)
-    np.clip(reals, a_min=-1, a_max=1, out=reals)  # Do clipping in-place!
+    np.clip(reals, a_min=-limit, a_max=limit, out=reals)  # Do clipping in-place!
 
     return signal
 
