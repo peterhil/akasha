@@ -12,7 +12,6 @@ import logging
 import pygame as pg
 import time
 
-from funckit import xoltar as fx
 from timeit import default_timer as timer
 from twisted.internet.task import LoopingCall
 from twisted.internet import reactor
@@ -112,7 +111,7 @@ def paint_frame(it, ch, paint_fn, clock):
         samples = it.next()
         audio = pg.sndarray.make_sound(pcm(samples))
         ch.queue(audio)
-        paint_fn([samples])  # FIXME wrap samples into a list for xoltar curry to work
+        paint_fn(samples)
     except StopIteration:
         logger.debug("Sound ended!")
         done = True
@@ -213,9 +212,6 @@ def show_slice(screen, snd, size=800, antialias=True, lines=False, colours=True)
     """
     Show a sound signal on screen.
     """
-    # FIXME because xoltar uses 'is' to inspect the arguments,
-    # snd samples need to be wrapped into a list!
-    snd = snd[0]
     img = None
 
     # Make sure there are axis for pygame
@@ -238,11 +234,12 @@ def show_transfer(screen, snd, size=720, standard='PAL', axis='imag'):
     """
     # FIXME because xoltar uses 'is' to inspect the arguments,
     # snd samples need to be wrapped into a list!
-    snd = snd[0]
     img = get_canvas(size)
+
     tfer = video_transfer(snd, standard=standard, axis=axis, horiz=size)
     black = (size - tfer.shape[0]) / 2.0
-    img[1 + black:-black, 1:, :] = tfer
+    img[:, black:-black, :] = tfer[:, :img.shape[1], :].transpose(1, 0, 2)
+
     blit(screen, img)
     pg.display.flip()
 
@@ -280,17 +277,11 @@ def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=T
     ch = pg.mixer.find_channel()
     it = iter(snd)
 
-    paint_fn = lambda snd: show_slice(
-        screen,
-        snd,
-        size=size,
-        antialias=antialias,
-        lines=lines,
-        colours=colours,
-    )
-    # paint_fn = fx.curry_function(show_slice, screen, size=size,
-    #                     antialias=antialias, lines=lines, colours=colours)
-    #paint_fn = fx.curry_function(show_transfer, screen, size=size, standard='PAL', axis='imag')
+    # paint_fn = lambda snd: show_slice(
+    #     screen, snd, size=size,
+    #     antialias=antialias, lines=lines, colours=colours
+    # )
+    paint_fn = lambda snd: show_transfer(screen, snd, size=size, standard='PAL', axis='imag')
 
     clock = pg.time.Clock()
 

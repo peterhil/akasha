@@ -330,7 +330,7 @@ def video_transfer(signal, standard='PAL', axis='real', horiz=720):
     #for block in xrange(0, len(signal), framesize):
     #    pass # draw frame
 
-    img = get_canvas(3 - 1, vert - 1, axis=False)  # Stretch to horiz. width later!
+    img = get_canvas(3, vert, axis=False)  # Stretch to horiz. width later!
     fv = img.flat
 
     s = pcm(signal[:framesize] * 256, bits=8, axis='real').astype(np.uint8)
@@ -338,7 +338,7 @@ def video_transfer(signal, standard='PAL', axis='real', horiz=720):
     fv[::] = np.repeat(s, 4, axis=0)
 
     #logger.debug("Image:\n%s,\nFlat view:\n%s" % (img[:framesize], fv[:framesize]))
-    return np.repeat(img[:framesize], horiz / linewidth, axis=1)
+    return np.repeat(img[:framesize], horiz / linewidth + 2, axis=1)
 
 
 # Showing images
