@@ -29,16 +29,235 @@ w = WickiLayout()
 VIDEOFRAME = pg.NUMEVENTS - 1
 
 
-def change_frequency(snd, key):
+def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=True,
+         init=None, loop='pygame'):
     """
-    Change frequency of the sound based on key position.
+    Animate complex sound signal
     """
-    snd.frequency = w.get(*(pos.get(key, pos[None])))
+    init_pygame()
+    init_mixer(init)
+    pg.display.set_caption(name)
 
-    if isinstance(snd, Generator):
-        snd.sustain = None
+    resolution = (size, size)  # FIXME get resolution some other way.
+    screen = pg.display.set_mode(resolution, pg.SRCALPHA, 32)
 
-    logger.info("Changed frequency: %s." % snd)
+    ch = pg.mixer.find_channel()
+    it = iter(snd)
+
+    paint_fn = lambda snd: show_slice(
+        screen, snd, size=size,
+        antialias=antialias, lines=lines, colours=colours
+    )
+    # paint_fn = lambda snd: show_transfer(screen, snd, size=size, standard='PAL', axis='imag')
+
+    clock = pg.time.Clock()
+
+    set_timer()
+    if loop == 'pygame':
+        done = False
+        while not done:
+            done = handle_events(snd, it, ch, paint_fn, clock)
+            time.sleep(1 / 1000)  # Fixme: This reduces calls to handle_events, but is it necessary?
+        cleanup(it)
+    else:
+        # See: http://bazaar.launchpad.net/~game-hackers/game/trunk/view/head:/game/view.py
+
+        pg.display.init()
+
+        # renderCall = LoopingCall(do_audio_video, it, ch, paint_fn)
+        # renderdef = renderCall.start(1 / sampler.videorate, now=False)
+        # renderdef.addErrback(handle_error)
+
+        inputCall = LoopingCall(handle_events, snd, it, ch, paint_fn, clock)
+        finished = inputCall.start(1 / (sampler.videorate * 2), now=False)
+        finished.addErrback(handle_error)
+
+        # finished.addCallback(lambda ign: renderCall.stop())
+        # finished.addCallback(lambda ign: cleanup())
+
+        if not reactor.running:
+            reactor.run()  # pylint: disable=E1101
+
+
+def init_pygame():
+    """
+    Initialize Pygame mixer settings and surface array.
+    """
+    # Set mixer defaults: sampler rate, sample type, number of channels, buffer size
+    pg.mixer.pre_init(sampler.rate, pg.AUDIO_S16, 1, 512)
+    if 'numpy' in pg.surfarray.get_arraytypes():
+        pg.surfarray.use_arraytype('numpy')
+        logger.info("Using %s" % pg.surfarray.get_arraytype().capitalize())
+    else:
+        raise ImportError('Numpy array package is not installed')
+
+
+def init_mixer(*args):
+    """
+    Initialize the Pygame mixer.
+    """
+    pg.init()
+    pg.mixer.quit()
+    if isinstance(args, (tuple, list)) and len(args) > 0 and args[0]:
+        print args[0]
+        pg.mixer.init(*args[0])
+    else:
+        pg.mixer.init(frequency=sampler.rate, size=-16, channels=1, buffer=512)
+    init = pg.mixer.get_init()
+    logger.debug(
+        "Mixer init: %s sampler rate: %s Video rate: %s" %
+        (init, sampler.rate, sampler.videorate))
+    return init
+
+
+def set_timer(ms=sampler.frametime):
+    """
+    Set and start pygame timer interval for VIDEOFRAME events.
+    """
+    pg.time.set_timer(VIDEOFRAME, ms)
+
+
+def handle_error(err):
+    """
+    Logging error handler.
+    """
+    logger.error("Error traceback:\n%s" % str(err))
+    if reactor.running:
+        reactor.stop()  # pylint: disable=E1101
+    cleanup()
+    raise err
+
+
+def cleanup(it=None):
+    """
+    Clean up: Quit pygame, close iterator.
+    """
+    logger.info("Clean up: Quit pygame, close iterator.")
+    pg.mixer.quit()
+    pg.display.quit()
+    pg.quit()
+    if it:
+        it.close()
+        del it
+    logger.info("Done cleanup.")
+
+
+def handle_events(snd, it, ch, paint_fn, clock):
+    """
+    Event handling dispatcher.
+    """
+    done = False
+    start = timer()
+    events = pg.event.get()
+
+    inputs = [event for event in events if event.type != VIDEOFRAME]
+    frames = [event for event in events if event.type == VIDEOFRAME]
+
+    # Handle input
+    if inputs:
+        input_start = timer()
+        for event in inputs:
+            done = handle_input(snd, it, event)
+            if done:
+                break
+        logger.debug("Handled %s inputs in %.4f seconds: %s" % (len(inputs), timer() - input_start, inputs))
+
+    # Paint
+    if frames and not done:
+        draw_start = timer()
+
+        done |= do_audio_video(it, ch, paint_fn)
+
+        dc = timer() - draw_start
+        fps = clock.get_fps()
+        t = clock.tick_busy_loop(sampler.videorate)
+
+        logger.log(logging.BORING,
+            "Animation: clock tick %d, FPS: %3.3f, drawing took: %.4f", t, fps, dc)
+
+        done |= drop_frames(frames, it)
+
+    if len(events) > 1:
+        logger.debug("Handled %s events in %.4f seconds: %s" % (len(events), timer() - start, events))
+
+    if reactor.running and done:
+        reactor.stop()  # pylint: disable=E1101
+        cleanup()
+    else:
+        return done
+
+
+def do_audio_video(it, ch, paint_fn):
+    if not sampler.paused:
+        samples = next_block(it)
+        if samples is not None:
+            queue_audio(samples, ch)
+            paint_fn(samples)
+        else:
+            return True  # done
+    return False
+
+
+def next_block(it):
+    """
+    Get a next block of samples.
+    """
+    try:
+        return it.next()
+    except StopIteration:
+        logger.debug("Sound ended!")
+        return None
+
+
+def queue_audio(samples, ch):
+    """
+    Queue samples into a mixer channel.
+    """
+    ch.queue(pg.sndarray.make_sound(pcm(samples)))
+
+
+def show_slice(screen, snd, size=800, antialias=True, lines=False, colours=True):
+    """
+    Show a sound signal on screen.
+    """
+    img = draw(snd, size,
+               antialias=antialias, lines=lines, colours=colours,
+               axis=True, screen=screen)
+
+    blit(screen, img)
+    pg.display.flip()
+
+
+def show_transfer(screen, snd, size=720, standard='PAL', axis='imag'):
+    """
+    Show a sound signal using the old video tape audio recording technique.
+    See: http://en.wikipedia.org/wiki/44100_Hz#Recording_on_video_equipment
+    """
+    img = get_canvas(size)
+    tfer = video_transfer(snd, standard=standard, axis=axis, horiz=size)
+
+    black = (size - tfer.shape[0]) / 2.0
+    img[:, black:-black, :] = tfer[:, :img.shape[1], :].transpose(1, 0, 2)
+
+    blit(screen, img)
+    pg.display.flip()
+
+
+def drop_frames(frames, it):
+    """
+    Drop the number of frame events over one from the iterator.
+    """
+    done = False
+    if len(frames) > 1:
+        drop = len(frames) - 1
+        for i in xrange(drop):
+            try:
+                it.next()
+            except StopIteration:
+                done = True
+                break
+        logger.warn("Dropped %s frames!" % drop)
+    return done
 
 
 def handle_input(snd, it, event):
@@ -99,278 +318,13 @@ def handle_input(snd, it, event):
     return False
 
 
-def next_block(it):
+def change_frequency(snd, key):
     """
-    Get a next block of samples.
+    Change frequency of the sound based on key position.
     """
-    try:
-        return it.next()
-    except StopIteration:
-        logger.debug("Sound ended!")
-        return None
+    snd.frequency = w.get(*(pos.get(key, pos[None])))
 
+    if isinstance(snd, Generator):
+        snd.sustain = None
 
-def queue_audio(samples, ch):
-    """
-    Queue samples into a mixer channel.
-    """
-    ch.queue(pg.sndarray.make_sound(pcm(samples)))
-
-
-def do_audio_video(it, ch, paint_fn):
-    if not sampler.paused:
-        samples = next_block(it)
-        if samples is not None:
-            queue_audio(samples, ch)
-            paint_fn(samples)
-        else:
-            return True  # done
-    return False
-
-
-def handle_events(snd, it, ch, paint_fn, clock):
-    """
-    Event handling dispatcher.
-    """
-    done = False
-    start = timer()
-    events = pg.event.get()
-
-    inputs = [event for event in events if event.type != VIDEOFRAME]
-    frames = [event for event in events if event.type == VIDEOFRAME]
-
-    # Handle input
-    if inputs:
-        input_start = timer()
-        for event in inputs:
-            done = handle_input(snd, it, event)
-            if done:
-                break
-        logger.debug("Handled %s inputs in %.4f seconds: %s" % (len(inputs), timer() - input_start, inputs))
-
-    # Paint
-    if frames and not done:
-        draw_start = timer()
-
-        done |= do_audio_video(it, ch, paint_fn)
-
-        dc = timer() - draw_start
-        fps = clock.get_fps()
-        t = clock.tick_busy_loop(sampler.videorate)
-
-        logger.log(logging.BORING,
-            "Animation: clock tick %d, FPS: %3.3f, drawing took: %.4f", t, fps, dc)
-
-        done |= drop_frames(frames, it)
-
-    if len(events) > 1:
-        logger.debug("Handled %s events in %.4f seconds: %s" % (len(events), timer() - start, events))
-
-    if reactor.running and done:
-        reactor.stop()  # pylint: disable=E1101
-        cleanup()
-    else:
-        return done
-
-
-def drop_frames(frames, it):
-    """
-    Drop the number of frame events over one from the iterator.
-    """
-    done = False
-    if len(frames) > 1:
-        drop = len(frames) - 1
-        for i in xrange(drop):
-            try:
-                it.next()
-            except StopIteration:
-                done = True
-                break
-        logger.warn("Dropped %s frames!" % drop)
-    return done
-
-
-def init_pygame():
-    """
-    Initialize Pygame mixer settings and surface array.
-    """
-    # Set mixer defaults: sampler rate, sample type, number of channels, buffer size
-    pg.mixer.pre_init(sampler.rate, pg.AUDIO_S16, 1, 512)
-    if 'numpy' in pg.surfarray.get_arraytypes():
-        pg.surfarray.use_arraytype('numpy')
-        logger.info("Using %s" % pg.surfarray.get_arraytype().capitalize())
-    else:
-        raise ImportError('Numpy array package is not installed')
-
-
-def init_mixer(*args):
-    """
-    Initialize the Pygame mixer.
-    """
-    pg.init()
-    pg.mixer.quit()
-    if isinstance(args, (tuple, list)) and len(args) > 0 and args[0]:
-        print args[0]
-        pg.mixer.init(*args[0])
-    else:
-        pg.mixer.init(frequency=sampler.rate, size=-16, channels=1, buffer=512)
-    init = pg.mixer.get_init()
-    logger.debug(
-        "Mixer init: %s sampler rate: %s Video rate: %s" %
-        (init, sampler.rate, sampler.videorate))
-    return init
-
-
-def show_slice(screen, snd, size=800, antialias=True, lines=False, colours=True):
-    """
-    Show a sound signal on screen.
-    """
-    img = draw(snd, size,
-               antialias=antialias, lines=lines, colours=colours,
-               axis=True, screen=screen)
-
-    blit(screen, img)
-    pg.display.flip()
-
-
-def show_transfer(screen, snd, size=720, standard='PAL', axis='imag'):
-    """
-    Show a sound signal using the old video tape audio recording technique.
-    See: http://en.wikipedia.org/wiki/44100_Hz#Recording_on_video_equipment
-    """
-    img = get_canvas(size)
-    tfer = video_transfer(snd, standard=standard, axis=axis, horiz=size)
-
-    black = (size - tfer.shape[0]) / 2.0
-    img[:, black:-black, :] = tfer[:, :img.shape[1], :].transpose(1, 0, 2)
-
-    blit(screen, img)
-    pg.display.flip()
-
-
-def set_timer(ms=sampler.frametime):
-    """
-    Set and start pygame timer interval for VIDEOFRAME events.
-    """
-    pg.time.set_timer(VIDEOFRAME, ms)
-
-
-def handle_error(err):
-    """
-    Logging error handler.
-    """
-    logger.error("Error traceback:\n%s" % str(err))
-    if reactor.running:
-        reactor.stop()  # pylint: disable=E1101
-    cleanup()
-    raise err
-
-
-def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=True,
-         init=None, loop='pygame'):
-    """
-    Animate complex sound signal
-    """
-    init_pygame()
-    init_mixer(init)
-    pg.display.set_caption(name)
-
-    resolution = (size, size)  # FIXME get resolution some other way.
-    screen = pg.display.set_mode(resolution, pg.SRCALPHA, 32)
-
-    ch = pg.mixer.find_channel()
-    it = iter(snd)
-
-    paint_fn = lambda snd: show_slice(
-        screen, snd, size=size,
-        antialias=antialias, lines=lines, colours=colours
-    )
-    # paint_fn = lambda snd: show_transfer(screen, snd, size=size, standard='PAL', axis='imag')
-
-    clock = pg.time.Clock()
-
-    set_timer()
-    if loop == 'pygame':
-        done = False
-        while not done:
-            done = handle_events(snd, it, ch, paint_fn, clock)
-            time.sleep(1 / 1000)  # Fixme: This reduces calls to handle_events, but is it necessary?
-        cleanup(it)
-    else:
-        # See: http://bazaar.launchpad.net/~game-hackers/game/trunk/view/head:/game/view.py
-
-        pg.display.init()
-
-        # renderCall = LoopingCall(do_audio_video, it, ch, paint_fn)
-        # renderdef = renderCall.start(1 / sampler.videorate, now=False)
-        # renderdef.addErrback(handle_error)
-
-        inputCall = LoopingCall(handle_events, snd, it, ch, paint_fn, clock)
-        finished = inputCall.start(1 / (sampler.videorate * 2), now=False)
-        finished.addErrback(handle_error)
-
-        # finished.addCallback(lambda ign: renderCall.stop())
-        # finished.addCallback(lambda ign: cleanup())
-
-        if not reactor.running:
-            reactor.run()  # pylint: disable=E1101
-
-def cleanup(it=None):
-    """
-    Clean up: Quit pygame, close iterator.
-    """
-    logger.info("Clean up: Quit pygame, close iterator.")
-    pg.mixer.quit()
-    pg.display.quit()
-    pg.quit()
-    if it:
-        it.close()
-        del it
-    logger.info("Done cleanup.")
-
-
-class SignalView(object):
-    """
-    A view for animated sound signal and audio output.
-    """
-    def __init__(self, position=(0, 0), size=(800, 800), antialias=True, lines=False):
-        self.position = position
-        self.size = size
-        self.antialias = antialias
-        self.lines = lines
-
-
-class Window(object):
-    """
-    Pygame based window.
-    """
-    def __init__(
-        self,
-        clock=reactor,
-        display=pg.display,
-        event=pg.event,
-        view=SignalView,
-        size=(800, 800),
-        name="Resonance"
-    ):
-        self.clock = clock
-        self.display = display
-        self.event = event
-        self.size = size
-        self.viewType = view
-        self._view = view(size=size)
-        pg.display.set_caption(name)
-
-    def go(self, snd):
-        """
-        Go live with the Window.
-        """
-        self.display.init()
-        # self.display.set_caption(name)
-
-        renderCall = LoopingCall(handle_events, (snd, iter(snd), paint_frame, self.clock))
-        renderdef = renderCall.start(1 / sampler.videorate, now=False)
-        renderdef.addCallback(lambda ign: self.display.quit())
-        renderdef.addErrback(handle_error)
-
-        reactor.run()  # pylint: disable=E1101
+    logger.info("Changed frequency: %s." % snd)
