@@ -34,8 +34,8 @@ def change_frequency(snd, key):
     """
     Change frequency of the sound based on key position.
     """
-    f = w.get(*(pos.get(key, pos[None])))
-    snd.frequency = f
+    snd.frequency = w.get(*(pos.get(key, pos[None])))
+
     if isinstance(snd, Generator):
         snd.sustain = None
 
@@ -124,29 +124,49 @@ def paint_frame(it, ch, paint_fn, clock):
     logger.log(
         logging.BORING,
         "Animation: clock tick %d, FPS: %3.3f, drawing took: %.4f", t, fps, dc)
+
     return done
 
 
-def handle_events(snd, it, ch, paint_fn, clock, twisted_loop=False):
+def handle_events(snd, it, ch, paint_fn, clock):
     """
     Event handling dispatcher.
     """
     done = False
-    input_start = timer()
+    start = timer()
     events = pg.event.get()
-    for event in events:
-        if twisted_loop or (event.type != VIDEOFRAME):
+
+    inputs = [event for event in events if event.type != VIDEOFRAME]
+    frames = [event for event in events if event.type == VIDEOFRAME]
+
+    # Handle input
+    if inputs:
+        input_start = timer()
+        for event in inputs:
             done = handle_input(snd, it, event)
-        if twisted_loop or (event.type == VIDEOFRAME):
-            done |= paint_frame(it, ch, paint_fn, clock)
-        if done:
-            break
-    dc = timer() - input_start
+            if done:
+                break
+        logger.debug("Handled %s inputs in %.4f seconds: %s" % (len(inputs), timer() - input_start, inputs))
+
+    # Paint
+    if frames and not done:
+        frames_start = timer()
+        done |= paint_frame(it, ch, paint_fn, clock)
+        if len(frames) != 1:
+            logger.debug("Painted %s frames in %.4f seconds: %s" % (len(frames), timer() - frames_start, frames))
+        if len(frames) > 1:
+            drop = len(frames) - 1
+            for i in xrange(drop):
+                try:
+                    it.next()
+                except StopIteration:
+                    done = True
+                    break
+            logger.warn("Dropped %s frames!" % drop)
+
     if len(events) > 1:
-        logger.debug("Handled %s events in %.4f seconds: %s" % (len(events), dc, events))
-    if done and reactor.running:  # pylint: disable=E1101
-        pg.display.quit()
-        reactor.stop()  # pylint: disable=E1101
+        logger.debug("Handled %s events in %.4f seconds: %s" % (len(events), timer() - start, events))
+
     return done
 
 
@@ -232,13 +252,14 @@ def set_timer(ms=sampler.frametime):
     pg.time.set_timer(VIDEOFRAME, ms)
 
 
-def handleError(err):
+def handle_error(err):
     """
     Logging error handler.
     """
-    logger.error("%s happened!" % str(err))
-    pg.display.quit()
-    reactor.stop()  # pylint: disable=E1101
+    logger.error("Error traceback:\n%s" % str(err))
+    if reactor.running:
+        reactor.stop()  # pylint: disable=E1101
+    cleanup()
     raise err
 
 
@@ -278,25 +299,39 @@ def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=T
             done = handle_events(snd, it, ch, paint_fn, clock)
             time.sleep(1 / 1000)  # Fixme: This reduces calls to handle_events, but is it necessary?
     else:
+        # See: http://bazaar.launchpad.net/~game-hackers/game/trunk/view/head:/game/view.py
         pg.display.init()
 
         renderCall = LoopingCall(paint_frame, it, ch, paint_fn, clock)
         inputCall = LoopingCall(handle_events, snd, it, ch, paint_fn, clock)
 
         renderdef = renderCall.start(1 / sampler.videorate, now=False)
-        renderdef.addErrback(handleError)
+        renderdef.addErrback(handle_error)
 
         finished = inputCall.start(1 / sampler.videorate / 10, now=False)
-        finished.addErrback(handleError)
+        finished.addErrback(handle_error)
 
         finished.addCallback(lambda ign: renderCall.stop())
-        finished.addCallback(lambda ign: pg.display.quit())
-        reactor.run()  # pylint: disable=E1101
+        finished.addCallback(lambda ign: cleanup())
 
-    it.close()
-    del it
+        if not reactor.running:
+            reactor.run()  # pylint: disable=E1101
+
+    cleanup(it)
+
+
+def cleanup(it=None):
+    """
+    Clean up: Quit pygame, close iterator.
+    """
+    logger.info("Clean up: Quit pygame, close iterator.")
     pg.mixer.quit()
+    pg.display.quit()
     pg.quit()
+    if it:
+        it.close()
+        del it
+    logger.info("Done cleanup.")
 
 
 class SignalView(object):
@@ -341,6 +376,6 @@ class Window(object):
         renderCall = LoopingCall(handle_events, (snd, iter(snd), paint_frame, self.clock))
         renderdef = renderCall.start(1 / sampler.videorate, now=False)
         renderdef.addCallback(lambda ign: self.display.quit())
-        renderdef.addErrback(handleError)
+        renderdef.addErrback(handle_error)
 
         reactor.run()  # pylint: disable=E1101
