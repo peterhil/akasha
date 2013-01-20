@@ -81,7 +81,7 @@ class FrequencyRatioMixin(object):
         return self.ratio.numerator
 
     @staticmethod
-    def to_ratio(freq, limit=sampler.rate ** 2):
+    def to_ratio(freq, limit=sampler.rate * 2):
         """
         Returns a rationally approximated ratio (a Fraction) corresponding to the frequency.
         """
