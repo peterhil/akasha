@@ -68,6 +68,14 @@ def get_canvas(width=1000, height=None, channels=4, axis=True):
     return img
 
 
+def blit(screen, img):
+    """
+    Blit the screen.
+    """
+    if screen and img is not None:
+        pygame.surfarray.blit_array(screen, img[..., :3])  # Drop alpha
+
+
 def draw(
     signal,
     size=1000,

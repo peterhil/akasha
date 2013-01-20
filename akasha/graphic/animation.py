@@ -18,7 +18,7 @@ from twisted.internet import reactor
 
 from akasha.audio.generators import Generator
 from akasha.control.io.keyboard import pos
-from akasha.graphic.drawing import get_canvas, draw, video_transfer
+from akasha.graphic.drawing import get_canvas, blit, draw, video_transfer
 from akasha.timing import sampler
 from akasha.tunings import WickiLayout
 from akasha.utils.math import pcm
@@ -198,14 +198,6 @@ def init_mixer(*args):
         "Mixer init: %s sampler rate: %s Video rate: %s" %
         (init, sampler.rate, sampler.videorate))
     return init
-
-
-def blit(screen, img):
-    """
-    Blit the screen.
-    """
-    if screen and img is not None:
-        pg.surfarray.blit_array(screen, img[..., :3])  # Drop alpha
 
 
 def show_slice(screen, snd, size=800, antialias=True, lines=False, colours=True):
