@@ -153,10 +153,9 @@ def draw_lines(signal, img, size=1000, colours=True):
     if colours:
         colors = add_alpha(colorize(signal))
 
-    points = np.rint(get_points(flip_vertical(signal), size) - 0.5).astype(np.uint32)
+    points = np.rint(get_points(flip_vertical(signal), size) - 0.5).astype(np.uint32).T
 
-    segments = np.array(list(pairwise(izip(*points))), dtype=np.uint32).reshape(len(points.T) - 1, 4)
-
+    segments = np.hstack((points[:-1], points[1:]))
     for i, coords in enumerate(segments):
         img[skdraw.bresenham(*coords)] = colors[i] if colours else white
 
