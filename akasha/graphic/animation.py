@@ -21,6 +21,7 @@ from akasha.control.io.keyboard import pos
 from akasha.graphic.drawing import get_canvas, blit, draw, video_transfer
 from akasha.timing import sampler
 from akasha.tunings import WickiLayout
+from akasha.utils import issequence
 from akasha.utils.math import pcm
 from akasha.utils.log import logger
 
@@ -30,18 +31,12 @@ VIDEOFRAME = pg.NUMEVENTS - 1
 
 
 def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=True,
-         init=None, loop='pygame'):
+         mixer_options=(), loop='pygame'):
     """
     Animate complex sound signal
     """
-    init_pygame()
-    init_mixer(init)
-    pg.display.set_caption(name)
+    screen, ch = init_pygame(name, size, mixer_options)
 
-    resolution = (size, size)  # FIXME get resolution some other way.
-    screen = pg.display.set_mode(resolution, pg.SRCALPHA, 32)
-
-    ch = pg.mixer.find_channel()
     it = iter(snd)
 
     paint_fn = lambda snd: show_slice(
@@ -79,35 +74,57 @@ def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=T
             reactor.run()  # pylint: disable=E1101
 
 
-def init_pygame():
+def init_pygame(name="Resonance", size=800, mixer_options=()):
     """
     Initialize Pygame mixer settings and surface array.
     """
-    # Set mixer defaults: sampler rate, sample type, number of channels, buffer size
-    pg.mixer.pre_init(sampler.rate, pg.AUDIO_S16, 1, 512)
+    logger.info(
+        "Akasha is using %s Hz sampler rate and %s fps video rate." %
+        (sampler.rate, sampler.videorate))
+
+    screen = init_display(name, size)
+    channel = init_mixer(*mixer_options)
+
+    logger.info(
+        "Pygame initialized with %s loaded modules (%s failed)." %
+        pg.init())
+
+    return screen, channel
+
+
+def init_display(name, size):
+    """
+    Initialize Pygame display and surface arrays.
+    Returns Pygame screen.
+    """
     if 'numpy' in pg.surfarray.get_arraytypes():
         pg.surfarray.use_arraytype('numpy')
-        logger.info("Using %s" % pg.surfarray.get_arraytype().capitalize())
     else:
         raise ImportError('Numpy array package is not installed')
+
+    pg.display.set_caption(name)
+    resolution = (size, size)  # FIXME get resolution some other way.
+
+    return pg.display.set_mode(resolution, pg.SRCALPHA, 32)
 
 
 def init_mixer(*args):
     """
     Initialize the Pygame mixer.
     """
-    pg.init()
     pg.mixer.quit()
-    if isinstance(args, (tuple, list)) and len(args) > 0 and args[0]:
-        print args[0]
-        pg.mixer.init(*args[0])
+
+    # Set mixer defaults: sample rate, sample size, number of channels, buffer size
+    if issequence(args) and 0 < len(args) <= 3:
+        pg.mixer.init(*args)
     else:
         pg.mixer.init(frequency=sampler.rate, size=-16, channels=1, buffer=512)
-    init = pg.mixer.get_init()
-    logger.debug(
-        "Mixer init: %s sampler rate: %s Video rate: %s" %
-        (init, sampler.rate, sampler.videorate))
-    return init
+
+    logger.info(
+        "Mixer has %s Hz sample rate with %s size samples and %s channels." %
+        pg.mixer.get_init())
+
+    return pg.mixer.find_channel()
 
 
 def set_timer(ms=sampler.frametime):
