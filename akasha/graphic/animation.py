@@ -174,7 +174,7 @@ def init_pygame():
     Initialize Pygame mixer settings and surface array.
     """
     # Set mixer defaults: sampler rate, sample type, number of channels, buffer size
-    pg.mixer.pre_init(sampler.rate, pg.AUDIO_S16, 1, 128)
+    pg.mixer.pre_init(sampler.rate, pg.AUDIO_S16, 1, 512)
     if 'numpy' in pg.surfarray.get_arraytypes():
         pg.surfarray.use_arraytype('numpy')
         logger.info("Using %s" % pg.surfarray.get_arraytype().capitalize())
@@ -192,7 +192,7 @@ def init_mixer(*args):
         print args[0]
         pg.mixer.init(*args[0])
     else:
-        pg.mixer.init(frequency=sampler.rate, size=-16, channels=1, buffer=128)
+        pg.mixer.init(frequency=sampler.rate, size=-16, channels=1, buffer=512)
     init = pg.mixer.get_init()
     logger.debug(
         "Mixer init: %s sampler rate: %s Video rate: %s" %
