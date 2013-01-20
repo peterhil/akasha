@@ -277,11 +277,11 @@ def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=T
     ch = pg.mixer.find_channel()
     it = iter(snd)
 
-    # paint_fn = lambda snd: show_slice(
-    #     screen, snd, size=size,
-    #     antialias=antialias, lines=lines, colours=colours
-    # )
-    paint_fn = lambda snd: show_transfer(screen, snd, size=size, standard='PAL', axis='imag')
+    paint_fn = lambda snd: show_slice(
+        screen, snd, size=size,
+        antialias=antialias, lines=lines, colours=colours
+    )
+    # paint_fn = lambda snd: show_transfer(screen, snd, size=size, standard='PAL', axis='imag')
 
     clock = pg.time.Clock()
 
