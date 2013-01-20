@@ -488,6 +488,13 @@ def normalize(signal):
     return signal / sup
 
 
+def inside(arr, low, high):
+    """
+    Return values of array inside interval [low, high]
+    """
+    return np.ma.masked_outside(arr, low, high).compressed()
+
+
 def clip(signal, limit=1.0, inplace=False):
     """
     Clips complex signal to unit rectangle area (-1-1j, +1+1j).
@@ -546,6 +553,20 @@ def get_points(signal, size=1000, dtype=np.float64):
     Get coordinate points from a complex signal.
     """
     return complex_as_reals(scale(np.atleast_1d(signal), size), dtype)
+
+
+def get_pixels(signal, size):
+    """
+    Get pixel coordinates and pixel values from complex signal on some size.
+    """
+    # Change bottom-left coordinates to top-left with flip_vertical
+    points = get_points(flip_vertical(signal), size) - 0.5
+
+    # Note! np.fix rounds towards zero (rint would round to closest int)
+    pixels = np.fix(points).astype(np.int32)
+    values = 1 - ((points - pixels) % 1)
+
+    return pixels, values
 
 
 def scale(signal, size):

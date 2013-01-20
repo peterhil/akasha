@@ -16,7 +16,16 @@ from akasha.graphic.colour import colorize, white
 from akasha.graphic.primitive.line import bresenham
 from akasha.timing import sampler
 from akasha.utils.log import logger
-from akasha.utils.math import clip, pad, pcm, complex_as_reals, normalize, get_points, flip_vertical
+from akasha.utils.math import \
+    clip, \
+    complex_as_reals, \
+    flip_vertical, \
+    get_pixels, \
+    get_points, \
+    inside, \
+    normalize, \
+    pad, \
+    pcm
 
 from itertools import izip
 from PIL import Image
@@ -178,23 +187,6 @@ def draw_points_np_aa(signal, img, size=1000, colours=True):
 
     return img
 
-
-def get_pixels(signal, size):
-    """
-    Get pixel coordinates and pixel values from complex signal on some size.
-    """
-    # Change bottom-left coordinates to top-left with flip_vertical
-    points = get_points(flip_vertical(signal), size) - 0.5
-
-    # Note! np.fix rounds towards zero (rint would round to closest int)
-    pixels = np.fix(points).astype(np.int32)
-    values = 1 - ((points - pixels) % 1)
-
-    return pixels, values
-
-
-def inside(arr, low, high):
-    return np.ma.masked_outside(arr, low, high).compressed()
 
 def draw_points_aa(signal, img, size=1000, colours=True):
     """
