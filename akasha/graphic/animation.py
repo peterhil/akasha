@@ -205,7 +205,8 @@ def blit(screen, img):
     """
     Blit the screen.
     """
-    pg.surfarray.blit_array(screen, img[:, :, :-1])  # Drop alpha
+    if screen and img is not None:
+        pg.surfarray.blit_array(screen, img[..., :3])  # Drop alpha
 
 
 def show_slice(screen, snd, size=800, antialias=True, lines=False, colours=True):
@@ -215,17 +216,18 @@ def show_slice(screen, snd, size=800, antialias=True, lines=False, colours=True)
     # FIXME because xoltar uses 'is' to inspect the arguments,
     # snd samples need to be wrapped into a list!
     snd = snd[0]
-    if lines and antialias:  # Using Pygame drawing, so blit before
-        img = get_canvas(size)
+    img = None
+
+    # Make sure there are axis for pygame
+    if lines and antialias:
+        img = get_canvas(size, axis=True)
         blit(screen, img)
-        img = draw(snd, size,
-                   antialias=antialias, lines=lines, colours=colours,
-                   screen=screen, img=img)
-    else:
-        img = draw(snd, size,
-                   antialias=antialias, lines=lines, colours=colours,
-                   screen=screen)
-        blit(screen, img)
+
+    img = draw(snd, size,
+               antialias=antialias, lines=lines, colours=colours,
+               axis=True, screen=screen, img=img)
+
+    blit(screen, img)
     pg.display.flip()
 
 
