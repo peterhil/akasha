@@ -117,40 +117,6 @@ class FrequencyRatioMixin(RationalUnit):
         """
         return self.ratio != 0
 
-<<<<<<< HEAD
-=======
-    def _cmp(op):  # pylint: disable=E0213
-        """
-        Generate comparison methods.
-        """
-
-        def comparison(self, other):
-            # pylint: disable=C0111,E1102
-            if isinstance(other, FrequencyRatioMixin):
-                return op(self.ratio, other.ratio)
-            elif isinstance(other, Number):
-                return op(float(self), float(other))
-            else:
-                return NotImplemented
-
-        comparison.__name__ = '__' + op.__name__ + '__'
-        comparison.__doc__ = op.__doc__
-
-        return comparison
-
-    __eq__ = _cmp(operator.eq)
-    __ge__ = _cmp(operator.ge)
-    __gt__ = _cmp(operator.gt)
-    __le__ = _cmp(operator.le)
-    __lt__ = _cmp(operator.lt)
-
-    def __float__(self):
-        return float(self.hz)
-
-    def __int__(self):
-        return int(self.hz)
-
->>>>>>> develop
 
 class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
     """
