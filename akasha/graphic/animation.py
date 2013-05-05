@@ -21,13 +21,15 @@ from akasha.audio.generators import Generator
 from akasha.control.io.keyboard import pos
 from akasha.graphic.drawing import get_canvas, blit, draw, video_transfer
 from akasha.timing import sampler
-from akasha.tunings import WickiLayout
+from akasha.tunings import PianoLayout, WickiLayout
 from akasha.utils import issequence
-from akasha.utils.math import pcm
+from akasha.utils.math import pcm, minfloat
 from akasha.utils.log import logger
 
 
-w = WickiLayout()
+# w = WickiLayout()
+w = PianoLayout()
+
 VIDEOFRAME = pg.NUMEVENTS - 1
 
 

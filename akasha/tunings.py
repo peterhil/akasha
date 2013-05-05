@@ -165,7 +165,20 @@ class LucyTuning(object):
         return (2.0 / cls.L(5)) ** (n / 2.0)
 
 
-class WickiLayout(object):
+
+class AbstractLayout(object):
+    """
+    Abstract base class for musical keyboard layouts.
+    """
+    def move(self, *pos):
+        """
+        Move the placement of keys (or origo) on the generator lattice.
+        """
+        assert len(pos) == 2, "Expected two arguments or tuple of length two."
+        self.origo = (self.origo[0] + pos[0], self.origo[1] + pos[1])
+
+
+class WickiLayout(AbstractLayout):
     """
     Wicki-Hayden note layout:
     http://en.wikipedia.org/wiki/Wicki-Hayden_note_layout
@@ -223,9 +236,63 @@ class WickiLayout(object):
                 (self.gen[0] ** (pos[0] - self.origo[0])) * \
                 (self.gen[1] ** (pos[1] - self.origo[1]))
 
-    def move(self, *pos):
+
+class PianoLayout(AbstractLayout):
+    """
+    Classical piano layout.
+    """
+    def __init__(self, base=Frequency(441.0), origo=(1, 5)):
+        self.base = base
+        self.origo = origo
+        self.gen = 2 ** (1 / 12.0)
+
+    @property
+    def halftones(self):
+        return {
+            'C': 0, 'C#': 1,
+            'D': 2, 'D#': 3,
+            'E': 4,
+            'F': 5, 'F#': 6,
+            'G': 7, 'G#': 8,
+            'A': 9, 'A#': 10,
+            'B': 11,
+            '_': -1,
+        }
+
+    @property
+    def lattice(self):
+        return np.array([
+            ['C', 'C#'],
+            ['D', 'D#'],
+            ['E', '_'],
+            ['F', 'F#'],
+            ['G', 'G#'],
+            ['A', 'A#'],
+            ['B', '_'],
+        ], dtype='|S2').T
+
+    def get(self, *pos):
         """
-        Move the placement of keys (or origo) on the generator lattice.
+        Get a frequency on key position.
         """
-        assert len(pos) == 2, "Expected two arguments or tuple of length two."
-        self.origo = (self.origo[0] + pos[0], self.origo[1] + pos[1])
+        pos = np.subtract(pos, np.array(self.origo))
+        key = self.lattice[tuple(np.mod(pos, self.lattice.shape))]
+        octave_block = np.floor_divide(pos, self.lattice.shape)
+        octave = np.sum(octave_block)
+
+        if key == '_' or tuple(pos) == kb.shape:
+            freq = Frequency(0.0)
+        else:
+            freq = self.base * 2 ** ((octave * 12.0 + self.halftones[key]) / 12.0)
+
+        logger.debug(
+            "Playing key '%s%s' (%s) with %s. Got %s with octave block distance %s." % (
+                key,
+                octave,
+                self.halftones[key],
+                freq,
+                tuple(pos),
+                octave_block,
+                ))
+
+        return freq
