@@ -92,16 +92,22 @@ def angle_between(a, b):
     Angle in radians between two non-zero vectors.
     See: http://en.wikipedia.org/wiki/Vector_dot_product#Geometric_interpretation
     """
-    return np.angle(np.arccos((a / np.abs(a)) * (b / np.abs(b))))
+    return np.angle(a) - np.angle(b)
 
 
-def angle_between2(a, b):
+def angle_between_dotp(a, b):
     """
     Angle in radians between two nonzero vectors.
-    See: http://en.wikipedia.org/wiki/Vector_dot_product#Geometric_interpretation
+    Returns only positive values.
+
+    See:
+    http://en.wikipedia.org/wiki/Vector_dot_product#Geometric_interpretation
+    http://en.wikipedia.org/wiki/Inner_product
+    http://www.wikihow.com/Find-the-Angle-Between-Two-Vectors
     """
-    # vdot is for complex numbers, but this seems to not work correctly?!
-    return np.real(np.vdot(a, b)) / (np.abs(a) * np.abs(b))
+    # vdot is for complex numbers
+    dotp = np.real(np.vdot(a, b))
+    return np.arccos(dotp / (np.abs(a) * np.abs(b)))
 
 
 def curvature(previous_pt, point, next_pt):
