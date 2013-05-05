@@ -46,11 +46,11 @@ def demo(signal=None):
     """
     Demo of the short time fourier transforms.
     """
-    f0 = 440         # Compute the STFT of a 440 Hz sinusoid
-    fs = sampler.rate        # sampled at 8 kHz
-    T = 30            # lasting 5 seconds
+    f0 = 440  # Compute the STFT of a 440 Hz sinusoid
+    fs = sampler.rate  # sampled at 8 kHz
+    T = int(len(signal)/sampler.rate) if signal is not None else 5  # lasting 5 seconds
     framesz = 0.050  # with a frame size of 50 milliseconds
-    hop = 0.020      # and hop size of 20 milliseconds.
+    hop = 0.020  # and hop size of 20 milliseconds.
 
     # Create test signal and STFT.
     t = scipy.linspace(0, T, T * fs, endpoint=False)

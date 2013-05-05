@@ -13,11 +13,24 @@ import time
 from akasha.funct import pairwise
 from akasha.graphic.colour import colorize, white
 # from akasha.graphic.colour import hsv2rgb, angle2hsv, chords_to_hues
+from akasha.graphic.primitive.line import bresenham
 from akasha.timing import sampler
 from akasha.utils.log import logger
-from akasha.utils.math import clip, pad, pcm, complex_as_reals, normalize
+from akasha.utils.math import \
+    clip, \
+    complex_as_reals, \
+    flip_vertical, \
+    get_pixels, \
+    get_points, \
+    inside, \
+    normalize, \
+    pad, \
+    pcm
 
+from itertools import izip
 from PIL import Image
+from scipy import sparse
+from skimage import draw as skdraw
 
 try:
     import matplotlib.pyplot as plt
@@ -29,62 +42,49 @@ except ImportError:
 # Use sparse.coo (coordinate matrix) to build the matrix, and convert to csc/csr for math.
 
 
-def hist_graph(samples, size=1000):
+def draw_axis(img, colour=[42, 42, 42, 127]):
     """
-    Use Numpy histogram2d to make an image from the complex signal.
+    Draw axis on the image with the colour.
     """
-    # NP Doc: http://docs.scipy.org/doc/numpy/reference/generated/numpy.histogram2d.html
-    #
-    # TODO: see also np.bincount and Numpy histogram with 3x3d arrays as indices
-    # http://stackoverflow.com/questions/7422713/numpy-histogram-with-3x3d-arrays-as-indices
-    c = samples.view(np.float64).reshape(len(samples), 2).transpose()
-    x, y = c[0], -c[1]
-    histogram, _, _ = np.histogram2d(
-        y,
-        x,
-        bins=size,
-        range=[[-1., 1.], [-1., 1.]],
-        normed=True
-    )
-    histogram = normalize(histogram)
-    image = Image.fromarray(np.array(histogram * 255, dtype=np.uint8), 'L')
-    image.show()
-    return histogram
+    height, width, channels = img.shape
+    img[height / 2.0, :] = img[:, width / 2.0] = colour[:channels]
 
-
-def get_canvas(x_size=1000, y_size=None, axis=True):
-    """
-    Get a Numpy array suitable for use as a drawing canvas.
-    """
-    if not y_size:
-        y_size = x_size
-    img = np.zeros((y_size + 1, x_size + 1, 4), np.uint8)  # Note: y, x
-    if axis:
-        # Draw axis
-        img[y_size / 2.0, :] = img[:, x_size / 2.0] = [42, 42, 42, 127]
     return img
 
 
-def get_points(signal, size=1000):
+def get_canvas(width=1000, height=None, channels=4, axis=True):
     """
-    Get coordinate points from a signal.
+    Get a Numpy array suitable for use as a drawing canvas.
     """
-    # TODO: Move to math or dsp module
-    # Scale to size and interpret values as pixel centers
-    signal = ((clip(signal) + 1 + 1j) / 2.0 * (size - 1) + (0.5 + 0.5j))  # 0.5 to 599.5
-    return complex_as_reals(signal)
+    if height is None:
+        height = width
+
+    img = np.zeros((height, width, channels), np.uint8)  # Note: y, x
+
+    # FIXME: axis argument for get_canvas should accept a colour value, or it shouldn't exist
+    if axis:
+        img = draw_axis(img)
+
+    return img
+
+
+def blit(screen, img):
+    """
+    Blit the screen.
+    """
+    if screen and img is not None:
+        pygame.surfarray.blit_array(screen, img[..., :3])  # Drop alpha
 
 
 def draw(
-    samples,
+    signal,
     size=1000,
-    dur=None,
     antialias=False,
     lines=False,
     colours=True,
     axis=True,
     img=None,
-    screen=None
+    screen=None,
 ):
     """
     Draw the complex sound signal into specified size image.
@@ -95,29 +95,29 @@ def draw(
     # buffersize = int(round(float(sampler.rate) / framerate))    # 44100.0/30 = 1470
     # indices = np.arange(*(slice(item.start, item.stop, buffersize).indices(item.stop)))
     # for start in indices:
-    # samples = self[start:start+buffersize-1:buffersize] # TODO: Make this cleaner
+    # signal = self[start:start+buffersize-1:buffersize] # TODO: Make this cleaner
+
+    # TODO: Enable using non-square size.
 
     if img is not None:  # Draw into existing img?
-        size = img.shape[0] - 1
+        size = img.shape[0]
     else:
         img = get_canvas(size, axis=axis)
 
-    if dur:
-        samples = samples[:int(round(dur * sampler.rate))]
-
-    samples = clip_samples(samples)
+    signal = clip_samples(signal)
 
     if lines:
         if antialias and screen is not None:
-            draw_coloured_lines_aa(samples, screen, size, colours)
+            draw_lines_pg(signal, screen, size, colours, antialias=True)
         else:
             # raise NotImplementedError("Drawing lines with Numpy is way too slow for now!")
-            return draw_coloured_lines(samples, img, size, colours)
+            # return draw_lines(signal, img, size, colours)
+            return draw_lines_pg(signal, screen, size, colours, antialias=False)
     else:
         if antialias:
-            return draw_points_aa(samples, img, size, colours)
+            return draw_points_aa(signal, img, size, colours)
         else:
-            return draw_points(samples, img, size, colours)
+            return draw_points(signal, img, size, colours)
 
 
 def clip_samples(signal):
@@ -128,6 +128,7 @@ def clip_samples(signal):
 
     # clip_max = np.max(np.abs(signal)) # unit circle
     # rectangular abs can be sqrt(2) > 1.0!
+    signal = np.atleast_1d(signal)
     clip_max = np.max(np.fmax(np.abs(signal.real), np.abs(signal.imag)))
     if clip_max > 1.0:
         logger.warn("Clipping signal -- maximum magnitude was: %0.6f" % clip_max)
@@ -143,51 +144,50 @@ def add_alpha(rgb, opacity=255):
     return np.append(rgb, np.array([opacity] * len(rgb)).reshape(len(rgb), 1), 1)
 
 
-def draw_coloured_lines_aa(samples, screen, size=1000, colours=True):
+def draw_lines_pg(signal, screen, size=1000, colours=True, antialias=False):
     """
-    Draw antialiased lines with Pygame.
+    Draw (antialiased) lines with Pygame.
     """
+    img = get_canvas(size, axis=True)
+    blit(screen, img)
+
+    method = 'aaline' if antialias else 'line'
+    pts = get_points(flip_vertical(signal), size).T
     if colours:
-        # FIXME: draws wrong colours on high frequencies!
-        colors = colorize(samples)
-        pts = get_points(samples, size).T
+        # FIXME: aaline draws wrong colours on high frequencies!
+        colors = add_alpha(colorize(signal))
         for (i, ends) in enumerate(pairwise(pts)):
-            # pts = get_points(np.array(ends), size).transpose()
-            # rgb = hsv2rgb(angle2hsv(chords_to_hues(ends, padding=False)))
-            # color = pygame.Color(*list(rgb)[:-1])
-            pygame.draw.aaline(screen, colors[i], *ends)
+            getattr(pygame.draw, method)(screen, colors[i], *ends)
     else:
-        pts = get_points(samples, size).transpose()
-        pygame.draw.aalines(screen, pygame.Color('orange'), False, pts, 1)
+        getattr(pygame.draw, method + 's')(screen, pygame.Color('orange'), False, pts, 1)
 
 
-def draw_coloured_lines(samples, img, size=1000, colours=True):
+def draw_lines(signal, img, size=1000, colours=True):
     """
     Draw antialiased lines with Numpy.
     """
-    if len(samples) < 2:
-        raise ValueError("Can't draw lines with less than two samples.")
-
-    bg = get_canvas(size, axis=False)
-
+    if len(signal) < 2:
+        signal = pad(signal, -1)
     if colours:
-        colors = add_alpha(colorize(samples))
+        colors = add_alpha(colorize(signal))
 
-    for i, (start, end) in enumerate(pairwise(pad(samples, -1))):
-        line = np.linspace(start, end, np.abs(start - end) * size, endpoint=False)
-        img += draw_points(line, bg, size, colours=False) * (colors[i] if colours else white)
+    points = np.rint(get_points(flip_vertical(signal), size) - 0.5).astype(np.uint32).T
+    segments = np.hstack((points[:-1], points[1:]))
+
+    for i, coords in enumerate(segments):
+        img[skdraw.bresenham(*coords)] = colors[i] if colours else white
 
     return img
 
 
-def draw_points_np_aa(samples, img, size=1000, colours=True):
+def draw_points_np_aa(signal, img, size=1000, colours=True):
     """
-    Draw colourized antialiased points from samples.
+    Draw colourized antialiased points from signal.
     """
-    points = ((clip(samples) + 1 + 1j) / 2.0 * (size - 1) + (0.5 + 0.5j))
+    points = ((clip(signal) + 1 + 1j) / 2.0 * (size - 1) + (0.5 + 0.5j))
     deltas = points - np.round(points)
 
-    color = add_alpha(colorize(samples)) if colours else white
+    color = add_alpha(colorize(signal)) if colours else white
 
     img[:-1, :-1, :] = np.cast['int32'](complex_as_reals(deltas + -0.5 - 0.5j)) * color
     img[:-1, :-1, :] = np.cast['int32'](complex_as_reals(deltas + -0.5 - 0.5j)) * color
@@ -197,14 +197,35 @@ def draw_points_np_aa(samples, img, size=1000, colours=True):
     return img
 
 
-def draw_points_aa(samples, img, size=1000, colours=True):
+def draw_points_aa(signal, img, size=1000, colours=True):
     """
-    Draw colourized antialiased points from samples.
+    Draw colourized antialiased points from signal.
     """
-    points = get_points(samples, size)
-    centers = np.round(points)  # 1.0 to 600.0
-    bases = np.cast['int32'](centers) - 1  # 0 to 599
-    deltas = points - bases - 0.5
+    # Fixme: Ignores size argument as it is now
+
+    width, height, ch = img.shape
+
+    iw = lambda a: inside(a, 0, width)
+    ih = lambda a: inside(a, 0, height)
+    area = lambda w: np.repeat(w, ch).reshape(len(signal), ch)
+
+    px, value = get_pixels(signal, width - 1)
+    color = add_alpha(colorize(signal)) if colours else white
+
+    img[px[0],         px[1], :]         += color * area(value[0] * value[1])
+    img[px[0],         iw(px[1] + 1), :] += color * area(value[0] * (1 - value[1]))
+    img[ih(px[0] + 1), px[1], :]         += color * area((1 - value[0]) * value[1])
+    img[ih(px[0] + 1), iw(px[1] + 1), :] += color * area((1 - value[0]) * (1 - value[1]))
+
+    return img
+
+
+def draw_points_aa_old(signal, img, size=1000, colours=True):
+    """
+    Draw colourized antialiased points from signal.
+    """
+    size -= 1
+    bases, deltas = get_pixels(signal, size)
 
     values_00 = deltas[1] * deltas[0]
     values_01 = deltas[1] * (1.0 - deltas[0])
@@ -214,31 +235,65 @@ def draw_points_aa(samples, img, size=1000, colours=True):
     pos = [
         ((size - 1) - bases[1], bases[0]),
         ((size - 1) - bases[1], bases[0] + 1),
-        ((size) - (bases[1] + 1), bases[0]),
-        ((size) - (bases[1] + 1), bases[0] + 1),
+        ((size - 1) - (bases[1] + 1), bases[0]),
+        ((size - 1) - (bases[1] + 1), bases[0] + 1),
     ]
 
-    color = add_alpha(colorize(samples)) if colours else white
+    color = add_alpha(colorize(signal)) if colours else white
 
-    img[pos[0][1], pos[0][0], :] += color * np.repeat(values_11, 4).reshape(len(samples), 4)
-    img[pos[1][1], pos[1][0], :] += color * np.repeat(values_10, 4).reshape(len(samples), 4)
-    img[pos[2][1], pos[2][0], :] += color * np.repeat(values_01, 4).reshape(len(samples), 4)
-    img[pos[3][1], pos[3][0], :] += color * np.repeat(values_00, 4).reshape(len(samples), 4)
+    img[pos[0][1], pos[0][0], :] += color * np.repeat(values_11, 4).reshape(len(signal), 4)
+    img[pos[1][1], pos[1][0], :] += color * np.repeat(values_10, 4).reshape(len(signal), 4)
+    img[pos[2][1], pos[2][0], :] += color * np.repeat(values_01, 4).reshape(len(signal), 4)
+    img[pos[3][1], pos[3][0], :] += color * np.repeat(values_00, 4).reshape(len(signal), 4)
 
+    return img
+
+
+def draw_points(signal, img, size=1000, colours=True):
+    """
+    Draw colourized points from signal
+    """
+    points = np.rint(get_points(flip_vertical(signal), size) - 0.5).astype(np.uint32)
+
+    color = add_alpha(colorize(signal)) if colours else white
+
+    img[points[0], points[1]] = color[..., :img.shape[2]]
     return img
 
 
-def draw_points(samples, img, size=1000, colours=True):
+def draw_points_coo(signal, img, size=1000, colours=True):
     """
-    Draw colourized points from samples
+    Draw a bitmap image from a complex signal with optionally colourized pixels.
     """
-    points = get_points(samples, size)
-    points = np.cast['uint32'](points)  # 0 to 599
+    points = np.rint(get_points(flip_vertical(signal), size) - 0.5).astype(np.uint32)
+    coords = sparse.coo_matrix(points, dtype=np.uint32).todense()
 
-    color = add_alpha(colorize(samples)) if colours else white
-    img[points[0], (size - 1) - points[1]] = color
+    color = add_alpha(colorize(signal)) if colours else white
 
+    img[coords[0], coords[1]] = color[..., :img.shape[2]]
     return img
+
+
+def hist_graph(signal, size=1000):
+    """
+    Use Numpy histogram2d to make an image from the complex signal.
+    """
+    # NP Doc: http://docs.scipy.org/doc/numpy/reference/generated/numpy.histogram2d.html
+    #
+    # TODO: see also np.bincount and Numpy histogram with 3x3d arrays as indices
+    # http://stackoverflow.com/questions/7422713/numpy-histogram-with-3x3d-arrays-as-indices
+    x, y = get_points(flip_vertical(signal))
+    histogram, _, _ = np.histogram2d(
+        y,
+        x,
+        bins=size,
+        range=[[-1., 1.], [-1., 1.]],
+        normed=True
+    )
+    histogram = normalize(histogram)
+    image = Image.fromarray(np.array(histogram * 255, dtype=np.uint8), 'L')
+    image.show()
+    return histogram
 
 
 def video_transfer(signal, standard='PAL', axis='real', horiz=720):
@@ -275,7 +330,7 @@ def video_transfer(signal, standard='PAL', axis='real', horiz=720):
     #for block in xrange(0, len(signal), framesize):
     #    pass # draw frame
 
-    img = get_canvas(3 - 1, vert - 1, axis=False)  # Stretch to horiz. width later!
+    img = get_canvas(3, vert, axis=False)  # Stretch to horiz. width later!
     fv = img.flat
 
     s = pcm(signal[:framesize] * 256, bits=8, axis='real').astype(np.uint8)
@@ -283,7 +338,7 @@ def video_transfer(signal, standard='PAL', axis='real', horiz=720):
     fv[::] = np.repeat(s, 4, axis=0)
 
     #logger.debug("Image:\n%s,\nFlat view:\n%s" % (img[:framesize], fv[:framesize]))
-    return np.repeat(img[:framesize], horiz / linewidth, axis=1)
+    return np.repeat(img[:framesize], horiz / linewidth + 2, axis=1)
 
 
 # Showing images

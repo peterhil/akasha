@@ -83,7 +83,7 @@ class FrequencyRatioMixin(RationalUnit):
     numerator = order
 
     @staticmethod
-    def to_ratio(freq, limit=sampler.rate):
+    def to_ratio(freq, limit=sampler.rate * 2):
         """
         Returns a rationally approximated ratio (a Fraction) corresponding to the frequency.
         """
