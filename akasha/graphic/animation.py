@@ -177,7 +177,7 @@ def handle_events(snd, it, ch, paint_fn, clock):
             done = handle_input(snd, it, event)
             if done:
                 break
-        logger.debug("Handled %s inputs in %.4f seconds." % (len(inputs), timer() - input_start))
+        logger.debug("Inputs: %s handled in %.4f seconds." % (len(inputs), timer() - input_start))
 
     # Paint
     if frames and not sampler.paused and not done:
@@ -194,8 +194,8 @@ def handle_events(snd, it, ch, paint_fn, clock):
 
         done |= drop_frames(frames, it)
 
-    if len(events) > 1:
-        logger.debug("Handled %s events in %.4f seconds." % (len(events), timer() - start))
+    if len(events) - len(inputs) > 1:
+        logger.info("Events: %s handled in %.4f seconds." % (len(events), timer() - start))
 
     if reactor.running and done:
         reactor.stop()  # pylint: disable=E1101
@@ -300,10 +300,7 @@ def handle_input(snd, it, event):
             if isinstance(snd, Generator):
                 snd.sustain = None
             logger.info("Rewind")
-            try:
-                it.send('reset')
-            except TypeError, err:
-                logger.warn(err)
+            reset_iterator(it)
         # Arrows
         elif pg.K_UP == event.key:
             if event.mod & (pg.KMOD_LALT | pg.KMOD_RALT):
@@ -323,13 +320,11 @@ def handle_input(snd, it, event):
             w.move(0, -1)
         # Change frequency
         elif hasattr(snd, 'frequency'):
-            change_frequency(snd, event.key)
-            it.send('reset')
+            change_frequency(snd, event.key, it)
     # Key up
     elif (event.type == pg.KEYUP and hasattr(snd, 'frequency')):
         if pg.K_CAPSLOCK == event.key:
-            change_frequency(snd, event.key)
-            it.send('reset')
+            change_frequency(snd, event.key, it)
         else:
             if isinstance(snd, Generator):
                 snd.sustain = it.send('current')[0]
@@ -340,7 +335,15 @@ def handle_input(snd, it, event):
     return False
 
 
-def change_frequency(snd, key):
+def reset_iterator(it):
+    """Reset an iterator and catch possible TypeErrors if it has just started."""
+    try:
+        it.send('reset')
+    except TypeError, err:
+        logger.warn(err)
+
+
+def change_frequency(snd, key, it):
     """
     Change frequency of the sound based on key position.
     """
@@ -350,3 +353,4 @@ def change_frequency(snd, key):
         snd.sustain = None
 
     logger.info("Changed frequency: %s." % snd)
+    reset_iterator(it)
