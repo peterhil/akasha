@@ -27,10 +27,15 @@ from akasha.utils.math import pcm, minfloat
 from akasha.utils.log import logger
 
 
-# w = WickiLayout()
-w = PianoLayout()
+w = WickiLayout()
+# w = PianoLayout()
 
 VIDEOFRAME = pg.NUMEVENTS - 1
+STOP = pg.NUMEVENTS - 2
+
+# See http://stackoverflow.com/questions/2819931/handling-keyboardinterrupt-when-working-with-pygame
+stop_event = pg.event.Event(STOP)
+stop_event.quit = False
 
 
 def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=True,
@@ -52,10 +57,17 @@ def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=T
 
     set_timer()
     if loop == 'pygame':
-        done = False
-        while not done:
-            done = handle_events(snd, it, ch, paint_fn, clock)
-            time.sleep(1 / 1000)  # Fixme: This reduces calls to handle_events, but is it necessary?
+        stop_event.quit = False
+        while not (stop_event.quit):
+            try:
+                stop_event.quit = handle_events(snd, it, ch, paint_fn, clock)
+            except KeyboardInterrupt:
+                logger.debug("Got KeyboardInterrupt (CTRL-C)!")
+                stop_event.quit = True
+            except Exception, err:
+                logger.error("Unexpected exception: %s" % err)
+                stop_event.quit = True
+
         cleanup(it)
     else:
         # See: http://bazaar.launchpad.net/~game-hackers/game/trunk/view/head:/game/view.py
@@ -81,16 +93,20 @@ def init_pygame(name="Resonance", size=800, mixer_options=()):
     """
     Initialize Pygame mixer settings and surface array.
     """
+    pg.quit()
+
     logger.info(
         "Akasha is using %s Hz sampler rate and %s fps video rate." %
         (sampler.rate, sampler.videorate))
 
-    screen = init_display(name, size)
     channel = init_mixer(*mixer_options)
 
-    logger.info(
-        "Pygame initialized with %s loaded modules (%s failed)." %
-        pg.init())
+    # logger.info(
+    #     "Pygame initialized with %s loaded modules (%s failed)." %
+    #     pg.init())
+
+    screen = init_display(name, size)
+    logger.info("Inited display %s" % screen)
 
     return screen, channel
 
@@ -100,15 +116,21 @@ def init_display(name, size):
     Initialize Pygame display and surface arrays.
     Returns Pygame screen.
     """
+    pg.display.quit()
+
     if 'numpy' in pg.surfarray.get_arraytypes():
         pg.surfarray.use_arraytype('numpy')
     else:
         raise ImportError('Numpy array package is not installed')
 
-    pg.display.set_caption(name)
-    resolution = (size, size)  # FIXME get resolution some other way.
+    try:
+        # FIXME get resolution some other way.
+        mode = pg.display.set_mode((size, size), pg.SRCALPHA, 32)
+        pg.display.init()
+    except Exception, err:
+        logger.error("Something bad happened on init_display(): %s" % err)
 
-    return pg.display.set_mode(resolution, pg.SRCALPHA, 32)
+    return mode
 
 
 def init_mixer(*args):
@@ -153,6 +175,7 @@ def cleanup(it=None):
     Clean up: Quit pygame, close iterator.
     """
     logger.info("Clean up: Quit pygame, close iterator.")
+    stop_event.quit = False
     pg.mixer.quit()
     pg.display.quit()
     pg.quit()
