@@ -9,6 +9,7 @@ Animation module
 from __future__ import division
 
 import logging
+import numpy as np
 import pygame as pg
 import time
 
@@ -329,6 +330,40 @@ def handle_input(snd, it, event):
             if isinstance(snd, Generator):
                 snd.sustain = it.send('current')[0]
                 logger.debug("Key '%s' (%s) up, sustain: %s" % (pg.key.name(event.key), event.key, snd.sustain))
+    # Mouse
+    elif hasattr(snd, 'frequency') and event.type in (
+        pg.MOUSEBUTTONDOWN,
+        pg.MOUSEBUTTONUP,
+        pg.MOUSEMOTION
+    ):
+        if (event.type == pg.MOUSEBUTTONDOWN):
+            snd.pitch_bend = 0
+        elif (event.type == pg.MOUSEBUTTONUP):
+            snd.pitch_bend = None
+        elif (event.type == pg.MOUSEMOTION) and getattr(snd, 'pitch_bend', None) is not None:
+            size = pg.display.get_surface().get_size()[1] or 0
+            freq = snd.frequency
+            snd.pitch_bend = event.pos[1]
+
+            logger.debug("Pitch bend == event.pos[0]: %s" % snd.pitch_bend)
+
+            odd = (size + 1) % 2
+            norm_size = (size // 2) * 2 + odd
+            scale = np.logspace(-1 / 4, 1 / 4, norm_size, endpoint=True, base=2)
+            ratio = scale[snd.pitch_bend]
+
+            new_freq = np.clip(
+                snd.frequency * ratio,
+                a_min=-minfloat()[0],
+                a_max=sampler.nyquist
+            )
+            snd.frequency = new_freq
+            logger.info(
+                "Pitched frequency to %s (with ratio %.04f) position %s, bend %s. [%s, %s, %s]" %
+                (
+                    snd.frequency, ratio, event.pos[1], snd.pitch_bend,
+                    scale[0], scale[len(scale)//2], scale[-1]
+                ))
     else:
         logger.debug("Other: %s" % event)
 

@@ -41,6 +41,10 @@ class Sampler(object):
         """
         return 1000 / self.frametime
 
+    @property
+    def nyquist(self):
+        return self.rate / 2
+
     def change_frametime(self, ms=None, rel=0, mintime=16):
         """
         Changes video frame time (in ms).
