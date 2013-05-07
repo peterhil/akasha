@@ -117,10 +117,10 @@ def curvature(previous_pt, point, next_pt):
     See section "2.6.1 Discrete curvature estimation" at:
     http://www.dgp.toronto.edu/~mccrae/mccraeMScthesis.pdf
     """
-    v1 = point - previous_pt
+    v1 = previous_pt - point
     v2 = next_pt - point
-    print polar(v1), polar(v2), rad_to_deg(angle_between(v1, v2))
-    return 2 * np.sin(angle_between2(v1, v2) / 2) / np.sqrt(np.abs(v1) * np.abs(v2))
+    logger.debug("Curvature with vectors %s and %s: %s" % (polar(v1), polar(v2), rad_to_deg(angle_between(v1, v2))))
+    return 2 * np.sin(angle_between(v1, v2) / 2) / np.sqrt(np.abs(v1) * np.abs(v2))
 
 
 def circumcircle_radius(a, b, c):
