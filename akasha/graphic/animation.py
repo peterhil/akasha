@@ -31,11 +31,9 @@ w = WickiLayout()
 # w = PianoLayout()
 
 VIDEOFRAME = pg.NUMEVENTS - 1
-STOP = pg.NUMEVENTS - 2
 
 # See http://stackoverflow.com/questions/2819931/handling-keyboardinterrupt-when-working-with-pygame
-stop_event = pg.event.Event(STOP)
-stop_event.quit = False
+done = False
 
 
 def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=True,
@@ -57,16 +55,16 @@ def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=T
 
     set_timer()
     if loop == 'pygame':
-        stop_event.quit = False
-        while not (stop_event.quit):
+        done = False
+        while not (done):
             try:
-                stop_event.quit = handle_events(snd, it, ch, paint_fn, clock)
+                done = handle_events(snd, it, ch, paint_fn, clock)
             except KeyboardInterrupt:
                 logger.debug("Got KeyboardInterrupt (CTRL-C)!")
-                stop_event.quit = True
+                done = True
             except Exception, err:
                 logger.error("Unexpected exception: %s" % err)
-                stop_event.quit = True
+                done = True
 
         cleanup(it)
     else:
@@ -175,7 +173,7 @@ def cleanup(it=None):
     Clean up: Quit pygame, close iterator.
     """
     logger.info("Clean up: Quit pygame, close iterator.")
-    stop_event.quit = False
+    done = False
     pg.mixer.quit()
     pg.display.quit()
     pg.quit()
