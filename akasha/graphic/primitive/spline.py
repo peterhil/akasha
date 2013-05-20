@@ -110,6 +110,9 @@ def angle_between_dotp(a, b):
     return np.arccos(dotp / (np.abs(a) * np.abs(b)))
 
 
+def vectors(previous_pt, point, next_pt):
+    return np.array([previous_pt, next_pt]) - point
+
 def curvature(previous_pt, point, next_pt):
     """
     Discrete curvature estimation.
@@ -117,9 +120,7 @@ def curvature(previous_pt, point, next_pt):
     See section "2.6.1 Discrete curvature estimation" at:
     http://www.dgp.toronto.edu/~mccrae/mccraeMScthesis.pdf
     """
-    v1 = previous_pt - point
-    v2 = next_pt - point
-    logger.debug("Curvature with vectors %s and %s: %s" % (polar(v1), polar(v2), rad_to_deg(angle_between(v1, v2))))
+    (v1, v2) = vectors(previous_pt, point, next_pt)
     return 2 * np.sin(angle_between(v1, v2) / 2) / np.sqrt(np.abs(v1) * np.abs(v2))
 
 
@@ -127,9 +128,15 @@ def circumcircle_radius(a, b, c):
     """
     Find the circumcircle of three points.
     """
-    a0 = a - c
-    b0 = b - c
-    return np.abs(a0 - b0) / 2 * np.sin(angle_between(a0, b0))
+    (v1, v2) = vectors(previous_pt, point, next_pt)
+    return np.abs(v1 - v2) / 2 * np.sin(angle_between(v1, v2))
+
+
+def midpoint(a, b):
+    """
+    Midpoint is the middle point of a line segment.
+    """
+    return ((a - b) / 2.0) + b
 
 
 # Circular arcs

@@ -13,7 +13,7 @@ Unit tests for spline drawing functions
 import numpy as np
 import pytest
 
-from akasha.graphic.primitive.spline import angle_between, angle_between_dotp
+from akasha.graphic.primitive.spline import angle_between, angle_between_dotp, midpoint
 #from akasha.audio.curves import Circle
 from cmath import rect
 from numpy.testing.utils import assert_array_equal
@@ -25,6 +25,7 @@ class TestSplines(object):
     """
 
     octant = np.sqrt(2)/2  # ≈ 0.70710678
+
 
     @pytest.mark.parametrize(('a', 'b', 'expected'), [
         [0, 0, 0],
@@ -44,3 +45,13 @@ class TestSplines(object):
     ])
     def test_angle_between(self, a, b, expected):
         assert angle_between(a, b) == expected
+
+
+    @pytest.mark.parametrize(('a', 'b', 'expected'), [
+        [-3, 5, 1],
+        [1+1j, -1-1j, 0],
+        [1.5+1.5j, -1-1j, 0.25+0.25j],
+    ])
+    def test_midpoint(self, a, b, expected):
+        assert midpoint(a, b) == expected
+
