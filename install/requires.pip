@@ -1,6 +1,7 @@
 Cython==0.17.4
 Louie==1.1
-PIL==1.1.7
+#PIL==1.1.7
+Pillow==2.0.0
 PyGUI==2.5.3
 Pygments==1.4
 Twisted==12.2.0
