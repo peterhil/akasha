@@ -1,2 +1,2 @@
 -r requires.pip
-py.test>=2.3.2
+pytest>=2.3.4
