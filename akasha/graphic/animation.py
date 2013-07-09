@@ -19,6 +19,7 @@ from twisted.internet import reactor
 
 from akasha.audio.generators import Generator
 from akasha.control.io.keyboard import pos
+from akasha.funct import blockwise
 from akasha.graphic.drawing import get_canvas, blit, draw, video_transfer
 from akasha.timing import sampler
 from akasha.tunings import PianoLayout, WickiLayout
@@ -43,7 +44,7 @@ def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=T
     """
     screen, ch = init_pygame(name, size, mixer_options)
 
-    it = iter(snd)
+    it = blockwise(snd, sampler.blocksize())
 
     paint_fn = lambda snd: show_slice(
         screen, snd, size=size,
@@ -178,7 +179,8 @@ def cleanup(it=None):
     pg.display.quit()
     pg.quit()
     if it:
-        it.close()
+        if hasattr(it, 'close'):
+            it.close()
         del it
     logger.info("Done cleanup.")
 
