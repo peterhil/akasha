@@ -205,49 +205,37 @@ def handle_events(snd, it, ch, paint_fn, clock):
 
     # Paint
     if frames and not sampler.paused and not done:
-        draw_start = timer()
+        try:
+            samples = it.next()
 
-        done |= do_audio_video(it, ch, paint_fn)
+            audio_start = timer()
+            queue_audio(samples, ch)
+            audio_time = timer() - audio_start
 
-        dc = timer() - draw_start
-        fps = clock.get_fps()
-        t = clock.tick_busy_loop(sampler.videorate)
+            video_start = timer()
+            paint_fn(samples)
+            video_time = timer() - video_start
 
-        logger.log(logging.BORING,
-            "Animation: clock tick %d, FPS: %3.3f, drawing took: %.4f", t, fps, dc)
+            fps = clock.get_fps()
+            t = clock.tick_busy_loop(sampler.videorate)
+            percent = (audio_time + video_time) / (1.0 / sampler.videorate) * 100
 
-        done |= drop_frames(frames, it)
+            logger.log(logging.BORING,
+                       "Animation: clock tick %d, FPS: %3.3f, audio: %.4f, video: %.4f, (%.2f %%)", t, fps, audio_time, video_time, percent)
+
+            done |= drop_frames(frames, it)
+        except StopIteration:
+            logger.info("Sound ended!")
+            done = True
 
     if len(events) - len(inputs) > 1:
         logger.info("Events: %s handled in %.4f seconds." % (len(events), timer() - start))
 
     if reactor.running and done:
-        reactor.stop()  # pylint: disable=E1101
+        # reactor.stop()  # pylint: disable=E1101
         cleanup()
     else:
         return done
-
-
-def do_audio_video(it, ch, paint_fn):
-    if not sampler.paused:
-        samples = next_block(it)
-        if samples is not None:
-            queue_audio(samples, ch)
-            paint_fn(samples)
-        else:
-            return True  # done
-    return False
-
-
-def next_block(it):
-    """
-    Get a next block of samples.
-    """
-    try:
-        return it.next()
-    except StopIteration:
-        logger.debug("Sound ended!")
-        return None
 
 
 def queue_audio(samples, ch):

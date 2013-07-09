@@ -17,6 +17,8 @@ from akasha.timing import sampler
 from akasha.types.numeric import RealUnit
 from akasha.utils import _super
 from akasha.utils.decorators import memoized
+from akasha.utils.log import logger
+from akasha.utils.math import cents_diff
 
 
 class FrequencyRatioMixin(object):
@@ -81,13 +83,21 @@ class FrequencyRatioMixin(object):
         return self.ratio.numerator
 
     @staticmethod
-    def to_ratio(freq, limit=sampler.rate ** 2):
+    @memoized
+    def to_ratio(freq, limit=sampler.rate * 4):
         """
         Returns a rationally approximated ratio (a Fraction) corresponding to the frequency.
         """
         # TODO: Investigate what is the right limit, and take beating tones into account!
         # TODO: Check whether memoizing this is of any value.
-        return Fraction.from_float(float(freq) / sampler.rate).limit_denominator(limit)
+        ratio = Fraction.from_float(float(freq) / sampler.rate).limit_denominator(limit)
+        if ratio != 0:
+            approx = sampler.rate * ratio
+            deviation = cents_diff(freq, approx)
+            if deviation != 0:
+                logger.warn("Frequency approx %f for ratio %s deviates from %.3f by %.16f%% cents" % \
+                            (approx, ratio, freq, deviation))
+        return ratio
 
     @staticmethod
     def antialias(ratio):
