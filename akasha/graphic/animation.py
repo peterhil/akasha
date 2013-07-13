@@ -11,7 +11,9 @@ from __future__ import division
 import logging
 import numpy as np
 import pygame as pg
+import sys
 import time
+import traceback
 
 from timeit import default_timer as timer
 from twisted.internet.task import LoopingCall
@@ -64,8 +66,12 @@ def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=T
                 logger.debug("Got KeyboardInterrupt (CTRL-C)!")
                 done = True
             except Exception, err:
-                logger.error("Unexpected exception: %s" % err)
-                done = True
+                try:
+                    exc = sys.exc_info()[:2]
+                    logger.error("Unexpected exception %s: %s\n%s" % (exc[0], exc[1], traceback.format_exc()))
+                finally:
+                    done = True
+                    del exc
 
         cleanup(it)
     else:
