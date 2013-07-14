@@ -115,97 +115,6 @@ def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=T
             reactor.run()  # pylint: disable=E1101
 
 
-def init_pygame(name="Resonance", size=800):
-    """
-    Initialize Pygame mixer settings and surface array.
-    """
-    pg.quit()
-
-    # logger.info(
-    #     "Pygame initialized with %s loaded modules (%s failed)." %
-    #     pg.init())
-
-    screen = init_display(name, size)
-    logger.info("Inited display %s" % screen)
-
-    return screen
-
-
-def init_display(name, size):
-    """
-    Initialize Pygame display and surface arrays.
-    Returns Pygame screen.
-    """
-    pg.display.quit()
-
-    if 'numpy' in pg.surfarray.get_arraytypes():
-        pg.surfarray.use_arraytype('numpy')
-    else:
-        raise ImportError('Numpy array package is not installed')
-
-    try:
-        # FIXME get resolution some other way.
-        mode = pg.display.set_mode((size, size), pg.SRCALPHA, 32)
-        pg.display.init()
-    except Exception, err:
-        logger.error("Something bad happened on init_display(): %s" % err)
-
-    return mode
-
-
-def init_mixer(*args):
-    """
-    Initialize the Pygame mixer.
-    """
-    pg.mixer.quit()
-
-    # Set mixer defaults: sample rate, sample size, number of channels, buffer size
-    if issequence(args) and 0 < len(args) <= 3:
-        pg.mixer.init(*args)
-    else:
-        pg.mixer.init(frequency=sampler.rate, size=-16, channels=1, buffer=512)
-
-    logger.info(
-        "Mixer has %s Hz sample rate with %s size samples and %s channels." %
-        pg.mixer.get_init())
-
-    return pg.mixer.find_channel()
-
-
-def set_timer(event=VIDEOFRAME, ms=sampler.frametime):
-    """
-    Set and start pygame timer interval for VIDEOFRAME events.
-    """
-    pg.time.set_timer(event, ms)
-
-
-def handle_error(err):
-    """
-    Logging error handler.
-    """
-    logger.error("Error traceback:\n%s" % str(err))
-    if reactor.running:
-        reactor.stop()  # pylint: disable=E1101
-    cleanup()
-    raise err
-
-
-def cleanup(it=None):
-    """
-    Clean up: Quit pygame, close iterator.
-    """
-    logger.info("Clean up: Quit pygame, close iterator.")
-    done = False
-    pg.mixer.quit()
-    pg.display.quit()
-    pg.quit()
-    if it:
-        if hasattr(it, 'close'):
-            it.close()
-        del it
-    logger.info("Done cleanup.")
-
-
 def handle_events(snd, it, channel, paint_fn):
     """
     Event handling dispatcher.
@@ -415,6 +324,97 @@ def handle_input(snd, it, event):
             logger.debug("Other: %s" % event)
 
     return False
+
+
+def init_pygame(name="Resonance", size=800):
+    """
+    Initialize Pygame mixer settings and surface array.
+    """
+    pg.quit()
+
+    # logger.info(
+    #     "Pygame initialized with %s loaded modules (%s failed)." %
+    #     pg.init())
+
+    screen = init_display(name, size)
+    logger.info("Inited display %s" % screen)
+
+    return screen
+
+
+def init_display(name, size):
+    """
+    Initialize Pygame display and surface arrays.
+    Returns Pygame screen.
+    """
+    pg.display.quit()
+
+    if 'numpy' in pg.surfarray.get_arraytypes():
+        pg.surfarray.use_arraytype('numpy')
+    else:
+        raise ImportError('Numpy array package is not installed')
+
+    try:
+        # FIXME get resolution some other way.
+        mode = pg.display.set_mode((size, size), pg.SRCALPHA, 32)
+        pg.display.init()
+    except Exception, err:
+        logger.error("Something bad happened on init_display(): %s" % err)
+
+    return mode
+
+
+def init_mixer(*args):
+    """
+    Initialize the Pygame mixer.
+    """
+    pg.mixer.quit()
+
+    # Set mixer defaults: sample rate, sample size, number of channels, buffer size
+    if issequence(args) and 0 < len(args) <= 3:
+        pg.mixer.init(*args)
+    else:
+        pg.mixer.init(frequency=sampler.rate, size=-16, channels=1, buffer=512)
+
+    logger.info(
+        "Mixer has %s Hz sample rate with %s size samples and %s channels." %
+        pg.mixer.get_init())
+
+    return pg.mixer.find_channel()
+
+
+def set_timer(event=VIDEOFRAME, ms=sampler.frametime):
+    """
+    Set and start pygame timer interval for VIDEOFRAME events.
+    """
+    pg.time.set_timer(event, ms)
+
+
+def handle_error(err):
+    """
+    Logging error handler.
+    """
+    logger.error("Error traceback:\n%s" % str(err))
+    if reactor.running:
+        reactor.stop()  # pylint: disable=E1101
+    cleanup()
+    raise err
+
+
+def cleanup(it=None):
+    """
+    Clean up: Quit pygame, close iterator.
+    """
+    logger.info("Clean up: Quit pygame, close iterator.")
+    done = False
+    pg.mixer.quit()
+    pg.display.quit()
+    pg.quit()
+    if it:
+        if hasattr(it, 'close'):
+            it.close()
+        del it
+    logger.info("Done cleanup.")
 
 
 def reset_iterator(it):
