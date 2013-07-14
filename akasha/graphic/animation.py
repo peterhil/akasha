@@ -44,7 +44,12 @@ def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=T
     """
     Animate complex sound signal
     """
-    screen, ch = init_pygame(name, size, mixer_options)
+    logger.info(
+        "Akasha animation is using %s Hz sampler rate and %s fps video rate." %
+        (sampler.rate, sampler.videorate))
+
+    screen = init_pygame(name, size)
+    ch = init_mixer(*mixer_options)
 
     it = blockwise(snd, sampler.blocksize())
 
@@ -94,17 +99,11 @@ def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=T
             reactor.run()  # pylint: disable=E1101
 
 
-def init_pygame(name="Resonance", size=800, mixer_options=()):
+def init_pygame(name="Resonance", size=800):
     """
     Initialize Pygame mixer settings and surface array.
     """
     pg.quit()
-
-    logger.info(
-        "Akasha is using %s Hz sampler rate and %s fps video rate." %
-        (sampler.rate, sampler.videorate))
-
-    channel = init_mixer(*mixer_options)
 
     # logger.info(
     #     "Pygame initialized with %s loaded modules (%s failed)." %
@@ -113,7 +112,7 @@ def init_pygame(name="Resonance", size=800, mixer_options=()):
     screen = init_display(name, size)
     logger.info("Inited display %s" % screen)
 
-    return screen, channel
+    return screen
 
 
 def init_display(name, size):
