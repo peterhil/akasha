@@ -60,8 +60,6 @@ def anim(snd, size=800, name='Resonance', antialias=True, lines=False, colours=T
     screen = init_pygame(name, size)
     channel = init_mixer(*mixer_options)
 
-    it = blockwise(snd, sampler.blocksize())
-
     if style == 'complex':
         paint_fn = lambda snd: show_slice(
             screen, snd, size=size,
@@ -71,23 +69,24 @@ def anim(snd, size=800, name='Resonance', antialias=True, lines=False, colours=T
         paint_fn = lambda snd: show_transfer(screen, snd, size=size, standard='PAL', axis='imag')
     else:
         logger.err("Unknown animation style: '{0}'".format(style))
-        cleanup(it)
+        cleanup()
 
     # set_timer(AUDIOFRAME, int(round(sampler.frametime / 5)))
     set_timer(VIDEOFRAME, sampler.frametime)
 
     if loop == 'pygame':
-        pygame_loop(snd, it, channel, paint_fn)
+        pygame_loop(snd, channel, paint_fn)
     elif loop == 'twisted':
-        twisted_loop(snd, it, channel, paint_fn)
+        twisted_loop(snd, channel, paint_fn)
     else:
         logger.err("Unknown event loop: '{0}'".format(loop))
-        cleanup(it)
+        cleanup()
 
 
-def pygame_loop(snd, it, channel, paint_fn):
+def pygame_loop(snd, channel, paint_fn):
     done = False
     clock = pg.time.Clock()
+    it = blockwise(snd, sampler.blocksize())
 
     while not (done):
         try:
@@ -123,6 +122,7 @@ def twisted_loop(snd, it, channel, paint_fn):
     # See: http://bazaar.launchpad.net/~game-hackers/game/trunk/view/head:/game/view.py
 
     pg.display.init()
+    it = blockwise(snd, sampler.blocksize())
 
     # renderCall = LoopingCall(do_audio_video, it, channel, paint_fn)
     # renderdef = renderCall.start(1 / sampler.videorate, now=False)
