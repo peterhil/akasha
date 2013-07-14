@@ -30,18 +30,26 @@ from akasha.utils.math import pcm, minfloat
 from akasha.utils.log import logger
 
 
+
+# import sys
+
+# def trace(frame, event, arg):
+#     if event == 'c_call' or arg is not None and 'IPython' not in frame.f_code.co_filename:
+#         print "%s, %s: %d" % (event, frame.f_code.co_filename, frame.f_lineno)
+#     return trace
+
+# sys.settrace(trace)
+
+
 w = WickiLayout()
 # w = PianoLayout()
 
 VIDEOFRAME = pg.NUMEVENTS - 1
 AUDIOFRAME = pg.NUMEVENTS - 2
 
-# See http://stackoverflow.com/questions/2819931/handling-keyboardinterrupt-when-working-with-pygame
-done = False
 
-
-def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=True,
-         mixer_options=(), loop='pygame'):
+def anim(snd, size=800, name='Resonance', antialias=True, lines=False, colours=True,
+         mixer_options=(), loop='pygame', style='complex'):
     """
     Animate complex sound signal
     """
@@ -54,65 +62,81 @@ def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=T
 
     it = blockwise(snd, sampler.blocksize())
 
-    paint_fn = lambda snd: show_slice(
-        screen, snd, size=size,
-        antialias=antialias, lines=lines, colours=colours
-    )
-    # paint_fn = lambda snd: show_transfer(screen, snd, size=size, standard='PAL', axis='imag')
+    if style == 'complex':
+        paint_fn = lambda snd: show_slice(
+            screen, snd, size=size,
+            antialias=antialias, lines=lines, colours=colours
+            )
+    elif style == 'transfer':
+        paint_fn = lambda snd: show_transfer(screen, snd, size=size, standard='PAL', axis='imag')
+    else:
+        logger.err("Unknown animation style: '{0}'".format(style))
+        cleanup(it)
 
-    clock = pg.time.Clock()
     # set_timer(AUDIOFRAME, int(round(sampler.frametime / 5)))
     set_timer(VIDEOFRAME, sampler.frametime)
 
     if loop == 'pygame':
-        done = False
-
-        while not (done):
-            try:
-                timestamp = timer()
-
-                (done, input_time, audio_time, video_time) = handle_events(snd, it, channel, paint_fn)
-
-                loop_time = timer() - timestamp
-
-                fps = clock.get_fps()
-                percent = loop_time / (1.0 / sampler.videorate) * 100
-                av_percent = (audio_time + video_time) / (1.0 / sampler.videorate) * 100
-                t = clock.tick_busy_loop(sampler.videorate)
-
-                if not sampler.paused:
-                    logger.log(logging.BORING,
-                               "Animation: clock tick %d, FPS: %3.3f, loop: %.4f, (%.2f %%), input: %.6f, audio: %.6f, video: %.4f, (%.2f %%)", t, fps, loop_time, percent, input_time, audio_time, video_time, av_percent)
-            except KeyboardInterrupt:
-                logger.debug("Got KeyboardInterrupt (CTRL-C)!")
-                done = True
-            except Exception, err:
-                try:
-                    exc = sys.exc_info()[:2]
-                    logger.error("Unexpected exception %s: %s\n%s" % (exc[0], exc[1], traceback.format_exc()))
-                finally:
-                    done = True
-                    del exc
-
-        cleanup(it)
+        pygame_loop(snd, it, channel, paint_fn)
+    elif loop == 'twisted':
+        twisted_loop(snd, it, channel, paint_fn)
     else:
-        # See: http://bazaar.launchpad.net/~game-hackers/game/trunk/view/head:/game/view.py
+        logger.err("Unknown event loop: '{0}'".format(loop))
+        cleanup(it)
 
-        pg.display.init()
 
-        # renderCall = LoopingCall(do_audio_video, it, channel, paint_fn)
-        # renderdef = renderCall.start(1 / sampler.videorate, now=False)
-        # renderdef.addErrback(handle_error)
+def pygame_loop(snd, it, channel, paint_fn):
+    done = False
+    clock = pg.time.Clock()
 
-        inputCall = LoopingCall(handle_events, snd, it, channel, paint_fn)
-        finished = inputCall.start(1 / (sampler.videorate * 2), now=False)
-        finished.addErrback(handle_error)
+    while not (done):
+        try:
+            timestamp = timer()
 
-        # finished.addCallback(lambda ign: renderCall.stop())
-        # finished.addCallback(lambda ign: cleanup())
+            (done, input_time, audio_time, video_time) = handle_events(snd, it, channel, paint_fn)
 
-        if not reactor.running:
-            reactor.run()  # pylint: disable=E1101
+            loop_time = timer() - timestamp
+
+            fps = clock.get_fps()
+            percent = loop_time / (1.0 / sampler.videorate) * 100
+            av_percent = (audio_time + video_time) / (1.0 / sampler.videorate) * 100
+            t = clock.tick_busy_loop(sampler.videorate)
+
+            if not sampler.paused:
+                logger.log(logging.BORING,
+                           "Animation: clock tick %d, FPS: %3.3f, loop: %.4f, (%.2f %%), input: %.6f, audio: %.6f, video: %.4f, (%.2f %%)", t, fps, loop_time, percent, input_time, audio_time, video_time, av_percent)
+        except KeyboardInterrupt:
+            # See http://stackoverflow.com/questions/2819931/handling-keyboardinterrupt-when-working-with-pygame
+            logger.debug("Got KeyboardInterrupt (CTRL-C)!")
+            done = True
+        except Exception, err:
+            try:
+                exc = sys.exc_info()[:2]
+                logger.error("Unexpected exception %s: %s\n%s" % (exc[0], exc[1], traceback.format_exc()))
+            finally:
+                done = True
+                del exc
+                cleanup(it)
+
+
+def twisted_loop(snd, it, channel, paint_fn):
+    # See: http://bazaar.launchpad.net/~game-hackers/game/trunk/view/head:/game/view.py
+
+    pg.display.init()
+
+    # renderCall = LoopingCall(do_audio_video, it, channel, paint_fn)
+    # renderdef = renderCall.start(1 / sampler.videorate, now=False)
+    # renderdef.addErrback(handle_error)
+
+    inputCall = LoopingCall(handle_events, snd, it, channel, paint_fn)
+    finished = inputCall.start(1 / (sampler.videorate * 2), now=False)
+    finished.addErrback(handle_error)
+
+    # finished.addCallback(lambda ign: renderCall.stop())
+    # finished.addCallback(lambda ign: cleanup())
+
+    if not reactor.running:
+        reactor.run()  # pylint: disable=E1101
 
 
 def handle_events(snd, it, channel, paint_fn):
