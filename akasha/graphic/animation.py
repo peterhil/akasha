@@ -88,7 +88,7 @@ def pygame_loop(snd, channel, paint_fn):
     clock = pg.time.Clock()
     it = blockwise(snd, sampler.blocksize())
 
-    while not (done):
+    while True:
         try:
             timestamp = timer()
 
@@ -104,18 +104,22 @@ def pygame_loop(snd, channel, paint_fn):
             if not sampler.paused:
                 logger.log(logging.BORING,
                            "Animation: clock tick %d, FPS: %3.3f, loop: %.4f, (%.2f %%), input: %.6f, audio: %.6f, video: %.4f, (%.2f %%)", t, fps, loop_time, percent, input_time, audio_time, video_time, av_percent)
+
+            if done:
+                logger.debug("Ending animation!")
+                break
         except KeyboardInterrupt:
             # See http://stackoverflow.com/questions/2819931/handling-keyboardinterrupt-when-working-with-pygame
             logger.debug("Got KeyboardInterrupt (CTRL-C)!")
-            done = True
+            break
         except Exception, err:
             try:
                 exc = sys.exc_info()[:2]
                 logger.error("Unexpected exception %s: %s\n%s" % (exc[0], exc[1], traceback.format_exc()))
             finally:
-                done = True
                 del exc
                 cleanup(it)
+                break
 
 
 def twisted_loop(snd, it, channel, paint_fn):
