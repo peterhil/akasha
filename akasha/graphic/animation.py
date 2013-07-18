@@ -84,7 +84,6 @@ def anim(snd, size=800, name='Resonance', antialias=True, lines=False, colours=T
 
 
 def pygame_loop(snd, channel, paint_fn):
-    done = False
     clock = pg.time.Clock()
     it = blockwise(snd, sampler.blocksize())
 
@@ -92,7 +91,7 @@ def pygame_loop(snd, channel, paint_fn):
         try:
             timestamp = timer()
 
-            (done, input_time, audio_time, video_time) = handle_events(snd, it, channel, paint_fn)
+            (input_time, audio_time, video_time) = handle_events(snd, it, channel, paint_fn)
 
             loop_time = timer() - timestamp
 
@@ -104,13 +103,14 @@ def pygame_loop(snd, channel, paint_fn):
             if not sampler.paused:
                 logger.log(logging.BORING,
                            "Animation: clock tick %d, FPS: %3.3f, loop: %.4f, (%.2f %%), input: %.6f, audio: %.6f, video: %.4f, (%.2f %%)", t, fps, loop_time, percent, input_time, audio_time, video_time, av_percent)
-
-            if done:
-                logger.debug("Ending animation!")
-                break
-        except KeyboardInterrupt:
+        except KeyboardInterrupt, err:
             # See http://stackoverflow.com/questions/2819931/handling-keyboardinterrupt-when-working-with-pygame
-            logger.debug("Got KeyboardInterrupt (CTRL-C)!")
+            logger.info("Got KeyboardInterrupt (CTRL-C)!".format(type(err)))
+            cleanup(it)
+            break
+        except SystemExit, err:
+            logger.info("Ending animation: %s" % err.message)
+            cleanup(it)
             break
         except Exception, err:
             try:
@@ -147,7 +147,8 @@ def handle_events(snd, it, channel, paint_fn):
     """
     Event handling dispatcher.
     """
-    done = False
+    reset = False
+    sampler.paused = False
     input_time, audio_time, video_time = 0, 0, 0
 
     events = pg.event.get()
@@ -156,13 +157,19 @@ def handle_events(snd, it, channel, paint_fn):
     videoframes = [event for event in events if event.type == VIDEOFRAME]
 
     # input_start = timer()
-    done = handle_inputs(snd, it, inputs)
+    reset = handle_inputs(snd, it, inputs)
     # input_time = timer() - input_start
 
     # Paint
-    if videoframes and not sampler.paused and not done:
+    if videoframes and not sampler.paused:
         try:
-            samples = it.next()
+            if reset:
+                try:
+                    samples = it.send('reset')
+                except TypeError:
+                    samples = it.next()
+            else:
+                samples = it.next()
             # logger.debug("iterator on: %s" % (it.send('current'),))
 
             audio_start = timer()
@@ -173,19 +180,15 @@ def handle_events(snd, it, channel, paint_fn):
             paint_fn(samples)
             video_time = timer() - video_start
 
-            done |= drop_frames(videoframes, it)
+            drop_frames(videoframes, it)
         except StopIteration:
-            logger.info("Sound ended!")
-            done = True
+            raise SystemExit('Sound ended!')
 
     if reactor.running:
         # reactor.stop()  # pylint: disable=E1101
         pass
 
-    if done:
-        cleanup()
-
-    return (done, input_time, audio_time, video_time)
+    return (input_time, audio_time, video_time)
 
 
 def queue_audio(samples, channel):
@@ -226,39 +229,36 @@ def drop_frames(frames, it):
     """
     Drop the number of frame events over one from the iterator.
     """
-    done = False
     if len(frames) > 1:
         drop = len(frames) - 1
         for i in xrange(drop):
             try:
                 it.next()
             except StopIteration:
-                done = True
-                break
+                raise SystemExit('Sound ended when dropping frames!')
         logger.warn("Dropped %s frames!" % drop)
-    return done
 
 
 def handle_inputs(snd, it, inputs):
-    done = False
     if len(inputs) == 0:
-        return done
+        return False
+
+    reset = False
 
     input_start = timer()
     for event in inputs:
         # timestamp = timer()
         # logger.debug("Event: %s at %s" % (event, timestamp))
 
-        done = handle_input(snd, it, event)
+        reset |= handle_input(snd, it, event)
 
         # input_time = timer() - timestamp
         # if input_time > 0.001:
         #     logger.warn("*** SLOW Input events handling: %.4f", input_time)
 
-        if done: break
-
     logger.debug("Inputs: %s handled in %.4f seconds." % (len(inputs), timer() - input_start))
-    return done
+
+    return reset
 
 
 def handle_input(snd, it, event):
@@ -267,8 +267,7 @@ def handle_input(snd, it, event):
     """
     # Quit
     if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
-        logger.info("Quitting.")
-        return True
+        raise SystemExit('Quit.')
     # Pause
     elif (event.type in [pg.KEYDOWN, pg.KEYUP] and event.key == pg.K_F8) or \
          (event.type == pg.ACTIVEEVENT and event.state == 3):
@@ -305,14 +304,20 @@ def handle_input(snd, it, event):
         # Change frequency
         elif hasattr(snd, 'frequency'):
             change_frequency(snd, event.key, it)
+            return True
     # Key up
     elif (event.type == pg.KEYUP and hasattr(snd, 'frequency')):
         if pg.K_CAPSLOCK == event.key:
             change_frequency(snd, event.key, it)
+            return True
         else:
             if isinstance(snd, Generator):
-                snd.sustain = it.send('current')[0]
+                try:
+                    snd.sustain = it.send('current')[0]
+                except TypeError:
+                    snd.sustain = 0
                 logger.debug("Key '%s' (%s) up, sustain: %s" % (pg.key.name(event.key), event.key, snd.sustain))
+                return True
     # Mouse
     elif hasattr(snd, 'frequency') and event.type in (
         pg.MOUSEBUTTONDOWN,
@@ -350,7 +355,6 @@ def handle_input(snd, it, event):
     else:
         if event.type != AUDIOFRAME:
             logger.debug("Other: %s" % event)
-
     return False
 
 
@@ -433,8 +437,6 @@ def cleanup(it=None):
     """
     Clean up: Quit pygame, close iterator.
     """
-    logger.info("Clean up: Quit pygame, close iterator.")
-    done = False
     pg.mixer.quit()
     pg.display.quit()
     pg.quit()
@@ -443,14 +445,6 @@ def cleanup(it=None):
             it.close()
         del it
     logger.info("Done cleanup.")
-
-
-def reset_iterator(it):
-    """Reset an iterator and catch possible TypeErrors if it has just started."""
-    try:
-        it.send('reset')
-    except TypeError, err:
-        logger.warn(err)
 
 
 def change_frequency(snd, key, it):
@@ -463,4 +457,4 @@ def change_frequency(snd, key, it):
         snd.sustain = None
 
     logger.info("Changed frequency: %s." % snd)
-    reset_iterator(it)
+
