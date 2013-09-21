@@ -365,12 +365,13 @@ def init_pygame(name="Resonance", size=800):
     """
     pg.quit()
 
-    # logger.info(
-    #     "Pygame initialized with %s loaded modules (%s failed)." %
-    #     pg.init())
+    logger.info(
+        "Pygame initialized with %s loaded modules (%s failed)." %
+        pg.init())
 
     screen = init_display(name, size)
-    logger.info("Inited display %s" % screen)
+    surface = pg.display.get_surface()
+    logger.info("Inited display %s with flags: %s" % (screen, surface.get_flags()))
 
     return screen
 
@@ -382,6 +383,12 @@ def init_display(name, size):
     """
     pg.display.quit()
 
+    flags = 0
+    flags |= pg.SRCALPHA
+    flags |= pg.HWSURFACE
+    # flags |= pg.OPENGL
+    # flags |= pg.DOUBLEBUF
+
     if 'numpy' in pg.surfarray.get_arraytypes():
         pg.surfarray.use_arraytype('numpy')
     else:
@@ -389,7 +396,7 @@ def init_display(name, size):
 
     try:
         # FIXME get resolution some other way.
-        mode = pg.display.set_mode((size, size), pg.SRCALPHA, 32)
+        mode = pg.display.set_mode((size, size), flags, 32)
         pg.display.init()
     except Exception, err:
         logger.error("Something bad happened on init_display(): %s" % err)
