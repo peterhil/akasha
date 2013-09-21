@@ -129,7 +129,7 @@ def circumcircle_radius(a, b, c):
     """
     side = np.abs(a - c)
     angle = angle_between(a - b, c - b)
-    return side / (2 * np.sin(angle))
+    return np.abs(side / (2 * np.sin(angle)))
 
 
 # Circular arcs

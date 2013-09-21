@@ -49,3 +49,7 @@ class TestSplines(object):
         radius = 0.5
         pts = Circle.at(np.linspace(0, 1, 3, endpoint=False)) * radius
         assert apply(circumcircle_radius, pts) == np.abs(radius)
+
+    def test_circumcircle_radius_returns_positive_radius(self):
+        expected = np.sqrt(2) / 2
+        assert circumcircle_radius(1j, 1, 0) == expected
