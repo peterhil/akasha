@@ -57,6 +57,7 @@ def anim(snd, size=800, name='Resonance', antialias=True, lines=False, colours=T
         "Akasha animation is using %s Hz sampler rate and %s fps video rate." %
         (sampler.rate, sampler.videorate))
 
+    sampler.paused = False
     screen = init_pygame(name, size)
     channel = init_mixer(*mixer_options)
 
@@ -148,7 +149,6 @@ def handle_events(snd, it, channel, paint_fn):
     Event handling dispatcher.
     """
     reset = False
-    sampler.paused = False
     input_time, audio_time, video_time = 0, 0, 0
 
     events = pg.event.get()
