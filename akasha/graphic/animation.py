@@ -283,7 +283,8 @@ def handle_input(snd, it, event):
             if isinstance(snd, Generator):
                 snd.sustain = None
             logger.info("Rewind")
-            reset_iterator(it)
+            it.send('reset')
+            return True
         # Arrows
         elif pg.K_UP == event.key:
             if event.mod & (pg.KMOD_LALT | pg.KMOD_RALT):
