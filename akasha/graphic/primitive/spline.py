@@ -127,9 +127,9 @@ def circumcircle_radius(a, b, c):
     """
     Find the circumcircle of three points.
     """
-    a0 = a - c
-    b0 = b - c
-    return np.abs(a0 - b0) / 2 * np.sin(angle_between(a0, b0))
+    side = np.abs(a - c)
+    angle = angle_between(a - b, c - b)
+    return side / (2 * np.sin(angle))
 
 
 # Circular arcs

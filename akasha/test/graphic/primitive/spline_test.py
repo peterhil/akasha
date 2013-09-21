@@ -13,8 +13,8 @@ Unit tests for spline drawing functions
 import numpy as np
 import pytest
 
-from akasha.graphic.primitive.spline import angle_between, angle_between_dotp
-#from akasha.audio.curves import Circle
+from akasha.graphic.primitive.spline import angle_between, angle_between_dotp, circumcircle_radius
+from akasha.audio.curves import Circle
 from cmath import rect
 from numpy.testing.utils import assert_array_equal
 
@@ -44,3 +44,8 @@ class TestSplines(object):
     ])
     def test_angle_between(self, a, b, expected):
         assert angle_between(a, b) == expected
+
+    def test_circumcircle_radius(self):
+        radius = 0.5
+        pts = Circle.at(np.linspace(0, 1, 3, endpoint=False)) * radius
+        assert apply(circumcircle_radius, pts) == np.abs(radius)
