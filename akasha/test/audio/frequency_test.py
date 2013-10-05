@@ -24,7 +24,7 @@ from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import PeriodicGenerator, Generator
 from akasha.audio.oscillator import Osc
 from akasha.timing import sampler
-from akasha.tunings import cents_diff
+from akasha.utils.math import cents_diff
 from akasha.types.numeric import NumericUnit, ComplexUnit, RealUnit
 
 
