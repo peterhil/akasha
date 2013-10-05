@@ -14,6 +14,7 @@ import cmath
 import numpy as np
 
 from funckit import xoltar as fx
+from akasha.utils.log import logger, logging
 from akasha.utils.math import map_array, normalize, as_polar, as_rect
 
 
@@ -40,12 +41,17 @@ def mag2(x0, x1, m, norm_level=0.95):
     Get previous magnetization (m) level and diff (x) in signal level in.
     Return new magnetization level.
     """
-    permeability = (norm_level - m)
     d_in = x1 - x0
+
+    permeability = (norm_level - m)
+    if np.sign(d_in) == -1:
+        permeability = 1 - permeability
     # Should d_in be abs(d_in)?
-    d_out = permeability * d_in / max(x0, x1, norm_level)
+    d_out = permeability * d_in / norm_level
+
     # msg = "Delta in: %s, Permeability: %s, Change: %s"
     # logger.log(logging.BORING, msg % (d_in, permeability, d_out))
+
     return m + d_out
 
 
