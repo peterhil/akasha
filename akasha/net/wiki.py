@@ -16,9 +16,8 @@ from wikitools import wiki, api
 from fractions import Fraction
 from funckit.datastruct import head as car, tail as cdr
 
-from akasha.tunings import cents
 from akasha.utils.log import logger
-from akasha.utils.math import identity
+from akasha.utils.math import cents, identity
 
 
 def user_agent(req):

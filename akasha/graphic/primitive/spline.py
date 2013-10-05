@@ -113,6 +113,7 @@ def angle_between_dotp(a, b):
 def vectors(previous_pt, point, next_pt):
     return np.array([previous_pt, next_pt]) - point
 
+
 def curvature(previous_pt, point, next_pt):
     """
     Discrete curvature estimation.
@@ -125,6 +126,15 @@ def curvature(previous_pt, point, next_pt):
 
 
 def circumcircle_radius(a, b, c):
+    """
+    Find the circumcircle of three points.
+    """
+    side = np.abs(a - c)
+    angle = angle_between(a - b, c - b)
+    return np.abs(side / (2 * np.sin(angle)))
+
+
+def circumcircle_radius_alt(a, b, c):
     """
     Find the circumcircle of three points.
     """

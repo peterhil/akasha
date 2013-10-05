@@ -11,7 +11,7 @@ import numpy as np
 from akasha.audio.generators import PeriodicGenerator
 from akasha.timing import sampler
 from akasha.utils import issequence
-from akasha.utils.math import clip, pi2, normalize
+from akasha.utils.math import as_complex, clip, pi2, normalize
 from akasha.utils.patterns import Singleton
 
 
@@ -140,3 +140,25 @@ def chirp_zeta(z1=-0.5 - 100j, z2=0.5 + 100j, dur=10):
     z = np.linspace(z1, z2, n)
     k = np.arange(n)
     return normalize(k ** -z)
+
+
+class Ellipse(object):
+    """
+    Ellipse curve
+    """
+    def __init__(self, a, b, angle=0, origin=0):
+        self.a = a
+        self.b = b
+        self.angle = angle
+        self.origin = origin
+
+    def at(self, points):
+        """
+        General parametric form of ellipse curve
+        http://en.wikipedia.org/wiki/Ellipse#General_parametric_form
+        """
+        cos = self.a * np.cos(points)
+        sin = self.b * np.sin(points)
+        x = self.origin.real + cos * np.cos(self.angle) - sin * np.sin(self.angle)
+        y = self.origin.imag + cos * np.sin(self.angle) + sin * np.cos(self.angle)
+        return as_complex(np.array([np.asanyarray(x), np.asanyarray(y)]))

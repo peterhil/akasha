@@ -14,8 +14,6 @@ from akasha.audio.frequency import FrequencyRatioMixin, Frequency
 from akasha.audio.generators import Generator
 from akasha.funct import blockwise
 from akasha.timing import sampler
-
-from akasha.utils.decorators import memoized
 from akasha.utils.log import logger
 
 
@@ -23,7 +21,7 @@ class Pcm(FrequencyRatioMixin, Generator):
     """
     Playable PCM (pulse-code modulated aka sampled) sound.
     """
-    def __init__(self, snd, base=1):
+    def __init__(self, snd, base = 441):
         super(self.__class__, self).__init__()
         self._hz = Frequency(base)
         self.base_freq = Frequency(base)
@@ -40,8 +38,8 @@ class Pcm(FrequencyRatioMixin, Generator):
                 len(self.snd) * (self.base_freq.ratio / self.frequency.ratio)
             )))
 
-    @memoized
-    def resample(self, ratio, window='linear'):
+    @staticmethod
+    def resample(signal, ratio, window='linear'):
         """
         Resample the PCM sound with a new normalized frequency (ratio).
         """
@@ -51,13 +49,12 @@ class Pcm(FrequencyRatioMixin, Generator):
         )
         orig_state = sampler.paused
         sampler.paused = True
-        out = dsp.hilbert(src.resample(self.snd.real, float(ratio), window)).astype(np.complex128)
+        out = dsp.hilbert(src.resample(signal.real, float(ratio), window)).astype(np.complex128)
         sampler.paused = orig_state
         return out
-        #return src.resample(self.snd.real, float(ratio), window, verbose=True).astype(np.float64)
 
-    @memoized
-    def sc_resample(self, ratio, window='blackman'):
+    @staticmethod
+    def sc_resample(signal, ratio, window='blackman'):
         """
         Resample the PCM sound with a new normalized frequency (ratio).
         Uses scipy.signal.resample.
@@ -68,7 +65,7 @@ class Pcm(FrequencyRatioMixin, Generator):
         # Note about scipy.signal.resample: t : array_like, optional
         # If t given, it's assumed to be the sample positions associated with the signal data in x
         # http://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.resample.html
-        return dsp.resample(self.snd, len(self))
+        return dsp.resample(signal, int(round(ratio * len(signal))), window = window)
 
     def resample_at_freq(self, items=None):
         """
@@ -85,8 +82,8 @@ class Pcm(FrequencyRatioMixin, Generator):
             if isinstance(items, slice) and items.stop >= len(self):
                 logger.warn("Normalising {0} for length {1}".format(items, len(self)))
                 items = slice(items.start, min(items.stop, len(self), items.step))
-            return self.resample(ratio)[items]
-            # return self.sc_resample(ratio, items)
+            # return self.resample(self.snd[items], ratio)
+            return self.sc_resample(self.snd[items], ratio)
 
     def sample(self, items):
         """
