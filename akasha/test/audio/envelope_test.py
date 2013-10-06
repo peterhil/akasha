@@ -14,6 +14,7 @@ import numpy as np
 import pytest
 
 from akasha.audio.envelope import Exponential
+from akasha.timing import sampler
 from akasha.utils.math import minfloat
 
 from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
@@ -49,11 +50,11 @@ class TestExponential(object):
     @pytest.mark.parametrize(('rate', 'half_life'), half_lifes)
     def test_half_life(self, rate, half_life):
         e = Exponential(rate)
-        assert e.half_life_physical == half_life
+        assert e.half_life == half_life
 
     @pytest.mark.parametrize(('rate', 'half_life'), half_lifes)
     def test_from_half_life(self, rate, half_life):
-        e = Exponential.from_half_life_physical(half_life)
+        e = Exponential.from_half_life(half_life)
         assert e.rate == rate
 
     @pytest.mark.parametrize(('rate', 'amp'), [
@@ -85,8 +86,9 @@ class TestExponential(object):
         Test that scale reports correct time to reach zero.
         """
         ex = Exponential(rate, amp)
-        index = int(ex.scale)
+        index = int(ex.scale * sampler.rate)
         window = 50
+        msg = ''
 
         # There should be at least one non-zero item
         non_zero_before_end = False
@@ -105,3 +107,9 @@ class TestExponential(object):
 
         assert (all_zero_after_end or non_zero_before_end), \
             "%s\nLength %d %s\nBefore:\n%s\nAfter:\n%s" % (ex, index, msg, end, after_end)
+
+    def test_from_scale(self):
+        expected = Exponential(-0.5)
+        e = Exponential.from_scale(1490.2664382038824)
+        assert expected.rate == e.rate
+        assert e.at(e.scale) == 0
