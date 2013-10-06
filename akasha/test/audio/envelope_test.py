@@ -39,6 +39,23 @@ class TestExponential(object):
             1
         )
 
+    half_lifes = [
+        (1, -0.69314718055994529),
+        (0, np.inf),
+        (-0.5, 1.3862943611198906),
+        (-1, 0.69314718055994529),
+    ]
+
+    @pytest.mark.parametrize(('rate', 'half_life'), half_lifes)
+    def test_half_life(self, rate, half_life):
+        e = Exponential(rate)
+        assert e.half_life_physical == half_life
+
+    @pytest.mark.parametrize(('rate', 'half_life'), half_lifes)
+    def test_from_half_life(self, rate, half_life):
+        e = Exponential.from_half_life_physical(half_life)
+        assert e.rate == rate
+
     @pytest.mark.parametrize(('rate', 'amp'), [
         # Amp > 1
         (-1, 200),

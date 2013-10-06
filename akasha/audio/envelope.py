@@ -41,6 +41,22 @@ class Exponential(Generator):
         if np.inf == np.abs(time):
             return cls(rate=0.0, amp=amp)
         else:
+            return cls(rate=sampler.rate / (-time / np.log(2.0)), amp=amp)
+
+    @property
+    def half_life_physical(self):
+        """Returns the time required to reach half-life from a starting amplitude."""
+        return np.inf if self.rate == 0 else np.log(2.0) / -self.rate
+
+    @classmethod
+    def from_half_life_physical(cls, time, amp=1.0):
+        """
+        Returns an exponential decay envelope.
+        Time parameter for half-life is measured in seconds.
+        """
+        if np.inf == np.abs(time):
+            return cls(rate=0.0, amp=amp)
+        else:
             return cls(rate=sampler.rate / (-(time * sampler.rate) / np.log(2.0)), amp=amp)
 
     @property
@@ -59,11 +75,17 @@ class Exponential(Generator):
 
     def sample(self, frames):
         """
-        Sample the exponential.
+        Sample the exponential at sampler frames.
         """
         # Convert frame numbers to time (ie. 44100 => 1.0)
         time = np.array(frames) / float(sampler.rate)
         return self.amp * np.exp(self.rate * time)
+
+    def at(self, times):
+        """
+        Sample the exponential at sample times.
+        """
+        return self.amp * np.exp(self.rate * times)
 
     # def __len__(self):
     #     return int(np.ceil(np.abs(self.scale)))
