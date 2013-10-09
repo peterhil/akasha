@@ -264,6 +264,9 @@ def complex_as_reals(signal, dtype=np.float64):
     """
     Convert complex signal to real number coordinate points.
     """
+    signal = np.asanyarray(signal, dtype=np.complex128)
+    if signal.ndim < 1:
+        signal = np.atleast_1d(signal)
     return signal.view(dtype).reshape(len(signal), 2).transpose()
 
 
