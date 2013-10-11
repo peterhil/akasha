@@ -107,12 +107,13 @@ def draw(
     signal = clip_samples(signal)
 
     if lines:
+        if screen is None:
+            # logger.warn("Drawing lines with Numpy is way too slow for now!")
+            return draw_lines(signal, img, size, colours)
         if antialias and screen is not None:
             draw_lines_pg(signal, screen, size, colours, antialias=True)
         else:
-            # raise NotImplementedError("Drawing lines with Numpy is way too slow for now!")
-            # return draw_lines(signal, img, size, colours)
-            return draw_lines_pg(signal, screen, size, colours, antialias=False)
+            draw_lines_pg(signal, screen, size, colours, antialias=False)
     else:
         if antialias:
             return draw_points_aa(signal, img, size, colours)
