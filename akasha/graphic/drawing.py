@@ -348,6 +348,7 @@ def show(img, plot=False, osx_open=False):
     """
     Show an image from a Numpy array.
     """
+    img = img.transpose((1, 0, 2))
     if (plot and plt):
         plt.interactive(True)
         imgplot = plt.imshow(img[:, :, :3])
@@ -386,7 +387,7 @@ def graph(signal, size=1000, dur=None, plot=False, axis=True,
         antialias=antialias, lines=lines, colours=colours,
         axis=axis,
         img=img
-    ).transpose((1, 0, 2))
+    )
 
     show(img, plot and plt)
 
