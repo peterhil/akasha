@@ -21,7 +21,7 @@ class AffineTransform(skt.AffineTransform):
     http://scikit-image.org/docs/0.8.0/api/skimage.transform.html#affinetransform
 
     Adds complex_plane method to transform comples signals.
-    
+
     References:
     Postscript Language Reference Manual, 3rd edition, chapters "4.3.2 Transformations" and
     "4.3.3 Matrix Representation and Manipulation"
@@ -41,3 +41,10 @@ class AffineTransform(skt.AffineTransform):
         src = complex_as_reals(src).T
         dst = complex_as_reals(dst).T
         _super(self).estimate(src, dst)
+
+    def inverse(self, signal):
+        """
+        Apply the inverse affine transformation onto a signal on the complex plane.
+        """
+        coords = complex_as_reals(signal).T
+        return as_complex(self._apply_mat(coords, self._inv_matrix).T)
