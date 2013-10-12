@@ -11,7 +11,7 @@ import scipy as sc
 
 from cmath import rect, polar
 
-from akasha.utils.math import as_complex, rad_to_deg
+from akasha.utils.math import as_complex, normalize, rad_to_deg
 
 
 def clothoid(points):
@@ -148,6 +148,38 @@ def midpoint(a, b):
     """
     return ((a - b) / 2.0) + b
 
+# Ellipses
+
+def parallelogram_point(a, b, c):
+    """
+    Make a parallelogram out of a triangle.
+    In other words, rotate point b pi degrees around midpoint of line form a to c.
+    """
+    m = midpoint(a, c)
+    return m - (b - m)
+
+def random_points(n=1, x=1, y=1):
+    a, b = np.random.rand(2, n)
+    return a * x + b * y * 1j
+
+def random_triangle(x=1, y=1):
+    return random_points(3, x, y)
+
+def random_parallelogram(x=1, y=1):
+    tri = random_triangle(x, y)
+    return normalize(np.append(tri, parallelogram_point(*tri)))
+
+def closed(signal):
+    return np.append(signal, signal[0])
+
+def ellipse_curvature(a, b):
+    """
+    Curvature of an ellipse with a, b axis lengths.
+    http://mathworld.wolfram.com/Ellipse.html formula 59
+    """
+    def curvature(t):
+        return (a * b) / (b ** 2 * np.cos(t) ** 2 + a ** 2 * np.sin(t) ** 2) ** (3 / 2)
+    return curvature
 
 # Circular arcs
 
