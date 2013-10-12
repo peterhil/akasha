@@ -373,6 +373,17 @@ def show(img, plot=False, osx_open=False):
         image.show()
 
 
+def imsave(img, filename):
+    try:
+        img = img.transpose((1, 0, 2))
+        image = Image.fromarray(img[..., :3], 'RGB')
+        image.save(filename, 'png')
+    except IOError, err:
+        logger.error("Failed to save image into {}".format(filename))
+    except Exception, err:
+        logger.error("Error when saving image: {}".format(err))
+
+
 def graph(signal, size=1000, dur=None, plot=False, axis=True,
           antialias=True, lines=False, colours=True, img=None):
     """
