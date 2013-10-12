@@ -66,7 +66,7 @@ class TestDrawing(object):
         )
 
     @pytest.mark.parametrize(('func', 'args'), [
-        ['draw_lines_aa', {
+        ['draw_lines_pg', {
             'lines': True,
             'antialias': True,
             'screen': True,

@@ -11,8 +11,7 @@ import numpy as np
 from cmath import rect
 
 from akasha.audio.generators import PeriodicGenerator
-from akasha.graphic.geometry import AffineTransform, is_orthogonal, rotate_towards
-from akasha.graphic.primitive.spline import midpoint
+from akasha.graphic.geometry import AffineTransform, is_orthogonal, midpoint, rotate_towards
 from akasha.timing import sampler
 from akasha.utils import issequence
 from akasha.utils.math import as_complex, clip, pi2, normalize
@@ -179,6 +178,10 @@ class Ellipse(Curve):
         return radius * np.exp((thetas + self.angle) * 1j) + self.origin
 
     def curvature(self, tau):
+        """
+        Curvature of an ellipse.
+        http://mathworld.wolfram.com/Ellipse.html formula 59
+        """
         t = np.asanyarray(tau) * np.pi
         return (self.a * self.b) / (self.b ** 2 * np.cos(t) ** 2 + self.a ** 2 * np.sin(t) ** 2) ** (3 / 2)
 
