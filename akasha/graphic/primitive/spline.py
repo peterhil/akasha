@@ -134,7 +134,7 @@ def circumcircle_radius(a, b, c):
     return np.abs(side / (2 * np.sin(angle)))
 
 
-def circumcircle_radius_alt(a, b, c):
+def circumcircle_radius_alt(previous_pt, point, next_pt):
     """
     Find the circumcircle of three points.
     """
