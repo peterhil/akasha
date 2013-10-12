@@ -9,6 +9,8 @@ from __future__ import division
 import numpy as np
 
 from akasha.audio.generators import PeriodicGenerator
+from akasha.graphic.geometry import AffineTransform
+from akasha.graphic.primitive.spline import midpoint
 from akasha.timing import sampler
 from akasha.utils import issequence
 from akasha.utils.math import as_complex, clip, pi2, normalize
@@ -141,7 +143,7 @@ def chirp_zeta(z1=-0.5 - 100j, z2=0.5 + 100j, dur=10):
     return normalize(k ** -z)
 
 
-class Ellipse(object):
+class Ellipse(Curve):
     """
     Ellipse curve
     """
@@ -151,7 +153,10 @@ class Ellipse(object):
         self.angle = angle
         self.origin = origin
 
-    def at(self, points):
+    def __repr__(self):
+        return "%s(%f, %f, %f, %r)" % (self.__class__.__name__, self.a, self.b, self.angle, self.origin)
+
+    def parametric(self, points):
         """
         General parametric form of ellipse curve
         http://en.wikipedia.org/wiki/Ellipse#General_parametric_form
@@ -161,3 +166,48 @@ class Ellipse(object):
         x = self.origin.real + cos * np.cos(self.angle) - sin * np.sin(self.angle)
         y = self.origin.imag + cos * np.sin(self.angle) + sin * np.cos(self.angle)
         return as_complex(np.array([np.asanyarray(x), np.asanyarray(y)]))
+
+    def at(self, taus):
+        """
+        Polar form of ellipse relative to center, translated and rotated to origin and angle.
+        https://en.wikipedia.org/wiki/Ellipse#Polar_form_relative_to_center
+        """
+        thetas = taus * pi2
+        radius = self.a * self.b / np.sqrt((self.b * np.cos(thetas)) ** 2 + (self.a * np.sin(thetas)) ** 2)
+        return radius * np.exp((thetas + self.angle) * 1j) + self.origin
+
+    def curvature(self, tau):
+        t = np.asanyarray(tau) * np.pi
+        return (self.a * self.b) / (self.b ** 2 * np.cos(t) ** 2 + self.a ** 2 * np.sin(t) ** 2) ** (3 / 2)
+
+    def roc(self, tau):
+        """
+        Radius of curvature.
+        """
+        return 1.0 / self.curvature(tau)
+
+    @classmethod
+    def from_rhombus(cls, para):
+        a, b, c, d = para
+        para_origin =  para - midpoint(a, c)
+        k, l = np.abs(para_origin)[:2]
+        return cls(l, k, np.angle(para_origin)[3], midpoint(a, c))
+
+    @classmethod
+    def from_parallelogram(cls, para):
+        sq = np.array([1, 1j, -1, -1j])
+        center = midpoint(para[0], para[2])
+        para_at_origin = para - center
+
+        tr = AffineTransform()
+        tr.estimate(sq, para_at_origin)
+
+        u, s, v = np.linalg.svd(tr._matrix[:2, :2], full_matrices=False, compute_uv=True)
+        a, b = s[:2]
+
+        uv = np.eye(3); uv[:2, :2] = u * np.diag(s) * v
+        uv = AffineTransform(uv)
+
+        return cls(a, b,
+                   np.angle(uv(sq[0])),
+                   center)
