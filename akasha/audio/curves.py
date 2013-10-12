@@ -60,7 +60,6 @@ class Super(Curve):
         See 'Superellipse' article at Wikipedia for explanation of what these parameters mean:
         http://en.wikipedia.org/wiki/Superellipse
         """
-        super(self.__class__, self).__init__()
         self.superness = self.get_superness(m, n, p, q, a, b)
 
     @staticmethod
