@@ -10,7 +10,7 @@ import numpy as np
 import skimage.transform as skt
 
 from akasha.utils import _super
-from akasha.utils.math import as_complex, complex_as_reals
+from akasha.utils.math import as_complex, complex_as_reals, pi2
 
 
 class AffineTransform(skt.AffineTransform):
@@ -57,3 +57,19 @@ class AffineTransform(skt.AffineTransform):
             float(self.shear),
             tuple(self.translation),
         )
+
+
+def is_orthogonal(a, b, c=0):
+    """
+    Return true if two complex points (a, b) are orthogonal from center point (c).
+    """
+    return np.abs(np.angle(a - c) - np.angle(b - c)) == np.pi / 2
+
+
+def rotate_towards(u, v, tau, center=0):
+    """
+    Rotate point u tau degrees *towards* v around center.
+    """
+    s, t = np.array([u, v]) - center
+    sign = -1 if (np.angle(s) - np.angle(t)) % pi2 > np.pi else 1
+    return s * (-np.exp(pi2 * 1j * tau) * sign) + center

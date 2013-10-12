@@ -8,8 +8,10 @@ from __future__ import division
 
 import numpy as np
 
+from cmath import rect
+
 from akasha.audio.generators import PeriodicGenerator
-from akasha.graphic.geometry import AffineTransform
+from akasha.graphic.geometry import AffineTransform, is_orthogonal, rotate_towards
 from akasha.graphic.primitive.spline import midpoint
 from akasha.timing import sampler
 from akasha.utils import issequence
@@ -215,3 +217,35 @@ class Ellipse(Curve):
                    # pi2 / 4 + tr.rotation + np.tan(tr.shear),
                    np.angle(tr(sq)[1]),
                    center)
+
+    @classmethod
+    def from_conjugate_diameters(cls, para):
+        """
+        Find the major and minor axes of an ellipse from a parallelogram determining the conjugate diameters.
+
+        Uses Rytz's construction for algorithm:
+        http://de.wikipedia.org/wiki/Rytzsche_Achsenkonstruktion#Konstruktion
+        """
+        c = midpoint(para[0], para[2])
+        para = para - c
+        u, v = para[:2]
+        if is_orthogonal(u, v):
+            return cls(np.abs(u), np.abs(v), np.angle(u), c)
+
+        # Step 1
+        ur = rotate_towards(u, v, 0.25)
+        s = midpoint(ur, v)
+
+        # Step 2
+        r = rect(np.abs(s), np.angle(ur - s)) + s
+        l = rect(np.abs(s), np.angle(v - s)) + s
+
+        a = np.abs(v - r)
+        b = np.abs(v - l)
+
+        # graph(np.concatenate([
+        #     closed(para + c),
+        #     np.array([u, c, v, ur, 0, s, r, c, l]),
+        #     Circle.at(np.linspace(0, 1, 500)) * np.abs(s) + s
+        #     ]), lines=True)
+        return cls(a, b, np.angle(l), c)
