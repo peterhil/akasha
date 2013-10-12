@@ -195,12 +195,13 @@ class Ellipse(Curve):
 
     @classmethod
     def from_parallelogram(cls, para):
-        sq = np.array([1, 1j, -1, -1j])
+        dia = np.array([1, 1j, -1, -1j])
+        sq = np.array([1+1j, -1+1j, -1-1j, 1-1j])
         center = midpoint(para[0], para[2])
         para_at_origin = para - center
 
         tr = AffineTransform()
-        tr.estimate(sq, para_at_origin)
+        tr.estimate(dia, para_at_origin)
 
         u, s, v = np.linalg.svd(tr._matrix[:2, :2], full_matrices=False, compute_uv=True)
         a, b = s[:2]
@@ -209,5 +210,8 @@ class Ellipse(Curve):
         uv = AffineTransform(uv)
 
         return cls(a, b,
-                   np.angle(uv(sq[0])),
+                   # np.angle(uv(dia[0])),
+                   # np.angle(tr.inverse(dia))[0],
+                   # pi2 / 4 + tr.rotation + np.tan(tr.shear),
+                   np.angle(tr(sq)[1]),
                    center)
