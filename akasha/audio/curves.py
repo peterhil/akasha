@@ -8,7 +8,10 @@ from __future__ import division
 
 import numpy as np
 
+from cmath import rect
+
 from akasha.audio.generators import PeriodicGenerator
+from akasha.graphic.geometry import AffineTransform, is_orthogonal, midpoint, rotate_towards
 from akasha.timing import sampler
 from akasha.utils import issequence
 from akasha.utils.math import as_complex, clip, pi2, normalize
@@ -60,7 +63,6 @@ class Super(Curve):
         See 'Superellipse' article at Wikipedia for explanation of what these parameters mean:
         http://en.wikipedia.org/wiki/Superellipse
         """
-        super(self.__class__, self).__init__()
         self.superness = self.get_superness(m, n, p, q, a, b)
 
     @staticmethod
@@ -142,7 +144,7 @@ def chirp_zeta(z1=-0.5 - 100j, z2=0.5 + 100j, dur=10):
     return normalize(k ** -z)
 
 
-class Ellipse(object):
+class Ellipse(Curve):
     """
     Ellipse curve
     """
@@ -152,7 +154,19 @@ class Ellipse(object):
         self.angle = angle
         self.origin = origin
 
-    def at(self, points):
+    def __repr__(self):
+        return "%s(%r, %r, %r, %r)" % (self.__class__.__name__, self.a, self.b, self.angle, self.origin)
+
+    def __hash__(self):
+        return hash((self.a, self.b, self.angle, self.origin))
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            hash(self) == hash(other)
+        else:
+            return NotImplemented
+
+    def parametric(self, points):
         """
         General parametric form of ellipse curve
         http://en.wikipedia.org/wiki/Ellipse#General_parametric_form
@@ -162,3 +176,88 @@ class Ellipse(object):
         x = self.origin.real + cos * np.cos(self.angle) - sin * np.sin(self.angle)
         y = self.origin.imag + cos * np.sin(self.angle) + sin * np.cos(self.angle)
         return as_complex(np.array([np.asanyarray(x), np.asanyarray(y)]))
+
+    def at(self, taus):
+        """
+        Polar form of ellipse relative to center, translated and rotated to origin and angle.
+        https://en.wikipedia.org/wiki/Ellipse#Polar_form_relative_to_center
+        """
+        thetas = taus * pi2
+        radius = self.a * self.b / np.sqrt((self.b * np.cos(thetas)) ** 2 + (self.a * np.sin(thetas)) ** 2)
+        return radius * np.exp((thetas + self.angle) * 1j) + self.origin
+
+    def curvature(self, tau):
+        """
+        Curvature of an ellipse.
+        http://mathworld.wolfram.com/Ellipse.html formula 59
+        """
+        t = np.asanyarray(tau) * np.pi
+        return (self.a * self.b) / (self.b ** 2 * np.cos(t) ** 2 + self.a ** 2 * np.sin(t) ** 2) ** (3 / 2)
+
+    def roc(self, tau):
+        """
+        Radius of curvature.
+        """
+        return 1.0 / self.curvature(tau)
+
+    @classmethod
+    def from_rhombus(cls, para):
+        a, b, c, d = para
+        para_origin =  para - midpoint(a, c)
+        k, l = np.abs(para_origin)[:2]
+        return cls(l, k, np.angle(para_origin)[3], midpoint(a, c))
+
+    @classmethod
+    def from_parallelogram(cls, para):
+        dia = np.array([1, 1j, -1, -1j])
+        sq = np.array([1+1j, -1+1j, -1-1j, 1-1j])
+        center = midpoint(para[0], para[2])
+        para_at_origin = para - center
+
+        tr = AffineTransform()
+        tr.estimate(dia, para_at_origin)
+
+        u, s, v = np.linalg.svd(tr._matrix[:2, :2], full_matrices=False, compute_uv=True)
+        a, b = s[:2]
+
+        uv = np.eye(3); uv[:2, :2] = u * np.diag(s) * v
+        uv = AffineTransform(uv)
+
+        return cls(a, b,
+                   # np.angle(uv(dia[0])),
+                   # np.angle(tr.inverse(dia))[0],
+                   # pi2 / 4 + tr.rotation + np.tan(tr.shear),
+                   np.angle(tr(sq)[1]),
+                   center)
+
+    @classmethod
+    def from_conjugate_diameters(cls, para):
+        """
+        Find the major and minor axes of an ellipse from a parallelogram determining the conjugate diameters.
+
+        Uses Rytz's construction for algorithm:
+        http://de.wikipedia.org/wiki/Rytzsche_Achsenkonstruktion#Konstruktion
+        """
+        c = midpoint(para[0], para[2])
+        para = para - c
+        u, v = para[:2]
+        if is_orthogonal(u, v):
+            return cls(np.abs(u), np.abs(v), np.angle(u), c)
+
+        # Step 1
+        ur = rotate_towards(u, v, 0.25)
+        s = midpoint(ur, v)
+
+        # Step 2
+        r = rect(np.abs(s), np.angle(ur - s)) + s
+        l = rect(np.abs(s), np.angle(v - s)) + s
+
+        a = np.abs(v - r)
+        b = np.abs(v - l)
+
+        # graph(np.concatenate([
+        #     closed(para + c),
+        #     np.array([u, c, v, ur, 0, s, r, c, l]),
+        #     Circle.at(np.linspace(0, 1, 500)) * np.abs(s) + s
+        #     ]), lines=True)
+        return cls(a, b, np.angle(l), c)

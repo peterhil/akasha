@@ -17,6 +17,7 @@ pytest==2.3.4
 readline==6.2.4.1
 scikit-image==0.7.2
 scikits.audiolab==0.11.0
+scikits-image==0.7.1
 scikits.samplerate==0.3.3
 scipy==0.12.0
 wikitools==1.1.1

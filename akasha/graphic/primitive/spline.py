@@ -9,9 +9,10 @@ from __future__ import division
 import numpy as np
 import scipy as sc
 
-from cmath import rect, polar
+from cmath import rect
 
-from akasha.utils.math import as_complex, rad_to_deg
+from akasha.graphic.geometry import angle_between, vectors
+from akasha.utils.math import as_complex, normalize, rad_to_deg
 
 
 def clothoid(points):
@@ -74,42 +75,6 @@ def cl_piece(start, stop, n, endpoint=False, scale=1, norm=False, fn=clothoid_wi
     return rotated * (scale / 2)
 
 
-def orient(arr, end=1 + 0j, inplace=False):
-    """
-    Orientates (or normalizes) an array by translating startpoint to the origo,
-    and scales and rotates endpoint to the parameter 'end'.
-    """
-    if inplace:
-        arr -= arr[0]
-        arr *= end / arr[-1]
-        return arr
-    else:
-        return ((arr - arr[0]) * (end / (arr[-1] - arr[0])))
-
-
-def angle_between(a, b):
-    """
-    Angle in radians between two non-zero vectors.
-    See: http://en.wikipedia.org/wiki/Vector_dot_product#Geometric_interpretation
-    """
-    return np.angle(a) - np.angle(b)
-
-
-def angle_between_dotp(a, b):
-    """
-    Angle in radians between two nonzero vectors.
-    Returns only positive values.
-
-    See:
-    http://en.wikipedia.org/wiki/Vector_dot_product#Geometric_interpretation
-    http://en.wikipedia.org/wiki/Inner_product
-    http://www.wikihow.com/Find-the-Angle-Between-Two-Vectors
-    """
-    # vdot is for complex numbers
-    dotp = np.real(np.vdot(a, b))
-    return np.arccos(dotp / (np.abs(a) * np.abs(b)))
-
-
 def curvature(previous_pt, point, next_pt):
     """
     Discrete curvature estimation.
@@ -117,19 +82,8 @@ def curvature(previous_pt, point, next_pt):
     See section "2.6.1 Discrete curvature estimation" at:
     http://www.dgp.toronto.edu/~mccrae/mccraeMScthesis.pdf
     """
-    v1 = previous_pt - point
-    v2 = next_pt - point
-    logger.debug("Curvature with vectors %s and %s: %s" % (polar(v1), polar(v2), rad_to_deg(angle_between(v1, v2))))
+    (v1, v2) = vectors(previous_pt, point, next_pt)
     return 2 * np.sin(angle_between(v1, v2) / 2) / np.sqrt(np.abs(v1) * np.abs(v2))
-
-
-def circumcircle_radius(a, b, c):
-    """
-    Find the circumcircle of three points.
-    """
-    side = np.abs(a - c)
-    angle = angle_between(a - b, c - b)
-    return np.abs(side / (2 * np.sin(angle)))
 
 
 # Circular arcs
