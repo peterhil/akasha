@@ -10,7 +10,7 @@ import numpy as np
 import skimage.transform as skt
 
 from akasha.utils import _super
-from akasha.utils.math import as_complex, complex_as_reals, pi2
+from akasha.utils.math import as_complex, complex_as_reals, normalize, pi2
 
 
 class AffineTransform(skt.AffineTransform):
