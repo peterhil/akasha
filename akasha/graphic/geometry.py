@@ -48,3 +48,12 @@ class AffineTransform(skt.AffineTransform):
         """
         coords = complex_as_reals(signal).T
         return as_complex(self._apply_mat(coords, self._inv_matrix).T)
+
+    def __repr__(self):
+        return "{}(scale={}, rotation={}, shear={}, translation={})".format(
+            self.__class__.__name__,
+            tuple(self.scale),
+            float(self.rotation),
+            float(self.shear),
+            tuple(self.translation),
+        )
