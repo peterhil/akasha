@@ -155,7 +155,16 @@ class Ellipse(Curve):
         self.origin = origin
 
     def __repr__(self):
-        return "%s(%f, %f, %f, %r)" % (self.__class__.__name__, self.a, self.b, self.angle, self.origin)
+        return "%s(%r, %r, %r, %r)" % (self.__class__.__name__, self.a, self.b, self.angle, self.origin)
+
+    def __hash__(self):
+        return hash((self.a, self.b, self.angle, self.origin))
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            hash(self) == hash(other)
+        else:
+            return NotImplemented
 
     def parametric(self, points):
         """
