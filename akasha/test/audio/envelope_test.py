@@ -10,79 +10,106 @@
 Unit tests for Exponential
 """
 
-import unittest
-
-import math
 import numpy as np
+import pytest
 
 from akasha.audio.envelope import Exponential
+from akasha.timing import sampler
 from akasha.utils.math import minfloat
 
+from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
 
-class ExponentialTest(unittest.TestCase):
-    def testInit(self):
+
+class TestExponential(object):
+    """
+    Tests for Exponential envelope curves.
+    """
+
+    def test_init(self):
         rate = -1
         amp = 0.5
         e = Exponential(rate, amp)
-        self.assertEqual(e.rate, rate)
-        self.assertEqual(e.amp, amp)
+        assert rate == e.rate
+        assert amp == e.amp
 
-    def testExponentialDecay(self):
-        e = Exponential(-1, 1.0)
-        self.assertEqual(1.0 / math.e, e.sample(44100))
-        f = Exponential(-2, 1.0)
-        self.assertEqual(1.0 / math.e ** 2, f.sample(44100))
+    @pytest.mark.parametrize('rate', [-1, -2, 0, 1, 5])
+    def test_exponential_rates(self, rate):
+        assert_nulp_diff(
+            np.e ** rate,
+            Exponential(rate, 1.0).sample(44100),
+            1
+        )
 
-    def testExponentialGrowth(self):
-        e = Exponential(1, 1.0)
-        self.assertEqual(math.e, e.sample(44100))
-        f = Exponential(5, 1.0)
-        self.assertAlmostEqual(math.e ** 5, f.sample(44100))
+    half_lifes = [
+        (1, -0.69314718055994529),
+        (0, np.inf),
+        (-0.5, 1.3862943611198906),
+        (-1, 0.69314718055994529),
+    ]
 
-    def testZeroExponential(self):
-        amp = 1.0
-        z = Exponential(0, amp)
-        assert np.equal(amp, z[:44100]).all()
+    @pytest.mark.parametrize(('rate', 'half_life'), half_lifes)
+    def test_half_life(self, rate, half_life):
+        e = Exponential(rate)
+        assert e.half_life == half_life
 
-    def test_scale(self):
-        """Test that scale reports correct time for reach zero."""
-        min_float = minfloat(1)[0]
+    @pytest.mark.parametrize(('rate', 'half_life'), half_lifes)
+    def test_from_half_life(self, rate, half_life):
+        e = Exponential.from_half_life(half_life)
+        assert e.rate == rate
+
+    @pytest.mark.parametrize(('rate', 'amp'), [
+        # Amp > 1
+        (-1, 200),
+        (-1, 2),
+
+        # Amp 1
+        (-0.5, 1),
+        (-1, 1),
+        (-2, 1),
+        (-128, 1),
+        (-2 ** 18 - 1, 1),
+
+        # Amp 0.5
+        (-1, 0.5),
+        (-128, 0.5),
+
+        # Amp 0.05
+        (-1, 0.05),
+        (-0.05, 0.05),
+        (-2 ** 18 - 1, 0.05),
+
+        # Amp min_float
+        (-1, minfloat(1)[0]),
+    ])
+    def test_scale(self, rate, amp):
+        """
+        Test that scale reports correct time to reach zero.
+        """
+        ex = Exponential(rate, amp)
+        index = int(ex.scale * sampler.rate)
         window = 50
-        testdata = [
-            # Amp > 1
-            (-1, 200), (-1, 2),
-            # Amp 1
-            (-0.5, 1), (-1, 1), (-2, 1), (-128, 1), (-2 ** 18 - 1, 1),
-            # Amp 0.5
-            (-1, 0.5), (-128, 0.5),
-            # Amp 0.05
-            (-1, 0.05), (-0.05, 0.05), (-2 ** 18 - 1, 0.05),
-            # Amp min_float
-            (-1, min_float),
-        ]
-        for rate, amp in testdata:
-            e = Exponential(rate, amp)
-            i = int(e.scale)
+        msg = ''
 
-            # There should be at least one non-zero item
-            non_zero_before_end = False
-            end = e[i - window:i - 1]
-            if np.not_equal(0, end).any():
-                non_zero_before_end = True
-                msg = "too long: Only zeroes found before end."
+        # There should be at least one non-zero item
+        non_zero_before_end = False
+        end = ex[index - window : index - 1]
+        if np.not_equal(0, end).any():
+            non_zero_before_end = True
+            msg = "too long: Only zeroes found before end."
 
-            # Every item after end should be zero
-            all_zero_after_end = False
-            after_end = e[i:i + window]
-            if np.equal(0, after_end).all():
-                all_zero_after_end = True
-                msg = "too short: Not all zero after end."
+        # Every item after end should be zero
+        all_zero_after_end = False
+        after_end = ex[index : index + window]
 
-            self.assert_(
-                (all_zero_after_end or non_zero_before_end),
-                "%s\nLength %d %s\nBefore:\n%s\nAfter:\n%s" % (e, i, msg, end, after_end)
-            )
+        if np.equal(0, after_end).all():
+            all_zero_after_end = True
+            msg = "too short: Not all zero after end."
 
+        assert (all_zero_after_end or non_zero_before_end), \
+            "%s\nLength %d %s\nBefore:\n%s\nAfter:\n%s" % (ex, index, msg, end, after_end)
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_from_scale(self):
+        expected = Exponential(-0.5)
+        e = Exponential.from_scale(1490.2664382038824)
+        assert expected.rate == e.rate
+        assert e.at(e.scale) == 0

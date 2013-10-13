@@ -70,6 +70,60 @@ def rad_to_tau(angles):
 
 # Utils for frequency ratios etc...
 
+
+def cents(*args):
+    """
+    Calculate cents from interval or frequency ratio(s).
+    When using frequencies, give greater frequencies first.
+
+    >>> cents(float(Fraction(5,4)))
+    array([ 386.31371386])
+
+    >>> cents(440/27.5)
+    array([ 4800.])     # equals four octaves
+
+    >>> cents(np.arange(8)/16.0+1)
+    array([[   0.        ,  104.9554095 ,  203.91000173,  297.51301613,
+             386.31371386,  470.78090733,  551.31794236,  628.27434727]])
+    """
+    return 1200.0 * np.log2(args)
+
+
+def cents_diff(a, b):
+    """
+    Calculate the difference of two frequencies in cents."
+    """
+    return np.abs(cents(float(a)) - cents(float(b)))
+
+
+def interval(*cnt):
+    """
+    Calculate interval ratio from cents.
+
+    >>> interval(100)
+    array([ 1.05946309])    # one equal temperament semitone
+
+    >>> interval(386.31371386)
+    array([ 1.25])          # 5:4, perfect fifth
+
+    >> frac = lambda f: map(Fraction.limit_denominator, map(Fraction.from_float, f))
+    >> [frac for i in interval(np.arange(5) * 386.31371386)]
+    [[Fraction(1, 1),
+      Fraction(5, 4),
+      Fraction(25, 16),
+      Fraction(125, 64),
+      Fraction(625, 256)]]
+    """
+    return np.power(2, np.asanyarray(cnt) / 1200.0)
+
+
+def freq_plus_cents(f, cnt):
+    """
+    Calculate what frequency is given cents apart from a frequency f.
+    """
+    return f * interval(cnt)
+
+
 def logn(x, base=np.e):
     """
     Logarithm of x on some base.
@@ -206,11 +260,14 @@ def as_complex(a):
     return a.transpose().flatten().view(np.complex128)
 
 
-def complex_as_reals(samples):
+def complex_as_reals(signal, dtype=np.float64):
     """
-    Convert complex samples to real number coordinate points.
+    Convert complex signal to real number coordinate points.
     """
-    return samples.view(np.float64).reshape(len(samples), 2).transpose()    # 0.5 to 599.5
+    signal = np.asanyarray(signal, dtype=np.complex128)
+    if signal.ndim < 1:
+        signal = np.atleast_1d(signal)
+    return signal.view(dtype).reshape(len(signal), 2).transpose()
 
 
 def as_polar(signal, dtype=np.complex128):
@@ -488,9 +545,16 @@ def normalize(signal):
     return signal / sup
 
 
-def clip(signal, inplace=False):
+def inside(arr, low, high):
     """
-    Clips complex samples to unit area (-1-1j, +1+1j).
+    Return values of array inside interval [low, high]
+    """
+    return np.ma.masked_outside(arr, low, high).compressed()
+
+
+def clip(signal, limit=1.0, inplace=False):
+    """
+    Clips complex signal to unit rectangle area (-1-1j, +1+1j).
     """
     if np.any(np.isnan(signal)):
         signal = np.nan_to_num(signal)
@@ -499,7 +563,7 @@ def clip(signal, inplace=False):
         signal = signal.copy()
 
     reals = signal.view(np.float)
-    np.clip(reals, a_min=-1, a_max=1, out=reals)  # Do clipping in-place!
+    np.clip(reals, a_min=-limit, a_max=limit, out=reals)  # Do clipping in-place!
 
     return signal
 
@@ -539,6 +603,43 @@ def diffs(signal, start=0, end=0):
     """
     # Could use np.apply_over_axes - profile with time?
     return np.append(start, signal[1:]) - np.append(signal[:-1], end)
+
+
+def get_points(signal, size=1000, dtype=np.float64):
+    """
+    Get coordinate points from a complex signal.
+    """
+    return complex_as_reals(scale(np.atleast_1d(signal), size), dtype)
+
+
+def get_pixels(signal, size):
+    """
+    Get pixel coordinates and pixel values from complex signal on some size.
+    """
+    # Change bottom-left coordinates to top-left with flip_vertical
+    points = get_points(flip_vertical(signal), size) - 0.5
+
+    # Note! np.fix rounds towards zero (rint would round to closest int)
+    pixels = np.fix(points).astype(np.int32)
+    values = 1 - ((points - pixels) % 1)
+
+    return pixels, values
+
+
+def scale(signal, size):
+    """
+    Scale complex signal in unit rectangle area to size and interpret values as pixel centers.
+    Range of the coordinates will be from 0.5 to size - 0.5.
+    """
+    # TODO: Move to math or dsp module
+    return ((clip(signal) + 1 + 1j) / 2.0 * (size - 1) + (0.5 + 0.5j))
+
+
+def flip_vertical(signal):
+    """
+    Flip signal on vertical (imaginary) axis.
+    """
+    return np.array(signal.real - signal.imag * 1j, dtype=np.complex128)
 
 
 def get_zerocrossings(signal):

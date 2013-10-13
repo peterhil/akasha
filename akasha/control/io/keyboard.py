@@ -7,6 +7,8 @@ Author: Peter Hillerström
 Date: 2011-12-06
 """
 
+from __future__ import division
+
 import json
 import numpy as np
 
@@ -35,17 +37,8 @@ from akasha.control.io import relative_path
 
 
 def get_layout(path='settings/keymaps/fi.json'):
-    mappath = relative_path(path)
-    fp = None
-    try:
-        fp = open(mappath)
-        data = json.load(fp, encoding='utf-8')
-        return data
-    except Exception, e:
-        raise e
-    finally:
-        if hasattr(fp, 'close'):
-            fp.close()
+    with open(relative_path(path)) as keymap:
+        return json.load(keymap, encoding='utf-8')
 
 
 def get_mapping(layout, section='main', mapping=np.empty([6, 25], dtype=object)):

@@ -22,59 +22,6 @@ from akasha.utils.log import logger
 from akasha.utils.math import pi2, find_closest_index, map_array
 
 
-def cents(*args):
-    """
-    Calculate cents from interval or frequency ratio(s).
-    When using frequencies, give greater frequencies first.
-
-    >>> cents(float(Fraction(5,4)))
-    array([ 386.31371386])
-
-    >>> cents(440/27.5)
-    array([ 4800.])     # equals four octaves
-
-    >>> cents(np.arange(8)/16.0+1)
-    array([[   0.        ,  104.9554095 ,  203.91000173,  297.51301613,
-             386.31371386,  470.78090733,  551.31794236,  628.27434727]])
-    """
-    return 1200.0 * np.log2(args)
-
-
-def cents_diff(a, b):
-    """
-    Calculate the difference of two frequencies in cents."
-    """
-    return np.abs(cents(float(a)) - cents(float(b)))
-
-
-def interval(*cnt):
-    """
-    Calculate interval ratio from cents.
-
-    >>> interval(100)
-    array([ 1.05946309])    # one equal temperament semitone
-
-    >>> interval(386.31371386)
-    array([ 1.25])          # 5:4, perfect fifth
-
-    >> frac = lambda f: map(Fraction.limit_denominator, map(Fraction.from_float, f))
-    >> [frac for i in interval(np.arange(5) * 386.31371386)]
-    [[Fraction(1, 1),
-      Fraction(5, 4),
-      Fraction(25, 16),
-      Fraction(125, 64),
-      Fraction(625, 256)]]
-    """
-    return np.power(2, np.asanyarray(cnt) / 1200.0)
-
-
-def freq_plus_cents(f, cnt):
-    """
-    Calculate what frequency is given cents apart from a frequency f.
-    """
-    return f * interval(cnt)
-
-
 class EqualTemperament(object):
     """
     Equal temperament tuning: 
@@ -104,10 +51,10 @@ class EqualTemperament(object):
         Find the generators for the lattice from the scale
         closest to the large and the small base interval.
         """
-        return op.getitem(scale, map_array(
-            fx.curry_function(find_closest_index, scale),
+        return scale[map(
+            lambda x: find_closest_index(scale, x),
             [large, small]
-        ))
+        )]
 
     @staticmethod
     def octave(n, scale=2.0):
@@ -165,7 +112,20 @@ class LucyTuning(object):
         return (2.0 / cls.L(5)) ** (n / 2.0)
 
 
-class WickiLayout(object):
+
+class AbstractLayout(object):
+    """
+    Abstract base class for musical keyboard layouts.
+    """
+    def move(self, *pos):
+        """
+        Move the placement of keys (or origo) on the generator lattice.
+        """
+        assert len(pos) == 2, "Expected two arguments or tuple of length two."
+        self.origo = (self.origo[0] + pos[0], self.origo[1] + pos[1])
+
+
+class WickiLayout(AbstractLayout):
     """
     Wicki-Hayden note layout:
     http://en.wikipedia.org/wiki/Wicki-Hayden_note_layout
@@ -190,11 +150,11 @@ class WickiLayout(object):
     #
     # Good for testing with 44100 Hz sampling rate
 
-    def __init__(self, base=Frequency(432.0), origo=(1, 5), generators=(
+    def __init__(self, base=Frequency(441.0), origo=(1, 5), generators=(
             # LucyTuning.L(3) * LucyTuning.s(1), LucyTuning.s(1)
-            # (Fraction(3,2), Fraction(9,8)) # Pythagorean or Just intonation (3-limit)
+            (Fraction(3,2), Fraction(9,8)) # Pythagorean or Just intonation (3-limit)
             # EqualTemperament(5).generators
-            EqualTemperament(12).generators
+            # EqualTemperament(12).generators
             # EqualTemperament(19).generators
     )):
         """
@@ -223,9 +183,63 @@ class WickiLayout(object):
                 (self.gen[0] ** (pos[0] - self.origo[0])) * \
                 (self.gen[1] ** (pos[1] - self.origo[1]))
 
-    def move(self, *pos):
+
+class PianoLayout(AbstractLayout):
+    """
+    Classical piano layout.
+    """
+    def __init__(self, base=Frequency(441.0), origo=(1, 5)):
+        self.base = base
+        self.origo = origo
+        self.gen = 2 ** (1 / 12.0)
+
+    @property
+    def halftones(self):
+        return {
+            'C': 0, 'C#': 1,
+            'D': 2, 'D#': 3,
+            'E': 4,
+            'F': 5, 'F#': 6,
+            'G': 7, 'G#': 8,
+            'A': 9, 'A#': 10,
+            'B': 11,
+            '_': -1,
+        }
+
+    @property
+    def lattice(self):
+        return np.array([
+            ['C', 'C#'],
+            ['D', 'D#'],
+            ['E', '_'],
+            ['F', 'F#'],
+            ['G', 'G#'],
+            ['A', 'A#'],
+            ['B', '_'],
+        ], dtype='|S2').T
+
+    def get(self, *pos):
         """
-        Move the placement of keys (or origo) on the generator lattice.
+        Get a frequency on key position.
         """
-        assert len(pos) == 2, "Expected two arguments or tuple of length two."
-        self.origo = (self.origo[0] + pos[0], self.origo[1] + pos[1])
+        pos = np.subtract(pos, np.array(self.origo))
+        key = self.lattice[tuple(np.mod(pos, self.lattice.shape))]
+        octave_block = np.floor_divide(pos, self.lattice.shape)
+        octave = np.sum(octave_block)
+
+        if key == '_' or tuple(pos) == kb.shape:
+            freq = Frequency(0.0)
+        else:
+            freq = self.base * 2 ** ((octave * 12.0 + self.halftones[key]) / 12.0)
+
+        logger.debug(
+            "Playing key '%s%s' (%s) with %s. Got %s with octave block distance %s." % (
+                key,
+                octave,
+                self.halftones[key],
+                freq,
+                tuple(pos),
+                octave_block,
+                ))
+
+        return freq

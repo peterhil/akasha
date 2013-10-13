@@ -19,8 +19,9 @@ class ansi(object):
     """
     # pylint: disable=W1401
 
-    BLACK = "\033[90m"
-    RED = '\\033[91m'
+    # TODO refactor using code() like in Prism...
+    BLACK = '\033[90m'
+    RED = '\033[91m'
     GREEN = '\033[92m'
     YELLOW = '\033[93m'
 
