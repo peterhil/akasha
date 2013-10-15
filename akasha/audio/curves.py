@@ -177,12 +177,12 @@ class Ellipse(Curve):
         y = self.origin.imag + cos * np.sin(self.angle) + sin * np.cos(self.angle)
         return as_complex(np.array([np.asanyarray(x), np.asanyarray(y)]))
 
-    def at(self, taus):
+    def at(self, tau):
         """
         Polar form of ellipse relative to center, translated and rotated to origin and angle.
         https://en.wikipedia.org/wiki/Ellipse#Polar_form_relative_to_center
         """
-        thetas = taus * pi2
+        thetas = np.asanyarray(tau) * pi2
         radius = self.a * self.b / np.sqrt((self.b * np.cos(thetas)) ** 2 + (self.a * np.sin(thetas)) ** 2)
         return radius * np.exp((thetas + self.angle) * 1j) + self.origin
 
@@ -191,7 +191,7 @@ class Ellipse(Curve):
         Curvature of an ellipse.
         http://mathworld.wolfram.com/Ellipse.html formula 59
         """
-        t = np.asanyarray(tau) * np.pi
+        t = np.asanyarray(tau) * pi2
         return (self.a * self.b) / (self.b ** 2 * np.cos(t) ** 2 + self.a ** 2 * np.sin(t) ** 2) ** (3 / 2)
 
     def roc(self, tau):
