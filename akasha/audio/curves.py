@@ -191,7 +191,7 @@ class Ellipse(Curve):
         Curvature of an ellipse.
         http://mathworld.wolfram.com/Ellipse.html formula 59
         """
-        t = np.asanyarray(tau) * pi2
+        t = np.asanyarray(tau) * pi2 + self.angle
         return (self.a * self.b) / (self.b ** 2 * np.cos(t) ** 2 + self.a ** 2 * np.sin(t) ** 2) ** (3 / 2)
 
     def roc(self, tau):
