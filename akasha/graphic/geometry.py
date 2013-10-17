@@ -67,26 +67,6 @@ def angle_between(a, b):
     return np.angle(cartesian(1, np.angle(a) - np.angle(b)))
 
 
-def angle_between_dotp(a, b):
-    """
-    Angle in radians between two nonzero vectors.
-    Returns only positive values.
-
-    See:
-    http://en.wikipedia.org/wiki/Vector_dot_product#Geometric_interpretation
-    http://en.wikipedia.org/wiki/Inner_product
-    http://www.wikihow.com/Find-the-Angle-Between-Two-Vectors
-    """
-    if a == b:
-        return 0
-    # vdot is for complex numbers
-    dotp = np.real(np.vdot(complex(a), b))
-    if np.angle(a) < np.angle(b):
-        return -1 * np.arccos(dotp / (np.abs(a) * np.abs(b)))
-    else:
-        return np.arccos(dotp / (np.abs(a) * np.abs(b)))
-
-
 def circumcircle_radius(a, b, c):
     """
     Find the circumcircle of three points.

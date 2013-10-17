@@ -13,7 +13,7 @@ Unit tests for geometry module
 import numpy as np
 import pytest
 
-from akasha.graphic.geometry import AffineTransform, angle_between, angle_between_dotp, circumcircle_radius, midpoint
+from akasha.graphic.geometry import AffineTransform, angle_between, circumcircle_radius, midpoint
 from akasha.audio.curves import Circle, Square
 from numpy.testing.utils import assert_array_almost_equal
 
@@ -41,7 +41,7 @@ class TestGeometryFunctions(object):
     """
     octant = np.sqrt(2)/2  # ≈ 0.70710678
 
-    angles_between_vectors = [
+    @pytest.mark.parametrize(('a', 'b', 'expected'), [
         [0, 0, 0],
         [1, 1, 0],
         [1j, 2j, 0],
@@ -57,15 +57,9 @@ class TestGeometryFunctions(object):
 
         # np.abs(result) > np.pi
         [-1j, -1, 1.5707963267948968],
-    ]
-
-    @pytest.mark.parametrize(('a', 'b', 'expected'), angles_between_vectors)
+    ])
     def test_angle_between(self, a, b, expected):
         assert angle_between(a, b) == expected
-
-    @pytest.mark.parametrize(('a', 'b', 'expected'), angles_between_vectors)
-    def test_angle_between_dotp(self, a, b, expected):
-        assert_array_almost_equal(angle_between_dotp(a, b), expected)
 
     @pytest.mark.parametrize(('a', 'b', 'expected'), [
         [-3, 5, 1],
