@@ -90,6 +90,18 @@ def closed(signal):
     return np.append(signal, signal[0])
 
 
+def is_collinear(a, b, c):
+    """
+    Return true if the three points are collinear.
+
+    For other methods, see:
+    https://en.wikipedia.org/wiki/Collinearity#Collinearity_of_points_whose_coordinates_are_given
+    """
+    if a == b or b == c or a == c:
+        return True
+    return angle_between(a, b, c) % np.pi == 0
+
+
 def is_orthogonal(a, b, c=0):
     """
     Return true if two complex points (a, b) are orthogonal from center point (c).
