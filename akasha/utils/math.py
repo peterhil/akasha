@@ -13,6 +13,7 @@ if sys.version_info >= (2, 7):
     from collections import OrderedDict
 else:
     from ordereddict import OrderedDict
+from cmath import rect
 from fractions import Fraction
 
 from akasha.funct import blockwise
@@ -21,6 +22,7 @@ from akasha.utils.log import logger
 
 
 pi2 = np.pi * 2.0
+cartesian = np.vectorize(rect, doc="""Return cartesian points from polar coordinate radiuses and angles.""")
 
 
 def to_phasor(x):

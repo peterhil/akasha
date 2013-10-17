@@ -41,7 +41,7 @@ class TestGeometryFunctions(object):
     """
     octant = np.sqrt(2)/2  # ≈ 0.70710678
 
-    @pytest.mark.parametrize(('a', 'b', 'expected'), [
+    angles_between_vectors = [
         [0, 0, 0],
         [1, 1, 0],
         [1j, 2j, 0],
@@ -49,16 +49,23 @@ class TestGeometryFunctions(object):
         [1j, 1, np.pi / 2],
         [1j, 1 + 1j, np.pi / 4],
         [1 + 2j, 1, 1.1071487177940904],
+        [2+4j, 1-1j, 1.8925468811915387],
 
         # Keep sign?
         [-1j, 1j, -np.pi],
         [octant - octant * 1j, octant + octant * 1j, -np.pi / 2],
 
         # np.abs(result) > np.pi
-        [-1j, -1, -4.7123889803846897],
-    ])
+        [-1j, -1, 1.5707963267948968],
+    ]
+
+    @pytest.mark.parametrize(('a', 'b', 'expected'), angles_between_vectors)
     def test_angle_between(self, a, b, expected):
         assert angle_between(a, b) == expected
+
+    @pytest.mark.parametrize(('a', 'b', 'expected'), angles_between_vectors)
+    def test_angle_between_dotp(self, a, b, expected):
+        assert_array_almost_equal(angle_between_dotp(a, b), expected)
 
     @pytest.mark.parametrize(('a', 'b', 'expected'), [
         [-3, 5, 1],

@@ -10,7 +10,7 @@ import numpy as np
 import skimage.transform as skt
 
 from akasha.utils import _super
-from akasha.utils.math import as_complex, complex_as_reals, normalize, pi2
+from akasha.utils.math import as_complex, cartesian, complex_as_reals, normalize, pi2
 
 
 class AffineTransform(skt.AffineTransform):
@@ -64,7 +64,7 @@ def angle_between(a, b):
     Angle in radians between two non-zero vectors.
     See: http://en.wikipedia.org/wiki/Vector_dot_product#Geometric_interpretation
     """
-    return np.angle(a) - np.angle(b)
+    return np.angle(cartesian(1, np.angle(a) - np.angle(b)))
 
 
 def angle_between_dotp(a, b):
@@ -77,9 +77,14 @@ def angle_between_dotp(a, b):
     http://en.wikipedia.org/wiki/Inner_product
     http://www.wikihow.com/Find-the-Angle-Between-Two-Vectors
     """
+    if a == b:
+        return 0
     # vdot is for complex numbers
-    dotp = np.real(np.vdot(a, b))
-    return np.arccos(dotp / (np.abs(a) * np.abs(b)))
+    dotp = np.real(np.vdot(complex(a), b))
+    if np.angle(a) < np.angle(b):
+        return -1 * np.arccos(dotp / (np.abs(a) * np.abs(b)))
+    else:
+        return np.arccos(dotp / (np.abs(a) * np.abs(b)))
 
 
 def circumcircle_radius(a, b, c):
