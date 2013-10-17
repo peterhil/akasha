@@ -89,6 +89,19 @@ def count_step(start=0, step=1):
         yield g.next()
 
 
+def consecutive(signal, n):
+    """
+    Iterates over n consecutive samples from the signal at a time.
+
+    Example
+    -------
+
+    >>> list(consecutive(np.linspace(0, 1, 5), 2))
+    [(0.0, 0.25), (0.25, 0.5), (0.5, 0.75), (0.75, 1.0)]
+    """
+    return izip(*[signal[start:] for start in xrange(n)])
+
+
 def blockwise(iterable, step=1, start=0):
     """
     Blockwise iterator with blocksize equal to step parameter.
