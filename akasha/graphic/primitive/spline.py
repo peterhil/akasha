@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Clothoid splines.
+http://www.dgp.toronto.edu/~karan/papers/sbim2008mccrae.pdf
 """
 
 from __future__ import division
@@ -11,19 +12,35 @@ import scipy as sc
 
 from cmath import rect
 
-from akasha.graphic.geometry import angle_between, vectors
+from akasha.audio.curves import Ellipse
+from akasha.funct import consecutive
+from akasha.graphic.geometry import angle_between, circumcircle_radius, is_collinear, vectors
 from akasha.utils.math import as_complex, normalize, rad_to_deg
 
 
 def clothoid(points):
     """
     The clothoid (or Euler) spiral curve.
+    Calculated using the Fresnel integrals.
+
     See: http://en.wikipedia.org/wiki/Euler_spiral
     """
     points = np.atleast_1d(points)
-    a = np.zeros((2, len(points)))
-    a[:, :] = sc.special.fresnel(points)[:]
-    return as_complex(a)
+    s, c = sc.special.fresnel(points)
+    return as_complex(np.array([c, s]))
+
+
+def clothoidn(points):
+    """
+    The clothoid (or Euler) spiral curve.
+    Calculated using the Fresnel integrals.
+
+    See: http://en.wikipedia.org/wiki/Euler_spiral
+    """
+    points = np.atleast_1d(points)
+    k = np.sqrt(2.0 / np.pi)
+    s, c = sc.special.fresnel(k * points) / k
+    return as_complex(np.array([c, s]))
 
 
 def clothoid_slice(start, stop, n, endpoint=False):
@@ -72,18 +89,34 @@ def cl_piece(start, stop, n, endpoint=False, scale=1, norm=False, fn=clothoid_wi
     curve = fn(start, stop, n, endpoint)
     coeff = 1 / np.abs(curve[-1]) if norm else 1
     rotated = (curve - curve[0]) * rect(coeff, angle)
-    return rotated * (scale / 2)
+    return rotated * scale
 
 
-def curvature(previous_pt, point, next_pt):
+def curvature(a, b, c):
     """
     Discrete curvature estimation.
 
     See section "2.6.1 Discrete curvature estimation" at:
     http://www.dgp.toronto.edu/~mccrae/mccraeMScthesis.pdf
     """
-    (v1, v2) = vectors(previous_pt, point, next_pt)
-    return 2 * np.sin(angle_between(v1, v2) / 2) / np.sqrt(np.abs(v1) * np.abs(v2))
+    if a == b == c:
+        return np.inf
+    if is_collinear(a, b, c):
+        return 0
+    return 1 / circumcircle_radius(a, b, c)
+
+
+def estimate_curvature_circle(signal):
+    return np.array([curvature(*points) for points in consecutive(signal, 3)])
+
+
+def ellipse_curvature(pts):
+    ell = Ellipse.from_conjugate_diameters(pts[:3])
+    return ell.curvature(np.angle(pts[1] - midpoint(pts[0], pts[2])) / pi2)
+
+
+def estimate_curvature(signal):
+    return np.array([ellipse_curvature(points) for points in consecutive(signal, 3)])
 
 
 # Circular arcs
