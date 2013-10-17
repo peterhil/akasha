@@ -59,12 +59,14 @@ class AffineTransform(skt.AffineTransform):
         )
 
 
-def angle_between(a, b):
+def angle_between(a, b, origin=0):
     """
-    Angle in radians between two non-zero vectors.
-    See: http://en.wikipedia.org/wiki/Vector_dot_product#Geometric_interpretation
+    Angle between two points around origin in radians.
+
+    Dot Product & Angle Between Vectors: http://www.youtube.com/watch?v=p8BZTFNSKIw
+    Also see: http://en.wikipedia.org/wiki/Vector_dot_product#Geometric_interpretation
     """
-    return np.angle(cartesian(1, np.angle(a) - np.angle(b)))
+    return np.angle(cartesian(1, np.angle(a - origin) - np.angle(b - origin)))
 
 
 def circumcircle_radius(a, b, c):
@@ -72,7 +74,7 @@ def circumcircle_radius(a, b, c):
     Find the circumcircle of three points.
     """
     side = np.abs(a - c)
-    angle = angle_between(a - b, c - b)
+    angle = angle_between(a, c, b)
     return np.abs(side / (2 * np.sin(angle)))
 
 
@@ -92,7 +94,7 @@ def is_orthogonal(a, b, c=0):
     """
     Return true if two complex points (a, b) are orthogonal from center point (c).
     """
-    return np.abs(np.angle(a - c) - np.angle(b - c)) == np.pi / 2
+    return np.abs(angle_between(a, b, c)) == np.pi / 2
 
 
 def midpoint(a, b):
