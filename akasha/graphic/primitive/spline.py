@@ -14,8 +14,8 @@ from cmath import rect
 
 from akasha.audio.curves import Ellipse
 from akasha.funct import consecutive
-from akasha.graphic.geometry import angle_between, circumcircle_radius, is_collinear, vectors
-from akasha.utils.math import as_complex, normalize, rad_to_deg
+from akasha.graphic.geometry import circumcircle_radius, is_collinear
+from akasha.utils.math import as_complex
 
 
 def clothoid(points):
