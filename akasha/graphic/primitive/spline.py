@@ -18,7 +18,7 @@ from akasha.graphic.geometry import circumcircle_radius, is_collinear
 from akasha.utils.math import as_complex
 
 
-def clothoid(points, scaled=True):
+def clothoid(points, b=1, scaled=True):
     """
     The clothoid (or Euler) spiral curve.
     Calculated using the Fresnel integrals.
@@ -28,9 +28,9 @@ def clothoid(points, scaled=True):
     points = np.atleast_1d(points)
     if scaled:
         k = np.sqrt(2.0 / np.pi)
-        s, c = sc.special.fresnel(k * points) / k
+        s, c = sc.special.fresnel(k * points / b) / k
     else:
-        s, c = sc.special.fresnel(points)
+        s, c = sc.special.fresnel(points / b)
     return as_complex(np.array([c, s]))
 
 
