@@ -66,7 +66,7 @@ def clothoid_windings(start, stop, n, endpoint=False):
     """
     A piece of clothoid with start and stop being winding values.
     """
-    return clothoid(np.linspace(wind(start), wind(stop), n, endpoint))
+    return clothoid(np.linspace(wind(start), wind(stop), n, endpoint), scaled=False)
 
 
 def clothoid_length(turn, diff=0.5, n=1000, endpoint=True):
