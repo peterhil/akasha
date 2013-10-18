@@ -84,6 +84,13 @@ def wind(x):
     return np.sign(x) * np.sqrt(np.abs(x) * 4)
 
 
+def unwind(x):
+    """
+    Get the point on clothoid that has x number of turns.
+    """
+    return np.sign(x) * (x ** 2 / 4)
+
+
 def clothoid_angle(s):
     """
     Find the tangent angle of the clothoid curve at s points.
