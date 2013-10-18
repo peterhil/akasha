@@ -34,6 +34,27 @@ def clothoid(points, b=1, scaled=True):
     return as_complex(np.array([c, s]))
 
 
+def clothoid_pow(points, limit=50):
+    """
+    The clothoid (or Euler) spiral curve.
+    Calculated using the Fresnel integrals.
+
+    See: http://en.wikipedia.org/wiki/Euler_spiral
+    """
+    points = np.atleast_1d(points)
+    @np.vectorize
+    def s(x):
+        def st(t):
+            return np.sin(t**2)
+        return sc.integrate.quad(st, 0, x, epsrel=1e-6, epsabs=0, limit=limit)[0]
+    @np.vectorize
+    def c(x):
+        def ct(t):
+            return np.cos(t**2)
+        return sc.integrate.quad(ct, 0, x, epsrel=1e-6, epsabs=0, limit=limit)[0]
+    return as_complex(np.array([c(points), s(points)]))
+
+
 def clothoid_slice(start, stop, n, endpoint=False):
     """
     A slice of clothoid spiral.
