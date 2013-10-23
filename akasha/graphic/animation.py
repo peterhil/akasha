@@ -304,12 +304,12 @@ def handle_input(snd, it, event):
             w.move(0, -1)
         # Change frequency
         elif hasattr(snd, 'frequency'):
-            change_frequency(snd, event.key, it)
+            change_frequency(snd, event.key)
             return True
     # Key up
     elif (event.type == pg.KEYUP and hasattr(snd, 'frequency')):
         if pg.K_CAPSLOCK == event.key:
-            change_frequency(snd, event.key, it)
+            change_frequency(snd, event.key)
             return True
         else:
             if isinstance(snd, Generator):
@@ -455,7 +455,7 @@ def cleanup(it=None):
     logger.info("Done cleanup.")
 
 
-def change_frequency(snd, key, it):
+def change_frequency(snd, key):
     """
     Change frequency of the sound based on key position.
     """
