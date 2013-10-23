@@ -383,10 +383,10 @@ def init_display(name, size):
     pg.display.quit()
 
     flags = 0
-    flags |= pg.SRCALPHA
+    # flags |= pg.SRCALPHA
     flags |= pg.HWSURFACE
     # flags |= pg.OPENGL
-    # flags |= pg.DOUBLEBUF
+    flags |= pg.DOUBLEBUF
 
     if 'numpy' in pg.surfarray.get_arraytypes():
         pg.surfarray.use_arraytype('numpy')
