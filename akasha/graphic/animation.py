@@ -396,6 +396,7 @@ def init_display(name, size):
     try:
         # FIXME get resolution some other way.
         mode = pg.display.set_mode((size, size), flags, 32)
+        pg.display.set_caption(name)
         pg.display.init()
     except Exception, err:
         logger.error("Something bad happened on init_display(): %s" % err)
