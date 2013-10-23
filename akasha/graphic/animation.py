@@ -301,7 +301,7 @@ def handle_input(snd, it, event):
 
 def init_pygame(name="Resonance", size=800):
     """
-    Initialize Pygame mixer settings and surface array.
+    Initialize Pygame and return a surface.
     """
     pg.quit()
 
