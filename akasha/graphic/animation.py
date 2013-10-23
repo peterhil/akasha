@@ -179,8 +179,6 @@ def handle_events(snd, it, channel, paint_fn):
             video_start = timer()
             paint_fn(samples)
             video_time = timer() - video_start
-
-            drop_frames(videoframes, it)
         except StopIteration:
             raise SystemExit('Sound ended!')
 
@@ -223,20 +221,6 @@ def show_transfer(screen, snd, size=720, standard='PAL', axis='imag'):
 
     blit(screen, img)
     pg.display.flip()
-
-
-def drop_frames(frames, it):
-    """
-    Drop the number of frame events over one from the iterator.
-    """
-    if len(frames) > 1:
-        drop = len(frames) - 1
-        for i in xrange(drop):
-            try:
-                it.next()
-            except StopIteration:
-                raise SystemExit('Sound ended when dropping frames!')
-        logger.warn("Dropped %s frames!" % drop)
 
 
 def handle_inputs(snd, it, inputs):
