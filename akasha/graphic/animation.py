@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# E1101: Module 'twisted.internet.reactor' has no 'run/stop/running' member
 """
 Animation module
 """
@@ -16,8 +15,6 @@ import time
 import traceback
 
 from timeit import default_timer as timer
-from twisted.internet.task import LoopingCall
-from twisted.internet import reactor
 
 from akasha.audio.generators import Generator
 from akasha.control.io.keyboard import pos
@@ -49,7 +46,7 @@ AUDIOFRAME = pg.NUMEVENTS - 2
 
 
 def anim(snd, size=800, name='Resonance', antialias=True, lines=False, colours=True,
-         mixer_options=(), loop='pygame', style='complex'):
+         mixer_options=(), style='complex'):
     """
     Animate complex sound signal
     """
@@ -72,16 +69,10 @@ def anim(snd, size=800, name='Resonance', antialias=True, lines=False, colours=T
     # set_timer(AUDIOFRAME, int(round(sampler.frametime / 5)))
     set_timer(VIDEOFRAME, sampler.frametime)
 
-    if loop == 'pygame':
-        pygame_loop(snd, channel, widget)
-    elif loop == 'twisted':
-        twisted_loop(snd, channel, widget)
-    else:
-        logger.err("Unknown event loop: '{0}'".format(loop))
-        cleanup()
+    loop(snd, channel, widget)
 
 
-def pygame_loop(snd, channel, widget):
+def loop(snd, channel, widget):
     clock = pg.time.Clock()
     it = blockwise(snd, sampler.blocksize())
 
@@ -121,27 +112,6 @@ def pygame_loop(snd, channel, widget):
                 break
 
 
-def twisted_loop(snd, it, channel, widget):
-    # See: http://bazaar.launchpad.net/~game-hackers/game/trunk/view/head:/game/view.py
-
-    pg.display.init()
-    it = blockwise(snd, sampler.blocksize())
-
-    # renderCall = LoopingCall(do_audio_video, it, channel, widget)
-    # renderdef = renderCall.start(1 / sampler.videorate, now=False)
-    # renderdef.addErrback(handle_error)
-
-    inputCall = LoopingCall(handle_events, snd, it, channel, widget)
-    finished = inputCall.start(1 / (sampler.videorate * 2), now=False)
-    finished.addErrback(handle_error)
-
-    # finished.addCallback(lambda ign: renderCall.stop())
-    # finished.addCallback(lambda ign: cleanup())
-
-    if not reactor.running:
-        reactor.run()  # pylint: disable=E1101
-
-
 def handle_events(snd, it, channel, widget):
     """
     Event handling dispatcher.
@@ -179,11 +149,6 @@ def handle_events(snd, it, channel, widget):
             video_time = timer() - video_start
         except StopIteration:
             raise SystemExit('Sound ended!')
-
-    if reactor.running:
-        # reactor.stop()  # pylint: disable=E1101
-        pass
-
     return (input_time, audio_time, video_time)
 
 
@@ -430,8 +395,6 @@ def handle_error(err):
     Logging error handler.
     """
     logger.error("Error traceback:\n%s" % str(err))
-    if reactor.running:
-        reactor.stop()  # pylint: disable=E1101
     cleanup()
     raise err
 
