@@ -156,9 +156,9 @@ def handle_events(snd, it, channel, paint_fn):
     inputs = [event for event in events if event.type not in (AUDIOFRAME, VIDEOFRAME)]
     videoframes = [event for event in events if event.type == VIDEOFRAME]
 
-    # input_start = timer()
+    input_start = timer()
     reset = handle_inputs(snd, it, inputs)
-    # input_time = timer() - input_start
+    input_time = timer() - input_start
 
     # Paint
     if videoframes and not sampler.paused:
