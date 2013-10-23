@@ -189,24 +189,15 @@ class VideoTransferView(object):
 
 
 def handle_inputs(snd, it, inputs):
-    if len(inputs) == 0:
-        return False
-
     reset = False
+    if len(inputs) == 0:
+        return reset
 
     input_start = timer()
     for event in inputs:
-        # timestamp = timer()
-        # logger.debug("Event: %s at %s" % (event, timestamp))
-
         reset |= handle_input(snd, it, event)
 
-        # input_time = timer() - timestamp
-        # if input_time > 0.001:
-        #     logger.warn("*** SLOW Input events handling: %.4f", input_time)
-
     logger.debug("Inputs: %s handled in %.4f seconds." % (len(inputs), timer() - input_start))
-
     return reset
 
 
