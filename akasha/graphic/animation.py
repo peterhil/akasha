@@ -370,8 +370,7 @@ def init_pygame(name="Resonance", size=800):
         pg.init())
 
     screen = init_display(name, size)
-    surface = pg.display.get_surface()
-    logger.info("Inited display %s with flags: %s" % (screen, surface.get_flags()))
+    logger.info("Inited display %s with flags: %s" % (screen, screen.get_flags()))
 
     return screen
 
