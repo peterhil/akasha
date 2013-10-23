@@ -3,7 +3,6 @@ Louie==1.1  # Replacement for PIL
 Pillow==2.0.0
 PyGUI==2.5.3
 Pygments==1.4
-Twisted>=11.0
 cdecimal==2.3
 distribute==0.6.24
 -e hg+https://bitbucket.org/ccordoba12/funckit@23bf0cfeb1763385055a51863256eb6b74ea6fe1#egg=funckit-dev
