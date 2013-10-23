@@ -62,12 +62,9 @@ def anim(snd, size=800, name='Resonance', antialias=True, lines=False, colours=T
     channel = init_mixer(*mixer_options)
 
     if style == 'complex':
-        paint_fn = lambda snd: show_slice(
-            screen, snd, size=size,
-            antialias=antialias, lines=lines, colours=colours
-            )
+        widget = ComplexView(screen, antialias=antialias, lines=lines, colours=colours)
     elif style == 'transfer':
-        paint_fn = lambda snd: show_transfer(screen, snd, size=size, standard='PAL', axis='imag')
+        widget = VideoTransferView(screen, size=size, standard='PAL', axis='imag')
     else:
         logger.err("Unknown animation style: '{0}'".format(style))
         cleanup()
@@ -76,15 +73,15 @@ def anim(snd, size=800, name='Resonance', antialias=True, lines=False, colours=T
     set_timer(VIDEOFRAME, sampler.frametime)
 
     if loop == 'pygame':
-        pygame_loop(snd, channel, paint_fn)
+        pygame_loop(snd, channel, widget)
     elif loop == 'twisted':
-        twisted_loop(snd, channel, paint_fn)
+        twisted_loop(snd, channel, widget)
     else:
         logger.err("Unknown event loop: '{0}'".format(loop))
         cleanup()
 
 
-def pygame_loop(snd, channel, paint_fn):
+def pygame_loop(snd, channel, widget):
     clock = pg.time.Clock()
     it = blockwise(snd, sampler.blocksize())
 
@@ -92,7 +89,8 @@ def pygame_loop(snd, channel, paint_fn):
         try:
             timestamp = timer()
 
-            (input_time, audio_time, video_time) = handle_events(snd, it, channel, paint_fn)
+            (input_time, audio_time, video_time) = handle_events(snd, it, channel, widget)
+            pg.display.flip()
 
             loop_time = timer() - timestamp
 
@@ -123,17 +121,17 @@ def pygame_loop(snd, channel, paint_fn):
                 break
 
 
-def twisted_loop(snd, it, channel, paint_fn):
+def twisted_loop(snd, it, channel, widget):
     # See: http://bazaar.launchpad.net/~game-hackers/game/trunk/view/head:/game/view.py
 
     pg.display.init()
     it = blockwise(snd, sampler.blocksize())
 
-    # renderCall = LoopingCall(do_audio_video, it, channel, paint_fn)
+    # renderCall = LoopingCall(do_audio_video, it, channel, widget)
     # renderdef = renderCall.start(1 / sampler.videorate, now=False)
     # renderdef.addErrback(handle_error)
 
-    inputCall = LoopingCall(handle_events, snd, it, channel, paint_fn)
+    inputCall = LoopingCall(handle_events, snd, it, channel, widget)
     finished = inputCall.start(1 / (sampler.videorate * 2), now=False)
     finished.addErrback(handle_error)
 
@@ -144,7 +142,7 @@ def twisted_loop(snd, it, channel, paint_fn):
         reactor.run()  # pylint: disable=E1101
 
 
-def handle_events(snd, it, channel, paint_fn):
+def handle_events(snd, it, channel, widget):
     """
     Event handling dispatcher.
     """
@@ -177,7 +175,7 @@ def handle_events(snd, it, channel, paint_fn):
             audio_time = timer() - audio_start
 
             video_start = timer()
-            paint_fn(samples)
+            widget.render(samples)
             video_time = timer() - video_start
         except StopIteration:
             raise SystemExit('Sound ended!')
@@ -196,31 +194,44 @@ def queue_audio(samples, channel):
     channel.queue(pg.sndarray.make_sound(pcm(samples)))
 
 
-def show_slice(screen, snd, size=800, antialias=True, lines=False, colours=True):
+class ComplexView(object):
     """
     Show a sound signal on screen.
     """
-    img = draw(snd, size,
-               antialias=antialias, lines=lines, colours=colours,
-               axis=True, screen=screen)
+    def __init__(self, screen, antialias=True, lines=False, colours=True):
+        self._surface = screen
+        self.antialias = antialias
+        self.lines = lines
+        self.colours = colours
 
-    blit(screen, img)
-    pg.display.flip()
+    def render(self, signal):
+        img = draw(signal, self._surface.get_size()[0],
+                   antialias=self.antialias, lines=self.lines, colours=self.colours,
+                   axis=True, screen=self._surface)
+
+        blit(self._surface, img)
 
 
-def show_transfer(screen, snd, size=720, standard='PAL', axis='imag'):
+class VideoTransferView(object):
     """
     Show a sound signal using the old video tape audio recording technique.
     See: http://en.wikipedia.org/wiki/44100_Hz#Recording_on_video_equipment
     """
-    img = get_canvas(size)
-    tfer = video_transfer(snd, standard=standard, axis=axis, horiz=size)
+    def __init__(self, screen, size=720, standard='PAL', axis='imag'):
+        self._surface = screen
+        self.size = size
+        self.standard = standard
+        self.axis = axis
 
-    black = (size - tfer.shape[0]) / 2.0
-    img[:, black:-black, :] = tfer[:, :img.shape[1], :].transpose(1, 0, 2)
+    def render(self, signal):
+        size = self._surface.get_size()[0]
+        img = get_canvas(size)
+        tfer = video_transfer(signal, standard=self.standard, axis=self.axis, horiz=self.size)
 
-    blit(screen, img)
-    pg.display.flip()
+        black = (size - tfer.shape[0]) / 2.0
+        img[:, black:-black, :] = tfer[:, :img.shape[1], :].transpose(1, 0, 2)
+
+        blit(self._surface, img)
 
 
 def handle_inputs(snd, it, inputs):
