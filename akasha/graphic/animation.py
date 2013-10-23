@@ -395,7 +395,7 @@ def init_display(name, size):
 
     try:
         # FIXME get resolution some other way.
-        mode = pg.display.set_mode((size, size), flags, 32)
+        mode = pg.display.set_mode((size, size), flags, 32 if flags & pg.SRCALPHA else 24)
         pg.display.set_caption(name)
         pg.display.init()
     except Exception, err:
