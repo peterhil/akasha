@@ -27,17 +27,6 @@ from akasha.utils.math import pcm, minfloat
 from akasha.utils.log import logger
 
 
-
-# import sys
-
-# def trace(frame, event, arg):
-#     if event == 'c_call' or arg is not None and 'IPython' not in frame.f_code.co_filename:
-#         print "%s, %s: %d" % (event, frame.f_code.co_filename, frame.f_lineno)
-#     return trace
-
-# sys.settrace(trace)
-
-
 w = WickiLayout()
 # w = PianoLayout()
 
