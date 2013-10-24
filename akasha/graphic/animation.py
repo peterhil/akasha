@@ -96,8 +96,12 @@ def loop(snd, channel, widget):
                 av_percent = (float(audio_time) + float(video_time)) / (1.0 / sampler.videorate) * 100
                 fps = clock.get_fps()
 
-                logger.log(logging.BORING,
-                           "Animation: clock tick %d, FPS: %3.3f, loop: %.4f, (%.2f %%), input: %.6f, audio: %.6f, video: %.4f, (%.2f %%)", t, fps, float(loop_time), percent, float(input_time), float(audio_time), float(video_time), av_percent)
+                logger.log(
+                    logging.BORING,
+                    "Animation: clock tick %d, FPS: %3.3f, loop: %.4f, (%.2f %%), "
+                    "input: %.6f, audio: %.6f, video: %.4f, (%.2f %%)", t, fps, float(loop_time), percent,
+                    float(input_time), float(audio_time), float(video_time), av_percent
+                )
         except KeyboardInterrupt, err:
             # See http://stackoverflow.com/questions/2819931/handling-keyboardinterrupt-when-working-with-pygame
             logger.info("Got KeyboardInterrupt (CTRL-C)!".format(type(err)))
