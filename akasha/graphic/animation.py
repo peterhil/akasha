@@ -109,13 +109,11 @@ def handle_events(snd, it, channel, widget):
     reset = False
     input_time, audio_time, video_time = 0, 0, 0
 
-    events = pg.event.get()
-
-    inputs = [event for event in events if event.type not in (AUDIOFRAME, VIDEOFRAME)]
-    videoframes = [event for event in events if event.type == VIDEOFRAME]
+    videoframes = pg.event.get(VIDEOFRAME)
 
     input_start = timer()
-    reset = handle_inputs(snd, it, inputs)
+    for event in pg.event.get():
+        reset |= handle_input(snd, it, event)
     input_time = timer() - input_start
 
     # Paint
@@ -187,19 +185,6 @@ class VideoTransferView(object):
         img[:, black:-black, :] = tfer[:, :img.shape[1], :].transpose(1, 0, 2)
 
         blit(self._surface, img)
-
-
-def handle_inputs(snd, it, inputs):
-    reset = False
-    if len(inputs) == 0:
-        return reset
-
-    input_start = timer()
-    for event in inputs:
-        reset |= handle_input(snd, it, event)
-
-    logger.debug("Inputs: %s handled in %.4f seconds." % (len(inputs), timer() - input_start))
-    return reset
 
 
 def handle_input(snd, it, event):
