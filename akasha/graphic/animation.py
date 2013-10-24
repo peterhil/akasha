@@ -17,7 +17,6 @@ import traceback
 from timeit import default_timer as timer
 
 from akasha.audio.generators import Generator
-from akasha.control.io.keyboard import pos
 from akasha.funct import blockwise
 from akasha.graphic.drawing import get_canvas, blit, draw, video_transfer
 from akasha.timing import sampler
@@ -27,8 +26,8 @@ from akasha.utils.math import pcm, minfloat
 from akasha.utils.log import logger
 
 
-w = WickiLayout()
-# w = PianoLayout()
+keyboard = WickiLayout()
+# keyboard = PianoLayout()
 
 VIDEOFRAME = pg.NUMEVENTS - 1
 AUDIOFRAME = pg.NUMEVENTS - 2
@@ -70,6 +69,7 @@ def loop(snd, channel, widget):
             timestamp = timer()
 
             (input_time, audio_time, video_time) = handle_events(snd, it, channel, widget)
+
             pg.display.flip()
 
             loop_time = timer() - timestamp
@@ -216,18 +216,18 @@ def handle_input(snd, it, event):
             if event.mod & (pg.KMOD_LALT | pg.KMOD_RALT):
                 set_timer(ms = sampler.change_frametime(rel=step_size))
             else:
-                # w.move(-2, 0)
-                w.base *= 2.0
+                # keyboard.move(-2, 0)
+                keyboard.base *= 2.0
         elif pg.K_DOWN == event.key:
             if event.mod & (pg.KMOD_LALT | pg.KMOD_RALT):
                 set_timer(ms = sampler.change_frametime(rel=-step_size))
             else:
-                # w.move(2, 0)
-                w.base /= 2.0
+                # keyboard.move(2, 0)
+                keyboard.base /= 2.0
         elif pg.K_LEFT == event.key:
-            w.move(0, 1)
+            keyboard.move(0, 1)
         elif pg.K_RIGHT == event.key:
-            w.move(0, -1)
+            keyboard.move(0, -1)
         # Change frequency
         elif hasattr(snd, 'frequency'):
             change_frequency(snd, event.key)
@@ -383,7 +383,7 @@ def change_frequency(snd, key):
     """
     Change frequency of the sound based on key position.
     """
-    snd.frequency = w.get(*(pos.get(key, pos[None])))
+    snd.frequency = keyboard.get_frequency(key)
 
     if isinstance(snd, Generator):
         snd.sustain = None
