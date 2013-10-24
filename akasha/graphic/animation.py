@@ -66,8 +66,28 @@ def loop(snd, channel, widget):
     while True:
         try:
             with Timed() as loop_time:
-                (input_time, audio_time, video_time) = handle_events(snd, it, channel, widget)
-                pg.display.flip()
+                input_time, audio_time, video_time = 0, 0, 0
+                videoframes = pg.event.get(VIDEOFRAME)
+
+                with Timed() as input_time:
+                    for event in pg.event.get():
+                        handle_input(snd, it, event)
+
+                # Paint
+                if videoframes and not sampler.paused:
+                    try:
+                        samples = it.next()
+                        # logger.debug("iterator on: %s" % (it.send('current'),))
+                    except StopIteration:
+                        raise SystemExit('Sound ended!')
+
+                    with Timed() as audio_time:
+                        queue_audio(samples, channel)
+
+                    with Timed() as video_time:
+                        widget.render(samples)
+
+                    pg.display.flip()
 
             t = clock.tick_busy_loop(sampler.videorate)
 
@@ -95,34 +115,6 @@ def loop(snd, channel, widget):
                 del exc
                 cleanup(it)
                 break
-
-
-def handle_events(snd, it, channel, widget):
-    """
-    Event handling dispatcher.
-    """
-    input_time, audio_time, video_time = 0, 0, 0
-    videoframes = pg.event.get(VIDEOFRAME)
-
-    with Timed() as input_time:
-        for event in pg.event.get():
-            handle_input(snd, it, event)
-
-    # Paint
-    if videoframes and not sampler.paused:
-        try:
-            samples = it.next()
-            # logger.debug("iterator on: %s" % (it.send('current'),))
-        except StopIteration:
-            raise SystemExit('Sound ended!')
-
-        with Timed() as audio_time:
-            queue_audio(samples, channel)
-
-        with Timed() as video_time:
-            widget.render(samples)
-
-    return (float(input_time), float(audio_time), float(video_time))
 
 
 def queue_audio(samples, channel):
