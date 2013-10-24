@@ -101,11 +101,9 @@ def loop(snd, channel, widget):
         except KeyboardInterrupt, err:
             # See http://stackoverflow.com/questions/2819931/handling-keyboardinterrupt-when-working-with-pygame
             logger.info("Got KeyboardInterrupt (CTRL-C)!".format(type(err)))
-            cleanup(it)
             break
         except SystemExit, err:
             logger.info("Ending animation: %s" % err.message)
-            cleanup(it)
             break
         except Exception, err:
             try:
@@ -113,8 +111,10 @@ def loop(snd, channel, widget):
                 logger.error("Unexpected exception %s: %s\n%s" % (exc[0], exc[1], traceback.format_exc()))
             finally:
                 del exc
-                cleanup(it)
                 break
+    cleanup(it)
+    if isinstance(snd, Generator):
+        snd.sustain = None
 
 
 def queue_audio(samples, channel):
