@@ -335,15 +335,6 @@ def set_timer(event=VIDEOFRAME, ms=sampler.frametime):
     pg.time.set_timer(event, ms)
 
 
-def handle_error(err):
-    """
-    Logging error handler.
-    """
-    logger.error("Error traceback:\n%s" % str(err))
-    cleanup()
-    raise err
-
-
 def cleanup(it=None):
     """
     Clean up: Quit pygame, close iterator.
