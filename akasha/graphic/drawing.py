@@ -104,6 +104,10 @@ def draw(
     else:
         img = get_canvas(size, axis=axis)
 
+    if len(signal) == 0:
+        logger.warn('Drawing empty signal!')
+        return img
+
     signal = clip_samples(signal)
 
     if lines:

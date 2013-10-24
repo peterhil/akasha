@@ -13,10 +13,11 @@ import pygame as pg
 import sys
 import traceback
 
+from itertools import count
 from timeit import default_timer as timer
 
 from akasha.audio.generators import Generator
-from akasha.funct import blockwise
+from akasha.funct import pairwise
 from akasha.graphic.drawing import get_canvas, blit, draw, video_transfer
 from akasha.timing import sampler, Timed
 from akasha.tunings import PianoLayout, WickiLayout
@@ -61,24 +62,24 @@ def anim(snd, size=800, name='Resonance', antialias=True, lines=False, colours=T
 
 def loop(snd, channel, widget):
     clock = pg.time.Clock()
-    it = blockwise(snd, sampler.blocksize())
+    it = pairwise(count(step=sampler.blocksize()))
 
     while True:
         try:
             with Timed() as loop_time:
                 input_time, audio_time, video_time = 0, 0, 0
+                current_slice = it.next()
                 videoframes = pg.event.get(VIDEOFRAME)
 
                 with Timed() as input_time:
                     for event in pg.event.get():
-                        handle_input(snd, it, event)
+                        if handle_input(snd, current_slice, event):
+                            it = pairwise(count(step=sampler.blocksize()))
 
                 # Paint
                 if videoframes and not sampler.paused:
-                    try:
-                        samples = it.next()
-                        # logger.debug("iterator on: %s" % (it.send('current'),))
-                    except StopIteration:
+                    samples = snd[slice(*current_slice)]
+                    if len(samples) == 0:
                         raise SystemExit('Sound ended!')
 
                     with Timed() as audio_time:
@@ -168,7 +169,7 @@ class VideoTransferView(object):
         blit(self._surface, img)
 
 
-def handle_input(snd, it, event):
+def handle_input(snd, current_slice, event):
     """
     Handle pygame events.
     """
@@ -190,8 +191,7 @@ def handle_input(snd, it, event):
             if isinstance(snd, Generator):
                 snd.sustain = None
             logger.info("Rewind")
-            it.send('reset')
-            return
+            return True  # reset
         # Arrows
         elif pg.K_UP == event.key:
             if event.mod & (pg.KMOD_LALT | pg.KMOD_RALT):
@@ -212,17 +212,16 @@ def handle_input(snd, it, event):
         # Change frequency
         elif hasattr(snd, 'frequency'):
             change_frequency(snd, event.key)
-            it.send('reset')
-            return
+            return True  # reset
     # Key up
     elif (event.type == pg.KEYUP and hasattr(snd, 'frequency')):
         if pg.K_CAPSLOCK == event.key:
             change_frequency(snd, event.key)
-            it.send('reset')
+            return True  # reset
         else:
             if isinstance(snd, Generator):
                 try:
-                    snd.sustain = it.send('current')[0]
+                    snd.sustain = current_slice[0]
                 except TypeError:
                     logger.warn("Can't get current value from the iterator.")
                     snd.sustain = 0
