@@ -106,26 +106,19 @@ def handle_events(snd, it, channel, widget):
     """
     Event handling dispatcher.
     """
-    reset = False
     input_time, audio_time, video_time = 0, 0, 0
 
     videoframes = pg.event.get(VIDEOFRAME)
 
     input_start = timer()
     for event in pg.event.get():
-        reset |= handle_input(snd, it, event)
+        handle_input(snd, it, event)
     input_time = timer() - input_start
 
     # Paint
     if videoframes and not sampler.paused:
         try:
-            if reset:
-                try:
-                    samples = it.send('reset')
-                except TypeError:
-                    samples = it.next()
-            else:
-                samples = it.next()
+            samples = it.next()
             # logger.debug("iterator on: %s" % (it.send('current'),))
 
             audio_start = timer()
@@ -199,7 +192,7 @@ def handle_input(snd, it, event):
          (event.type == pg.ACTIVEEVENT and event.state == 3):
         if event.type is not pg.KEYUP:
             sampler.pause()
-        return False
+        return
     # Key down
     elif event.type == pg.KEYDOWN:
         logger.debug("Key '%s' (%s) down." % (pg.key.name(event.key), event.key))
@@ -210,7 +203,7 @@ def handle_input(snd, it, event):
                 snd.sustain = None
             logger.info("Rewind")
             it.send('reset')
-            return True
+            return
         # Arrows
         elif pg.K_UP == event.key:
             if event.mod & (pg.KMOD_LALT | pg.KMOD_RALT):
@@ -231,20 +224,22 @@ def handle_input(snd, it, event):
         # Change frequency
         elif hasattr(snd, 'frequency'):
             change_frequency(snd, event.key)
-            return True
+            it.send('reset')
+            return
     # Key up
     elif (event.type == pg.KEYUP and hasattr(snd, 'frequency')):
         if pg.K_CAPSLOCK == event.key:
             change_frequency(snd, event.key)
-            return True
+            it.send('reset')
         else:
             if isinstance(snd, Generator):
                 try:
                     snd.sustain = it.send('current')[0]
                 except TypeError:
+                    logger.warn("Can't get current value from the iterator.")
                     snd.sustain = 0
                 logger.debug("Key '%s' (%s) up, sustain: %s" % (pg.key.name(event.key), event.key, snd.sustain))
-                return True
+        return
     # Mouse
     elif hasattr(snd, 'frequency') and event.type in (
         pg.MOUSEBUTTONDOWN,
@@ -282,7 +277,7 @@ def handle_input(snd, it, event):
     else:
         if event.type != AUDIOFRAME:
             logger.debug("Other: %s" % event)
-    return False
+    return
 
 
 def init_pygame(name="Resonance", size=800):
