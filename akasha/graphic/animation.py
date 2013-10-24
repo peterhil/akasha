@@ -74,12 +74,13 @@ def loop(snd, channel, widget):
 
             loop_time = timer() - timestamp
 
-            fps = clock.get_fps()
-            percent = loop_time / (1.0 / sampler.videorate) * 100
-            av_percent = (audio_time + video_time) / (1.0 / sampler.videorate) * 100
             t = clock.tick_busy_loop(sampler.videorate)
 
             if not sampler.paused:
+                percent = loop_time / (1.0 / sampler.videorate) * 100
+                av_percent = (audio_time + video_time) / (1.0 / sampler.videorate) * 100
+                fps = clock.get_fps()
+
                 logger.log(logging.BORING,
                            "Animation: clock tick %d, FPS: %3.3f, loop: %.4f, (%.2f %%), input: %.6f, audio: %.6f, video: %.4f, (%.2f %%)", t, fps, loop_time, percent, input_time, audio_time, video_time, av_percent)
         except KeyboardInterrupt, err:
