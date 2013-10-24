@@ -6,6 +6,8 @@ Sampler module.
 
 from __future__ import division
 
+from timeit import default_timer as timer
+
 from akasha.utils.log import logger
 
 
@@ -80,3 +82,21 @@ def time_slice(dur, start=0, time=False):
     if not isinstance(time, slice):
         raise TypeError("Expected a %s for 'time' argument, got %s." % (slice, type(time)))
     return time
+
+
+class Timed(object):
+    """
+    Time some code using with statement.
+    """
+    elapsed = 0
+
+    def __enter__(self):
+        self.start = timer()
+        return self
+
+    def __exit__(self, *args):
+        self.end = timer()
+        self.elapsed = self.end - self.start
+
+    def __float__(self):
+        return float(self.elapsed)

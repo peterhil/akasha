@@ -11,7 +11,6 @@ import logging
 import numpy as np
 import pygame as pg
 import sys
-import time
 import traceback
 
 from timeit import default_timer as timer
@@ -19,7 +18,7 @@ from timeit import default_timer as timer
 from akasha.audio.generators import Generator
 from akasha.funct import blockwise
 from akasha.graphic.drawing import get_canvas, blit, draw, video_transfer
-from akasha.timing import sampler
+from akasha.timing import sampler, Timed
 from akasha.tunings import PianoLayout, WickiLayout
 from akasha.utils import issequence
 from akasha.utils.math import pcm, minfloat
@@ -66,23 +65,19 @@ def loop(snd, channel, widget):
 
     while True:
         try:
-            timestamp = timer()
-
-            (input_time, audio_time, video_time) = handle_events(snd, it, channel, widget)
-
-            pg.display.flip()
-
-            loop_time = timer() - timestamp
+            with Timed() as loop_time:
+                (input_time, audio_time, video_time) = handle_events(snd, it, channel, widget)
+                pg.display.flip()
 
             t = clock.tick_busy_loop(sampler.videorate)
 
             if not sampler.paused:
-                percent = loop_time / (1.0 / sampler.videorate) * 100
+                percent = float(loop_time) / (1.0 / sampler.videorate) * 100
                 av_percent = (audio_time + video_time) / (1.0 / sampler.videorate) * 100
                 fps = clock.get_fps()
 
                 logger.log(logging.BORING,
-                           "Animation: clock tick %d, FPS: %3.3f, loop: %.4f, (%.2f %%), input: %.6f, audio: %.6f, video: %.4f, (%.2f %%)", t, fps, loop_time, percent, input_time, audio_time, video_time, av_percent)
+                           "Animation: clock tick %d, FPS: %3.3f, loop: %.4f, (%.2f %%), input: %.6f, audio: %.6f, video: %.4f, (%.2f %%)", t, fps, float(loop_time), percent, input_time, audio_time, video_time, av_percent)
         except KeyboardInterrupt, err:
             # See http://stackoverflow.com/questions/2819931/handling-keyboardinterrupt-when-working-with-pygame
             logger.info("Got KeyboardInterrupt (CTRL-C)!".format(type(err)))
@@ -107,30 +102,27 @@ def handle_events(snd, it, channel, widget):
     Event handling dispatcher.
     """
     input_time, audio_time, video_time = 0, 0, 0
-
     videoframes = pg.event.get(VIDEOFRAME)
 
-    input_start = timer()
-    for event in pg.event.get():
-        handle_input(snd, it, event)
-    input_time = timer() - input_start
+    with Timed() as input_time:
+        for event in pg.event.get():
+            handle_input(snd, it, event)
 
     # Paint
     if videoframes and not sampler.paused:
         try:
             samples = it.next()
             # logger.debug("iterator on: %s" % (it.send('current'),))
-
-            audio_start = timer()
-            queue_audio(samples, channel)
-            audio_time = timer() - audio_start
-
-            video_start = timer()
-            widget.render(samples)
-            video_time = timer() - video_start
         except StopIteration:
             raise SystemExit('Sound ended!')
-    return (input_time, audio_time, video_time)
+
+        with Timed() as audio_time:
+            queue_audio(samples, channel)
+
+        with Timed() as video_time:
+            widget.render(samples)
+
+    return (float(input_time), float(audio_time), float(video_time))
 
 
 def queue_audio(samples, channel):
