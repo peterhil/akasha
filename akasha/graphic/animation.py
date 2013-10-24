@@ -339,8 +339,6 @@ def cleanup(it=None):
     """
     Clean up: Quit pygame, close iterator.
     """
-    pg.mixer.quit()
-    pg.display.quit()
     pg.quit()
     if it:
         if hasattr(it, 'close'):
