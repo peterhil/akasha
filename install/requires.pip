@@ -1,9 +1,9 @@
 Cython==0.17.4
-Louie==1.1
-PIL==1.1.7
+Louie==1.1  # Replacement for PIL
+Pillow==2.0.0
 PyGUI==2.5.3
 Pygments==1.4
-Twisted==12.2.0
+Twisted>=11.0
 cdecimal==2.3
 distribute==0.6.24
 -e hg+https://bitbucket.org/ccordoba12/funckit@23bf0cfeb1763385055a51863256eb6b74ea6fe1#egg=funckit-dev
@@ -12,13 +12,14 @@ matplotlib==1.1.1
 nose==1.2.1
 numpy==1.6.2
 py==1.4.12
--e hg+https://bitbucket.org/pygame/pygame@4a461123902123d8b9309b3841bb63520c09761b#egg=pygame-dev
+pygame==1.9.2pre
 pytest==2.3.4
 readline==6.2.4.1
 scikit-image==0.7.2
 scikits.audiolab==0.11.0
+scikits-image==0.7.1
 scikits.samplerate==0.3.3
--e git+https://github.com/scipy/scipy@ebb8b11bdaccc628bf1ede102468f01d38fd2d85#egg=scipy-dev
+scipy==0.12.0
 wikitools==1.1.1
 wsgiref==0.1.2
 zope.interface==4.0.3

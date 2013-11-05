@@ -123,8 +123,9 @@ def blockwise(iterable, step=1, start=0):
                     val = (yield indices)
                 if val == 'reset':
                     blocks = reset()
-                    indices = (start, step)
-                    val = (yield True)
+                    indices = blocks.next()
+                    block = iterable[slice(*np.append(indices, np.sign(step)))]
+                    val = (yield block)
         else:
             raise StopIteration
 

@@ -13,10 +13,10 @@ Unit tests for curves
 import pytest
 import numpy as np
 
-from numpy.testing.utils import assert_array_equal
+from numpy.testing.utils import assert_array_equal, assert_array_almost_equal
 from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
 
-from akasha.audio.curves import Curve, Circle, Square, Super
+from akasha.audio.curves import Curve, Circle, Ellipse, Square, Super
 from akasha.audio.generators import PeriodicGenerator
 from akasha.utils.math import pi2, normalize
 from akasha.utils.patterns import Singleton
@@ -168,3 +168,61 @@ class TestSuper(object):
     def test_repr(self):
         o = Super()
         assert o == eval(repr(o))
+
+
+class TestEllipse(object):
+
+    def test_at(self):
+        ell = Ellipse(1, 0.707, pi2 * 1/8)
+        assert_nulp_diff(
+            np.array([
+                 0.7071067811865476+0.7071067811865475j,
+                -0.0881957403979775+0.7827588458787578j,
+                -0.6061872590833505+0.3808926997730741j,
+                -0.8658500540960117-0.3029740376569993j,
+                -0.3029740376569996-0.8658500540960116j,
+                 0.3808926997730734-0.606187259083351j ,
+                 0.7827588458787578-0.0881957403979777j,
+                 0.7071067811865477+0.7071067811865474j
+            ]),
+            ell.at(np.linspace(0, 1, 8))
+        )
+
+    def test_curvature(self):
+        ell = Ellipse(1, 0.707, pi2 * 1/8)
+        assert_nulp_diff(
+            np.array([
+                2.0006041824631042,  1.5443093080698087,  0.9778297511146608,  0.7341007514023552,
+                0.7341007514023552,  0.9778297511146602,  1.5443093080698087,  2.0006041824631042
+            ]),
+            ell.curvature(np.linspace(0, 1, 8))
+        )
+
+    def test_roc(self):
+        ell = Ellipse(1, 0.707, pi2 * 1/8)
+        assert_nulp_diff(
+            np.array([
+                0.4998489999999999,  0.6475386729682239,  1.0226729130097203,  1.3622108383484099,
+                1.3622108383484099,  1.0226729130097210,  0.6475386729682239,  0.4998489999999999
+            ]),
+            ell.roc(np.linspace(0, 1, 8))
+        )
+
+    def test_form_conjugate_diameters(self):
+        para = np.array([
+            0.21972613654798550664182243963296+0.05592349761197702023851618946537j,
+            0.06351890232019029303156543164732+0.72144561730157619194869766943157j,
+            0.64242622053932740833204206865048+0.76634753941247535369285515116644j,
+            0.79863345476712266357566250007949+0.10082541972287623055493099855084j
+        ])
+        ell = Ellipse.from_conjugate_diameters(para)
+        exp = Ellipse(
+            a = 0.49554415098466492,
+            b = 0.39581703245813976,
+            angle = 2.1056608982703207,
+            origin = (0.43107617854365643+0.41113551851222618j)
+        )
+        assert_nulp_diff(
+            np.array([exp.a, exp.b, exp.angle, exp.origin]),
+            np.array([ell.a, ell.b, ell.angle, ell.origin])
+        )

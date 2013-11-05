@@ -47,6 +47,7 @@ from funckit import xoltar as fx
 
 from akasha.graphic.animation import *
 from akasha.graphic.drawing import *
+from akasha.graphic.geometry import *
 from akasha.graphic.primitive.line import *
 from akasha.graphic.primitive.spline import *
 

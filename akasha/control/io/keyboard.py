@@ -7,6 +7,8 @@ Author: Peter Hillerström
 Date: 2011-12-06
 """
 
+from __future__ import division
+
 import json
 import numpy as np
 

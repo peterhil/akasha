@@ -70,6 +70,60 @@ def rad_to_tau(angles):
 
 # Utils for frequency ratios etc...
 
+
+def cents(*args):
+    """
+    Calculate cents from interval or frequency ratio(s).
+    When using frequencies, give greater frequencies first.
+
+    >>> cents(float(Fraction(5,4)))
+    array([ 386.31371386])
+
+    >>> cents(440/27.5)
+    array([ 4800.])     # equals four octaves
+
+    >>> cents(np.arange(8)/16.0+1)
+    array([[   0.        ,  104.9554095 ,  203.91000173,  297.51301613,
+             386.31371386,  470.78090733,  551.31794236,  628.27434727]])
+    """
+    return 1200.0 * np.log2(args)
+
+
+def cents_diff(a, b):
+    """
+    Calculate the difference of two frequencies in cents."
+    """
+    return np.abs(cents(float(a)) - cents(float(b)))
+
+
+def interval(*cnt):
+    """
+    Calculate interval ratio from cents.
+
+    >>> interval(100)
+    array([ 1.05946309])    # one equal temperament semitone
+
+    >>> interval(386.31371386)
+    array([ 1.25])          # 5:4, perfect fifth
+
+    >> frac = lambda f: map(Fraction.limit_denominator, map(Fraction.from_float, f))
+    >> [frac for i in interval(np.arange(5) * 386.31371386)]
+    [[Fraction(1, 1),
+      Fraction(5, 4),
+      Fraction(25, 16),
+      Fraction(125, 64),
+      Fraction(625, 256)]]
+    """
+    return np.power(2, np.asanyarray(cnt) / 1200.0)
+
+
+def freq_plus_cents(f, cnt):
+    """
+    Calculate what frequency is given cents apart from a frequency f.
+    """
+    return f * interval(cnt)
+
+
 def logn(x, base=np.e):
     """
     Logarithm of x on some base.
@@ -210,6 +264,9 @@ def complex_as_reals(signal, dtype=np.float64):
     """
     Convert complex signal to real number coordinate points.
     """
+    signal = np.asanyarray(signal, dtype=np.complex128)
+    if signal.ndim < 1:
+        signal = np.atleast_1d(signal)
     return signal.view(dtype).reshape(len(signal), 2).transpose()
 
 

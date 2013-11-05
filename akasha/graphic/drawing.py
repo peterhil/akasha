@@ -107,12 +107,13 @@ def draw(
     signal = clip_samples(signal)
 
     if lines:
+        if screen is None:
+            # logger.warn("Drawing lines with Numpy is way too slow for now!")
+            return draw_lines(signal, img, size, colours)
         if antialias and screen is not None:
             draw_lines_pg(signal, screen, size, colours, antialias=True)
         else:
-            # raise NotImplementedError("Drawing lines with Numpy is way too slow for now!")
-            # return draw_lines(signal, img, size, colours)
-            return draw_lines_pg(signal, screen, size, colours, antialias=False)
+            draw_lines_pg(signal, screen, size, colours, antialias=False)
     else:
         if antialias:
             return draw_points_aa(signal, img, size, colours)
@@ -347,6 +348,7 @@ def show(img, plot=False, osx_open=False):
     """
     Show an image from a Numpy array.
     """
+    img = img.transpose((1, 0, 2))
     if (plot and plt):
         plt.interactive(True)
         imgplot = plt.imshow(img[:, :, :3])
@@ -371,6 +373,17 @@ def show(img, plot=False, osx_open=False):
         image.show()
 
 
+def imsave(img, filename):
+    try:
+        img = img.transpose((1, 0, 2))
+        image = Image.fromarray(img[..., :3], 'RGB')
+        image.save(filename, 'png')
+    except IOError, err:
+        logger.error("Failed to save image into {}".format(filename))
+    except Exception, err:
+        logger.error("Error when saving image: {}".format(err))
+
+
 def graph(signal, size=1000, dur=None, plot=False, axis=True,
           antialias=True, lines=False, colours=True, img=None):
     """
@@ -385,7 +398,7 @@ def graph(signal, size=1000, dur=None, plot=False, axis=True,
         antialias=antialias, lines=lines, colours=colours,
         axis=axis,
         img=img
-    ).transpose((1, 0, 2))
+    )
 
     show(img, plot and plt)
 

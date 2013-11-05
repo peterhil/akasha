@@ -9,7 +9,19 @@ wsgiref>=0.1.2
 
 mercurial
 
-# Do "brew install sdl sdl_image sdl_mixer sdl_ttf portmidi --HEAD smpeg" before pygame!
+
+# Gevent
+#
+# sudo port install libevent
+#CFLAGS="-I /opt/local/include -L /opt/local/lib" pip install gevent
+
+
+# Pygame
+#
+# Install SDL before Pygame with:
+# % brew install sdl sdl_image sdl_mixer sdl_ttf portmidi
+# % brew install --HEAD smpeg
+#
 # See http://stackoverflow.com/questions/8458911/pygame-in-a-virtualenv
 #pygame==1.9.1release
 #pygame==1.9.2pre
