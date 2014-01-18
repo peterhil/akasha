@@ -4,6 +4,8 @@
 Noise and chaos module.
 """
 
+from __future__ import division
+
 import numpy as np
 
 from cmath import rect
@@ -52,6 +54,40 @@ class Noise(Generator):
         Commence noise.
         """
         return self.function(iterable, self.randomizer)
+
+
+class ColouredNoise(Generator):
+    """
+    Generate coloured noise, with instantaneous frequency differences having some distribution.
+    By default uses standard normal distribution, also known as the Gaussian distribution.
+    """
+    # TODO Make this into a filter for jittering a frequency
+    # TODO Examine using other distributions
+
+    def __init__(self, frequency, deviation=0.1, step=1, log=True):
+        """
+        == Parameters ==
+        frequency: The center of the distribution (mu).
+        deviation: The standard deviation (sigma).
+
+        Example:
+        >>> cn = ColouredNoise(0.01, 0.1)
+        """
+        self.frequency = Frequency(frequency)
+        self.sigma = deviation
+        self.step = step
+        self.randomizer = np.random.lognormal if log else np.random.normal
+
+    @property
+    def mu(self):
+        return self.frequency.ratio
+
+    def sample(self, iterable):
+        length = len(iterable)
+        s = self.randomizer(self.mu, self.sigma, np.ceil(length / float(self.step)))
+        if self.step != 1:
+            s = np.interp(np.arange(length), np.arange(0, length, self.step), s[:length])
+        return c.at(np.cumsum(s))
 
 
 class Rustle(Generator):
