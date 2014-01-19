@@ -1,25 +1,17 @@
-Cython==0.17.4
-Louie==1.1  # Replacement for PIL
-Pillow==2.0.0
-PyGUI==2.5.3
-Pygments==1.4
-Twisted>=11.0
+Cython>=0.19.2
+Louie==1.1
+Pillow>=2.3.0  # Replacement for PIL
+Twisted>=13.2
 cdecimal==2.3
-distribute==0.6.24
 -e hg+https://bitbucket.org/ccordoba12/funckit@23bf0cfeb1763385055a51863256eb6b74ea6fe1#egg=funckit-dev
-ipython==0.13
-matplotlib==1.1.1
-nose==1.2.1
-numpy==1.6.2
-py==1.4.12
-pygame==1.9.2pre
-pytest==2.3.4
-readline==6.2.4.1
-scikit-image==0.7.2
-scikits.audiolab==0.11.0
-scikits-image==0.7.1
+ipython>=1.1.0
+# matplotlib>=1.3.1  # Fails with Freetype 2.5.1 by: /usr/X11/include/ft2build.h:56:10: fatal error: 'freetype/config/ftheader.h' file not found
+-e git+https://github.com/matplotlib/matplotlib.git#egg=matplotlib
+numpy>=1.8.0
+-e hg+https://bitbucket.org/pygame/pygame#egg=pygame-dev
+pyinter
+scikit-image>=0.9.3
+scikits.audiolab>=0.11.0
 scikits.samplerate==0.3.3
-scipy==0.12.0
+scipy>=0.13.2
 wikitools==1.1.1
-wsgiref==0.1.2
-zope.interface==4.0.3
