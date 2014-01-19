@@ -339,7 +339,7 @@ def random_phasor(n=1, amp=1.0, random=np.random.random):
     graph(snd)  # or anim(Pcm(snd))
     """
     if np.isscalar(amp):
-        return np.atleast_1d(cmath.rect(amp, pi2 * random(n) - np.pi))
+        return [cmath.rect(a, b) for a, b in izip(np.repeat(amp, n), pi2 * random(n) - np.pi)]
     elif callable(amp):
         return np.array(map(cmath.rect, *np.array([amp(n), pi2 * random(n) - np.pi])))
     else:
