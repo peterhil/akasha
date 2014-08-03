@@ -9,8 +9,10 @@ ipython>=1.1.0
 -e git+https://github.com/matplotlib/matplotlib.git#egg=matplotlib
 numpy>=1.8.0
 -e hg+https://bitbucket.org/pygame/pygame#egg=pygame-dev
+# http://pygame.org/ftp/pygame-1.9.1release.tar.gz
 pyinter
-scikit-image>=0.9.3
+# scikit-image>=0.9.3
+-e git+https://github.com/scikit-image/scikit-image#egg=scikit-image
 scikits.audiolab>=0.11.0
 scikits.samplerate==0.3.3
 scipy>=0.13.2
