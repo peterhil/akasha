@@ -637,6 +637,39 @@ def scale(signal, size):
     return ((clip(signal) + 1 + 1j) / 2.0 * (size - 1) + (0.5 + 0.5j))
 
 
+def scaleto(arr, magnitude=1, inplace=False):
+    """
+    Scales a complex or real signal by translating startpoint to the origo,
+    and scales endpoint to the desired magnitude.
+    """
+    if inplace:
+        arr -= arr[0]
+        arr *= magnitude / np.abs(arr[-1])
+        return arr
+    else:
+        return ((arr - arr[0]) * (magnitude / np.abs(arr[-1] - arr[0])))
+
+
+def abspowersign(base, exponent):
+    return np.sign(base) * np.abs(base) ** exponent
+
+
+def lambertw(z):
+    """
+    Lambert W function:
+    http://en.wikipedia.org/wiki/Lambert_W_function
+    http://docs.scipy.org/doc/scipy/reference/generated/scipy.special.lambertw.html
+    """
+    limit = -1 / np.e
+    if limit < np.abs(z) < 0:
+        branch = -1
+    elif limit < np.abs(z):
+        branch = 0
+    else:
+        raise ValueError("Argument for lambertw %s should be below %s to get real values out." % (z, limit))
+    return sc.special.lambertw(z, branch)
+
+
 def flip_vertical(signal):
     """
     Flip signal on vertical (imaginary) axis.
