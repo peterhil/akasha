@@ -62,6 +62,10 @@ class Super(Curve):
 
         See 'Superellipse' article at Wikipedia for explanation of what these parameters mean:
         http://en.wikipedia.org/wiki/Superellipse
+
+        Also see Gielis curve:
+        http://www.2dcurves.com/power/powergc.html
+        http://en.wikipedia.org/wiki/Superformula
         """
         self.superness = self.get_superness(m, n, p, q, a, b)
 
