@@ -109,8 +109,8 @@ def clothoid_gray_negative(t, exponent=2, scale=1):
 
 
 def kphis(n, a, t):
-    k = -(t ** n / a)
-    phi = -(t ** (n + 1) / (n + 1))
+    k = -(abspowersign(t, n) / a)
+    phi = -(abspowersign(t, (n + 1)) / (n + 1))
     s = a * t
     return (k, phi, s)
 
