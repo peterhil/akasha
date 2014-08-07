@@ -115,12 +115,12 @@ def kphis(n, a, t):
     return (k, phi, s)
 
 
-def plot_unit(scale = 3):
-    o = Osc.from_ratio(1, 8000)
+def plot_unit(axes=3, scale=1):
+    o = Osc.from_ratio(1, 8000)[::] * scale
     plt.interactive(True)
-    plt.plot(o[::].real, o[::].imag)
+    plt.plot(o.real, o.imag)
     plt.axis('equal')
-    plt.axis((-scale, scale, -scale, scale))
+    plt.axis((-axes, axes, -axes, axes))
     plt.show()
 
 
