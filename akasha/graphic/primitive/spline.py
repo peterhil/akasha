@@ -182,6 +182,10 @@ def nat(k, phi, s):
         )
 
 
+def t_from_phi_n(phi, n):
+    return abspowersign(phi * (n + 1), 1 / (n + 1))
+
+
 def snk(a, t, phi):
     """
     Get arc length (s), exponent (n) and curvature (k) from
