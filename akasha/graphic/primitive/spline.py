@@ -58,7 +58,7 @@ def clothoid_gray_hg(t, exponent=2, norm=1):
 
 
 def fresnel(t, exponent):
-    return np.exp(1j * (t ** (exponent + 1) / (exponent + 1)))
+    return np.exp(1j * (np.abs(t) ** (exponent + 1) / (exponent + 1)))
 
 
 def clothoid_gray(t, exponent=2, scale=1):
@@ -151,7 +151,7 @@ def n_a_phi(k, s, t):
         )
 
 
-def nat(k, phi, s):
+def nat_pos(k, phi, s):
     """
     Get exponent (n), scaling (a) and parameter (t) from
     curvature (k), tangential angle (phi) and arc length (s).
@@ -168,7 +168,7 @@ def nat(k, phi, s):
         )
 
 
-def nat2(k, phi, s):
+def nat(k, phi, s):
     """
     Get exponent (n), scaling (a) and parameter (t) from
     curvature (k), tangential angle (phi) and arc length (s).
