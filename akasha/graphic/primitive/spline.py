@@ -108,15 +108,11 @@ def clothoid_gray_negative(t, exponent=2, scale=1):
     return np.append(s[1:][::-1] * 1j * 1j, s)
 
 
-def clothoid_params(n, a, t):
-    s = a * t
+def kphis(n, a, t):
     k = -(t ** n / a)
     phi = -(t ** (n + 1) / (n + 1))
-    print "Arc length:\t%s\n" \
-      "Curvature:\t%s\n" \
-      "Tang. angle:\t%s\n" \
-      "Tau angle:\t%s" % (s, k, phi, phi / (np.pi * 2))
-    return (s, k, phi)
+    s = a * t
+    return (k, phi, s)
 
 
 def plot_unit(scale = 3):
