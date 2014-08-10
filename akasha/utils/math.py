@@ -655,6 +655,10 @@ def abspowersign(base, exponent):
     return np.sign(base) * np.abs(base) ** exponent
 
 
+def abslogsign(x):
+    return np.sign(x) * np.log(np.abs(x))
+
+
 def lambertw(z):
     """
     Lambert W function:
