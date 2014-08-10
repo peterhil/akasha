@@ -592,7 +592,42 @@ def pad(signal, index=-1, count=1, value=None):
     length = len(signal)
     space = index % (length + 1)
     value = (value if value is not None else signal[index])
-    return np.concatenate((signal[0:space], np.repeat(value, count), signal[space:length]))
+    return np.concatenate((signal[0:space], repeat(value, count), signal[space:length]))
+
+
+def pad_minlength(signal, padding, minlength, index=-1, fromleft=False):
+    """
+    Pad a signal with padding value(s) on the left to be at least the given length.
+    """
+    padding = np.asanyarray([padding]).flatten()
+    if len(padding) == 0:
+        padding = [0]
+    missing = max(0, minlength - len(signal))
+    if not missing:
+        return signal
+    times = int(np.ceil(missing / len(padding)))  # Will be at least 1
+
+    if not fromleft:  # Take missing items from the head of the repeated padding
+        padding = repeat(padding, times)[:missing]
+    else:  # Take missing items from the tail
+        padding = repeat(padding, times)[-missing:]
+
+    space = index % (len(signal) + 1)
+    return np.concatenate((signal[:space], padding, signal[space:]))
+
+
+def pad_left(signal, padding, minlength):
+    """
+    Pad a signal with padding value(s) on the start (left side) to be at least the given length.
+    """
+    return pad_minlength(signal, padding, minlength, 0, fromleft=True)
+
+
+def pad_right(signal, padding, minlength):
+    """
+    Pad a signal with padding value(s) on the end to be at least the given length.
+    """
+    return pad_minlength(signal, padding, minlength, -1, fromleft=False)
 
 
 def distances(signal):
