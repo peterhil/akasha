@@ -577,6 +577,7 @@ def repeat(signal, times):
     """
     Repeat the signal the desired number of times.
     """
+    signal = np.asarray([signal]).flatten()
     if times < 1:
         return signal[0:0]
     if times == 1:
