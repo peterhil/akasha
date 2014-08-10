@@ -7,6 +7,7 @@ Curves for oscillators
 from __future__ import division
 
 import numpy as np
+import scipy as sc
 
 from cmath import rect
 
@@ -203,6 +204,24 @@ class Ellipse(Curve):
         Radius of curvature.
         """
         return 1.0 / self.curvature(tau)
+
+    def arc_length(self, tau):
+        """
+        Arc length of the ellipse.
+        Formula (4) from: http://paulbourke.net/geometry/ellipsecirc/Abbott.pdf
+        """
+        return self.a * sc.special.ellipeinc(tau * pi2, self.eccentricity ** 2)
+
+    @property
+    def circumference(self):
+        return 4.0 * self.arc_length(0.25)
+
+    @property
+    def eccentricity(self):
+        """
+        Eccentricity of the ellipse: https://en.wikipedia.org/wiki/Ellipse#Eccentricity
+        """
+        return np.sqrt(1 - (self.b / self.a) ** 2)
 
     @classmethod
     def from_rhombus(cls, para):
