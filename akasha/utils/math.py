@@ -4,6 +4,8 @@
 Mathematical utility functions module.
 """
 
+from __future__ import division
+
 import cmath
 import exceptions
 import numpy as np
