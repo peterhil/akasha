@@ -573,6 +573,17 @@ def clip(signal, limit=1.0, inplace=False):
     return signal
 
 
+def repeat(signal, times):
+    """
+    Repeat the signal the desired number of times.
+    """
+    if times < 1:
+        return signal[0:0]
+    if times == 1:
+        return signal
+    return np.repeat([signal], times, axis=0).flatten()
+
+
 def pad(signal, index=-1, count=1, value=None):
     """
     Inserts a padding value at index repeated count number of times.
