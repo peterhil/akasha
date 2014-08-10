@@ -101,8 +101,9 @@ def circumcircle_radius(a, b, c):
 def circumcircle_radius_alt(previous_pt, point, next_pt):
     """
     Find the circumcircle of three points.
+    Takes into account the clockwise or anticlockwise direction, that the points represent.
     """
-    (v1, v2) = vectors(previous_pt, point, next_pt)
+    (v1, v2) = np.array([previous_pt, next_pt]) - point
     return np.abs(v1 - v2) / 2 * np.sin(angle_between(v1, v2))
 
 
@@ -185,5 +186,17 @@ def rotate_towards(u, v, tau, center=0):
     return s * (-np.exp(pi2 * 1j * tau) * sign) + center
 
 
-def vectors(previous_pt, point, next_pt):
-    return np.array([previous_pt, next_pt]) - point
+def vectors_from_origo(points, origo=0):
+    return np.asarray(points) - origo
+
+
+def vectors(points, *rest):
+    """
+    Get the vectors that give directions on how to move through some points.
+    You could use this to move something in way the turtle graphics in the Logo programming language works.
+
+    https://en.wikipedia.org/wiki/Logo_(programming_language)
+    https://en.wikipedia.org/wiki/Turtle_graphics
+    """
+    points = np.append(points, rest)
+    return np.subtract(*overlap(points, 2)[::-1])

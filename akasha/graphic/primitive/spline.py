@@ -212,6 +212,30 @@ def clothoid_segment(k, k2, phi, phi2, s, s2):
     return n, a, t, t2
 
 
+def clothoid_tangents(points, ends=False):
+    """
+    Find suitable tangent angles for a set of points.
+    Angles are found by halving the angle of "turns" on the "turtle path" formed by the points.
+
+    Parameters:
+    ===========
+    ends = handle end point tangents separately, and add to output
+
+    Example:
+    >>> points = np.array([1, 0, 2j, 2+2j, 3+1j, 4+2j, 5+3j, 5+2j])
+    >>> tangents = clothoid_tangents(points) / pi2
+    array([-0.125 , -0.125 , -0.0625,  0.125 ,  0.    , -0.1875])
+    """
+    directions = np.angle(vectors(points))
+    turns = np.ediff1d(directions)
+    current = 0
+    tangents = map_array(lambda angle: np.fmod(current + angle, np.pi), turns / 2)
+    if ends:
+        return np.concatenate(([directions[0]], tangents, [directions[-1]]))
+    else:
+        return tangents
+
+
 def snk(a, t, phi):
     """
     Get arc length (s), exponent (n) and curvature (k) from
