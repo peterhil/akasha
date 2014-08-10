@@ -86,7 +86,7 @@ def clothoid_gray(t, exponent=2, scale=1):
 
 
 def clothoid_scaled(k, phi, s, start=0):
-    points = 1000
+    points = 1000  # TODO Maybe control the number of points by multiplying with s, but beware of huge values of s!
 
     n, a, t = nat(k, phi, s)
     end = clothoid_gray(np.linspace(0, t, points), n, a/points)[-1]
