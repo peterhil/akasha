@@ -630,6 +630,13 @@ def pad_right(signal, padding, minlength):
     return pad_minlength(signal, padding, minlength, -1, fromleft=False)
 
 
+def overlap(signal, n):
+    """
+    Split the 1-d signal into n overlapping parts.
+    """
+    return np.array([signal[p : len(signal) - q] for p, q in enumerate(reversed(xrange(n)))])
+
+
 def distances(signal):
     """
     Get the absolute distances from consecutive samples of the signal.
