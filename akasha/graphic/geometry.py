@@ -152,6 +152,10 @@ def random_parallelogram(x=1, y=1):
     return normalize(np.append(tri, parallelogram_point(*tri)))
 
 
+def rotate(z, tau):
+    return z * np.exp(tau * pi2 * 1j)
+
+
 def rotate_towards(u, v, tau, center=0):
     """
     Rotate point u tau degrees *towards* v around center.
