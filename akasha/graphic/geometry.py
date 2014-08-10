@@ -66,7 +66,7 @@ def angle_between(a, b, origin=0):
     Dot Product & Angle Between Vectors: http://www.youtube.com/watch?v=p8BZTFNSKIw
     Also see: http://en.wikipedia.org/wiki/Vector_dot_product#Geometric_interpretation
     """
-    return np.angle(cartesian(1, np.angle(a - origin) - np.angle(b - origin)))
+    return np.angle(cartesian(1, np.angle(b - origin) - np.angle(a - origin)))
 
 
 def circumcircle_radius(a, b, c):
