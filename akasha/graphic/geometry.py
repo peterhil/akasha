@@ -10,7 +10,7 @@ import numpy as np
 import skimage.transform as skt
 
 from akasha.utils import _super
-from akasha.utils.math import as_complex, cartesian, complex_as_reals, normalize, pi2
+from akasha.utils.math import as_complex, cartesian, complex_as_reals, normalize, overlap, pad, pad_left, pi2
 
 
 class AffineTransform(skt.AffineTransform):
@@ -59,14 +59,34 @@ class AffineTransform(skt.AffineTransform):
         )
 
 
-def angle_between(a, b, origin=0):
+def angle_between(a, b, c=None):
     """
-    Angle between two points around origin in radians.
+    Angle between two points (a and c though b) in radians.
+    If only a and b is given, will give the angle between (a and b through 0).
 
     Dot Product & Angle Between Vectors: http://www.youtube.com/watch?v=p8BZTFNSKIw
-    Also see: http://en.wikipedia.org/wiki/Vector_dot_product#Geometric_interpretation
+    Also see: https://en.wikipedia.org/wiki/Vector_dot_product#Geometric_definition
     """
-    return np.angle(cartesian(1, np.angle(b - origin) - np.angle(a - origin)))
+    if c is None:
+        b, c = 0, b
+    return np.angle(cartesian(1, np.angle(c - b) - np.angle(a - b)))
+
+
+def angles_between(points, *rest):
+    """
+    Angles between consecutive points on the complex plane in radians.
+
+    If given less than three points, the input is padded from the start with [1, 1, 0],
+    from which the missing elements are taken starting from the right side.
+
+    For example:
+    angles_between(3j)  # -> input becomes [1, 0, 3j]
+    >>> np.pi/2
+    """
+    points = np.append(points, rest).astype(np.complex128)
+    points = pad_left(points, [1, 1, 0], 3)
+    points = pad(points, count=2, index=-1, value=points[-1])
+    return angle_between(*overlap(points, 3))
 
 
 def circumcircle_radius(a, b, c):
@@ -74,7 +94,7 @@ def circumcircle_radius(a, b, c):
     Find the circumcircle of three points.
     """
     side = np.abs(a - c)
-    angle = angle_between(a, c, b)
+    angle = angle_between(a, b, c)
     return np.abs(side / (2 * np.sin(angle)))
 
 
@@ -106,7 +126,7 @@ def is_orthogonal(a, b, c=0):
     """
     Return true if two complex points (a, b) are orthogonal from center point (c).
     """
-    return np.abs(angle_between(a, b, c)) == np.pi / 2
+    return np.abs(angle_between(a, c, b)) == np.pi / 2
 
 
 def midpoint(a, b):
