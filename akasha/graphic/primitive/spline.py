@@ -108,10 +108,22 @@ def clothoid_gray_negative(t, exponent=2, scale=1):
     return np.append(s[1:][::-1] * 1j * 1j, s)
 
 
+def curvature(n, a, t):
+    return -(abspowersign(t, n) / a)
+
+
+def tangent_angle(n, t):
+    return -(abspowersign(t, (n + 1)) / (n + 1))
+
+
+def arclength(a, t):
+    return a * t
+
+
 def kphis(n, a, t):
-    k = -(abspowersign(t, n) / a)
-    phi = -(abspowersign(t, (n + 1)) / (n + 1))
-    s = a * t
+    k = curvature(n, a, t)
+    phi = tangent_angle(n, t)
+    s = arclength(a, t)
     return (k, phi, s)
 
 
