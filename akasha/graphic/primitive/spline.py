@@ -124,7 +124,7 @@ def plot_unit(axes=3, scale=1):
     plt.show()
 
 
-def n_from_phi_t(phi, t, branch=0):
+def n_from_phi_t(phi, t):
     """
     Calculate n parameter from tangential angle (phi) and parameter t.
 
