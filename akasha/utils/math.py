@@ -7,6 +7,7 @@ Mathematical utility functions module.
 import cmath
 import exceptions
 import numpy as np
+import scipy as sc
 import sys
 
 if sys.version_info >= (2, 7):
