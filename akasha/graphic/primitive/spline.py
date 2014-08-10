@@ -353,7 +353,7 @@ def cl_piece(start, stop, n, endpoint=False, scale=1, norm=False, fn=clothoid_wi
     return rotated * scale
 
 
-def curvature(a, b, c):
+def circle_curvature(a, b, c):
     """
     Discrete curvature estimation.
 
@@ -368,7 +368,7 @@ def curvature(a, b, c):
 
 
 def estimate_curvature_circle(signal):
-    return np.array([curvature(*points) for points in consecutive(signal, 3)])
+    return np.array([circle_curvature(*points) for points in consecutive(signal, 3)])
 
 
 def ellipse_curvature(pts):
