@@ -10,7 +10,7 @@ import numpy as np
 import skimage.transform as skt
 
 from akasha.utils import _super
-from akasha.utils.math import as_complex, cartesian, complex_as_reals, normalize, overlap, pad, pad_left, pi2
+from akasha.utils.math import as_complex, cartesian, complex_as_reals, normalize, overlap, pad_left, pad_right, pi2
 
 
 class AffineTransform(skt.AffineTransform):
@@ -85,7 +85,7 @@ def angles_between(points, *rest):
     """
     points = np.append(points, rest).astype(np.complex128)
     points = pad_left(points, [1, 1, 0], 3)
-    points = pad(points, count=2, index=-1, value=points[-1])
+    points = pad_right(points, points[-1], 5)
     return angle_between(*overlap(points, 3))
 
 
