@@ -17,7 +17,7 @@ from akasha.audio.oscillator import Osc
 from akasha.funct import consecutive
 from akasha.graphic.drawing import plt
 from akasha.graphic.geometry import circumcircle_radius, is_collinear
-from akasha.utils.math import abspowersign, as_complex, lambertw
+from akasha.utils.math import abslogsign, abspowersign, as_complex, lambertw
 
 
 def clothoid_erf(t):
@@ -184,14 +184,32 @@ def nat(k, phi, s):
     b = abspowersign(-k * s, phi)
     e = 1 / (k * s)
     return (
-        np.log(-k * s * abspowersign(b, -e)) / np.log(abspowersign(b, e)),
+        abslogsign(-k * s * abspowersign(b, -e)) / abslogsign(abspowersign(b, e)),
         s * abspowersign(b, -e),
         abspowersign(b, e)
         )
 
 
+def t_for_curvature(n, a, k):
+    return abspowersign(-a * k, 1 / n)
+
+
 def t_from_phi_n(phi, n):
     return abspowersign(phi * (n + 1), 1 / (n + 1))
+
+
+def tf(k, phi, s):
+    return abspowersign(abspowersign(-k * s, phi), 1 / (k * s))
+
+
+def clothoid_segment(k, k2, phi, phi2, s, s2):
+    t = tf(k, phi, s)
+    t2 = tf(k2, phi2, s2)
+
+    n = abslogsign(k2 / k) / abslogsign(t2 / t)
+    a = abspowersign(-t, n) / k if k != 0 else abspowersign(-t2, n) / k2
+
+    return n, a, t, t2
 
 
 def snk(a, t, phi):
