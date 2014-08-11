@@ -639,17 +639,14 @@ def overlap(signal, n):
     return np.array([signal[p : len(signal) - q] for p, q in enumerate(reversed(xrange(n)))])
 
 
-def distances(signal):
+def distances(signal, start=None, end=None):
     """
     Get the absolute distances from consecutive samples of the signal.
     Signal must have at least two samples.
 
     See also: np.diff()
     """
-    if hasattr(signal, '__len__') and (len(signal) >= 2):
-        return np.abs(signal[1:] - signal[:-1])
-    else:
-        raise ValueError("Expected signal to have at least two samples. Signal was: %s" % signal)
+    return np.abs(np.ediff1d(signal, start, end))
 
 
 def diffs(signal, start=0, end=0):
