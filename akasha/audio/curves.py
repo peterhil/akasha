@@ -240,7 +240,7 @@ class Ellipse(Curve):
         tr = AffineTransform()
         tr.estimate(dia, para_at_origin)
 
-        u, s, v = np.linalg.svd(tr._matrix[:2, :2], full_matrices=False, compute_uv=True)
+        u, s, v = np.linalg.svd(tr.params[:2, :2], full_matrices=False, compute_uv=True)
         a, b = s[:2]
 
         uv = np.eye(3); uv[:2, :2] = u * np.diag(s) * v

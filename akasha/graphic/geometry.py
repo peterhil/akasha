@@ -32,7 +32,7 @@ class AffineTransform(skt.AffineTransform):
         Apply the affine transformation onto a signal on the complex plane.
         """
         coords = complex_as_reals(signal).T
-        return as_complex(self._apply_mat(coords, self._matrix).T)
+        return as_complex(_super(self).__call__(coords).T)
 
     def estimate(self, src, dst):
         """
@@ -47,7 +47,7 @@ class AffineTransform(skt.AffineTransform):
         Apply the inverse affine transformation onto a signal on the complex plane.
         """
         coords = complex_as_reals(signal).T
-        return as_complex(self._apply_mat(coords, self._inv_matrix).T)
+        return as_complex(_super(self).inverse(coords).T)
 
     def __repr__(self):
         return "{}(scale={}, rotation={}, shear={}, translation={})".format(
