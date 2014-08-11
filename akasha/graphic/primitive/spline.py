@@ -424,7 +424,7 @@ def estimate_curvature(signal, ends=None):
 
 def clothoid_arc_length(para):
     ell = Ellipse.from_conjugate_diameters(para[:3])
-    return np.ediff1d(ell.arc_length((np.angle(para[:3][::-1] - e.origin) / pi2))[::-1])
+    return np.ediff1d(ell.arc_length((np.angle(para[:3][::-1] - ell.origin) / pi2))[::-1])
 
 
 def estimate_arc_length(signal, mean=sc.stats.hmean):
