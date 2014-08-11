@@ -16,8 +16,8 @@ from akasha.audio.curves import Ellipse
 from akasha.audio.oscillator import Osc
 from akasha.funct import consecutive
 from akasha.graphic.drawing import plt
-from akasha.graphic.geometry import circumcircle_radius, is_collinear
-from akasha.utils.math import abslogsign, abspowersign, as_complex, lambertw
+from akasha.graphic.geometry import circumcircle_radius, is_collinear, midpoint, repeat_ends, wrap_ends
+from akasha.utils.math import abslogsign, abspowersign, as_complex, lambertw, pi2
 
 
 def clothoid_erf(t):
@@ -409,13 +409,32 @@ def estimate_curvature_circle(signal):
     return np.array([circle_curvature(*points) for points in consecutive(signal, 3)])
 
 
-def ellipse_curvature(pts):
-    ell = Ellipse.from_conjugate_diameters(pts[:3])
-    return ell.curvature(np.angle(pts[1] - midpoint(pts[0], pts[2])) / pi2)
+def ellipse_curvature(para):
+    ell = Ellipse.from_conjugate_diameters(para[:3])
+    return ell.curvature(np.angle(para[1] - ell.origin) / pi2)
 
 
-def estimate_curvature(signal):
+def estimate_curvature(signal, ends=None):
+    if ends == 'open':
+        signal = repeat_ends(signal)
+    if ends == 'closed':
+        signal = wrap_ends(signal)
     return np.array([ellipse_curvature(points) for points in consecutive(signal, 3)])
+
+
+def clothoid_arc_length(para):
+    ell = Ellipse.from_conjugate_diameters(para[:3])
+    return np.ediff1d(ell.arc_length((np.angle(para[:3][::-1] - e.origin) / pi2))[::-1])
+
+
+def estimate_arc_length(signal, mean=sc.stats.hmean):
+    arr = np.array([clothoid_arc_length(points) for points in consecutive(signal, 3)])
+    fst, snd = np.append(arr, [[arr[-1, -1], arr[0, 0]]], axis=0).T
+    snd = np.roll(snd, 1)
+    # TODO try other means (pun intended) also. See https://en.wikipedia.org/wiki/Pythagorean_means
+    # Harmonic mean always gives the smallest value (for positive numbers), then geometric, then arithmetic mean (average).
+    # Harmonic mean is the same as 1/np.mean(1/arr), but doesn't make sense for negative values (results will be +/-inf).
+    return mean(np.abs(np.array([fst, snd])), axis=0)
 
 
 # Circular arcs
