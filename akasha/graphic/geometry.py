@@ -111,6 +111,14 @@ def closed(signal):
     return np.append(signal, signal[0])
 
 
+def wrap_ends(signal, n=1):
+    return np.concatenate([signal[-n:], signal, signal[:n]])
+
+
+def repeat_ends(signal, n=1):
+    return np.concatenate([repeat(signal[:1], n), signal, repeat(signal[-1:], n)])
+
+
 def is_collinear(a, b, c):
     """
     Return true if the three points are collinear.
