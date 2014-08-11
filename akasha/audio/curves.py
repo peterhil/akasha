@@ -221,7 +221,9 @@ class Ellipse(Curve):
         """
         Eccentricity of the ellipse: https://en.wikipedia.org/wiki/Ellipse#Eccentricity
         """
-        return np.sqrt(1 - (self.b / self.a) ** 2)
+        a, b = self.a, self.b
+        if a < b: a, b = b, a
+        return np.sqrt(1 - (b / a) ** 2)
 
     @classmethod
     def from_rhombus(cls, para):
