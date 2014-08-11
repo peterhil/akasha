@@ -210,7 +210,8 @@ class Ellipse(Curve):
         Arc length of the ellipse.
         Formula (4) from: http://paulbourke.net/geometry/ellipsecirc/Abbott.pdf
         """
-        return self.a * sc.special.ellipeinc(tau * pi2, self.eccentricity ** 2)
+        rad = np.fmod(np.asarray(tau) * pi2 - self.angle, np.pi)  # TODO is substracting self.angle necessary?
+        return self.a * sc.special.ellipeinc(rad, self.eccentricity ** 2)
 
     @property
     def circumference(self):
