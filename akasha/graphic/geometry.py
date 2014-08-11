@@ -10,7 +10,7 @@ import numpy as np
 import skimage.transform as skt
 
 from akasha.utils import _super
-from akasha.utils.math import as_complex, cartesian, complex_as_reals, normalize, overlap, pad_left, pad_right, pi2
+from akasha.utils.math import as_complex, cartesian, complex_as_reals, normalize, overlap, pad_left, pad_right, pi2, repeat
 
 
 class AffineTransform(skt.AffineTransform):
