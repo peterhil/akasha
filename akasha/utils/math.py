@@ -590,6 +590,7 @@ def pad(signal, index=-1, count=1, value=None):
     Inserts a padding value at index repeated count number of times.
     If value is None, uses an index from signal.
     """
+    signal = np.asarray([signal]).flatten()
     length = len(signal)
     space = index % (length + 1)
     value = (value if value is not None else signal[index])
