@@ -230,8 +230,22 @@ def clothoid_tangents(points, ends=False):
     turns = np.ediff1d(directions)
     current = 0
     tangents = map_array(lambda angle: np.fmod(current + angle, np.pi), turns / 2)
-    if ends:
-        return np.concatenate(([directions[0]], tangents, [directions[-1]]))
+    return np.concatenate(([directions[0]], tangents, [directions[-1]])) if ends else tangents
+
+
+def clothoid_tangents_simple(points, turns=False):
+    """
+    Find suitable tangent angles by angles between previous and next point on path.
+    """
+    points = pad(points, value=points[0], count=2, index=0)
+    points = pad(points, value=points[-1], count=2, index=-1)
+
+    tangents = np.angle(points[2:] - points[:-2]) [1:-1]
+
+    if turns:
+        # TODO check that this gives right results!
+        directions = np.angle(vectors(points))
+        return tangents + directions[2:-1]
     else:
         return tangents
 
