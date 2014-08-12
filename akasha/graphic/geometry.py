@@ -9,6 +9,7 @@ from __future__ import division
 import numpy as np
 import skimage.transform as skt
 
+from akasha.funct import consecutive
 from akasha.utils import _super
 from akasha.utils.math import as_complex, cartesian, complex_as_reals, normalize, overlap, pad_left, pad_right, pi2, repeat
 
@@ -74,19 +75,38 @@ def angle_between(a, b, c=None):
 
 def angles_between(points, *rest):
     """
-    Angles between consecutive points on the complex plane in radians.
-
-    If given less than three points, the input is padded from the start with [1, 1, 0],
-    from which the missing elements are taken starting from the right side.
+    Angles between each three consecutive points on the complex plane in radians.
+    If given less than three points, the input is padded from the start with the first value.
 
     For example:
-    angles_between(3j)  # -> input becomes [1, 0, 3j]
-    >>> np.pi/2
+    >>> angles_between([3j, 0])
+    array([-1.5707963267948966])
     """
     points = np.append(points, rest).astype(np.complex128)
-    points = pad_left(points, [1, 1, 0], 3)
-    points = pad_right(points, points[-1], 5)
+    if len(points) == 0:
+        return points
+    points = pad_left(points, points[0], 3)
     return angle_between(*overlap(points, 3))
+
+
+def directions(points):
+    """
+    Get direction angles (as in compass directions) for navigating through a set of points.
+    https://en.wikipedia.org/wiki/Direction_(geometry)
+    """
+    return np.angle(vectors(points))
+
+
+def turtle_turns(points):
+    """
+    Changes in orientation angle on a path formed by points (like in turtle graphics).
+    This differs from turns, in that the changes are relative to previous path segment.
+
+    >>> o = np.array([0.5+0.5j, -0.5+0.5j, -0.5-0.5j, 0.5-0.5j])
+    >>> turtle_turns(o) / pi2
+    array([ 0.25,  0.25])
+    """
+    return np.array([np.ediff1d(directions(seg / vectors(seg)[1])) for seg in consecutive(points, 3)]).flatten()
 
 
 def circumcircle_radius(a, b, c):
