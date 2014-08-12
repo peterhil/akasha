@@ -12,7 +12,7 @@ from akasha.timing import sampler
 from akasha.types import colour_values, colour_result
 from akasha.utils.decorators import memoized
 from akasha.utils.log import logger
-from akasha.utils.math import distances, minfloat, pad, rad_to_deg
+from akasha.utils.math import as_degrees, as_tau, distances, minfloat, pad
 
 
 lowest_audible_hz = 16.35
@@ -166,7 +166,7 @@ def angles2hues(cx_samples, padding=True, loglevel=logging.ANIMA):
     angles = pad(distances(angles), 0) if padding else distances(angles)
 
     # Get tau angles from points
-    angles = (-np.abs(angles - (np.pi)) % np.pi) / (2.0 * np.pi)
+    angles = as_tau(-np.abs(angles - (np.pi)) % np.pi)
     logger.log(loglevel, "Tau angles:\n%s", repr(angles[:100]))
 
     angles *= sampler.rate  # 0..Fs/2
@@ -198,14 +198,14 @@ def chord_to_hue(length):
     """
     Return degrees from a chord length between a point on unit circle and 1+0j.
     """
-    return rad_to_deg(chord_to_angle(length))
+    return as_degrees(chord_to_angle(length))
 
 
 def chord_to_tau(length):
     """
     Return tau angle from a chord length between a point on unit circle and 1+0j.
     """
-    return chord_to_angle(length) / (2.0 * np.pi)
+    return as_tau(chord_to_angle(length))
 
 
 def tau_to_hue(tau_angles):
