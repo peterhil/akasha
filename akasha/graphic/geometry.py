@@ -207,4 +207,4 @@ def vectors(points, *rest):
     https://en.wikipedia.org/wiki/Turtle_graphics
     """
     points = np.append(points, rest)
-    return np.subtract(*overlap(points, 2)[::-1])
+    return np.ediff1d(points)
