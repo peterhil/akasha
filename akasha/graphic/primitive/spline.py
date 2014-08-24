@@ -16,8 +16,9 @@ from akasha.audio.curves import Ellipse
 from akasha.audio.oscillator import Osc
 from akasha.funct import consecutive
 from akasha.graphic.drawing import plt
-from akasha.graphic.geometry import circumcircle_radius, is_collinear, midpoint, repeat_ends, wrap_ends
-from akasha.utils.math import abslogsign, abspowersign, as_complex, lambertw, pi2
+from akasha.graphic.geometry import circumcircle_radius, is_collinear, midpoint, orient, repeat_ends, turtle_turns, vectors, wrap_ends
+from akasha.utils.log import logger
+from akasha.utils.math import abslogsign, abspowersign, as_complex, cartesian, distances, lambertw, map_array, overlap, pi2, rect, repeat
 
 
 def clothoid_erf(t):
@@ -85,17 +86,33 @@ def clothoid_gray(t, exponent=2, scale=1):
     return scale * np.cumsum(fresnel(t, exponent))
 
 
-def clothoid_scaled(k, phi, s, start=0):
+def clothoid_scaled(k, phi, s, start=0, distance=1):
     points = 1000  # TODO Maybe control the number of points by multiplying with s, but beware of huge values of s!
 
     n, a, t = nat(k, phi, s)
-    end = clothoid_gray(np.linspace(0, t, points), n, a/points)[-1]
+    end = clothoid_gray(np.arange(start * t, t, 1/points), n, a/points)[-1]
 
-    scale = 1 / np.abs(end)
-    s *= scale; k /= scale
+    scale = distance / np.abs(end)
+    # s *= scale; k /= scale
+    a *= scale
+
+    # n, a, t = nat(k, phi, s)
+    return clothoid_gray(np.arange(start * t, t, 1/points), n, a/points)
+
+
+def clothoid_scaleto(k, phi, s, start=0, target=1+0j):
+    points = 1000  # TODO Maybe control the number of points by multiplying with s, but beware of huge values of s!
 
     n, a, t = nat(k, phi, s)
-    return clothoid_gray(np.linspace(start * t, t, points), n, a/points)
+    sig = clothoid_gray(np.linspace(start * t, t, points), n, a/points)
+    start, end = sig[0], sig[-1]
+    # del sig
+
+    vector = (target - start) / (end - start)
+    s *= np.abs(vector); k /= np.abs(vector)
+
+    n, a, t = nat(k, phi, s)
+    return clothoid_gray(np.linspace(start * t, t, points), n, a/points) * vector
 
 
 def clothoid_gray_negative(t, exponent=2, scale=1):
@@ -209,10 +226,15 @@ def clothoid_segment(k, k2, phi, phi2, s, s2):
     n = abslogsign(k2 / k) / abslogsign(t2 / t)
     a = abspowersign(-t, n) / k if k != 0 else abspowersign(-t2, n) / k2
 
-    return n, a, t, t2
+    n2 = abslogsign(k / k2) / abslogsign(t / t2)
+    a2 = abspowersign(-t, n2) / k2 if k2 != 0 else abspowersign(-t2, n2) / k
+    logger.debug("n1: %s, a1: %s" % (n, a))
+    logger.debug("n2: %s, a2: %s" % (n2, a2))
+
+    return ((n, a, t, t2), (n2, a2, t, t2))
 
 
-def clothoid_tangents(points, ends=False):
+def clothoid_tangents(points, ends=None):
     """
     Find suitable tangent angles for a set of points.
     Angles are found by halving the angle of "turns" on the "turtle path" formed by the points.
@@ -226,11 +248,16 @@ def clothoid_tangents(points, ends=False):
     >>> tangents = clothoid_tangents(points) / pi2
     array([-0.125 , -0.125 , -0.0625,  0.125 ,  0.    , -0.1875])
     """
+    if 'closed' == ends:
+        return clothoid_tangents(wrap_ends(points), ends=None)
     directions = np.angle(vectors(points))
-    turns = np.ediff1d(directions)
+    turns = turtle_turns(points)
+    logger.debug("Turns:\n%r\nSigns:\n%r" % (turns, np.sign(turns)))
     current = 0
-    tangents = map_array(lambda angle: np.fmod(current + angle, np.pi), turns / 2)
-    return np.concatenate(([directions[0]], tangents, [directions[-1]])) if ends else tangents
+    tangents = map_array(lambda angle: np.fmod(current + angle, np.pi), turns / 2) + directions[:-1]
+    if 'open' == ends:
+        return np.concatenate(([directions[0]], tangents, [directions[-1]]))
+    return tangents
 
 
 def clothoid_tangents_simple(points, turns=False):
@@ -416,7 +443,8 @@ def ellipse_curvature(para):
 
 def estimate_curvature(signal, ends=None):
     if ends == 'open':
-        signal = repeat_ends(signal)
+        # signal = repeat_ends(signal)
+        return np.concatenate(([0], np.array([ellipse_curvature(points) for points in consecutive(signal, 3)]), [0]))
     if ends == 'closed':
         signal = wrap_ends(signal)
     return np.array([ellipse_curvature(points) for points in consecutive(signal, 3)])
@@ -435,6 +463,78 @@ def estimate_arc_length(signal, mean=sc.stats.hmean):
     # Harmonic mean always gives the smallest value (for positive numbers), then geometric, then arithmetic mean (average).
     # Harmonic mean is the same as 1/np.mean(1/arr), but doesn't make sense for negative values (results will be +/-inf).
     return mean(np.abs(np.array([fst, snd])), axis=0)
+
+
+def clothoid_curve(n, a, t, t2, use_range=True):
+    # s = np.abs(a) * np.abs(t2 - t)
+    # resolution = 10  # dots per arc length unit
+    # points = s * resolution
+    points = 1000
+    # if not np.isnan(s):
+    #     points = np.min((500, points * s))
+    # logger.debug("Clothoid curve() -- Arc length: %r" % s)
+    logger.debug("Using %i points." % points)
+    direction = -1 if np.sign(t2 - t) == -1 else 1
+    step = direction * a / points
+
+    if use_range:
+        tt = np.arange(t, t2 + step, step)
+    else:
+        tt = np.linspace(t, t2, np.abs(t2 - t) * points + 1, endpoint=True)
+    print(tt)
+    return clothoid_gray(tt, n, a * step)
+
+
+def clothoid_segments(signal, ends='open', mean=np.mean):
+    directions = np.angle(vectors(signal))
+    scales = 1 / distances(signal)
+
+    # Points
+    phi = clothoid_tangents(signal, ends)
+    k = estimate_curvature(signal, ends) #/ np.append(scales, 1)
+
+    # Segments
+    # s = np.ones(len(signal) - 1)
+    # s = estimate_arc_length(signal, mean) / scales
+    # s = distances(signal)
+    s = scales
+
+    k[1:-1] = -np.sign(turtle_turns(signal)) * np.abs(k[1:-1])
+
+    ks = overlap(k, 2).T
+    phis = overlap(phi, 2).T
+    # ss = repeat(s / 2, 2).reshape(2, len(s)).T  # TODO find out correct lengths of the parts of clothoid segment!!!
+    ss = np.concatenate((s / 2, s)).reshape(2, len(s)).T
+
+    segments = np.hstack((ks, phis, ss))
+    logger.debug( "Segments (k, k2, phi, phi2, s, s2):\n%r" % segments )
+
+    params = np.apply_along_axis(lambda p: clothoid_segment(*p), 1, segments)
+    logger.debug( "Params (n, a, t, t2):\n%r" % params )
+
+
+    straighten = lambda s: s / rect(1, np.angle(s[-1] - s[0]))
+    # clothoids = map(lambda n, a, t, t2: orient(clothoid_curve(n, a, t, t2)), *params.T)
+    clothoids = np.apply_along_axis(lambda p: orient(clothoid_curve(*p)), 1, params)  # Works only if clothoid_curve always gives the same number of points!
+
+    path = cartesian(distances(signal), directions)
+    add_dim = lambda arr: np.resize(arr, (len(arr), 1))
+    clothoids = add_dim(path) * clothoids + add_dim(signal[:-1])
+    return (clothoids, segments, params)
+
+
+def ellipse(t):
+    e = Ellipse.from_conjugate_diameters(t[:3])
+    # a, b = (np.angle([t[0], t[2]] - e.origin) - e.angle) / pi2
+    # if np.sign(turns(t)) <= 0:
+    #     a -= 0.5; b += 0.5
+    # print(a, b, np.sign(turns(t)))
+    a, b = 0, 0.96
+    return e.at(np.linspace(a, b, 200))
+
+
+def ellipses(signal):
+    return np.array([ellipse(points) for points in consecutive(signal, 3)]).flatten()
 
 
 # Circular arcs
