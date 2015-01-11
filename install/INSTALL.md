@@ -32,7 +32,7 @@ for Pygame and Tk windowed Python apps.
     # Homebrew
 
     # Note! SDL Needs to be installed with Homebrew, the Macports version fails to put SDL.h on path
-    brew install sdl
+    brew install sdl sdl_image sdl_mixer sdl_ttf
     brew install portmidi  # Optional dependency for Pygame
 
 ## 5. Install the other required libraries with Macports
@@ -42,6 +42,7 @@ for Pygame and Tk windowed Python apps.
 
     # Scikits-audiofile and scikits-samplerate depends
     brew install libsndfile libsamplerate
+    brew install gcc  # Latest GCC versions include gfortran
 
 ## 6. Install the Python libraries using Pip
 
