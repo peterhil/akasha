@@ -38,7 +38,7 @@ def unosc(signal):
     return s.real + ((s.imag % pi2) + unwrap) * 1j
 
 
-def log_plane(freq):
+def log_plane(freq, amp1=1, amp2=1):
     """
     Return the complex logarithm of a signal from given frequencies (at amplitude 1).
     Result can be fed to back to np.exp to get the sum of oscillators (additive synthesis of frequencies).
@@ -57,8 +57,8 @@ def log_plane(freq):
     def ifrequency(freq):
         return np.arange(0, 1, float(freq) / sampler.rate) * pi2 * 1j
     if freq != 0:
-        i1 = ifrequency(freq)
-        i2 = ifrequency(freq * 2)
+        i1 = np.log(amp1) + ifrequency(freq)
+        i2 = np.log(amp2) + ifrequency(freq * 2)
     else:
         i1 = i2 = np.zeros(1, dtype=np.float64)
     i2 = np.hstack([i2, i2])
