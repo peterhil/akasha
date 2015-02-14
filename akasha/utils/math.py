@@ -370,6 +370,29 @@ def primes(inf, sup, dtype=np.uint64):
     return primes[primes >= inf]
 
 
+def pascal_line(n):
+    """
+    Line of Pascal's triangle using binomial coefficients
+    """
+    line = [1]
+    [line.append(line[k] * (n-k) / (k+1)) for k in xrange(n)]
+    return line
+
+
+def isprime_pascal(n):
+    """
+    Primality checking using the Pascal's triangle
+
+    https://www.youtube.com/watch?v=HoHiOgp0gqk  Prime Numbers in Pascal's Triangle
+    http://stackoverflow.com/questions/1740499/pascals-triangle
+
+    See also:
+    https://www.youtube.com/watch?v=sbjPwyPT1AI  Number theory - geometrical connection
+    """
+    p = np.array(pascal_line(n))[1:int(np.floor(n / 2. + 1))]
+    return not np.any(p % n)
+
+
 def gcd(a, b):
     """
     Greatest common divisor of a and b.
