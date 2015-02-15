@@ -42,6 +42,14 @@ def nth_root(n):
     return np.exp(1j * pi2 * 1.0 / n)
 
 
+def pole_frequency(frequencies, amplitudes=1.0):
+    return np.asanyarray(amplitudes) * nth_root(1.0 / freq_to_tau(frequencies))
+
+
+def freq_to_tau(f):
+    return np.asanyarray(f) / float(sampler.rate)
+
+
 def rad_to_deg(angles):
     """
     Radians to degrees conversion.
