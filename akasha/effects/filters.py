@@ -9,6 +9,7 @@ import numpy as np
 from scipy import signal as dsp
 
 from akasha.audio.oscillator import Osc
+from akasha.audio.frequency import Frequency, Fraction
 from akasha.timing import sampler
 from akasha.utils.math import pi2, get_impulses, normalize, complex_as_reals, as_complex, pad
 
@@ -35,6 +36,37 @@ def unosc(signal):
     unwrap = np.cumsum(impulses)
 
     return s.real + ((s.imag % pi2) + unwrap) * 1j
+
+
+def log_plane(freq, amp1=1, amp2=1):
+    """
+    Return the complex logarithm of a signal from given frequencies (at amplitude 1).
+    Result can be fed to back to np.exp to get the sum of oscillators (additive synthesis of frequencies).
+
+    To test:
+    >>> o882 = Osc(882)
+    >>> o1764 = Osc(1764)
+    >>> s = (o882[:50] + o1764[:50]) / 2
+    >>> unosc(s) - log_plane(882)
+    # Should be almost all zero
+    """
+    # TODO Get (multiple) frequencies from arguments
+    # i1 = Frequency.angles(Fraction(freq, sampler.rate)) * pi2
+    # i2 = Frequency.angles(Fraction(freq * 2, sampler.rate)) * pi2
+    # TODO Filter zero frequencies
+    def ifrequency(freq):
+        return np.arange(0, 1, float(freq) / sampler.rate) * pi2 * 1j
+    if freq != 0:
+        i1 = np.log(amp1) + ifrequency(freq)
+        i2 = np.log(amp2) + ifrequency(freq * 2)
+    else:
+        i1 = i2 = np.zeros(1, dtype=np.float64)
+    i2 = np.hstack([i2, i2])
+
+    angle_diff = np.abs(i2.imag - i1.imag)
+    real = np.log(np.sin((angle_diff + np.pi) / 2))
+    imag = (i1 + i2) / 2
+    return real + imag
 
 
 def freq_shift(signal, a=12.1, b=0.290147):
