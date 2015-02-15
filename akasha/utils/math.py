@@ -141,6 +141,28 @@ def logn(x, base=np.e):
     return np.log2(x) / np.log2(base)
 
 
+def power_limit(x, base=2, rounding=np.ceil):
+    """
+    Find (close) integer powers of base from x.
+
+    >>> power_limit([0, 1, 2, 3, 6, 12], 2)
+       array([  0.,   1.,   2.,   4.,   8.,  16.])
+
+    >>> power_limit(np.arange(1, 64, 8), 2, np.round)
+       array([  1.,   8.,  16.,  32.,  32.,  32.,  64.,  64.])
+
+    Parameters
+    ==========
+    base:
+      base of the exponent
+    rounding:
+      np.ceil => next larger power
+      np.floor => next smaller power
+      np.round => the closest rounded power
+    """
+    return np.power(base, rounding(logn(x, base)))
+
+
 def roots_periods(base, limit=44100.0):
     """
     Enumerates the roots for base from 0 to limit.
