@@ -11,6 +11,7 @@ from scipy import signal as dsp
 from akasha.audio.oscillator import Osc
 from akasha.audio.frequency import Frequency, Fraction
 from akasha.timing import sampler
+from akasha.utils.log import logger
 from akasha.utils.math import pi2, get_impulses, normalize, complex_as_reals, as_complex, pad
 
 
@@ -104,7 +105,6 @@ def highpass(signal, freq, bins=256, pass_zero=True, scale=False, nyq=sampler.ra
     """
     a = 1
     b = dsp.firwin(bins, cutoff=freq, pass_zero=pass_zero, scale=scale, nyq=nyq)
-
     return dsp.lfilter(b, a, signal)
 
 
@@ -116,20 +116,29 @@ def lowpass(signal, cutoff=sampler.rate / 2.0, bins=256):
     fc = cutoff / fs
     a = 1
     b = dsp.firwin(bins, cutoff=fc, window='hamming')
-
     return dsp.lfilter(b, a, signal)
 
 
-def resonate(signal, poles, zeros=np.array([]), gain=1.0, zi=None):
+def resonate(signal, poles, zeros=np.array([]), gain=1.0, axis=-1, zi=None):
     """
-    Resonate a signal with a zero-pole IIR filter.
-    """
-    b, a = dsp.filter_design.zpk2tf(zeros, poles, gain)
-    print b, a, max(len(a), len(b))
-    #zi = dsp.lfilter_zi(b, a)
+    Resonate a signal with an IIR filter based on given poles and zeros.
 
-    if zi is None:
-        return dsp.lfilter(b, a, signal, axis=0, zi=zi)
+    Usage example
+    =============
+
+    bjork = read('Bjork - Human Behaviour.aiff', dur=30)
+    poles = pole_frequency(np.array([30, 50, 238., 440., 1441]), [0.99, 0.999, 0.99, 0.87, 0.77])
+    anim(normalize(resonate(bjork, poles, gain=1.0)))
+    """
+    # TODO Try making resonate with z-transform and circular convolution by
+    # multiplying the transfer function g / (1 - pole * z ** (-1)) with the
+    # z-transform of the signal, and get the output with inverse z-transform.
+    # See: https://ccrma.stanford.edu/~jos/filters/Complex_Resonator.html and other chapters
+    b, a = dsp.filter_design.zpk2tf(zeros, poles, gain)
+    logger.debug("Resonate: order: {},\n\tb: {},\n\ta: {}".format(max(len(a), len(b)), b, a))
+    if zi == 'auto':
+        zi = dsp.lfilter_zi(b, a)
+        return dsp.lfilter(b, a, signal, axis=axis, zi=zi)[0]
     else:
         return dsp.lfilter(b, a, signal)
 
