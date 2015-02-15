@@ -46,28 +46,28 @@ def rad_to_deg(angles):
     """
     Radians to degrees conversion.
     """
-    return 180 * (angles / np.pi)
+    return 180 * (np.asanyarray(angles) / np.pi)
 
 
 def deg_to_rad(angles):
     """
     Degrees to radians conversion.
     """
-    return np.pi * (angles / 180.0)
+    return np.pi * (np.asanyarray(angles) / 180.0)
 
 
 def tau_to_rad(angles):
     """
     Tau angles to radians conversion.
     """
-    return pi2 * angles
+    return pi2 * np.asanyarray(angles)
 
 
 def rad_to_tau(angles):
     """
     Radians to tau angles conversion.
     """
-    return angles / pi2
+    return np.asanyarray(angles) / pi2
 
 
 # Utils for frequency ratios etc...
