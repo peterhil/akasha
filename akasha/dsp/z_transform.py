@@ -28,25 +28,12 @@ def z_transform(signal, m=None, w=None, a=1.0, dtype=np.complex128):
     z = np.zeros(m, dtype=dtype)
     n = np.arange(l)
     k = np.arange(m)
-    # 1: Next largest power of two for m + l -1
     lp2 = power_limit(m + l - 1, 2, np.ceil)
-    # 2: y[n] = A**-n*W**(n**2)/2 * x[n], zero padded on right to length lp2
+
     def chirp(x):
         return w ** ((x ** 2) / 2.0)
-    # chirp = w ** (np.arange(1 - x, max(m, x)) ** 2 / 2.0)
-    print('chirp', chirp(n))
-    y = np.append(signal * (a ** -n) * chirp(n), np.zeros(lp2 - l))  # Zero pad to lp2 length
-    print('y', y, len(y))
-    # 4: Vn =
-    # # pc = np.zeros(lp2, dtype=dtype)
-    # chirp2 = lambda n: (w ** ((-n ** 2) / 2.0))
-    # # chirp3 = lambda n: (w ** ((-(lp2 - n) ** 2) / 2.0))
-    # # pc[0:m - 1] = chirp2(n[:m - 1])
-    # # pc[lp2 - l + 1:lp2] = chirp3(np.arange(lp2 - l + 1, lp2))
-    # pc = pad(chirp2(np.arange(lp2 - l + 1, m + 1)), count=(lp2 - l), value=0.0)
-    # print('pc', pc, len(pc))
-    # vn = np.roll(pc, int(lp2 - l + 1))  # Double check this roll
-    # # vn = pc
+    y = np.append(signal * (a ** -n) * chirp(n), np.zeros(lp2 - l))
+
     @np.vectorize
     def v(n):
         if 0 <= n <= m - 1:
@@ -56,11 +43,8 @@ def z_transform(signal, m=None, w=None, a=1.0, dtype=np.complex128):
         else:
             return 0
     vn = v(np.arange(lp2))
-    print('vn', vn)
-    # 3, 5, 6, 7:
+
     g = sc.ifft(sc.fft(y) * sc.fft(vn))[:m]
-    print('g', g)
-    # 8:
     wk = (w ** ((k ** 2) / 2.0))
     return (g * wk)
 
