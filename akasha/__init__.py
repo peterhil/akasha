@@ -40,6 +40,7 @@ from akasha.audio.sound import Sound, Group, Pcm
 from akasha.control.io.audio import play, write, read
 from akasha.control.io.keyboard import *
 
+from akasha.dsp.z_transform import *
 from akasha.effects.tape import *
 from akasha.effects.filters import *
 
