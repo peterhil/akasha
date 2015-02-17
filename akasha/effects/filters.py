@@ -10,6 +10,8 @@ from scipy import signal as dsp
 
 from akasha.audio.oscillator import Osc
 from akasha.audio.frequency import Frequency, Fraction
+from akasha.dsp import unit_step
+from akasha.dsp.z_transform import czt, iczt
 from akasha.timing import sampler
 from akasha.utils.log import logger
 from akasha.utils.math import pi2, get_impulses, normalize, complex_as_reals, as_complex, pad
@@ -171,3 +173,36 @@ def resonator_comb(
     #anim(out, dur=playtime, antialias=False)
 
     return out[:int(round(playtime * fs))]
+
+
+def resonator_p1(signal, pole, m=None, gain=1.0):
+    """
+    Complex one pole resonator
+    https://ccrma.stanford.edu/~jos/filters/Complex_Resonator.html
+
+    Note: To get the results normalized to unit circle, set gain to:
+    gain = 1.0/(1 - np.abs(pole))
+
+    Examples
+    ========
+
+    * Windy noise:
+    n = Noise()
+    p = pole_frequency(59)
+    g = 0.99994
+    r = resonator_p1(f, p*g, m=30*sampler.rate, gain=rect(1, 1.0/300*pi2))
+    anim normalize(r)
+
+    * Hoover or car noise:
+    rn = Rustle(0.545, 275, Exponential(-0.05))
+    f  = rn[:10*44100]
+    g = 0.99894
+    r = resonator_p1(f, p*g, m=10*sampler.rate, gain=rect(1, 1.0/300*pi2))
+    anim normalize(r)
+    """
+    signal = np.atleast_1d(signal).astype(np.complex)
+    if m is None: m = len(signal)
+    n = np.arange(m)
+
+    response = unit_step(n) * gain * pole ** n
+    return iczt(czt(signal, m=m) * czt(response, m=m))
