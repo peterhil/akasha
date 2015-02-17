@@ -110,7 +110,7 @@ class Rustle(Generator):
     def __init__(self, expected=1, frequency=1, envelope=Exponential(0)):
         self.frequency = Frequency(frequency)
         self.expected = expected
-        self.gen = fx.curry(np.random.poisson, self.expected)
+        self.gen = fx.curry_function(np.random.poisson, self.expected)
         self.envelope = envelope
 
     def sample(self, items):
@@ -133,10 +133,10 @@ class Mandelbrot(Generator):
         super(self.__class__, self).__init__()
 
         if random:
-            self.z = random_phasor()
+            self.z = random_phasor()[0]
         else:
             self.z = z if z is not None else 0
-        self.c = c if c is not None else random_phasor()
+        self.c = c if c is not None else random_phasor()[0]
 
     def __iter__(self):
         return self
@@ -176,7 +176,7 @@ class Chaos(Generator):
     """
     # TODO: Make into generic iterator using Generator
 
-    def __init__(self, gen=Mandelbrot, envelope=Exponential(0, amp=0.5)):
+    def __init__(self, gen=Mandelbrot(random=True), envelope=Exponential(0, amp=0.5)):
         super(self.__class__, self).__init__()
         self.gen = gen
         self.envelope = envelope  # TODO: Leave out of sound objects, and compose when sampling?

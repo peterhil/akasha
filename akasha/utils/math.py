@@ -15,6 +15,7 @@ else:
     from ordereddict import OrderedDict
 from cmath import rect
 from fractions import Fraction
+from itertools import izip
 
 from akasha.funct import blockwise
 from akasha.timing import sampler
