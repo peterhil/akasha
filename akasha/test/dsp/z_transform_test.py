@@ -19,13 +19,13 @@ from akasha.dsp.z_transform import *
 
 
 z_transforms = [
-    [z_transform_naive],
-    [z_transform]
+    [czt_naive],
+    [czt]
     ]
 
 
 class TestZTransform(object):
-    """Test z-transform."""
+    """Test chirp z-transform."""
 
     @pytest.mark.parametrize(('Z',), z_transforms)
     def test_scalar(self, Z):
@@ -64,4 +64,16 @@ class TestZTransform(object):
         assert_array_almost_equal(
             Z(np.array([1.0, 2.0, 3.0])),
             np.array([6.0, -1.5+0.8660254037844379j, -1.5-0.8660254037844417j])
+            )
+
+
+class TestInverseZTransform(object):
+    """Test inverse chirp z-transform."""
+
+    def test_iczt(self):
+        n = 128
+        signal = np.random.random(n) + 1j * np.random.random(n)
+        assert_array_almost_equal(
+            signal,
+            iczt(czt(signal))
             )
