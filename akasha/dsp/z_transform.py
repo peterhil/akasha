@@ -9,10 +9,8 @@ from __future__ import division
 import numpy as np
 import scipy as sc
 
-from scipy import signal as dsp
+from akasha.utils.math import pi2, power_limit
 
-from akasha.utils.log import logger
-from akasha.utils.math import map_array, pi2, pad, power_limit
 
 
 def z_transform(signal, m=None, w=None, a=1.0):
