@@ -29,23 +29,28 @@ def z_transform(signal, m=None, w=None, a=1.0):
     k = np.arange(m)
     lp2 = power_limit(m + l - 1, 2, np.ceil)
 
-    def chirp(x):
-        return w ** ((x ** 2) / 2.0)
-    y = np.append(signal * (a ** -n) * chirp(n), np.zeros(lp2 - l))
+    y = np.append(signal * (a ** -n) * chirp(w, n), np.zeros(lp2 - l))
 
     @np.vectorize
     def v(n):
         if 0 <= n <= m - 1:
-            return (w ** ((-n ** 2) / 2.0))
+            return ichirp(w, n)
         if lp2 - l + 1 <= n < lp2:
-            return (w ** ((-(lp2 - n) ** 2) / 2.0))
+            return ichirp(w, lp2 - n)
         else:
             return 0
     vn = v(np.arange(lp2))
 
     g = sc.ifft(sc.fft(y) * sc.fft(vn))[:m]
-    wk = (w ** ((k ** 2) / 2.0))
-    return (g * wk)
+    return (g * chirp(w, k))
+
+
+def chirp(w, n):
+    return w ** ((n ** 2) / 2.0)
+
+
+def ichirp(w, n):
+    return w ** ((-n ** 2) / 2.0)
 
 
 def z_transform_naive(signal, m=None, w=None, a=1.0):
