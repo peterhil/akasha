@@ -30,16 +30,7 @@ def z_transform(signal, m=None, w=None, a=1.0):
     lp2 = power_limit(m + l - 1, 2, np.ceil)
 
     y = np.append(signal * (a ** -n) * chirp(w, n), np.zeros(lp2 - l))
-
-    @np.vectorize
-    def v(n):
-        if 0 <= n <= m - 1:
-            return ichirp(w, n)
-        if lp2 - l + 1 <= n < lp2:
-            return ichirp(w, lp2 - n)
-        else:
-            return 0
-    vn = v(np.arange(lp2))
+    vn = np.roll(ichirp(w, np.arange(-l, lp2 - l)), -l)
 
     g = sc.ifft(sc.fft(y) * sc.fft(vn))[:m]
     return (g * chirp(w, k))
