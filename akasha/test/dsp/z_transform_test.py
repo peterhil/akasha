@@ -29,7 +29,7 @@ class TestZTransform(object):
 
     @pytest.mark.parametrize(('Z',), z_transforms)
     def test_scalar(self, Z):
-        assert Z(1) == np.ones(1)
+        assert_array_almost_equal(Z(1), np.ones(1))
 
     @pytest.mark.parametrize(('Z',), z_transforms)
     def test_float(self, Z):
