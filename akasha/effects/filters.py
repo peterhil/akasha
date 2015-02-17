@@ -132,10 +132,6 @@ def resonate(signal, poles, zeros=np.array([]), gain=1.0, axis=-1, zi=None):
     poles = pole_frequency(np.array([30, 50, 238., 440., 1441]), [0.99, 0.999, 0.99, 0.87, 0.77])
     anim(normalize(resonate(bjork, poles, gain=1.0)))
     """
-    # TODO Try making resonate with z-transform and circular convolution by
-    # multiplying the transfer function g / (1 - pole * z ** (-1)) with the
-    # z-transform of the signal, and get the output with inverse z-transform.
-    # See: https://ccrma.stanford.edu/~jos/filters/Complex_Resonator.html and other chapters
     b, a = dsp.filter_design.zpk2tf(zeros, poles, gain)
     logger.debug("Resonate: order: {},\n\tb: {},\n\ta: {}".format(max(len(a), len(b)), b, a))
     if zi == 'auto':
