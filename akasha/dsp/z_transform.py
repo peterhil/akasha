@@ -56,6 +56,5 @@ def z_transform_naive(signal, m=None, w=None, a=1.0):
 
     for k in range(m):
         for n in range(l):
-            # print("l = {}, m = {}, k = {}, n = {}, w = {}, a = {}, z = {}".format(l, m, k, n, w, a, z))
-            z[k] += signal[n] * a * w ** (k * n)
+            z[k] += signal[n] * a ** -n * w ** (k * n)
     return z

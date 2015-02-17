@@ -53,6 +53,13 @@ class TestZTransform(object):
             )
 
     @pytest.mark.parametrize(('Z',), z_transforms)
+    def test_a(self, Z):
+        assert_array_almost_equal(
+            Z([0, 1j, -1, -1j], a=0.5),
+            np.array([-4-6j, 14, -4+6j, -6])
+            )
+
+    @pytest.mark.parametrize(('Z',), z_transforms)
     def test_float_input_gives_complex_results(self, Z):
         assert_array_almost_equal(
             Z(np.array([1.0, 2.0, 3.0])),
