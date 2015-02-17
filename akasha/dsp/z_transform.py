@@ -15,17 +15,16 @@ from akasha.utils.log import logger
 from akasha.utils.math import map_array, pi2, pad, power_limit
 
 
-def z_transform(signal, m=None, w=None, a=1.0, dtype=np.complex128):
+def z_transform(signal, m=None, w=None, a=1.0):
     """
     Chirp Z-transform as described in "The Chirp z-Transform Algorithm" by
     L.R. Rabiner, R.W. Schafer and C.M. Rader in the Bell System Technical Journal, May 1969.
     http://cronos.rutgers.edu/~lrr/Reprints/015_czt.pdf
     """
-    signal = dtype(signal)
+    signal = np.atleast_1d(signal).astype(np.complex)
     l = len(signal)
     if m is None: m = l
     if w is None: w = np.exp(-1j * pi2 / m)
-    z = np.zeros(m, dtype=dtype)
     n = np.arange(l)
     k = np.arange(m)
     lp2 = power_limit(m + l - 1, 2, np.ceil)
@@ -49,15 +48,15 @@ def z_transform(signal, m=None, w=None, a=1.0, dtype=np.complex128):
     return (g * wk)
 
 
-def z_transform_naive(signal, m=None, w=None, a=1.0, dtype=np.complex128):
+def z_transform_naive(signal, m=None, w=None, a=1.0):
     """
     Naive and slow O(n**2) implementation of Rader's chirp z-transform. For testing, do not use!
     """
-    signal = dtype(signal)
+    signal = np.atleast_1d(signal).astype(np.complex)
     l = len(signal)
     if m is None: m = l
     if w is None: w = np.exp(-1j * pi2 / m)
-    z = np.zeros(m, dtype=dtype)
+    z = np.zeros(m, dtype=np.complex)
 
     for k in range(m):
         for n in range(l):
