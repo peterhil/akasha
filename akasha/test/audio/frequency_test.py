@@ -249,9 +249,7 @@ class TestFrequency(object):
         assert '100' in s
 
     def test_int(self):
-        sampler.negative_frequencies = True
         assert 21 == int(Frequency(21.5))
-        assert -30 == int(Frequency(-30.5))
 
     def test_pos_neg_abs(self):
         sampler.negative_frequencies = True

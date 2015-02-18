@@ -66,7 +66,7 @@ class period(np.ndarray, object):
 
         return out
 
-    def _mod(self, index, dim=None):
+    def _mod(self, index, dim=-1):
         """Modulate indices to self.shape."""
         if debug_gs:
             print("Type in _mod: %s %s" % (index, type(index)))
@@ -144,9 +144,7 @@ class period(np.ndarray, object):
         if debug_gs:
             print("Modded to: %s %s" % (out, type(out)))
 
-        return _super(self).__getitem__(
-            out
-        )
+        return _super(self).__getitem__(out)
 
     def __setitem__(self, index, value):
         if debug_gs:

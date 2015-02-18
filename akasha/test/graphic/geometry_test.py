@@ -59,7 +59,7 @@ class TestGeometryFunctions(object):
         [-1j, -1, 1.5707963267948968],
     ])
     def test_angle_between(self, a, b, expected):
-        assert angle_between(a, b) == expected
+        assert_array_almost_equal(angle_between(a, b), expected)
 
     @pytest.mark.parametrize(('a', 'b', 'expected'), [
         [-3, 5, 1],
@@ -72,7 +72,7 @@ class TestGeometryFunctions(object):
     def test_circumcircle_radius(self):
         radius = 0.5
         pts = Circle.at(np.linspace(0, 1, 3, endpoint=False)) * radius
-        assert apply(circumcircle_radius, pts) == np.abs(radius)
+        assert_array_almost_equal(apply(circumcircle_radius, pts), np.abs(radius))
 
     def test_circumcircle_radius_returns_positive_radius(self):
         expected = np.sqrt(2) / 2
