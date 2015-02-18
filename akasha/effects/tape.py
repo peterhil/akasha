@@ -18,6 +18,40 @@ from akasha.utils.log import logger, logging
 from akasha.utils.math import map_array, normalize, as_polar, as_rect
 
 
+class Magnet(object):
+    """
+    Model magnetization direction of particles.
+
+    Vary m between 0 and 1, and return signal (s) with value between -1 and 1
+    depending on the current magnetization (m) level.
+    """
+    def __init__(self, m=0.5):
+        self.m = np.clip(m, 0, 1)
+
+    def hysteresis(self, s):
+        m = self.m
+        if s > 0:
+            m = np.clip(m + (1 - m) * s, 0, 1)
+        else:
+            m = np.clip(m + m * s, 0, 1)
+        return m
+
+    def demagnetize(self, m=0.5):
+        self.m = m
+
+    def __call__(self, s):
+        m = self.m = self.hysteresis(s)
+        s = (m * 2 - 1)
+        return s
+
+
+def complex_magnet(signal, gain=1.0):
+    m = Magnet()
+    mv = np.vectorize(m)
+    s = np.asarray(signal) * gain
+    return mv(np.ediff1d(s.real)) + 1j * mv(np.ediff1d(s.imag))
+
+
 def magnetize(x0, x1, m, norm_level=0.95):
     """
     Get previous magnetization (m) level and diff (x) in signal level in.
