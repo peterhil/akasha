@@ -158,19 +158,18 @@ def angles2hues(cx_samples, padding=True, loglevel=logging.ANIMA):
     """
     Convert angles of complex samples into hues.
     """
-    # Get angles from points
     angles = np.angle(np.atleast_1d(cx_samples))
-    logger.log(loglevel, "Angles:\n%s", repr(angles[:100]))
 
     # Get distances
     angles = pad(distances(angles), 0) if padding else distances(angles)
+    # logger.log(loglevel, "Angles:\n%s", repr(angles[:100]))
 
     # Get tau angles from points
     angles = (-np.abs(angles - (np.pi)) % np.pi) / pi2
-    logger.log(loglevel, "Tau angles:\n%s", repr(angles[:100]))
+    # logger.log(loglevel, "Tau angles:\n%s", repr(angles[:100]))
 
     angles *= sampler.rate  # 0..Fs/2
-    logger.log(loglevel, "Frequencies:\n%s", repr(angles[:100]))
+    # logger.log(loglevel, "Frequencies:\n%s", repr(angles[:100]))
 
     # Convert rad to deg
     low = np.log2(lowest_audible_hz)
@@ -178,7 +177,7 @@ def angles2hues(cx_samples, padding=True, loglevel=logging.ANIMA):
     # 10 octaves mapped to red..violet
     angles = ((np.log2(np.abs(angles) + 1) - low) / 8.96 * 240) % 360
 
-    logger.log(loglevel, "Scaled:\n%s\n", repr(angles[:100]))
+    # logger.log(loglevel, "Scaled:\n%s\n", repr(angles[:100]))
     return angles
 
 
@@ -228,15 +227,14 @@ def chords_to_hues(signal, padding=True, loglevel=logging.ANIMA):
 
     # Get distances
     d = pad(distances(phases), -1) if padding else distances(phases)
-
-    logger.log(loglevel, "%s Distances: %s", __name__, d)
+    # logger.log(loglevel, "%s Distances: %s", __name__, d)
 
     taus = np.apply_along_axis(chord_to_tau, 0, d)
-    logger.log(loglevel, "%s Taus: %s", __name__, taus)
+    # logger.log(loglevel, "%s Taus: %s", __name__, taus)
 
     taus *= sampler.rate  # 0..Fs/2
-    logger.log(loglevel, "Frequency median: %s", np.median(taus))
-    logger.log(loglevel, "Frequencies:\n%s", repr(taus[:100]))
+    # logger.log(loglevel, "Frequency median: %s", np.median(taus))
+    # logger.log(loglevel, "Frequencies:\n%s", repr(taus[:100]))
 
     return tau_to_hue(taus)
 
