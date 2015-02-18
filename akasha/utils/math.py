@@ -15,6 +15,7 @@ else:
     from ordereddict import OrderedDict
 from cmath import rect
 from fractions import Fraction
+from itertools import izip
 
 from akasha.funct import blockwise
 from akasha.timing import sampler
@@ -42,32 +43,40 @@ def nth_root(n):
     return np.exp(1j * pi2 * 1.0 / n)
 
 
+def pole_frequency(frequencies, amplitudes=1.0):
+    return np.asanyarray(amplitudes) * nth_root(1.0 / freq_to_tau(frequencies))
+
+
+def freq_to_tau(f):
+    return np.asanyarray(f) / float(sampler.rate)
+
+
 def rad_to_deg(angles):
     """
     Radians to degrees conversion.
     """
-    return 180 * (angles / np.pi)
+    return 180 * (np.asanyarray(angles) / np.pi)
 
 
 def deg_to_rad(angles):
     """
     Degrees to radians conversion.
     """
-    return np.pi * (angles / 180.0)
+    return np.pi * (np.asanyarray(angles) / 180.0)
 
 
 def tau_to_rad(angles):
     """
     Tau angles to radians conversion.
     """
-    return pi2 * angles
+    return pi2 * np.asanyarray(angles)
 
 
 def rad_to_tau(angles):
     """
     Radians to tau angles conversion.
     """
-    return angles / pi2
+    return np.asanyarray(angles) / pi2
 
 
 # Utils for frequency ratios etc...
@@ -131,6 +140,28 @@ def logn(x, base=np.e):
     Logarithm of x on some base.
     """
     return np.log2(x) / np.log2(base)
+
+
+def power_limit(x, base=2, rounding=np.ceil):
+    """
+    Find (close) integer powers of base from x.
+
+    >>> power_limit([0, 1, 2, 3, 6, 12], 2)
+       array([  0.,   1.,   2.,   4.,   8.,  16.])
+
+    >>> power_limit(np.arange(1, 64, 8), 2, np.round)
+       array([  1.,   8.,  16.,  32.,  32.,  32.,  64.,  64.])
+
+    Parameters
+    ==========
+    base:
+      base of the exponent
+    rounding:
+      np.ceil => next larger power
+      np.floor => next smaller power
+      np.round => the closest rounded power
+    """
+    return np.power(base, rounding(logn(x, base)))
 
 
 def roots_periods(base, limit=44100.0):
@@ -339,7 +370,7 @@ def random_phasor(n=1, amp=1.0, random=np.random.random):
     graph(snd)  # or anim(Pcm(snd))
     """
     if np.isscalar(amp):
-        return np.atleast_1d(cmath.rect(amp, pi2 * random(n) - np.pi))
+        return [cmath.rect(a, b) for a, b in izip(np.repeat(amp, n), pi2 * random(n) - np.pi)]
     elif callable(amp):
         return np.array(map(cmath.rect, *np.array([amp(n), pi2 * random(n) - np.pi])))
     else:
@@ -368,6 +399,29 @@ def primes(inf, sup, dtype=np.uint64):
 
     primes = np.array(primes, dtype=dtype)
     return primes[primes >= inf]
+
+
+def pascal_line(n):
+    """
+    Line of Pascal's triangle using binomial coefficients
+    """
+    line = [1]
+    [line.append(line[k] * (n-k) / (k+1)) for k in xrange(n)]
+    return line
+
+
+def isprime_pascal(n):
+    """
+    Primality checking using the Pascal's triangle
+
+    https://www.youtube.com/watch?v=HoHiOgp0gqk  Prime Numbers in Pascal's Triangle
+    http://stackoverflow.com/questions/1740499/pascals-triangle
+
+    See also:
+    https://www.youtube.com/watch?v=sbjPwyPT1AI  Number theory - geometrical connection
+    """
+    p = np.array(pascal_line(n))[1:int(np.floor(n / 2. + 1))]
+    return not np.any(p % n)
 
 
 def gcd(a, b):

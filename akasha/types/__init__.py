@@ -10,7 +10,7 @@ from akasha.utils.math import map_array
 
 
 colour_values = np.float32
-colour_result = np.float32
+colour_result = np.uint8
 
 signed = (int, float, np.signedinteger, np.floating)
 

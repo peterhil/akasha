@@ -4,6 +4,8 @@
 Noise and chaos module.
 """
 
+from __future__ import division
+
 import numpy as np
 
 from cmath import rect
@@ -54,6 +56,40 @@ class Noise(Generator):
         return self.function(iterable, self.randomizer)
 
 
+class ColouredNoise(Generator):
+    """
+    Generate coloured noise, with instantaneous frequency differences having some distribution.
+    By default uses standard normal distribution, also known as the Gaussian distribution.
+    """
+    # TODO Make this into a filter for jittering a frequency
+    # TODO Examine using other distributions
+
+    def __init__(self, frequency, deviation=0.1, step=1, log=True):
+        """
+        == Parameters ==
+        frequency: The center of the distribution (mu).
+        deviation: The standard deviation (sigma).
+
+        Example:
+        >>> cn = ColouredNoise(0.01, 0.1)
+        """
+        self.frequency = Frequency(frequency)
+        self.sigma = deviation
+        self.step = step
+        self.randomizer = np.random.lognormal if log else np.random.normal
+
+    @property
+    def mu(self):
+        return self.frequency.ratio
+
+    def sample(self, iterable):
+        length = len(iterable)
+        s = self.randomizer(self.mu, self.sigma, np.ceil(length / float(self.step)))
+        if self.step != 1:
+            s = np.interp(np.arange(length), np.arange(0, length, self.step), s[:length])
+        return c.at(np.cumsum(s))
+
+
 class Rustle(Generator):
     """
     Rustle noise generator.
@@ -74,7 +110,7 @@ class Rustle(Generator):
     def __init__(self, expected=1, frequency=1, envelope=Exponential(0)):
         self.frequency = Frequency(frequency)
         self.expected = expected
-        self.gen = fx.curry(np.random.poisson, self.expected)
+        self.gen = fx.curry_function(np.random.poisson, self.expected)
         self.envelope = envelope
 
     def sample(self, items):
@@ -97,10 +133,10 @@ class Mandelbrot(Generator):
         super(self.__class__, self).__init__()
 
         if random:
-            self.z = random_phasor()
+            self.z = random_phasor()[0]
         else:
             self.z = z if z is not None else 0
-        self.c = c if c is not None else random_phasor()
+        self.c = c if c is not None else random_phasor()[0]
 
     def __iter__(self):
         return self
@@ -140,7 +176,7 @@ class Chaos(Generator):
     """
     # TODO: Make into generic iterator using Generator
 
-    def __init__(self, gen=Mandelbrot, envelope=Exponential(0, amp=0.5)):
+    def __init__(self, gen=Mandelbrot(random=True), envelope=Exponential(0, amp=0.5)):
         super(self.__class__, self).__init__()
         self.gen = gen
         self.envelope = envelope  # TODO: Leave out of sound objects, and compose when sampling?
