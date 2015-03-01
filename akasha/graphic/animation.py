@@ -18,7 +18,7 @@ from akasha.graphic.drawing import get_canvas, blit, draw, video_transfer
 from akasha.timing import sampler, Timed, Watch
 from akasha.tunings import PianoLayout, WickiLayout
 from akasha.utils import issequence
-from akasha.utils.math import pcm, minfloat
+from akasha.utils.math import div_safe_zero, pcm, minfloat
 from akasha.utils.log import logger
 
 
@@ -94,9 +94,9 @@ def loop(snd, channel, widget):
                 fps = watch.get_fps(int(sampler.videorate))
                 logger.log(
                     logging.BORING,
-                    "Animation: clock tick %d, FPS: %3.3f, loop: %.4f, (%.2f %%), "
-                    "input: %.6f, audio: %.6f, video: %.4f, (%.2f %%)", t, fps, float(loop_time), percent,
-                    float(input_time), float(audio_time), float(video_time), av_percent
+                    "Animation: clock tick %d, FPS: %3.3f Hz, loop: %.3f Hz, (%.1f %%), "
+                    "input: %.2f Hz, audio: %.2f Hz, video: %.2f Hz, (%.1f %%)", t, fps, div_safe_zero(1, loop_time), percent,
+                    div_safe_zero(1, input_time), div_safe_zero(1, audio_time), div_safe_zero(1, video_time), av_percent
                 )
             t = clock.tick_busy_loop(sampler.videorate)
         except KeyboardInterrupt, err:
