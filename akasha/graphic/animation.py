@@ -13,13 +13,9 @@ import pygame as pg
 import sys
 import traceback
 
-from itertools import count
-from timeit import default_timer as timer
-
 from akasha.audio.generators import Generator
-from akasha.funct import pairwise
 from akasha.graphic.drawing import get_canvas, blit, draw, video_transfer
-from akasha.timing import sampler, Timed
+from akasha.timing import sampler, Timed, Watch
 from akasha.tunings import PianoLayout, WickiLayout
 from akasha.utils import issequence
 from akasha.utils.math import pcm, minfloat
@@ -57,52 +53,52 @@ def anim(snd, size=800, name='Resonance', antialias=True, lines=False, colours=T
     # set_timer(AUDIOFRAME, int(round(sampler.frametime / 5)))
     set_timer(VIDEOFRAME, sampler.frametime)
 
-    loop(snd, channel, widget)
+    return loop(snd, channel, widget)
 
 
 def loop(snd, channel, widget):
     clock = pg.time.Clock()
-    it = pairwise(count(step=sampler.blocksize()))
+    t = clock.tick_busy_loop(sampler.videorate)
+    watch = Watch()
+    last = 0
 
     while True:
         try:
             with Timed() as loop_time:
                 input_time, audio_time, video_time = 0, 0, 0
-                current_slice = it.next()
                 videoframes = pg.event.get(VIDEOFRAME)
 
                 with Timed() as input_time:
                     for event in pg.event.get():
-                        if handle_input(snd, current_slice, event):
-                            it = pairwise(count(step=sampler.blocksize()))
+                        if handle_input(snd, watch, event):
+                            watch.reset()
+                            last = 0
 
-                # Paint
-                if videoframes and not sampler.paused:
-                    samples = snd[slice(*current_slice)]
-                    if len(samples) == 0:
+                if not sampler.paused:
+                    current = watch.next()
+                    current_slice = slice(sampler.at(last, np.int), sampler.at(current, np.int))
+                    samples = snd[current_slice]
+
+                    if len(samples) == 0 and current_slice.start != current_slice.stop:
                         raise SystemExit('Sound ended!')
-
-                    with Timed() as audio_time:
-                        queue_audio(samples, channel)
-
-                    with Timed() as video_time:
-                        widget.render(samples)
-
-                    pg.display.flip()
-
-            t = clock.tick_busy_loop(sampler.videorate)
-
+                    if len(samples) > 0:
+                        with Timed() as audio_time:
+                            queue_audio(samples, channel)
+                        with Timed() as video_time:
+                            widget.render(samples)
+                        pg.display.flip()
+                        last = current
             if not sampler.paused:
                 percent = float(loop_time) / (1.0 / sampler.videorate) * 100
                 av_percent = (float(audio_time) + float(video_time)) / (1.0 / sampler.videorate) * 100
-                fps = clock.get_fps()
-
+                fps = watch.get_fps(int(sampler.videorate))
                 logger.log(
                     logging.BORING,
                     "Animation: clock tick %d, FPS: %3.3f, loop: %.4f, (%.2f %%), "
                     "input: %.6f, audio: %.6f, video: %.4f, (%.2f %%)", t, fps, float(loop_time), percent,
                     float(input_time), float(audio_time), float(video_time), av_percent
                 )
+            t = clock.tick_busy_loop(sampler.videorate)
         except KeyboardInterrupt, err:
             # See http://stackoverflow.com/questions/2819931/handling-keyboardinterrupt-when-working-with-pygame
             logger.info("Got KeyboardInterrupt (CTRL-C)!".format(type(err)))
@@ -117,9 +113,10 @@ def loop(snd, channel, widget):
             finally:
                 del exc
                 break
-    cleanup(it)
+    cleanup()
     if isinstance(snd, Generator):
         snd.sustain = None
+    return watch
 
 
 def queue_audio(samples, channel):
@@ -169,7 +166,7 @@ class VideoTransferView(object):
         blit(self._surface, img)
 
 
-def handle_input(snd, current_slice, event):
+def handle_input(snd, watch, event):
     """
     Handle pygame events.
     """
@@ -181,6 +178,7 @@ def handle_input(snd, current_slice, event):
          (event.type == pg.ACTIVEEVENT and event.state == 3):
         if event.type is not pg.KEYUP:
             sampler.pause()
+            watch.pause()
         return
     # Key down
     elif event.type == pg.KEYDOWN:
@@ -221,7 +219,7 @@ def handle_input(snd, current_slice, event):
         else:
             if isinstance(snd, Generator):
                 try:
-                    snd.sustain = current_slice[0]
+                    snd.sustain = sampler.at(watch.last())
                 except TypeError:
                     logger.warn("Can't get current value from the iterator.")
                     snd.sustain = 0
@@ -338,15 +336,11 @@ def set_timer(event=VIDEOFRAME, ms=sampler.frametime):
     pg.time.set_timer(event, ms)
 
 
-def cleanup(it=None):
+def cleanup():
     """
     Clean up: Quit pygame, close iterator.
     """
     pg.quit()
-    if it:
-        if hasattr(it, 'close'):
-            it.close()
-        del it
     logger.info("Done cleanup.")
 
 
