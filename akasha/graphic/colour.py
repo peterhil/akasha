@@ -211,29 +211,44 @@ def tau_to_hue(tau_angles):
     # Hue 240 is violet, and 8.96 is a factor for scaling back to 1.0
     #return (np.log2(np.abs(chord_to_tau(tau_angles))+1)) * 8.96 * 240
     low = np.log2(lowest_audible_hz)
-
     # 10 octaves mapped to red..violet
     return ((np.log2(np.abs(tau_angles) + 1) - low) / 8.96 * 240) % 360
 
 
-def chords_to_hues(signal, padding=True, loglevel=logging.ANIMA):
+def log_octaves(taus):
+    """
+    Convert tau angles (-0.5..0..0.5) into log (octave) scale between (0..1).
+    """
+    return np.log2(1 + (2 * (np.abs(taus).astype(np.float))))
+
+
+def instantaneous_phase(signal, padding=True):
+    """
+    Get the instantaneous (angular frequency) phase of the signal
+    by moving the complex signal onto the unit circle (by dividing it by the absolute value),
+    and then get the distances of the consecutive samples, and then angles from these chord lengths.
+    """
+    # Move the complex signal samples onto the unit circle (keep phase and discard amplitude)
+    unit_signal = signal / np.fmax(np.abs(signal), minfloat(0.5)[0])  # TODO Find another way to avoid zero division?
+    chords = pad(distances(unit_signal), -1) if padding else distances(unit_signal)
+    return chord_to_tau(chords)
+
+
+def chords_to_hues(signal, padding=True):
     """
     Return hue angles from instantaneous frequencies of a signal.
     """
-    phases = signal / np.fmax(np.abs(signal), minfloat(0.5)[0])
+    taus = instantaneous_phase(signal)
+    return tau_to_hue(taus * sampler.rate)  # 0..Fs/2
 
-    # Get distances
-    d = pad(distances(phases), -1) if padding else distances(phases)
-    # logger.log(loglevel, "%s Distances: %s", __name__, d)
 
-    taus = np.apply_along_axis(chord_to_tau, 0, d)
-    # logger.log(loglevel, "%s Taus: %s", __name__, taus)
-
-    taus *= sampler.rate  # 0..Fs/2
-    # logger.log(loglevel, "Frequency median: %s", np.median(taus))
-    # logger.log(loglevel, "Frequencies:\n%s", repr(taus[:100]))
-
-    return tau_to_hue(taus)
+def chords_to_hues2(signal, padding=True):
+    """
+    Return hue angles from instantaneous frequencies of a signal.
+    """
+    taus = instantaneous_phase(signal)
+    octaves = np.clip(log_octaves(taus), 0, 1)
+    return octaves * 240.0  # 240 is violet
 
 
 @memoized
