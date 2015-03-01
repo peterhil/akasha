@@ -186,10 +186,7 @@ def chord_to_angle(length):
     Return radian angle of a point on unit circle with the specified chord length from 1+0j.
     Restrict to unit circle, ie. max length is 2.0.
     """
-    # Limit highest freqs to Nyquist (blue or violet)
-    d = np.fmin(np.abs(length), 2.0)
-    # Limit lower freqs to lowest_audible_hz (red)
-    d = np.fmax(d, 4.0 * lowest_audible_hz / float(sampler.rate))
+    d = np.clip(np.abs(length), 0, 2)
     return np.arcsin(d / 2.0) * 2
 
 
