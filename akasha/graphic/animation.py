@@ -25,9 +25,6 @@ from akasha.utils.log import logger
 keyboard = WickiLayout()
 # keyboard = PianoLayout()
 
-VIDEOFRAME = pg.NUMEVENTS - 1
-AUDIOFRAME = pg.NUMEVENTS - 2
-
 
 def anim(snd, size=800, name='Resonance', antialias=True, lines=False, colours=True,
          mixer_options=(), style='complex'):
@@ -49,10 +46,6 @@ def anim(snd, size=800, name='Resonance', antialias=True, lines=False, colours=T
     else:
         logger.err("Unknown animation style: '{0}'".format(style))
         cleanup()
-
-    # set_timer(AUDIOFRAME, int(round(sampler.frametime / 5)))
-    set_timer(VIDEOFRAME, sampler.frametime)
-
     return loop(snd, channel, widget)
 
 
@@ -66,14 +59,12 @@ def loop(snd, channel, widget):
         try:
             with Timed() as loop_time:
                 input_time, audio_time, video_time = 0, 0, 0
-                videoframes = pg.event.get(VIDEOFRAME)
 
                 with Timed() as input_time:
                     for event in pg.event.get():
                         if handle_input(snd, watch, event):
                             watch.reset()
                             last = 0
-
                 if not sampler.paused:
                     current = watch.next()
                     current_slice = slice(sampler.at(last, np.int), sampler.at(current, np.int))
@@ -193,13 +184,13 @@ def handle_input(snd, watch, event):
         # Arrows
         elif pg.K_UP == event.key:
             if event.mod & (pg.KMOD_LALT | pg.KMOD_RALT):
-                set_timer(ms = sampler.change_frametime(rel=step_size))
+                sampler.change_frametime(rel=step_size)
             else:
                 # keyboard.move(-2, 0)
                 keyboard.base *= 2.0
         elif pg.K_DOWN == event.key:
             if event.mod & (pg.KMOD_LALT | pg.KMOD_RALT):
-                set_timer(ms = sampler.change_frametime(rel=-step_size))
+                sampler.change_frametime(rel=-step_size)
             else:
                 # keyboard.move(2, 0)
                 keyboard.base /= 2.0
@@ -260,8 +251,7 @@ def handle_input(snd, watch, event):
                     scale[0], scale[len(scale)//2], scale[-1]
                 ))
     else:
-        if event.type != AUDIOFRAME:
-            logger.debug("Other: %s" % event)
+        logger.debug("Other: %s" % event)
     return
 
 
@@ -325,15 +315,7 @@ def init_mixer(*args):
     logger.info(
         "Mixer has %s Hz sample rate with %s size samples and %s channels." %
         pg.mixer.get_init())
-
     return pg.mixer.find_channel()
-
-
-def set_timer(event=VIDEOFRAME, ms=sampler.frametime):
-    """
-    Set and start pygame timer interval for VIDEOFRAME events.
-    """
-    pg.time.set_timer(event, ms)
 
 
 def cleanup():
@@ -349,9 +331,6 @@ def change_frequency(snd, key):
     Change frequency of the sound based on key position.
     """
     snd.frequency = keyboard.get_frequency(key)
-
     if isinstance(snd, Generator):
         snd.sustain = None
-
     logger.info("Changed frequency: %s." % snd)
-
