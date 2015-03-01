@@ -219,7 +219,7 @@ def handle_input(snd, watch, event):
         else:
             if isinstance(snd, Generator):
                 try:
-                    snd.sustain = sampler.at(watch.last())
+                    snd.sustain = sampler.at(watch.time())
                 except TypeError:
                     logger.warn("Can't get current value from the iterator.")
                     snd.sustain = 0
