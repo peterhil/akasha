@@ -12,7 +12,7 @@ import scipy as sc
 from akasha.utils.math import pi2, power_limit
 
 
-def czt(signal, m=None, w=None, a=1.0):
+def czt(signal, m=None, w=None, a=1.0, normalize=False):
     """
     The Chirp Z-transform.
 
@@ -34,10 +34,11 @@ def czt(signal, m=None, w=None, a=1.0):
     vn = np.roll(ichirp(w, np.arange(lp2) - l), -l)
 
     g = sc.ifft(sc.fft(y) * sc.fft(vn))[:m]
-    return (g * chirp(w, k))
+    scale = 1.0 / l if normalize else 1.0
+    return scale * (g * chirp(w, k))
 
 
-def iczt(signal, m=None, w=None, a=1.0):
+def iczt(signal, m=None, w=None, a=1.0, normalize=False):
     """
     The inverse chirp Z-transform
 
@@ -46,6 +47,7 @@ def iczt(signal, m=None, w=None, a=1.0):
     """
     signal = np.atleast_1d(signal).astype(np.complex)
     l = len(signal)
+    if normalize: signal *= l**2
     if m is None: m = l
     if w is None: w = np.exp(-1j * pi2 / m)
 
