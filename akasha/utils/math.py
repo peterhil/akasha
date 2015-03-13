@@ -56,28 +56,28 @@ def freq_to_tau(f):
 
 def rad_to_deg(angles):
     """
-    Convert tau angle to radians.
+    Radians to degrees conversion.
     """
     return 180 * (np.asanyarray(angles) / np.pi)
 
 
-def as_tau(radians):
+def deg_to_rad(angles):
     """
-    Convert radians to tau angle.
+    Degrees to radians conversion.
     """
     return np.pi * (np.asanyarray(angles) / 180.0)
 
 
-def degrees(angles):
+def tau_to_rad(angles):
     """
-    Convert degrees to radians.
+    Tau angles to radians conversion.
     """
     return pi2 * np.asanyarray(angles)
 
 
-def as_degrees(radians):
+def rad_to_tau(angles):
     """
-    Convert radians to degrees.
+    Radians to tau angles conversion.
     """
     return np.asanyarray(angles) / pi2
 

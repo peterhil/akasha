@@ -194,7 +194,7 @@ def chord_to_hue(length):
     """
     Return degrees from a chord length between a point on unit circle and 1+0j.
     """
-    return as_degrees(chord_to_angle(length))
+    return rad_to_deg(chord_to_angle(length))
 
 
 def chord_to_tau(length):
