@@ -1,7 +1,6 @@
 PIL==1.1.7
 PyOpenGL==3.0.2b2
 Pygments==1.4
-Twisted==12.2.0
 cov-core==1.7
 coverage==3.5.3
 distribute==0.6.24

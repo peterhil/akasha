@@ -36,7 +36,6 @@ scikits.samplerate
 python-dateutil
 
 matplotlib # depends on numpy, python-dateutil (pyplot)
-Twisted
 txosc
 wikitools
 

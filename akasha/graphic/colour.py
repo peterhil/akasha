@@ -12,7 +12,7 @@ from akasha.timing import sampler
 from akasha.types import colour_values, colour_result
 from akasha.utils.decorators import memoized
 from akasha.utils.log import logger
-from akasha.utils.math import as_degrees, as_tau, distances, minfloat, pad
+from akasha.utils.math import distances, minfloat, pad, pi2, rad_to_deg, rad_to_tau
 
 
 lowest_audible_hz = 16.35
@@ -158,19 +158,18 @@ def angles2hues(cx_samples, padding=True, loglevel=logging.ANIMA):
     """
     Convert angles of complex samples into hues.
     """
-    # Get angles from points
     angles = np.angle(np.atleast_1d(cx_samples))
-    logger.log(loglevel, "Angles:\n%s", repr(angles[:100]))
 
     # Get distances
     angles = pad(distances(angles), 0) if padding else distances(angles)
+    # logger.log(loglevel, "Angles:\n%s", repr(angles[:100]))
 
     # Get tau angles from points
-    angles = as_tau(-np.abs(angles - (np.pi)) % np.pi)
-    logger.log(loglevel, "Tau angles:\n%s", repr(angles[:100]))
+    angles = (-np.abs(angles - (np.pi)) % np.pi) / pi2
+    # logger.log(loglevel, "Tau angles:\n%s", repr(angles[:100]))
 
     angles *= sampler.rate  # 0..Fs/2
-    logger.log(loglevel, "Frequencies:\n%s", repr(angles[:100]))
+    # logger.log(loglevel, "Frequencies:\n%s", repr(angles[:100]))
 
     # Convert rad to deg
     low = np.log2(lowest_audible_hz)
@@ -178,7 +177,7 @@ def angles2hues(cx_samples, padding=True, loglevel=logging.ANIMA):
     # 10 octaves mapped to red..violet
     angles = ((np.log2(np.abs(angles) + 1) - low) / 8.96 * 240) % 360
 
-    logger.log(loglevel, "Scaled:\n%s\n", repr(angles[:100]))
+    # logger.log(loglevel, "Scaled:\n%s\n", repr(angles[:100]))
     return angles
 
 
@@ -187,10 +186,7 @@ def chord_to_angle(length):
     Return radian angle of a point on unit circle with the specified chord length from 1+0j.
     Restrict to unit circle, ie. max length is 2.0.
     """
-    # Limit highest freqs to Nyquist (blue or violet)
-    d = np.fmin(np.abs(length), 2.0)
-    # Limit lower freqs to lowest_audible_hz (red)
-    d = np.fmax(d, 4.0 * lowest_audible_hz / float(sampler.rate))
+    d = np.clip(np.abs(length), 0, 2)
     return np.arcsin(d / 2.0) * 2
 
 
@@ -205,7 +201,7 @@ def chord_to_tau(length):
     """
     Return tau angle from a chord length between a point on unit circle and 1+0j.
     """
-    return as_tau(chord_to_angle(length))
+    return rad_to_tau(chord_to_angle(length))
 
 
 def tau_to_hue(tau_angles):
@@ -215,32 +211,44 @@ def tau_to_hue(tau_angles):
     # Hue 240 is violet, and 8.96 is a factor for scaling back to 1.0
     #return (np.log2(np.abs(chord_to_tau(tau_angles))+1)) * 8.96 * 240
     low = np.log2(lowest_audible_hz)
-
     # 10 octaves mapped to red..violet
     return ((np.log2(np.abs(tau_angles) + 1) - low) / 8.96 * 240) % 360
 
 
-def chords_to_hues(signal, padding=True, loglevel=logging.ANIMA):
+def log_octaves(taus):
+    """
+    Convert tau angles (-0.5..0..0.5) into log (octave) scale between (0..1).
+    """
+    return np.log2(1 + (2 * (np.abs(taus).astype(np.float))))
+
+
+def instantaneous_phase(signal, padding=True):
+    """
+    Get the instantaneous (angular frequency) phase of the signal
+    by moving the complex signal onto the unit circle (by dividing it by the absolute value),
+    and then get the distances of the consecutive samples, and then angles from these chord lengths.
+    """
+    # Move the complex signal samples onto the unit circle (keep phase and discard amplitude)
+    unit_signal = signal / np.fmax(np.abs(signal), minfloat(0.5)[0])  # TODO Find another way to avoid zero division?
+    chords = pad(distances(unit_signal), -1) if padding else distances(unit_signal)
+    return chord_to_tau(chords)
+
+
+def chords_to_hues(signal, padding=True):
     """
     Return hue angles from instantaneous frequencies of a signal.
     """
-    phases = signal / np.fmax(np.abs(signal), minfloat(0.5)[0])
+    taus = instantaneous_phase(signal)
+    return tau_to_hue(taus * sampler.rate)  # 0..Fs/2
 
-    # Get distances
-    d = pad(distances(phases), -1) if padding else distances(phases)
 
-    logger.log(loglevel, "%s Distances: %s", __name__, d)
-
-    # Append is a hack to get the same length back
-    taus = np.apply_along_axis(chord_to_tau, 0, d)  # np.append(d, d[-1]))
-    logger.log(loglevel, "%s Taus: %s", __name__, taus)
-
-    #taus = taus / (2*np.pi) * sampler.rate
-    taus *= sampler.rate  # 0..Fs/2
-    logger.log(loglevel, "Frequency median: %s", np.median(taus))
-    logger.log(loglevel, "Frequencies:\n%s", repr(taus[:100]))
-
-    return tau_to_hue(taus)
+def chords_to_hues2(signal, padding=True):
+    """
+    Return hue angles from instantaneous frequencies of a signal.
+    """
+    taus = instantaneous_phase(signal)
+    octaves = np.clip(log_octaves(taus), 0, 1)
+    return octaves * 240.0  # 240 is violet
 
 
 @memoized

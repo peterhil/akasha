@@ -63,8 +63,8 @@ class TestPeriod(object):
         ar = np.arange(6).reshape(2, 3)
         pa = period.array(ar)
 
-        assert_array_equal(ar[slice(None)], pa[slice(None)])
-        assert_array_equal(ar[1, slice(None)], pa[1, slice(None)])
+        assert_array_equal(ar[::], pa[::])
+        # assert_array_equal(ar[1, slice(None)], pa[1, slice(None)])
 
         assert_array_equal(ar, pa[::])
         assert_array_equal(ar, pa[:])

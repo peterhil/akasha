@@ -6,6 +6,10 @@ Sampler module.
 
 from __future__ import division
 
+import numpy as np
+
+from timeit import default_timer as timer
+
 from akasha.utils.log import logger
 
 
@@ -58,9 +62,12 @@ class Sampler(object):
 
     def blocksize(self):
         """
-        Calculate how may audio samples fit on one video frame. 
+        Calculate how may audio samples fit on one video frame.
         """
         return int(round(self.rate / self.videorate))
+
+    def at(self, times, dtype=np.float):
+        return (np.array(times) * self.rate).astype(dtype)
 
     def pause(self):
         """
@@ -80,3 +87,65 @@ def time_slice(dur, start=0, time=False):
     if not isinstance(time, slice):
         raise TypeError("Expected a %s for 'time' argument, got %s." % (slice, type(time)))
     return time
+
+
+class Timed(object):
+    """
+    Time some code using with statement.
+    """
+    elapsed = 0
+
+    def __enter__(self):
+        self.start = timer()
+        return self
+
+    def __exit__(self, *args):
+        self.end = timer()
+        self.elapsed = self.end - self.start
+
+    def __float__(self):
+        return float(self.elapsed)
+
+
+class Watch(object):
+    def __init__(self, maxstops=100):
+        self.paused = 0
+        self.reset()
+        self.maxstops = maxstops
+
+    def reset(self):
+        self.epoch = timer()
+        if self.paused:
+            self.paused = self.epoch
+        self.lasttime = 0
+        self.timings = []
+
+    def time(self):
+        if not self.paused:
+            return timer() - self.epoch
+        else:
+            return self.paused - self.epoch
+
+    def last(self):
+        return self.time() - self.lasttime
+
+    def next(self):
+        if not self.paused:
+            self.lasttime = self.time()
+            self.timings.append(self.lasttime)
+            self.timings = self.timings[-self.maxstops:]
+        return self.lasttime
+
+    def pause(self):
+        if not self.paused:
+            self.paused = timer()
+        else:
+            if self.paused > 0:
+                self.epoch += timer() - self.paused
+            self.paused = 0
+
+    def get_fps(self, n=None):
+        if n is None:
+            return np.average(1.0 / np.ediff1d(np.array(self.timings)))
+        elif n > 0:
+            return np.average(1.0 / np.ediff1d(np.array(self.timings[-n:])))
