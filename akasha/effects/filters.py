@@ -6,11 +6,10 @@ IIR and other filters.
 
 import numpy as np
 
-from scipy import signal as dsp
+from akasha import dsp
 
 from akasha.audio.oscillator import Osc
 from akasha.audio.frequency import Frequency, Fraction
-from akasha.dsp import unit_step
 from akasha.dsp.z_transform import czt, iczt
 from akasha.timing import sampler
 from akasha.utils.log import logger
@@ -106,8 +105,8 @@ def highpass(signal, freq, bins=256, pass_zero=True, scale=False, nyq=sampler.ra
     Highpass filter.
     """
     a = 1
-    b = dsp.firwin(bins, cutoff=freq, pass_zero=pass_zero, scale=scale, nyq=nyq)
-    return dsp.lfilter(b, a, signal)
+    b = dsp.signal.firwin(bins, cutoff=freq, pass_zero=pass_zero, scale=scale, nyq=nyq)
+    return dsp.signal.lfilter(b, a, signal)
 
 
 def lowpass(signal, cutoff=sampler.rate / 2.0, bins=256):
@@ -117,8 +116,8 @@ def lowpass(signal, cutoff=sampler.rate / 2.0, bins=256):
     fs = float(sampler.rate)
     fc = cutoff / fs
     a = 1
-    b = dsp.firwin(bins, cutoff=fc, window='hamming')
-    return dsp.lfilter(b, a, signal)
+    b = dsp.signal.firwin(bins, cutoff=fc, window='hamming')
+    return dsp.signal.lfilter(b, a, signal)
 
 
 def resonate(signal, poles, zeros=np.array([]), gain=1.0, axis=-1, zi=None):
@@ -132,13 +131,13 @@ def resonate(signal, poles, zeros=np.array([]), gain=1.0, axis=-1, zi=None):
     poles = pole_frequency(np.array([30, 50, 238., 440., 1441]), [0.99, 0.999, 0.99, 0.87, 0.77])
     anim(normalize(resonate(bjork, poles, gain=1.0)))
     """
-    b, a = dsp.filter_design.zpk2tf(zeros, poles, gain)
+    b, a = dsp.signal.filter_design.zpk2tf(zeros, poles, gain)
     logger.debug("Resonate: order: {},\n\tb: {},\n\ta: {}".format(max(len(a), len(b)), b, a))
     if zi == 'auto':
-        zi = dsp.lfilter_zi(b, a)
-        return dsp.lfilter(b, a, signal, axis=axis, zi=zi)[0]
+        zi = dsp.signal.lfilter_zi(b, a)
+        return dsp.signal.lfilter(b, a, signal, axis=axis, zi=zi)[0]
     else:
-        return dsp.lfilter(b, a, signal)
+        return dsp.signal.lfilter(b, a, signal)
 
 
 def resonator_comb(
@@ -200,5 +199,5 @@ def resonator_p1(signal, pole, m=None, gain=1.0):
     if m is None: m = len(signal)
     n = np.arange(m)
 
-    response = unit_step(n) * gain * pole ** n
+    response = dsp.unit_step(n) * gain * pole ** n
     return iczt(czt(signal, m=m) * czt(response, m=m))
