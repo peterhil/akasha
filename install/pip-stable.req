@@ -10,6 +10,7 @@ mercurial==3.2.4
 mock==1.0.1
 nose==1.3.4
 numpy==1.9.1
+pandas==0.16.0
 Pillow==2.7.0
 -e hg+https://bitbucket.org/pygame/pygame@7213968d5e819dad85416589bea835ce40b9f6be#egg=pygame-dev
 pyinter==0.1.6
