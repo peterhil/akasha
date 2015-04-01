@@ -9,6 +9,7 @@ librosa==0.3.1
 matplotlib>=1.4.2
 mercurial==3.2.4
 numpy>=1.9.1
+pandas>=0.16.0
 -e hg+https://bitbucket.org/pygame/pygame#egg=pygame-dev
 pyinter
 scikit-image>=0.10.1

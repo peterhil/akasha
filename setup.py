@@ -62,6 +62,7 @@ setup(
         'matplotlib (>=1.1.1)',
         'numpy (>=1.6.2)',
         'ordereddict (>=1.1)' if sys.version_info < (2, 7) else 'collections',
+        'pandas (>=0.16.0)',
         'py (>=1.4.11)',
         'pygame (>=1.9.2)',
         'scikits.audiolab (>=0.11.0)',
