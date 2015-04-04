@@ -14,7 +14,7 @@ from akasha.utils import norm_shape
 __all__ = ['sliding_window']
 
 
-def sliding_window(a, ws, ss = None, flatten = True):
+def sliding_window(a, ws, ss=None, flatten=True):
     """
     Return a sliding window over a in any number of dimensions
 
