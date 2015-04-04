@@ -27,6 +27,30 @@ def issequence(arg):
     )
 
 
+def norm_shape(shape):
+    """
+    Normalize numpy array shapes so they're always expressed as a tuple,
+    even for one-dimensional shapes.
+
+    Parameters
+        shape - an int, or a tuple of ints
+
+    Returns
+        a shape tuple
+    """
+    try:
+        i = int(shape)
+        return (i,)
+    except TypeError:
+        pass  # shape was not a number
+    try:
+        t = tuple(shape)
+        return t
+    except TypeError:
+        pass  # shape was not iterable
+    raise TypeError('shape must be an int, or a tuple of ints')
+
+
 def trace_c(frame, event, arg):
     """
     Trace C calls for debugging.
