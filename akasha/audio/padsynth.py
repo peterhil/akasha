@@ -14,7 +14,6 @@ import scipy as sc
 
 from itertools import izip
 
-from akasha.analysis.fft import istft
 from akasha.audio.frequency import Frequency
 from akasha.utils.math import random_phasor
 
