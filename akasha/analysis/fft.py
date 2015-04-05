@@ -11,7 +11,7 @@ import pylab
 from akasha.timing import sampler
 
 
-def stft(x, fs, framesz, hop):
+def stft_tjoa(x, fs, framesz, hop):
     """
     Short time fourier transform.
 
@@ -27,7 +27,7 @@ def stft(x, fs, framesz, hop):
     return X
 
 
-def istft(X, fs, T, hop):
+def istft_tjoa(X, fs, T, hop):
     """
     Inverse short time fourier transform.
 
@@ -42,7 +42,7 @@ def istft(X, fs, T, hop):
     return x
 
 
-def demo(signal=None):
+def tjoa_demo(signal=None):
     """
     Demo of the short time fourier transforms.
     """
@@ -60,7 +60,7 @@ def demo(signal=None):
     else:
         x = signal
 
-    X = stft(x, fs, framesz, hop)
+    X = stft_tjoa(x, fs, framesz, hop)
 
     pylab.interactive(True)
 
@@ -73,7 +73,7 @@ def demo(signal=None):
     pylab.spectral()
 
     # Compute the ISTFT.
-    xhat = istft(X, fs, T, hop)
+    xhat = istft_tjoa(X, fs, T, hop)
 
     # Plot the input and output signals over 0.1 seconds.
     T1 = int(0.1 * fs)
