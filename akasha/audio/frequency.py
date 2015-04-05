@@ -197,6 +197,9 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
         """
         return self.angles(self.ratio)
 
+    def at(self, t):
+        return self._hz * t
+
     def __repr__(self):
         return "Frequency(%s)" % self._hz
 
