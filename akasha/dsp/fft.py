@@ -5,7 +5,7 @@ Fast fourier transforms.
 """
 
 import numpy as np
-import scipy
+import scipy as sc
 import pylab
 
 from akasha.timing import sampler
@@ -20,9 +20,9 @@ def stft_tjoa(x, fs, framesz, hop):
     """
     framesamp = int(framesz * fs)
     hopsamp = int(hop * fs)
-    w = scipy.hamming(framesamp)
-    X = scipy.array(
-        [scipy.fft(w * x[i:i + framesamp]) for i in range(0, len(x) - framesamp, hopsamp)]
+    w = sc.hamming(framesamp)
+    X = sc.array(
+        [sc.fft(w * x[i:i + framesamp]) for i in range(0, len(x) - framesamp, hopsamp)]
     )
     return X
 
@@ -34,11 +34,11 @@ def istft_tjoa(X, fs, T, hop):
     Code from an Stackoverflow answer by Steve Tjoa
     http://stackoverflow.com/questions/2459295/stft-and-istft-in-python?answertab=votes#tab-top
     """
-    x = scipy.zeros(T * fs)
+    x = sc.zeros(T * fs)
     framesamp = X.shape[1]
     hopsamp = int(hop * fs)
     for n, i in enumerate(range(0, len(x) - framesamp, hopsamp)):
-        x[i:i + framesamp] += scipy.real(scipy.ifft(X[n]))
+        x[i:i + framesamp] += sc.real(sc.ifft(X[n]))
     return x
 
 
@@ -53,10 +53,10 @@ def tjoa_demo(signal=None):
     hop = 0.020  # and hop size of 20 milliseconds.
 
     # Create test signal and STFT.
-    t = scipy.linspace(0, T, T * fs, endpoint=False)
+    t = sc.linspace(0, T, T * fs, endpoint=False)
 
     if signal is None:
-        x = scipy.sin(2 * scipy.pi * f0 * t)  # test signal
+        x = sc.sin(2 * sc.pi * f0 * t)  # test signal
     else:
         x = signal
 
@@ -66,7 +66,7 @@ def tjoa_demo(signal=None):
 
     # Plot the magnitude spectrogram.
     pylab.figure()
-    pylab.imshow(scipy.absolute(np.log(X.T)), origin='lower', aspect='auto',
+    pylab.imshow(sc.absolute(np.log(X.T)), origin='lower', aspect='auto',
                  interpolation='nearest')
     pylab.xlabel('Time')
     pylab.ylabel('Frequency')
