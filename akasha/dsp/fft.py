@@ -8,7 +8,22 @@ import numpy as np
 import scipy as sc
 import pylab
 
+from akasha.dsp.window import sliding_window
+from akasha.dsp.z_transform import czt
 from akasha.timing import sampler
+
+
+def stft(signal, n_fft, frame_size, hop, window=sc.signal.hamming, sym=False, roll=True, normalize=True, *wargs):
+    # TODO Check n_fft, win_size, hop parameters
+    frames = sliding_window(signal, frame_size, hop)
+    window_array = window(frame_size, *wargs, sym=sym)  # TODO Enable using other parameters, like beta for Kaiser, and arrays
+    out = window_array * frames
+    pad_size = max(0, n_fft - frame_size)
+    out = np.hstack([out, np.zeros((out.shape[0], pad_size))])  # Zero pad
+    if roll:
+        out = np.roll(out, -(frame_size // 2), 1)
+    out = np.apply_along_axis(czt, 1, out, m=n_fft, normalize=normalize)  # TODO Try sc.fft also
+    return out[::, :int(round(n_fft / 2.0))].T
 
 
 def stft_tjoa(x, fs, framesz, hop):
