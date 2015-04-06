@@ -67,12 +67,12 @@ def sliding_window(a, ws, ss=None, flatten=True):
     # the shape of the strided array will be the number of slices in each dimension
     # plus the shape of the window (tuple addition)
     newshape += norm_shape(ws)
-    # the strides tuple will be the array's strides multiplied by step size, plus
-    # the array's strides (tuple addition)
-    newstrides = norm_shape(np.array(a.strides) * ss) + a.strides
     # pad with step size (ss) zeros on each dimension in order to not get garbage from the last indices
     na = np.zeros(np.array(shape) + ss)
     na[tuple(map(lambda s: slice(0, -s), ss))] = a
+    # the strides tuple will be the array's strides multiplied by step size, plus
+    # the array's strides (tuple addition)
+    newstrides = norm_shape(np.array(na.strides) * ss) + na.strides
 
     strided = as_strided(na, shape = newshape, strides = newstrides)
     if not flatten:
