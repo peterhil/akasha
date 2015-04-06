@@ -6,7 +6,7 @@ Sliding windows module.
 
 import numpy as np
 
-from numpy.lib.stride_tricks import as_strided as ast
+from numpy.lib.stride_tricks import as_strided
 
 from akasha.utils import norm_shape
 
@@ -38,6 +38,8 @@ def sliding_window(a, ws, ss=None, flatten=True):
     if None is ss:
         # ss was not provided. the windows will not overlap in any direction.
         ss = ws
+    assert np.all(np.zeros(a.ndim) < np.asarray(ss)) and np.all(np.asarray(ss) <= np.asarray(ws)), \
+      "Step size must be greater than zero and less than or equal to window size."
     ws = norm_shape(ws)
     ss = norm_shape(ss)
 
@@ -61,14 +63,18 @@ def sliding_window(a, ws, ss=None, flatten=True):
  a.shape was %s and ws was %s' % (str(a.shape), str(ws)))
 
     # how many slices will there be in each dimension?
-    newshape = norm_shape(((shape - ws) // ss) + 1)
+    newshape = norm_shape(np.ceil((shape - (ws - ss)) / ss.astype(np.float)))
     # the shape of the strided array will be the number of slices in each dimension
     # plus the shape of the window (tuple addition)
     newshape += norm_shape(ws)
     # the strides tuple will be the array's strides multiplied by step size, plus
     # the array's strides (tuple addition)
     newstrides = norm_shape(np.array(a.strides) * ss) + a.strides
-    strided = ast(a, shape = newshape, strides = newstrides)
+    # pad with step size (ss) zeros on each dimension in order to not get garbage from the last indices
+    na = np.zeros(np.array(shape) + ss)
+    na[tuple(map(lambda s: slice(0, -s), ss))] = a
+
+    strided = as_strided(na, shape = newshape, strides = newstrides)
     if not flatten:
         return strided
 
