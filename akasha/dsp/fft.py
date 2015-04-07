@@ -14,6 +14,9 @@ from akasha.timing import sampler
 
 
 def stft(signal, n_fft, frame_size, hop, window=sc.signal.hamming, sym=False, roll=True, normalize=True, *wargs):
+    """
+    Short time fourier transform.
+    """
     # TODO Check n_fft, win_size, hop parameters
     frames = sliding_window(signal, frame_size, hop)
     window_array = window(frame_size, *wargs, sym=sym)  # TODO Enable using other parameters, like beta for Kaiser, and arrays
