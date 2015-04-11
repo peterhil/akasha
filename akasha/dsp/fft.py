@@ -42,7 +42,7 @@ def stft(signal, n_fft=2048, frame_size=None, hop=None, window=sc.signal.hamming
     if roll:
         out = np.roll(out, -(frame_size // 2), 1)
     out = np.apply_along_axis(czt, 1, out, m=n_fft, normalize=normalize)  # TODO Try sc.fft also
-    return out[::, :int(round(n_fft / 2.0))].T
+    return out.T
 
 
 def stft_tjoa(x, fs, framesz, hop):
