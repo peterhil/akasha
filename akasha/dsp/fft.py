@@ -6,11 +6,13 @@ Fast fourier transforms.
 
 import numpy as np
 import scipy as sc
+import types
 import pylab
 
 from akasha.dsp.window import sliding_window
 from akasha.dsp.z_transform import czt
 from akasha.timing import sampler
+from akasha.utils import issequence
 
 
 def stft(signal, n_fft=2048, frame_size=None, hop=None, window=sc.signal.hamming, sym=False, roll=True, normalize=True, wargs=[]):
@@ -19,11 +21,21 @@ def stft(signal, n_fft=2048, frame_size=None, hop=None, window=sc.signal.hamming
     """
     if frame_size is None: frame_size = n_fft
     if hop is None: hop = frame_size // 2
+    assert n_fft > 0, "Number of FFT bins must (n_fft) must be positive."
     assert n_fft >= frame_size, "Frame size must be less than or equal to FFT bin count (n_fft)."
     assert frame_size >= hop, "Hop size must be less than or equal to frame size."
 
+    if isinstance(window, types.FunctionType):
+        window_array = window(frame_size, *wargs, sym=sym)
+    elif issequence(window):
+        if len(window) == frame_size:
+            window_array = np.asarray(window)
+        else:
+            raise ValueError("Window length must equal frame size.")
+    else:
+        raise TypeError("Window must be a function or a sequence.")
+
     frames = sliding_window(signal, frame_size, hop)
-    window_array = window(frame_size, *wargs, sym=sym)  # TODO Enable using arrays
     out = window_array * frames
     pad_size = max(0, n_fft - frame_size)
     out = np.hstack([out, np.zeros((out.shape[0], pad_size))])  # Zero pad
