@@ -13,13 +13,17 @@ from akasha.dsp.z_transform import czt
 from akasha.timing import sampler
 
 
-def stft(signal, n_fft, frame_size, hop, window=sc.signal.hamming, sym=False, roll=True, normalize=True, *wargs):
+def stft(signal, n_fft=2048, frame_size=None, hop=None, window=sc.signal.hamming, sym=False, roll=True, normalize=True, wargs=[]):
     """
     Short time fourier transform.
     """
-    # TODO Check n_fft, win_size, hop parameters
+    if frame_size is None: frame_size = n_fft
+    if hop is None: hop = frame_size // 2
+    assert n_fft >= frame_size, "Frame size must be less than or equal to FFT bin count (n_fft)."
+    assert frame_size >= hop, "Hop size must be less than or equal to frame size."
+
     frames = sliding_window(signal, frame_size, hop)
-    window_array = window(frame_size, *wargs, sym=sym)  # TODO Enable using other parameters, like beta for Kaiser, and arrays
+    window_array = window(frame_size, *wargs, sym=sym)  # TODO Enable using arrays
     out = window_array * frames
     pad_size = max(0, n_fft - frame_size)
     out = np.hstack([out, np.zeros((out.shape[0], pad_size))])  # Zero pad
