@@ -7,8 +7,9 @@ Generic sound object group containers.
 import numpy as np
 
 from numbers import Number
-from scipy import signal as dsp
 from scikits import samplerate as src
+
+from akasha import dsp
 
 from akasha.audio.frequency import FrequencyRatioMixin, Frequency
 from akasha.audio.generators import Generator
@@ -49,7 +50,7 @@ class Pcm(FrequencyRatioMixin, Generator):
         )
         orig_state = sampler.paused
         sampler.paused = True
-        out = dsp.hilbert(src.resample(signal.real, float(ratio), window)).astype(np.complex128)
+        out = dsp.signal.hilbert(src.resample(signal.real, float(ratio), window)).astype(np.complex128)
         sampler.paused = orig_state
         return out
 
@@ -65,7 +66,7 @@ class Pcm(FrequencyRatioMixin, Generator):
         # Note about scipy.signal.resample: t : array_like, optional
         # If t given, it's assumed to be the sample positions associated with the signal data in x
         # http://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.resample.html
-        return dsp.resample(signal, int(round(ratio * len(signal))), window = window)
+        return dsp.signal.resample(signal, int(round(ratio * len(signal))), window = window)
 
     def resample_at_freq(self, items=None):
         """

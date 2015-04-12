@@ -645,27 +645,8 @@ def pad(signal, index=-1, count=1, value=None):
 def distances(signal):
     """
     Get the absolute distances from consecutive samples of the signal.
-    Signal must have at least two samples.
-
-    See also: np.diff()
     """
-    if hasattr(signal, '__len__') and (len(signal) >= 2):
-        return np.abs(signal[1:] - signal[:-1])
-    else:
-        raise ValueError("Expected signal to have at least two samples. Signal was: %s" % signal)
-
-
-def diffs(signal, start=0, end=0):
-    """
-    The same as np.ediff1d(). Get the difference of the consecutive samples in signal.
-    This differs from distances(), in that the signal is padded with start and end values.
-
-    Signal must have at least two samples.
-
-    See also: distances()
-    """
-    # Could use np.apply_over_axes - profile with time?
-    return np.append(start, signal[1:]) - np.append(signal[:-1], end)
+    return np.abs(np.diff(signal))
 
 
 def get_points(signal, size=1000, dtype=np.float64):

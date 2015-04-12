@@ -58,6 +58,7 @@ setup(
         'distribute (>=0.6.32)',
         'funckit (==0.8.0)',
         'ipython (>=0.13)',
+        'librosa (==0.3.1)',
         'matplotlib (>=1.1.1)',
         'numpy (>=1.6.2)',
         'ordereddict (>=1.1)' if sys.version_info < (2, 7) else 'collections',

@@ -107,7 +107,7 @@ def tape_compress(signal, norm_level=0.95):
         amp = np.abs(signal)
     else:
         amp = signal
-    #diff_in = np.abs(diffs(amp))
+    #diff_in = np.abs(np.ediff1d(amp))
     # Calculate result - could use np.ufunc.accumulate?
     out = np.empty(len(amp))
     out[0] = signal[0]
