@@ -7,15 +7,17 @@ Noise and chaos module.
 from __future__ import division
 
 import numpy as np
+import pandas as pd
 
 from cmath import rect
+from funckit import xoltar as fx
 
 from akasha.audio.curves import Circle
 from akasha.audio.envelope import Exponential
 from akasha.audio.frequency import Frequency
 from akasha.audio.generators import Generator
-from funckit import xoltar as fx
 from akasha.utils.math import normalize, numberof, pi2, random_phasor
+from akasha.timing import sampler
 
 
 class Noise(Generator):
@@ -191,3 +193,15 @@ class Chaos(Generator):
 
     def __repr__(self):
         return "%s(gen=%s)" % (self.__class__.__name__, repr(self.gen))
+
+
+def random_frequencies(n, low=20, high=sampler.rate/2.0, t=4, window=2, smoothing='exponential'):
+    signal = np.repeat(
+        np.random.random_integers(
+            low, high, np.ceil(float(n) / float(t))) / float(sampler.rate),
+        t)
+    if smoothing == 'exponential':
+        signal = pd.ewma(signal, span=window, min_periods=1)
+    elif smoothing:
+        signal = pd.rolling_mean(signal, window=window, min_periods=1)
+    return np.exp(1j * pi2 * np.cumsum(signal))

@@ -451,6 +451,13 @@ np.getattr = np.vectorize(
 )
 
 
+@np.vectorize
+def div_safe_zero(numerator, denominator, zero_value=np.inf):
+    if denominator == 0:
+        return zero_value
+    return float(numerator) / float(denominator)
+
+
 def as_fractions(arr, limit=1000000):
     """
     Return array as Fractions with denominators up to the limit given.
