@@ -65,7 +65,7 @@ setup(
         'py (>=1.4.11)',
         'pygame (>=1.9.2)',
         'scikits.audiolab (>=0.11.0)',
-        'scikits-image (>=0.7.1)',
+        # 'scikit-image (>=0.7.1)',
         'scikits.samplerate (>=0.3.3)',
         'scipy (>=0.10.0)',
         'txosc (>=0.2.0)',
