@@ -49,12 +49,10 @@ setup(
     package_data={
         'akasha.settings': ['keymaps/*.json'],
     },
-    install_requires=['distribute'],
     requires = [
         'PIL (==1.1.7)',
         'Twisted (==12.2.0)',
         'cdecimal (>=2.3)',
-        'distribute (>=0.6.32)',
         'funckit (==0.8.0)',
         'ipython (>=0.13)',
         'librosa (==0.3.1)',
