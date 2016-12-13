@@ -19,6 +19,7 @@ from akasha.audio.frequency import Frequency
 from akasha.audio.harmonics import Overtones
 from akasha.audio.noise import *
 from akasha.audio.oscillator import *
+from akasha.audio.padsynth import *
 from akasha.audio.sound import Sound, Group, Pcm
 
 from akasha.control.io.audio import play, write, read
