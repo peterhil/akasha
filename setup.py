@@ -33,7 +33,6 @@ setup(
     version=PACKAGE_VERSION,
     packages=[
         'akasha',
-        'akasha.analysis',
         'akasha.audio',
         'akasha.control',
         'akasha.control.io',
