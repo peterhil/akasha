@@ -5,6 +5,7 @@ IIR and other filters.
 """
 
 import numpy as np
+import scipy as sc
 
 from akasha import dsp
 
@@ -105,8 +106,8 @@ def highpass(signal, freq, bins=256, pass_zero=True, scale=False, nyq=sampler.ra
     Highpass filter.
     """
     a = 1
-    b = dsp.signal.firwin(bins, cutoff=freq, pass_zero=pass_zero, scale=scale, nyq=nyq)
-    return dsp.signal.lfilter(b, a, signal)
+    b = sc.signal.firwin(bins, cutoff=freq, pass_zero=pass_zero, scale=scale, nyq=nyq)
+    return sc.signal.lfilter(b, a, signal)
 
 
 def lowpass(signal, cutoff=sampler.rate / 2.0, bins=256):
@@ -116,8 +117,8 @@ def lowpass(signal, cutoff=sampler.rate / 2.0, bins=256):
     fs = float(sampler.rate)
     fc = cutoff / fs
     a = 1
-    b = dsp.signal.firwin(bins, cutoff=fc, window='hamming')
-    return dsp.signal.lfilter(b, a, signal)
+    b = sc.signal.firwin(bins, cutoff=fc, window='hamming')
+    return sc.signal.lfilter(b, a, signal)
 
 
 def resonate(signal, poles, zeros=np.array([]), gain=1.0, axis=-1, zi=None):
