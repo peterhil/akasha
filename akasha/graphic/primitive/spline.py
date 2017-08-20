@@ -18,7 +18,7 @@ from akasha.funct import consecutive
 from akasha.graphic.drawing import plt
 from akasha.graphic.geometry import circumcircle_radius, is_collinear, midpoint, orient, repeat_ends, turtle_turns, vectors, wrap_ends
 from akasha.utils.log import logger
-from akasha.utils.math import abslogsign, abspowersign, as_complex, cartesian, distances, lambertw, map_array, overlap, pi2, rect, repeat
+from akasha.utils.math import abslogsign, abspowersign, all_equal, as_complex, cartesian, distances, lambertw, map_array, overlap, pi2, rect, repeat
 
 
 def clothoid_erf(t):
@@ -437,6 +437,10 @@ def estimate_curvature_circle(signal):
 
 
 def ellipse_curvature(para):
+    if all_equal(para[:3]):
+        return np.inf
+    if is_collinear(*para):
+        return 0
     ell = Ellipse.from_conjugate_diameters(para[:3])
     return ell.curvature(np.angle(para[1] - ell.origin) / pi2)
 

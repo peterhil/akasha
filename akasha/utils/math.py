@@ -823,3 +823,8 @@ def get_impulses(signal, tau=False):
         peaks = pad(distances(np.angle(signal) % pi2), 0)
         res = np.fmax(np.sign((peaks - np.pi)) * pi2, 0)
     return res
+
+
+def all_equal(signal):
+    arr = np.asanyarray(signal)
+    return np.all(arr[0] == arr)
