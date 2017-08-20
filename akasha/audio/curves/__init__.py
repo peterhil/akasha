@@ -11,19 +11,11 @@ import numpy as np
 from akasha.audio.curves.circle import Circle
 from akasha.audio.curves.curve import Curve
 from akasha.audio.curves.ellipse import Ellipse
+from akasha.audio.curves.square import Square
 from akasha.audio.curves.super import Super
 
 from akasha.timing import sampler
-from akasha.utils.math import clip, normalize
-from akasha.utils.patterns import Singleton
-
-
-class Square(Curve, Singleton):
-    """Curve of the square wave. Made with np.sign()."""
-
-    @staticmethod
-    def at(points):
-        return clip(Circle.at(points) * 2)
+from akasha.utils.math import normalize
 
 
 def chirp_zeta(z1=-0.5 - 100j, z2=0.5 + 100j, dur=10):
