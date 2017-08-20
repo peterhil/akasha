@@ -132,11 +132,15 @@ def closed(signal):
 
 
 def wrap_ends(signal, n=1):
-    return np.concatenate([signal[-n:], signal, signal[:n]])
+    return np.concatenate([signal[-n:], np.asanyarray(signal), signal[:n]])
+
+
+def pad_ends(signal, value=0, n=1):
+    return np.concatenate((repeat(value, n), np.asanyarray(signal), repeat(value, n)))
 
 
 def repeat_ends(signal, n=1):
-    return np.concatenate([repeat(signal[:1], n), signal, repeat(signal[-1:], n)])
+    return np.concatenate([repeat(signal[:1], n), np.asanyarray(signal), repeat(signal[-1:], n)])
 
 
 def is_collinear(a, b, c):

@@ -16,7 +16,7 @@ from akasha.audio.curves import Ellipse
 from akasha.audio.oscillator import Osc
 from akasha.funct import consecutive
 from akasha.graphic.drawing import plt
-from akasha.graphic.geometry import circumcircle_radius, is_collinear, midpoint, orient, repeat_ends, turtle_turns, vectors, wrap_ends
+from akasha.graphic.geometry import circumcircle_radius, is_collinear, midpoint, orient, pad_ends, repeat_ends, turtle_turns, vectors, wrap_ends
 from akasha.utils.log import logger
 from akasha.utils.math import abslogsign, abspowersign, all_equal, as_complex, cartesian, distances, lambertw, map_array, overlap, pi2, rect, repeat
 
@@ -445,12 +445,17 @@ def ellipse_curvature(para):
     return ell.curvature(np.angle(para[1] - ell.origin) / pi2)
 
 
-def estimate_curvature(signal, ends=None):
+def estimate_curvature(signal, ends='open'):
     if ends == 'open':
-        # signal = repeat_ends(signal)
-        return np.concatenate(([0], np.array([ellipse_curvature(points) for points in consecutive(signal, 3)]), [0]))
-    if ends == 'closed':
+        pass
+    elif ends == 'pad':
+        signal = pad_ends(signal, 0)
+    elif ends == 'repeat':
+        signal = repeat_ends(signal)
+    elif ends == 'closed':
         signal = wrap_ends(signal)
+    else:
+        raise NotImplementedError('Unknown method for handling ends')
     return np.array([ellipse_curvature(points) for points in consecutive(signal, 3)])
 
 
