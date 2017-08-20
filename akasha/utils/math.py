@@ -4,9 +4,12 @@
 Mathematical utility functions module.
 """
 
+from __future__ import division
+
 import cmath
 import exceptions
 import numpy as np
+import scipy as sc
 import sys
 
 if sys.version_info >= (2, 7):
@@ -631,22 +634,80 @@ def clip(signal, limit=1.0, inplace=False):
     return signal
 
 
+def repeat(signal, times):
+    """
+    Repeat the signal the desired number of times.
+    """
+    signal = np.asarray([signal]).flatten()
+    if times < 1:
+        return signal[0:0]
+    if times == 1:
+        return signal
+    return np.repeat([signal], times, axis=0).flatten()
+
+
 def pad(signal, index=-1, count=1, value=None):
     """
     Inserts a padding value at index repeated count number of times.
     If value is None, uses an index from signal.
     """
+    signal = np.asarray([signal]).flatten()
     length = len(signal)
     space = index % (length + 1)
     value = (value if value is not None else signal[index])
-    return np.concatenate((signal[0:space], np.repeat(value, count), signal[space:length]))
+    return np.concatenate((signal[0:space], repeat(value, count), signal[space:length]))
 
 
-def distances(signal):
+def pad_minlength(signal, padding, minlength, index=-1, fromleft=False):
+    """
+    Pad a signal with padding value(s) on the left to be at least the given length.
+    """
+    padding = np.asanyarray([padding]).flatten()
+    if len(padding) == 0:
+        padding = [0]
+    missing = max(0, minlength - len(signal))
+    if not missing:
+        return signal
+    times = int(np.ceil(missing / len(padding)))  # Will be at least 1
+
+    if not fromleft:  # Take missing items from the head of the repeated padding
+        padding = repeat(padding, times)[:missing]
+    else:  # Take missing items from the tail
+        padding = repeat(padding, times)[-missing:]
+
+    space = index % (len(signal) + 1)
+    return np.concatenate((signal[:space], padding, signal[space:]))
+
+
+def pad_left(signal, padding, minlength):
+    """
+    Pad a signal with padding value(s) on the start (left side) to be at least the given length.
+    """
+    return pad_minlength(signal, padding, minlength, 0, fromleft=True)
+
+
+def pad_right(signal, padding, minlength):
+    """
+    Pad a signal with padding value(s) on the end to be at least the given length.
+    """
+    return pad_minlength(signal, padding, minlength, -1, fromleft=False)
+
+
+def overlap(signal, n):
+    """
+    Split the 1-d signal into n overlapping parts.
+    """
+    return np.array([signal[p : len(signal) - q] for p, q in enumerate(reversed(xrange(n)))])
+
+
+def distances(signal, start=None, end=None):
     """
     Get the absolute distances from consecutive samples of the signal.
+    Signal must have at least two samples.
+
+    See also: np.diff()
     """
-    return np.abs(np.diff(signal))
+    return np.abs(np.ediff1d(signal, start, end))
 
 
 def get_points(signal, size=1000, dtype=np.float64):
@@ -677,6 +738,43 @@ def scale(signal, size):
     """
     # TODO: Move to math or dsp module
     return ((clip(signal) + 1 + 1j) / 2.0 * (size - 1) + (0.5 + 0.5j))
+
+
+def scaleto(arr, magnitude=1, inplace=False):
+    """
+    Scales a complex or real signal by translating startpoint to the origo,
+    and scales endpoint to the desired magnitude.
+    """
+    if inplace:
+        arr -= arr[0]
+        arr *= magnitude / np.abs(arr[-1])
+        return arr
+    else:
+        return ((arr - arr[0]) * (magnitude / np.abs(arr[-1] - arr[0])))
+
+
+def abspowersign(base, exponent):
+    return np.sign(base) * np.abs(base) ** exponent
+
+
+def abslogsign(x):
+    return np.sign(x) * np.log(np.abs(x))
+
+
+def lambertw(z):
+    """
+    Lambert W function:
+    http://en.wikipedia.org/wiki/Lambert_W_function
+    http://docs.scipy.org/doc/scipy/reference/generated/scipy.special.lambertw.html
+    """
+    limit = -1 / np.e
+    if limit < np.abs(z) < 0:
+        branch = -1
+    elif limit < np.abs(z):
+        branch = 0
+    else:
+        raise ValueError("Argument for lambertw %s should be below %s to get real values out." % (z, limit))
+    return sc.special.lambertw(z, branch)
 
 
 def flip_vertical(signal):
@@ -712,3 +810,8 @@ def get_impulses(signal, tau=False):
         peaks = pad(distances(np.angle(signal) % pi2), 0)
         res = np.fmax(np.sign((peaks - np.pi)) * pi2, 0)
     return res
+
+
+def all_equal(signal):
+    arr = np.asanyarray(signal)
+    return np.all(arr[0] == arr)

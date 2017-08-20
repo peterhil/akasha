@@ -45,18 +45,18 @@ class TestGeometryFunctions(object):
         [0, 0, 0],
         [1, 1, 0],
         [1j, 2j, 0],
-        [-1, 1, np.pi],
-        [1j, 1, np.pi / 2],
-        [1j, 1 + 1j, np.pi / 4],
-        [1 + 2j, 1, 1.1071487177940904],
-        [2+4j, 1-1j, 1.8925468811915387],
+        [1, -1, np.pi],
+        [1j, 1, -np.pi / 2],
+        [1, 0.5 + 0.5j, np.pi / 4],
+        [1 + 2j, 1, -1.1071487177940904],
+        [2+4j, 1-1j, -1.8925468811915387],
 
         # Keep sign?
-        [-1j, 1j, -np.pi],
-        [octant - octant * 1j, octant + octant * 1j, -np.pi / 2],
+        [-1j, 1j, np.pi],
+        [octant - octant * 1j, octant + octant * 1j, np.pi / 2],
 
         # np.abs(result) > np.pi
-        [-1j, -1, 1.5707963267948968],
+        [-1j, -1, -1.5707963267948968],
     ])
     def test_angle_between(self, a, b, expected):
         assert_array_almost_equal(angle_between(a, b), expected)

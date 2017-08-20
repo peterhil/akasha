@@ -7,6 +7,7 @@ Curves for oscillators
 from __future__ import division
 
 import numpy as np
+import scipy as sc
 
 from cmath import rect
 
@@ -62,6 +63,10 @@ class Super(Curve):
 
         See 'Superellipse' article at Wikipedia for explanation of what these parameters mean:
         http://en.wikipedia.org/wiki/Superellipse
+
+        Also see Gielis curve:
+        http://www.2dcurves.com/power/powergc.html
+        http://en.wikipedia.org/wiki/Superformula
         """
         self.superness = self.get_superness(m, n, p, q, a, b)
 
@@ -200,6 +205,27 @@ class Ellipse(Curve):
         """
         return 1.0 / self.curvature(tau)
 
+    def arc_length(self, tau):
+        """
+        Arc length of the ellipse.
+        Formula (4) from: http://paulbourke.net/geometry/ellipsecirc/Abbott.pdf
+        """
+        rad = np.fmod(np.asarray(tau) * pi2 - self.angle, np.pi)  # TODO is substracting self.angle necessary?
+        return self.a * sc.special.ellipeinc(rad, self.eccentricity ** 2)
+
+    @property
+    def circumference(self):
+        return 4.0 * self.arc_length(0.25)
+
+    @property
+    def eccentricity(self):
+        """
+        Eccentricity of the ellipse: https://en.wikipedia.org/wiki/Ellipse#Eccentricity
+        """
+        a, b = self.a, self.b
+        if a < b: a, b = b, a
+        return np.sqrt(1 - (b / a) ** 2)
+
     @classmethod
     def from_rhombus(cls, para):
         a, b, c, d = para
@@ -217,7 +243,7 @@ class Ellipse(Curve):
         tr = AffineTransform()
         tr.estimate(dia, para_at_origin)
 
-        u, s, v = np.linalg.svd(tr._matrix[:2, :2], full_matrices=False, compute_uv=True)
+        u, s, v = np.linalg.svd(tr.params[:2, :2], full_matrices=False, compute_uv=True)
         a, b = s[:2]
 
         uv = np.eye(3); uv[:2, :2] = u * np.diag(s) * v

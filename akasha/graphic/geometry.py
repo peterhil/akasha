@@ -9,8 +9,9 @@ from __future__ import division
 import numpy as np
 import skimage.transform as skt
 
+from akasha.funct import consecutive
 from akasha.utils import _super
-from akasha.utils.math import as_complex, cartesian, complex_as_reals, normalize, pi2
+from akasha.utils.math import as_complex, cartesian, complex_as_reals, normalize, overlap, pad_left, pad_right, pi2, repeat
 
 
 class AffineTransform(skt.AffineTransform):
@@ -32,7 +33,7 @@ class AffineTransform(skt.AffineTransform):
         Apply the affine transformation onto a signal on the complex plane.
         """
         coords = complex_as_reals(signal).T
-        return as_complex(self._apply_mat(coords, self._matrix).T)
+        return as_complex(_super(self).__call__(coords).T)
 
     def estimate(self, src, dst):
         """
@@ -47,7 +48,7 @@ class AffineTransform(skt.AffineTransform):
         Apply the inverse affine transformation onto a signal on the complex plane.
         """
         coords = complex_as_reals(signal).T
-        return as_complex(self._apply_mat(coords, self._inv_matrix).T)
+        return as_complex(_super(self).inverse(coords).T)
 
     def __repr__(self):
         return "{}(scale={}, rotation={}, shear={}, translation={})".format(
@@ -59,14 +60,53 @@ class AffineTransform(skt.AffineTransform):
         )
 
 
-def angle_between(a, b, origin=0):
+def angle_between(a, b, c=None):
     """
-    Angle between two points around origin in radians.
+    Angle between two points (a and c though b) in radians.
+    If only a and b is given, will give the angle between (a and b through 0).
 
     Dot Product & Angle Between Vectors: http://www.youtube.com/watch?v=p8BZTFNSKIw
-    Also see: http://en.wikipedia.org/wiki/Vector_dot_product#Geometric_interpretation
+    Also see: https://en.wikipedia.org/wiki/Vector_dot_product#Geometric_definition
     """
-    return np.angle(cartesian(1, np.angle(a - origin) - np.angle(b - origin)))
+    if c is None:
+        b, c = 0, b
+    return np.angle(cartesian(1, np.angle(c - b) - np.angle(a - b)))
+
+
+def angles_between(points, *rest):
+    """
+    Angles between each three consecutive points on the complex plane in radians.
+    If given less than three points, the input is padded from the start with the first value.
+
+    For example:
+    >>> angles_between([3j, 0])
+    array([-1.5707963267948966])
+    """
+    points = np.append(points, rest).astype(np.complex128)
+    if len(points) == 0:
+        return points
+    points = pad_left(points, points[0], 3)
+    return angle_between(*overlap(points, 3))
+
+
+def directions(points):
+    """
+    Get direction angles (as in compass directions) for navigating through a set of points.
+    https://en.wikipedia.org/wiki/Direction_(geometry)
+    """
+    return np.angle(vectors(points))
+
+
+def turtle_turns(points):
+    """
+    Changes in orientation angle on a path formed by points (like in turtle graphics).
+    This differs from turns, in that the changes are relative to previous path segment.
+
+    >>> o = np.array([0.5+0.5j, -0.5+0.5j, -0.5-0.5j, 0.5-0.5j])
+    >>> turtle_turns(o) / pi2
+    array([ 0.25,  0.25])
+    """
+    return np.array([np.ediff1d(directions(seg / vectors(seg)[1])) for seg in consecutive(points, 3)]).flatten()
 
 
 def circumcircle_radius(a, b, c):
@@ -74,20 +114,33 @@ def circumcircle_radius(a, b, c):
     Find the circumcircle of three points.
     """
     side = np.abs(a - c)
-    angle = angle_between(a, c, b)
+    angle = angle_between(a, b, c)
     return np.abs(side / (2 * np.sin(angle)))
 
 
 def circumcircle_radius_alt(previous_pt, point, next_pt):
     """
     Find the circumcircle of three points.
+    Takes into account the clockwise or anticlockwise direction, that the points represent.
     """
-    (v1, v2) = vectors(previous_pt, point, next_pt)
+    (v1, v2) = np.array([previous_pt, next_pt]) - point
     return np.abs(v1 - v2) / 2 * np.sin(angle_between(v1, v2))
 
 
 def closed(signal):
     return np.append(signal, signal[0])
+
+
+def wrap_ends(signal, n=1):
+    return np.concatenate([signal[-n:], np.asanyarray(signal), signal[:n]])
+
+
+def pad_ends(signal, value=0, n=1):
+    return np.concatenate((repeat(value, n), np.asanyarray(signal), repeat(value, n)))
+
+
+def repeat_ends(signal, n=1):
+    return np.concatenate([repeat(signal[:1], n), np.asanyarray(signal), repeat(signal[-1:], n)])
 
 
 def is_collinear(a, b, c):
@@ -106,7 +159,7 @@ def is_orthogonal(a, b, c=0):
     """
     Return true if two complex points (a, b) are orthogonal from center point (c).
     """
-    return np.abs(angle_between(a, b, c)) == np.pi / 2
+    return np.abs(angle_between(a, c, b)) == np.pi / 2
 
 
 def midpoint(a, b):
@@ -152,6 +205,10 @@ def random_parallelogram(x=1, y=1):
     return normalize(np.append(tri, parallelogram_point(*tri)))
 
 
+def rotate(z, tau):
+    return z * np.exp(tau * pi2 * 1j)
+
+
 def rotate_towards(u, v, tau, center=0):
     """
     Rotate point u tau degrees *towards* v around center.
@@ -161,5 +218,17 @@ def rotate_towards(u, v, tau, center=0):
     return s * (-np.exp(pi2 * 1j * tau) * sign) + center
 
 
-def vectors(previous_pt, point, next_pt):
-    return np.array([previous_pt, next_pt]) - point
+def vectors_from_origo(points, origo=0):
+    return np.asarray(points) - origo
+
+
+def vectors(points, *rest):
+    """
+    Get the vectors that give directions on how to move through some points.
+    You could use this to move something in way the turtle graphics in the Logo programming language works.
+
+    https://en.wikipedia.org/wiki/Logo_(programming_language)
+    https://en.wikipedia.org/wiki/Turtle_graphics
+    """
+    points = np.append(points, rest)
+    return np.ediff1d(points)
