@@ -57,6 +57,11 @@ class TestCircle(object):
         pts = np.linspace(0, 1.0, 7, endpoint=False)
         assert_nulp_diff(c.at(pts), np.exp(pi2 * 1j * pts), 1)
 
+    def test_roots_of_unity(self):
+        points = np.linspace(0, 1, 5, endpoint=False)
+        expected = Circle.at(points)
+        assert np.all(Circle.roots_of_unity(5) == expected)
+
     def test_at_complex(self):
         c = Circle()
         pts = np.linspace(0, 1 + 1j, 7, endpoint=False)
