@@ -11,7 +11,15 @@ import numpy as np
 from akasha.curves import Ellipse
 from akasha.funct import consecutive
 from akasha.math.geometry import circumcircle_radius, circumcircle_radius_alt, is_collinear
-from akasha.utils.math import all_equal, div_safe_zero, pi2
+from akasha.utils.math import all_equal, complex_as_reals, div_safe_zero, pi2
+
+
+debug = True
+
+
+if debug:
+    import pylab
+    from akasha.graphic.plotting import plot_signal
 
 
 def circle_curvature(a, b, c):
@@ -40,8 +48,19 @@ def ellipse_curvature(para):
     if is_collinear(*points):
         return 0
     ell = Ellipse.from_conjugate_diameters(points)
+
+    if debug:
+        pylab.interactive(False)
+        pylab.plot(*complex_as_reals(ell.at(np.linspace(0, 1, 200))))
+
     return ell.curvature(np.angle(points[0] - ell.origin) / pi2)
 
 
 def estimate_curvature_with_ellipses(signal):
-    return np.array([ellipse_curvature(points) for points in consecutive(signal, 3)])
+    res = np.array([ellipse_curvature(points) for points in consecutive(signal, 3)])
+
+    if debug:
+        plot_signal(signal)
+        pylab.savefig('/Users/peterhil/Desktop/ellipse_curvature.png', dpi=300)
+
+    return res
