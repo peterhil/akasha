@@ -11,7 +11,7 @@ import scipy as sc
 
 from cmath import rect
 
-from akasha.audio.curves.curve import Curve
+from akasha.curves.curve import Curve
 from akasha.graphic.geometry import AffineTransform, is_orthogonal, midpoint, rotate_towards
 from akasha.utils.math import pi2
 

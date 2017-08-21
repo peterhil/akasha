@@ -6,8 +6,8 @@ Square curve
 
 from __future__ import division
 
-from akasha.audio.curves.circle import Circle
-from akasha.audio.curves.curve import Curve
+from akasha.curves.circle import Circle
+from akasha.curves.curve import Curve
 from akasha.utils.math import clip
 from akasha.utils.patterns import Singleton
 

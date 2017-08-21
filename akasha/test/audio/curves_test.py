@@ -16,8 +16,8 @@ import numpy as np
 from numpy.testing.utils import assert_array_equal, assert_array_almost_equal
 from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
 
-from akasha.audio.curves import Curve, Circle, Ellipse, Square, Super
 from akasha.audio.generators import PeriodicGenerator
+from akasha.curves import Curve, Circle, Ellipse, Square, Super
 from akasha.utils.math import pi2, normalize
 from akasha.utils.patterns import Singleton
 

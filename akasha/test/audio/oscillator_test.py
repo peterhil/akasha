@@ -14,10 +14,10 @@ import pytest
 
 import numpy as np
 
-from akasha.audio.curves import Circle, Curve
 from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import PeriodicGenerator
 from akasha.audio.oscillator import Osc
+from akasha.curves import Circle, Curve
 from akasha.timing import sampler
 from akasha.utils.math import map_array, to_phasor, pi2
 

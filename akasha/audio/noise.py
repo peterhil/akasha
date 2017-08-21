@@ -12,7 +12,7 @@ import pandas as pd
 from cmath import rect
 from funckit import xoltar as fx
 
-from akasha.audio.curves import Circle
+from akasha.curves import Circle
 from akasha.audio.envelope import Exponential
 from akasha.audio.frequency import Frequency
 from akasha.audio.generators import Generator

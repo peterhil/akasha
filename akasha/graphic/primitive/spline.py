@@ -12,7 +12,7 @@ import scipy as sc
 
 from cmath import rect
 
-from akasha.audio.curves import Ellipse
+from akasha.curves import Ellipse
 from akasha.funct import consecutive
 from akasha.graphic.geometry import circumcircle_radius, is_collinear, midpoint, orient, pad_ends, repeat_ends, turtle_turns, vectors, wrap_ends
 from akasha.utils.log import logger

@@ -13,8 +13,8 @@ Unit tests for geometry module
 import numpy as np
 import pytest
 
+from akasha.curves import Circle, Square
 from akasha.graphic.geometry import AffineTransform, angle_between, circumcircle_radius, midpoint
-from akasha.audio.curves import Circle, Square
 from numpy.testing.utils import assert_array_almost_equal
 
 
