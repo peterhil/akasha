@@ -35,6 +35,7 @@ from akasha.graphic.primitive.line import *
 from akasha.graphic.primitive.spline import *
 
 from akasha.math.geometry import *
+from akasha.math.geometry.curvature import *
 
 from akasha.net.wiki import *
 
