@@ -10,7 +10,7 @@ import numpy as np
 
 from akasha.curves import Ellipse
 from akasha.funct import consecutive
-from akasha.math.geometry import circumcircle_radius, circumcircle_radius_alt, is_collinear, pad_ends, repeat_ends, wrap_ends
+from akasha.math.geometry import circumcircle_radius, circumcircle_radius_alt, is_collinear
 from akasha.utils.math import all_equal, div_safe_zero, pi2
 
 
@@ -37,15 +37,5 @@ def ellipse_curvature(para):
     return ell.curvature(np.angle(para[1] - ell.origin) / pi2)
 
 
-def estimate_curvature_with_ellipses(signal, ends='open'):
-    if ends == 'open':
-        pass
-    elif ends == 'pad':
-        signal = pad_ends(signal, 0)
-    elif ends == 'repeat':
-        signal = repeat_ends(signal)
-    elif ends == 'closed':
-        signal = wrap_ends(signal)
-    else:
-        raise NotImplementedError('Unknown method for handling ends')
+def estimate_curvature_with_ellipses(signal):
     return np.array([ellipse_curvature(points) for points in consecutive(signal, 3)])
