@@ -14,9 +14,9 @@ from cmath import rect
 
 from akasha.curves import Ellipse
 from akasha.funct import consecutive
-from akasha.graphic.geometry import circumcircle_radius, is_collinear, midpoint, orient, pad_ends, repeat_ends, turtle_turns, vectors, wrap_ends
+from akasha.graphic.geometry import estimate_curvature, orient, turtle_turns, vectors, wrap_ends
 from akasha.utils.log import logger
-from akasha.utils.math import abslogsign, abspowersign, all_equal, as_complex, cartesian, distances, lambertw, map_array, overlap, pi2, rect, repeat
+from akasha.utils.math import abslogsign, abspowersign, as_complex, cartesian, distances, lambertw, map_array, overlap, pi2, rect, repeat
 
 
 def clothoid_erf(t):
@@ -405,47 +405,6 @@ def cl_piece(start, stop, n, endpoint=False, scale=1, norm=False, fn=clothoid_wi
     coeff = 1 / np.abs(curve[-1]) if norm else 1
     rotated = (curve - curve[0]) * rect(coeff, angle)
     return rotated * scale
-
-
-def circle_curvature(a, b, c):
-    """
-    Discrete curvature estimation.
-
-    See section "2.6.1 Discrete curvature estimation" at:
-    http://www.dgp.toronto.edu/~mccrae/mccraeMScthesis.pdf
-    """
-    if a == b == c:
-        return np.inf
-    if is_collinear(a, b, c):
-        return 0
-    return 1 / circumcircle_radius(a, b, c)
-
-
-def estimate_curvature_circle(signal):
-    return np.array([circle_curvature(*points) for points in consecutive(signal, 3)])
-
-
-def ellipse_curvature(para):
-    if all_equal(para[:3]):
-        return np.inf
-    if is_collinear(*para):
-        return 0
-    ell = Ellipse.from_conjugate_diameters(para[:3])
-    return ell.curvature(np.angle(para[1] - ell.origin) / pi2)
-
-
-def estimate_curvature(signal, ends='open'):
-    if ends == 'open':
-        pass
-    elif ends == 'pad':
-        signal = pad_ends(signal, 0)
-    elif ends == 'repeat':
-        signal = repeat_ends(signal)
-    elif ends == 'closed':
-        signal = wrap_ends(signal)
-    else:
-        raise NotImplementedError('Unknown method for handling ends')
-    return np.array([ellipse_curvature(points) for points in consecutive(signal, 3)])
 
 
 def clothoid_arc_length(para):

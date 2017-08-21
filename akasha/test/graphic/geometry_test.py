@@ -14,8 +14,16 @@ import numpy as np
 import pytest
 
 from akasha.curves import Circle, Square
-from akasha.graphic.geometry import AffineTransform, angle_between, circumcircle_radius, midpoint
+from akasha.graphic.geometry import \
+     AffineTransform, \
+     angle_between, \
+     circumcircle_radius, \
+     circumcircle_radius_alt, \
+     estimate_curvature, \
+     estimate_curvature_with_ellipses, \
+     midpoint
 from numpy.testing.utils import assert_array_almost_equal
+from akasha.utils.math import all_equal
 
 
 class TestAffineTransform(object):
@@ -69,11 +77,60 @@ class TestGeometryFunctions(object):
     def test_midpoint(self, a, b, expected):
         assert midpoint(a, b) == expected
 
-    def test_circumcircle_radius(self):
-        radius = 0.5
-        pts = Circle.at(np.linspace(0, 1, 3, endpoint=False)) * radius
-        assert_array_almost_equal(apply(circumcircle_radius, pts), np.abs(radius))
 
-    def test_circumcircle_radius_returns_positive_radius(self):
-        expected = np.sqrt(2) / 2
-        assert circumcircle_radius(1j, 1, 0) == expected
+class TestCircumcircleRadius(object):
+    """
+    Unit tests for circumcircle radius.
+    """
+    circumcircle_dataset = [
+        [Circle.roots_of_unity(5) * 2, 2],
+        [Circle.roots_of_unity(4) * 0.25, 0.25],
+        # Test edge cases on guards
+        [[3, 3, 3], 0],
+        [[1, 2, 3], np.inf],
+    ]
+
+    @pytest.mark.parametrize(('points', 'expected'), circumcircle_dataset)
+    def test_circumcircle_radius(self, points, expected):
+        assert_array_almost_equal(circumcircle_radius(*points[:3]), expected)
+
+    @pytest.mark.parametrize(('points', 'expected'), circumcircle_dataset)
+    def test_circumcircle_radius_alt(self, points, expected):
+        assert_array_almost_equal(circumcircle_radius_alt(*points[:3]), expected)
+
+
+class TestEstimateCurvatureWithCircles(object):
+    """
+    Unit tests for curvature estimation using circumcircle radius.
+    """
+    curvature_dataset = [
+        [Circle.roots_of_unity(5) * 2, 0.5],
+        [Circle.roots_of_unity(6) * 0.25, 4],
+        # Test edge cases on guards
+        [[3, 3, 3], np.inf],
+        [[1, 2, 3], 0],
+    ]
+
+    @pytest.mark.parametrize(('points', 'expected'), curvature_dataset)
+    def test_estimate_curvature(self, points, expected):
+        assert_array_almost_equal(estimate_curvature(points), expected)
+
+    @pytest.mark.parametrize(('points', 'expected'), curvature_dataset)
+    def test_estimate_curvature_with_ellipses(self, points, expected):
+        assert_array_almost_equal(estimate_curvature_with_ellipses(points), expected)
+
+    @pytest.mark.parametrize(('points', 'expected'), [
+        [Circle.roots_of_unity(5) * -2, -0.5],
+        [Circle.roots_of_unity(4) * -2, -0.5],
+        [Circle.roots_of_unity(6) * -2, -0.5],
+    ])
+    def test_estimate_curvature_with_negative_radius(self, points, expected):
+        assert_array_almost_equal(estimate_curvature(points), expected)
+
+    @pytest.mark.parametrize(('points', 'expected'), [
+        [Circle.roots_of_unity(5) * 2, 0.5],
+        [Circle.roots_of_unity(4) * 2, 0.5],
+        [Circle.roots_of_unity(6) * -2, -0.5],
+    ])
+    def test_estimate_curvature_with_reversed_points(self, points, expected):
+        assert_array_almost_equal(estimate_curvature(np.flipud(points)), -expected)

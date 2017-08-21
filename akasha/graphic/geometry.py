@@ -9,9 +9,10 @@ from __future__ import division
 import numpy as np
 import skimage.transform as skt
 
+# from akasha.curves.ellipse import Ellipse
 from akasha.funct import consecutive
 from akasha.utils import _super
-from akasha.utils.math import as_complex, cartesian, complex_as_reals, normalize, overlap, pad_left, pad_right, pi2, repeat
+from akasha.utils.math import all_equal, as_complex, cartesian, complex_as_reals, div_safe_zero, normalize, overlap, pad_left, pad_right, pi2, repeat
 
 
 class AffineTransform(skt.AffineTransform):
@@ -112,19 +113,66 @@ def turtle_turns(points):
 def circumcircle_radius(a, b, c):
     """
     Find the circumcircle of three points.
+    Takes into account the counterclockwise (positive radius) or clockwise (negative radius) direction, that the points represent.
     """
+    if a == b == c:
+        return 0
+    if is_collinear(a, b, c):
+        return np.inf
     side = np.abs(a - c)
     angle = angle_between(a, b, c)
-    return np.abs(side / (2 * np.sin(angle)))
+    return -side / (2 * np.sin(angle))
 
 
-def circumcircle_radius_alt(previous_pt, point, next_pt):
+def circumcircle_radius_alt(a, b, c):
     """
     Find the circumcircle of three points.
-    Takes into account the clockwise or anticlockwise direction, that the points represent.
+    Takes into account the counterclockwise (positive radius) or clockwise (negative radius) direction, that the points represent.
     """
-    (v1, v2) = np.array([previous_pt, next_pt]) - point
-    return np.abs(v1 - v2) / 2 * np.sin(angle_between(v1, v2))
+    if a == b == c:
+        return 0
+    if is_collinear(a, b, c):
+        return np.inf
+    (v1, v2) = np.array([a, c]) - b
+    side = np.abs(a - c)
+    return -side / (2 * np.sin(angle_between(v1, v2)))
+
+
+def circle_curvature(a, b, c):
+    """
+    Discrete curvature estimation.
+
+    See section "2.6.1 Discrete curvature estimation" at:
+    http://www.dgp.toronto.edu/~mccrae/mccraeMScthesis.pdf
+    """
+    return div_safe_zero(1, circumcircle_radius_alt(a, b, c))
+
+
+def estimate_curvature(signal):
+    return np.array([circle_curvature(*points) for points in consecutive(signal, 3)])
+
+
+def ellipse_curvature(para):
+    if all_equal(para[:3]):
+        return np.inf
+    if is_collinear(*para):
+        return 0
+    ell = Ellipse.from_conjugate_diameters(para[:3])
+    return ell.curvature(np.angle(para[1] - ell.origin) / pi2)
+
+
+def estimate_curvature_with_ellipses(signal, ends='open'):
+    if ends == 'open':
+        pass
+    elif ends == 'pad':
+        signal = pad_ends(signal, 0)
+    elif ends == 'repeat':
+        signal = repeat_ends(signal)
+    elif ends == 'closed':
+        signal = wrap_ends(signal)
+    else:
+        raise NotImplementedError('Unknown method for handling ends')
+    return np.array([ellipse_curvature(points) for points in consecutive(signal, 3)])
 
 
 def closed(signal):
