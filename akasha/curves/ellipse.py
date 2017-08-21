@@ -12,7 +12,8 @@ import scipy as sc
 from cmath import rect
 
 from akasha.curves.curve import Curve
-from akasha.graphic.geometry import AffineTransform, is_orthogonal, midpoint, rotate_towards
+from akasha.math.geometry import is_orthogonal, midpoint, rotate_towards
+from akasha.math.geometry.affine_transform import AffineTransform
 from akasha.utils.math import pi2
 
 

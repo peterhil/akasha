@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# E1101: Module 'x' has no 'y' member
+#
+# pylint: disable=E1101
 """
 Geometry module
 """
@@ -7,58 +11,9 @@ Geometry module
 from __future__ import division
 
 import numpy as np
-import skimage.transform as skt
 
-# from akasha.curves.ellipse import Ellipse
 from akasha.funct import consecutive
-from akasha.utils import _super
-from akasha.utils.math import all_equal, as_complex, cartesian, complex_as_reals, div_safe_zero, normalize, overlap, pad_left, pad_right, pi2, repeat
-
-
-class AffineTransform(skt.AffineTransform):
-    """
-    Affine transformation on the complex plane.
-
-    Inherits from skimage.transform.AffineTransform:
-    http://scikit-image.org/docs/0.8.0/api/skimage.transform.html#affinetransform
-
-    Adds complex_plane method to transform comples signals.
-
-    References:
-    Postscript Language Reference Manual, 3rd edition, chapters "4.3.2 Transformations" and
-    "4.3.3 Matrix Representation and Manipulation"
-    http://www.adobe.com/products/postscript/pdfs/PLRM.pdf
-    """
-    def __call__(self, signal):
-        """
-        Apply the affine transformation onto a signal on the complex plane.
-        """
-        coords = complex_as_reals(signal).T
-        return as_complex(_super(self).__call__(coords).T)
-
-    def estimate(self, src, dst):
-        """
-        Estimate the required affine transformation on a complex plane from src to dst.
-        """
-        src = complex_as_reals(src).T
-        dst = complex_as_reals(dst).T
-        _super(self).estimate(src, dst)
-
-    def inverse(self, signal):
-        """
-        Apply the inverse affine transformation onto a signal on the complex plane.
-        """
-        coords = complex_as_reals(signal).T
-        return as_complex(_super(self).inverse(coords).T)
-
-    def __repr__(self):
-        return "{}(scale={}, rotation={}, shear={}, translation={})".format(
-            self.__class__.__name__,
-            tuple(self.scale),
-            float(self.rotation),
-            float(self.shear),
-            tuple(self.translation),
-        )
+from akasha.utils.math import cartesian, normalize, overlap, pad_left, pi2, repeat
 
 
 def angle_between(a, b, c=None):
@@ -136,43 +91,6 @@ def circumcircle_radius_alt(a, b, c):
     (v1, v2) = np.array([a, c]) - b
     side = np.abs(a - c)
     return -side / (2 * np.sin(angle_between(v1, v2)))
-
-
-def circle_curvature(a, b, c):
-    """
-    Discrete curvature estimation.
-
-    See section "2.6.1 Discrete curvature estimation" at:
-    http://www.dgp.toronto.edu/~mccrae/mccraeMScthesis.pdf
-    """
-    return div_safe_zero(1, circumcircle_radius_alt(a, b, c))
-
-
-def estimate_curvature(signal):
-    return np.array([circle_curvature(*points) for points in consecutive(signal, 3)])
-
-
-def ellipse_curvature(para):
-    if all_equal(para[:3]):
-        return np.inf
-    if is_collinear(*para):
-        return 0
-    ell = Ellipse.from_conjugate_diameters(para[:3])
-    return ell.curvature(np.angle(para[1] - ell.origin) / pi2)
-
-
-def estimate_curvature_with_ellipses(signal, ends='open'):
-    if ends == 'open':
-        pass
-    elif ends == 'pad':
-        signal = pad_ends(signal, 0)
-    elif ends == 'repeat':
-        signal = repeat_ends(signal)
-    elif ends == 'closed':
-        signal = wrap_ends(signal)
-    else:
-        raise NotImplementedError('Unknown method for handling ends')
-    return np.array([ellipse_curvature(points) for points in consecutive(signal, 3)])
 
 
 def closed(signal):

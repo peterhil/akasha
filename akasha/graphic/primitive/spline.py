@@ -10,11 +10,9 @@ from __future__ import division
 import numpy as np
 import scipy as sc
 
-from cmath import rect
-
 from akasha.curves import Ellipse
 from akasha.funct import consecutive
-from akasha.graphic.geometry import estimate_curvature, orient, turtle_turns, vectors, wrap_ends
+from akasha.math.geometry import estimate_curvature, orient, turtle_turns, vectors, wrap_ends
 from akasha.utils.log import logger
 from akasha.utils.math import abslogsign, abspowersign, as_complex, cartesian, distances, lambertw, map_array, overlap, pi2, rect, repeat
 
