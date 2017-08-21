@@ -29,12 +29,18 @@ def estimate_curvature(signal):
 
 
 def ellipse_curvature(para):
-    if all_equal(para[:3]):
+    """
+    Fit ellipse from three points using conjugate diameters.
+    """
+    # TODO: Investigate fitting ellipses from five points.
+    # https://math.stackexchange.com/questions/151969/ellipse-fitting-methods
+    points = para[:3]
+    if all_equal(points):
         return np.inf
-    if is_collinear(*para):
+    if is_collinear(*points):
         return 0
-    ell = Ellipse.from_conjugate_diameters(para[:3])
-    return ell.curvature(np.angle(para[1] - ell.origin) / pi2)
+    ell = Ellipse.from_conjugate_diameters(points)
+    return ell.curvature(np.angle(points[0] - ell.origin) / pi2)
 
 
 def estimate_curvature_with_ellipses(signal):
