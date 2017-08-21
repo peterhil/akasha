@@ -76,7 +76,7 @@ def circumcircle_radius(a, b, c):
         return np.inf
     side = np.abs(a - c)
     angle = angle_between(a, b, c)
-    return -side / (2 * np.sin(angle))
+    return side / (2 * -np.sin(angle))
 
 
 def circumcircle_radius_alt(a, b, c):
@@ -90,7 +90,7 @@ def circumcircle_radius_alt(a, b, c):
         return np.inf
     (v1, v2) = np.array([a, c]) - b
     side = np.abs(a - c)
-    return -side / (2 * np.sin(angle_between(v1, v2)))
+    return side / (2 * -np.sin(angle_between(v1, v2)))
 
 
 def closed(signal):
