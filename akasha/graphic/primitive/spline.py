@@ -13,9 +13,7 @@ import scipy as sc
 from cmath import rect
 
 from akasha.audio.curves import Ellipse
-from akasha.audio.oscillator import Osc
 from akasha.funct import consecutive
-from akasha.graphic.drawing import plt
 from akasha.graphic.geometry import circumcircle_radius, is_collinear, midpoint, orient, pad_ends, repeat_ends, turtle_turns, vectors, wrap_ends
 from akasha.utils.log import logger
 from akasha.utils.math import abslogsign, abspowersign, all_equal, as_complex, cartesian, distances, lambertw, map_array, overlap, pi2, rect, repeat
@@ -142,15 +140,6 @@ def kphis(n, a, t):
     phi = tangent_angle(n, t)
     s = arclength(a, t)
     return (k, phi, s)
-
-
-def plot_unit(axes=3, scale=1):
-    o = Osc.from_ratio(1, 8000)[::] * scale
-    plt.interactive(True)
-    plt.plot(o.real, o.imag)
-    plt.axis('equal')
-    plt.axis((-axes, axes, -axes, axes))
-    plt.show()
 
 
 def n_from_phi_t(phi, t):

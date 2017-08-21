@@ -10,6 +10,7 @@ import pygame
 import tempfile
 import time
 
+from akasha.audio.oscillator import Osc
 from akasha.funct import pairwise
 from akasha.graphic.colour import colorize, white
 # from akasha.graphic.colour import hsv2rgb, angle2hsv, chords_to_hues
@@ -424,4 +425,16 @@ if plt:
         plt.interactive(True)
         plt.plot(x, fn(x))
         plt.show(block=False)
+        return False
+
+    def plot_unit(axes=3, scale=1):
+        """
+        Helper function to plot an unit circle
+        """
+        o = Osc.from_ratio(1, 8000)[::] * scale
+        plt.interactive(True)
+        plt.plot(o.real, o.imag)
+        plt.axis('equal')
+        plt.axis((-axes, axes, -axes, axes))
+        plt.show()
         return False
