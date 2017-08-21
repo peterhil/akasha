@@ -12,7 +12,6 @@ from cmath import rect, pi, exp, phase
 from funckit import xoltar as fx
 from scipy.signal import hilbert
 
-from akasha.audio.curves import *
 from akasha.audio.dtmf import DTMF
 from akasha.audio.envelope import Attack, Exponential, Gamma
 from akasha.audio.frequency import Frequency
@@ -23,6 +22,8 @@ from akasha.audio.sound import Sound, Group, Pcm
 
 from akasha.control.io.audio import play, write, read
 from akasha.control.io.keyboard import *
+
+from akasha.curves import *
 
 from akasha import dsp
 from akasha.effects.tape import *

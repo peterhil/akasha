@@ -8,7 +8,7 @@ from __future__ import division
 
 from numbers import Real
 
-from akasha.audio.curves import Circle
+from akasha.curves import Circle
 from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import PeriodicGenerator
 
