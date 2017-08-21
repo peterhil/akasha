@@ -406,36 +406,3 @@ def graph(signal, size=1000, dur=None, plot=False, axis=True,
     )
 
     show(img, plot and plt)
-
-
-if plt:
-    def plot_signal(signal, cmap='hot'):
-        """
-        Plot complex signal using matplotlib.pyplot.
-        """
-        plt.interactive(True)
-        im = plt.imshow([signal.real, signal.imag], cmap)
-        plt.show(block=False)
-        return im
-
-    def plot_real_fn(fn, x):
-        """
-        Plot a real valued function with x values using matplotlib.pyplot.
-        """
-        plt.interactive(True)
-        plt.plot(x, fn(x))
-        plt.show(block=False)
-        return False
-
-    def plot_unit(axes=3, scale=1, n=800):
-        """
-        Helper function to plot an unit circle
-        """
-        samples = np.linspace(0, 1, n, endpoint=False)
-        o = Circle.at(samples) * scale
-        plt.interactive(True)
-        plt.plot(o.real, o.imag)
-        plt.axis('equal')
-        plt.axis((-axes, axes, -axes, axes))
-        plt.show()
-        return False
