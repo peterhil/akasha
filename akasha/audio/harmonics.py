@@ -39,15 +39,18 @@ class Overtones(FrequencyRatioMixin, Generator):
         self._hz = self.base.frequency
         self.n = n
         self.func = func
-        # Sine waves FIXME: separate freq. damping from rate
-        # self.damping = damping or (
-        #     lambda f, a=1.0: (
-        #         -5 * np.log2(float(f)) / (10.0),
-        #         a * float(self.frequency)/float(f)
-        #         )
-        #     )
-        #self.damping = damping or (lambda f, a=1.0: -5*np.log2(float(f))/10.0)
-        self.damping = damping or (lambda f, a=1.0: -5 * np.log2(float(f)) / 1000.0)
+        if damping == 'sine':
+            # Sine waves FIXME: separate freq. damping from rate
+            self.damping = lambda f, a=1.0: (
+                -5 * np.log2(float(f)) / (10.0),
+                a * float(self.frequency)/float(f)
+            )
+        elif damping == 'default':
+            self.damping = lambda f, a=1.0: -5 * np.log2(float(f)) / 1000.0
+        elif callable(damping):
+            self.damping = damping
+        else:
+            self.damping = None
         self.sustain = None
         self.sustained = None
         self.rand_phase = rand_phase
@@ -102,6 +105,7 @@ class Overtones(FrequencyRatioMixin, Generator):
             if o.frequency == 0:
                 break
 
+            e = None
             # square waves
             # amplitude = float(self.frequency / o.frequency * float(self.frequency))
             # e = Exponential(0, amp=amplitude)
@@ -112,15 +116,19 @@ class Overtones(FrequencyRatioMixin, Generator):
 
             # sine waves
             # e = Exponential(-o.frequency / 100.0)
-            e = Exponential(self.damping(o.frequency))
-            # e = Gamma(-self.damping(o.frequency)[0], 1.0 / max(float(o.frequency) / 100.0, 1.0))
 
+            if self.damping:
+                e = Exponential(self.damping(o.frequency))
+                # e = Gamma(-self.damping(o.frequency)[0], 1.0 / max(float(o.frequency) / 100.0, 1.0))
+
+            out = o[iterable]
             if self.rand_phase:
-                # TODO: Move phases to Osc/Frequency!
-                frames += o[iterable] * random_phasor() * e[iterable]
-            else:
-                frames += o[iterable] * e[iterable]
+                out *= random_phasor()  # TODO: Move phases to Osc/Frequency!
+            if e is not None:
+                out *= e[iterable]
+            frames += out
 
+        # TODO: Implement ADSR Envelopes!!!
         if self.sustain is not None:
             sus_damping = lambda f, a = 1.0: -2 * np.log2(float(f)) / 5.0
             #sus_damping = lambda f: -0.5
