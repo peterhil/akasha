@@ -22,8 +22,8 @@ from akasha.timing import sampler, Timed, Watch
 from akasha.tunings import PianoLayout, WickiLayout
 from akasha.utils import issequence
 from akasha.math import div_safe_zero, pcm, minfloat
+from akasha.settings import config
 from akasha.utils.log import logger
-
 
 keyboard = WickiLayout()
 # keyboard = PianoLayout()
@@ -86,12 +86,12 @@ def loop(snd, channel, widget):
                 percent = float(loop_time) / (1.0 / sampler.videorate) * 100
                 av_percent = (float(audio_time) + float(video_time)) / (1.0 / sampler.videorate) * 100
                 fps = watch.get_fps(int(sampler.videorate))
-                logger.log(
-                    logging.BORING,
-                    "Animation: clock tick %d, FPS: %3.3f Hz, loop: %.3f Hz, (%.1f %%), "
-                    "input: %.2f Hz, audio: %.2f Hz, video: %.2f Hz, (%.1f %%)", t, fps, div_safe_zero(1, loop_time), percent,
-                    div_safe_zero(1, input_time), div_safe_zero(1, audio_time), div_safe_zero(1, video_time), av_percent
-                )
+                if percent >= config.logging_limits.LOOP_THRESHOLD_PERCENT:
+                    logger.warn(
+                        "Animation: clock tick %d, FPS: %3.3f Hz, loop: %.3f Hz, (%.1f %%), "
+                        "input: %.2f Hz, audio: %.2f Hz, video: %.2f Hz, (%.1f %%)", t, fps, div_safe_zero(1, loop_time), percent,
+                        div_safe_zero(1, input_time), div_safe_zero(1, audio_time), div_safe_zero(1, video_time), av_percent
+                    )
             t = clock.tick_busy_loop(sampler.videorate)
         except KeyboardInterrupt, err:
             # See http://stackoverflow.com/questions/2819931/handling-keyboardinterrupt-when-working-with-pygame
@@ -176,7 +176,7 @@ def handle_input(snd, watch, event):
         return
     # Key down
     elif event.type == pg.KEYDOWN:
-        logger.debug("Key '%s' (%s) down." % (pg.key.name(event.key), event.key))
+        # logger.debug("Key '%s' (%s) down." % (pg.key.name(event.key), event.key))
         step_size = (5 if event.mod & (pg.KMOD_LSHIFT | pg.KMOD_RSHIFT) else 1)
         # Rewind
         if pg.K_F7 == event.key:
@@ -217,7 +217,7 @@ def handle_input(snd, watch, event):
                 except TypeError:
                     logger.warn("Can't get current value from the iterator.")
                     snd.sustain = 0
-                logger.debug("Key '%s' (%s) up, sustain: %s" % (pg.key.name(event.key), event.key, snd.sustain))
+                # logger.debug("Key '%s' (%s) up, sustain: %s" % (pg.key.name(event.key), event.key, snd.sustain))
         return
     # Mouse
     elif hasattr(snd, 'frequency') and event.type in (
@@ -336,4 +336,4 @@ def change_frequency(snd, key):
     snd.frequency = keyboard.get_frequency(key)
     if isinstance(snd, Generator):
         snd.sustain = None
-    logger.info("Changed frequency: %s." % snd)
+    logger.debug("Changed frequency: %s." % (snd.frequency if hasattr(snd, 'frequency') else snd))

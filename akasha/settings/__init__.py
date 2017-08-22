@@ -16,7 +16,13 @@ class config(object):
     """
     Configuration class.
     """
-    pass
+    class logging_limits(object):
+        """
+        Various limits for logging
+        """
+        FREQUENCY_DEVIATION_CENTS = 0.1
+        LOOP_THRESHOLD_PERCENT = 100
+
 
 def np_setup():
     """

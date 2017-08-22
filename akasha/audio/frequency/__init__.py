@@ -24,6 +24,7 @@ from akasha.utils import _super
 from akasha.utils.decorators import memoized
 from akasha.utils.log import logger
 from akasha.math import cents_diff
+from akasha.settings import config
 
 
 class FrequencyRatioMixin(object):
@@ -99,7 +100,7 @@ class FrequencyRatioMixin(object):
         if ratio != 0:
             approx = sampler.rate * ratio
             deviation = cents_diff(freq, approx)
-            if deviation != 0:
+            if deviation > config.logging_limits.FREQUENCY_DEVIATION_CENTS:
                 logger.warn("Frequency approx %f for ratio %s deviates from %.3f by %.16f%% cents" % \
                             (approx, ratio, freq, deviation))
         return ratio
