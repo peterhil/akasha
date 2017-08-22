@@ -4,6 +4,7 @@
 # E1101: Module 'x' has no 'y' member
 #
 # pylint: disable=E1101
+
 """
 Mathematical utility functions module.
 """

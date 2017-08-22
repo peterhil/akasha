@@ -6,6 +6,7 @@
 # E1101: Module 'x' has no 'y' member
 #
 # pylint: disable=C0111,R0201,E1101
+
 """
 Unit tests for generators
 """

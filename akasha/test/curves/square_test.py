@@ -7,6 +7,10 @@
 #
 # pylint: disable=C0111,R0201,E1101
 
+"""
+Unit tests for Square
+"""
+
 import numpy as np
 
 from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
@@ -16,9 +20,7 @@ from akasha.utils.patterns import Singleton
 
 
 class TestSquare(object):
-    """
-    Unit tests for Square
-    """
+
     pts = np.arange(0, 1, 1.0 / 8, dtype=np.float64)
 
     def test_super(self):

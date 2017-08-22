@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 # encoding: utf-8
+#
+# E1101: Module 'x' has no 'y' member
+#
+# pylint: disable=E1101
+
 """
 Copyright (c) 2011 Peter Hillerström. All rights reserved.
 

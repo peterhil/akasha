@@ -8,6 +8,7 @@
 # C0321: More than one statement on a single line
 #
 # pylint: disable=C0111,R0201,E1101,R0901,C0321
+
 """
 Unit tests for numeric types
 """

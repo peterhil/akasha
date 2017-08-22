@@ -7,6 +7,10 @@
 #
 # pylint: disable=C0111,R0201,E1101
 
+"""
+Unit tests for Ellipse
+"""
+
 import pytest
 import numpy as np
 
@@ -23,9 +27,6 @@ def ellipse_parameters(ellipse):
 
 
 class TestEllipse(object):
-    """
-    Unit tests for Ellipse
-    """
 
     def test_at(self):
         ell = Ellipse(1, 0.707, pi2 * 1/8)

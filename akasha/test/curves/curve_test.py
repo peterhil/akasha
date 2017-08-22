@@ -7,6 +7,10 @@
 #
 # pylint: disable=C0111,R0201,E1101
 
+"""
+Unit tests for Curve
+"""
+
 import pytest
 
 from akasha.audio.generators import PeriodicGenerator
@@ -15,9 +19,6 @@ from akasha.utils.patterns import Singleton
 
 
 class TestCurve(object):
-    """
-    Unit tests for Curve
-    """
 
     def test_super(self):
         assert issubclass(Curve, PeriodicGenerator)

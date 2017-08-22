@@ -7,6 +7,10 @@
 #
 # pylint: disable=C0111,R0201,E1101
 
+"""
+Unit tests for Circle
+"""
+
 import numpy as np
 
 from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
@@ -17,9 +21,6 @@ from akasha.utils.patterns import Singleton
 
 
 class TestCircle(object):
-    """
-    Unit tests for Circle
-    """
 
     def test_super(self):
         assert issubclass(Circle, Curve)
