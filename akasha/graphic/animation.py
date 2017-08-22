@@ -333,7 +333,11 @@ def change_frequency(snd, key):
     """
     Change frequency of the sound based on key position.
     """
-    snd.frequency = keyboard.get_frequency(key)
+    new_frequency = keyboard.get_frequency(key)
+    if new_frequency == 0:
+        return False
+    snd.frequency = new_frequency
     if isinstance(snd, Generator):
         snd.sustain = None
     logger.debug("Changed frequency: %s." % (snd.frequency if hasattr(snd, 'frequency') else snd))
+    return new_frequency
