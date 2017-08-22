@@ -41,7 +41,7 @@ def get_interval_list():
     """
     Get the list of musical pitch intervals table from Wikipedia.
     """
-    site = wiki.Wiki("http://en.wikipedia.org/w/api.php")
+    site = wiki.Wiki("https://en.wikipedia.org/w/api.php")
     params = {
         'action': 'query',
         'prop': 'revisions',
