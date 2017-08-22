@@ -463,6 +463,12 @@ np.getattr = np.vectorize(
 
 @np.vectorize
 def div_safe_zero(numerator, denominator, zero_value=np.inf):
+    """
+    Prevent zero division error by returning a specified value instead in case
+    the denominator is zero. Returns posititive infinity by default.
+
+    Note! Converts real arguments into floats (including ints).
+    """
     if denominator == 0:
         return zero_value
     return float(numerator) / float(denominator)
