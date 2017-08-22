@@ -15,7 +15,7 @@ import pytest
 
 from akasha.audio.envelope import Exponential
 from akasha.timing import sampler
-from akasha.utils.math import minfloat
+from akasha.math import minfloat
 
 from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
 

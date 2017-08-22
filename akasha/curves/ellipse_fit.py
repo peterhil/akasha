@@ -9,7 +9,7 @@ from __future__ import division
 import numpy as np
 import numpy.linalg as la
 
-from akasha.utils.math import complex_as_reals
+from akasha.math import complex_as_reals
 
 
 def ellipse_fit_fitzgibbon(points):

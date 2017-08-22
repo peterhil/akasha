@@ -12,7 +12,7 @@ import numpy as np
 from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
 
 from akasha.curves import Curve, Circle
-from akasha.utils.math import pi2
+from akasha.math import pi2
 from akasha.utils.patterns import Singleton
 
 

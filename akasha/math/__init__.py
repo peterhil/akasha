@@ -4,4 +4,4 @@
 Math module
 """
 
-from __future__ import division
+from akasha.math.functions import *

@@ -19,7 +19,7 @@ from akasha.audio.generators import PeriodicGenerator
 from akasha.audio.oscillator import Osc
 from akasha.curves import Circle, Curve
 from akasha.timing import sampler
-from akasha.utils.math import map_array, to_phasor, pi2
+from akasha.math import map_array, to_phasor, pi2
 
 from fractions import Fraction
 from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff

@@ -19,7 +19,7 @@ from funckit import xoltar as fx
 from akasha.audio.oscillator import Frequency
 from akasha.control.io.keyboard import kb, pos
 from akasha.utils.log import logger
-from akasha.utils.math import pi2, find_closest_index, map_array
+from akasha.math import pi2, find_closest_index, map_array
 
 
 class EqualTemperament(object):

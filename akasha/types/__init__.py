@@ -6,7 +6,7 @@ Types module
 
 import numpy as np
 
-from akasha.utils.math import map_array
+from akasha.math import map_array
 
 
 colour_values = np.float32

@@ -15,7 +15,7 @@ import numpy as np
 
 from funckit import xoltar as fx
 from akasha.utils.log import logger, logging
-from akasha.utils.math import map_array, normalize, as_polar, as_rect
+from akasha.math import map_array, normalize, as_polar, as_rect
 
 
 class Magnet(object):

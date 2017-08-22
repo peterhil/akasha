@@ -9,7 +9,7 @@ from __future__ import division
 import numpy as np
 
 from akasha.curves.curve import Curve
-from akasha.utils.math import pi2
+from akasha.math import pi2
 from akasha.utils.patterns import Singleton
 
 

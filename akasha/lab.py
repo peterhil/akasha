@@ -43,4 +43,4 @@ from akasha.net.wiki import *
 from akasha.timing import sampler
 from akasha.tunings import WickiLayout
 
-from akasha.utils.math import *
+from akasha.math import *

@@ -17,7 +17,7 @@ from numpy.testing.utils import assert_array_equal
 from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
 
 from akasha.curves import Curve, Circle, Super
-from akasha.utils.math import normalize
+from akasha.math import normalize
 from akasha.utils.patterns import Singleton
 
 

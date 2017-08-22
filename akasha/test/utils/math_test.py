@@ -16,7 +16,7 @@ import numpy as np
 from numpy.testing.utils import assert_array_equal
 
 from akasha.funct import pairwise
-from akasha.utils.math import *
+from akasha.math import *
 
 
 class TestPrimes(object):

@@ -18,7 +18,7 @@ from akasha.types.numeric import RealUnit
 from akasha.utils import _super
 from akasha.utils.decorators import memoized
 from akasha.utils.log import logger
-from akasha.utils.math import cents_diff
+from akasha.math import cents_diff
 
 
 class FrequencyRatioMixin(object):

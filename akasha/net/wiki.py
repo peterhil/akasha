@@ -17,7 +17,7 @@ from fractions import Fraction
 from funckit.datastruct import head as car, tail as cdr
 
 from akasha.utils.log import logger
-from akasha.utils.math import cents, identity
+from akasha.math import cents, identity
 
 
 def user_agent(req):

@@ -18,7 +18,7 @@ from akasha.graphic.drawing import get_canvas, blit, draw, video_transfer
 from akasha.timing import sampler, Timed, Watch
 from akasha.tunings import PianoLayout, WickiLayout
 from akasha.utils import issequence
-from akasha.utils.math import div_safe_zero, pcm, minfloat
+from akasha.math import div_safe_zero, pcm, minfloat
 from akasha.utils.log import logger
 
 

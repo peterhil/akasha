@@ -12,7 +12,7 @@ import operator
 from fractions import Fraction
 
 from akasha.timing import sampler
-from akasha.utils.math import pi2
+from akasha.math import pi2
 
 
 ### Limiter functions

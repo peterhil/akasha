@@ -12,7 +12,7 @@ from akasha.timing import sampler
 from akasha.types import colour_values, colour_result
 from akasha.utils.decorators import memoized
 from akasha.utils.log import logger
-from akasha.utils.math import distances, minfloat, pad, pi2, rad_to_deg, rad_to_tau
+from akasha.math import distances, minfloat, pad, pi2, rad_to_deg, rad_to_tau
 
 
 lowest_audible_hz = 16.35

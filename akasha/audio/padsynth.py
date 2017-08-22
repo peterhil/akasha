@@ -15,7 +15,7 @@ import scipy as sc
 from itertools import izip
 
 from akasha.audio.frequency import Frequency
-from akasha.utils.math import random_phasor
+from akasha.math import random_phasor
 
 
 class GaussianCurve(object):

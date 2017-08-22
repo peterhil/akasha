@@ -15,7 +15,7 @@ from akasha.funct import consecutive
 from akasha.math.geometry import orient, turtle_turns, vectors, wrap_ends
 from akasha.math.geometry.curvature import estimate_curvature
 from akasha.utils.log import logger
-from akasha.utils.math import abslogsign, abspowersign, as_complex, cartesian, distances, lambertw, map_array, overlap, pi2, rect, repeat
+from akasha.math import abslogsign, abspowersign, as_complex, cartesian, distances, lambertw, map_array, overlap, pi2, rect, repeat
 
 
 def clothoid_erf(t):

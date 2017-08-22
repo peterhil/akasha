@@ -10,7 +10,7 @@ import scipy as sp
 
 from akasha.audio.generators import Generator
 from akasha.timing import sampler
-from akasha.utils.math import minfloat
+from akasha.math import minfloat
 
 
 class Exponential(Generator):

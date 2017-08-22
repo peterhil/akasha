@@ -14,7 +14,7 @@ from akasha.audio.oscillator import Osc
 
 from akasha.timing import sampler
 from akasha.utils.decorators import memoized
-from akasha.utils.math import random_phasor, map_array, normalize, pi2
+from akasha.math import random_phasor, map_array, normalize, pi2
 
 
 class Overtones(FrequencyRatioMixin, Generator):

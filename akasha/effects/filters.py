@@ -13,7 +13,7 @@ from akasha.audio.frequency import Frequency, Fraction
 from akasha.dsp.z_transform import czt, iczt
 from akasha.timing import sampler
 from akasha.utils.log import logger
-from akasha.utils.math import pi2, get_impulses, normalize, complex_as_reals, as_complex, pad
+from akasha.math import pi2, get_impulses, normalize, complex_as_reals, as_complex, pad
 
 
 def unosc(signal):

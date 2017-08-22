@@ -10,7 +10,7 @@ import pylab
 from contextlib import contextmanager
 
 from akasha.curves.circle import Circle
-from akasha.utils.math import complex_as_reals
+from akasha.math import complex_as_reals
 
 
 @contextmanager

@@ -8,7 +8,7 @@ from __future__ import division
 
 from akasha.curves.circle import Circle
 from akasha.curves.curve import Curve
-from akasha.utils.math import clip
+from akasha.math import clip
 from akasha.utils.patterns import Singleton
 
 

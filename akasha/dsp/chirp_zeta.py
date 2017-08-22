@@ -9,7 +9,7 @@ from __future__ import division
 import numpy as np
 
 from akasha.timing import sampler
-from akasha.utils.math import normalize
+from akasha.math import normalize
 
 
 def chirp_zeta(z1=-0.5 - 100j, z2=0.5 + 100j, dur=10):

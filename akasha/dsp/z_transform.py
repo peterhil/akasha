@@ -9,7 +9,7 @@ from __future__ import division
 import numpy as np
 import scipy as sc
 
-from akasha.utils.math import pi2, power_limit
+from akasha.math import pi2, power_limit
 
 
 __all__ = ['czt', 'iczt']

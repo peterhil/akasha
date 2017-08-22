@@ -7,7 +7,7 @@ Graphic line drawing functions.
 import numpy as np
 
 from akasha.types import assert_type, signed
-from akasha.utils.math import complex_as_reals
+from akasha.math import complex_as_reals
 
 from skimage import draw as skdraw
 

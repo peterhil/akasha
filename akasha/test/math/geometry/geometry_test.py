@@ -16,7 +16,7 @@ import pytest
 from akasha.curves import Circle
 from akasha.math.geometry import angle_between, circumcircle_radius, circumcircle_radius_alt, midpoint
 from numpy.testing.utils import assert_array_almost_equal
-from akasha.utils.math import all_equal
+from akasha.math import all_equal
 
 
 class TestGeometryFunctions(object):

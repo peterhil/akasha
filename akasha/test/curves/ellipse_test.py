@@ -15,7 +15,7 @@ from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_di
 
 from akasha.curves import Ellipse
 from akasha.curves.ellipse import ellipse_fit_fitzgibbon
-from akasha.utils.math import pi2
+from akasha.math import pi2
 
 
 def ellipse_parameters(ellipse):

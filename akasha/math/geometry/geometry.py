@@ -13,7 +13,7 @@ from __future__ import division
 import numpy as np
 
 from akasha.funct import consecutive
-from akasha.utils.math import cartesian, normalize, overlap, pad_left, pi2, repeat
+from akasha.math import cartesian, normalize, overlap, pad_left, pi2, repeat
 
 
 def angle_between(a, b, c=None):

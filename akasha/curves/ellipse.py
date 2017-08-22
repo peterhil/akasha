@@ -14,10 +14,10 @@ from cmath import rect
 
 from akasha.curves.curve import Curve
 from akasha.curves.ellipse_fit import ellipse_fit_fitzgibbon
-from akasha.utils.math import complex_as_reals
+from akasha.math import complex_as_reals
 from akasha.math.geometry import is_orthogonal, midpoint, rotate_towards
 from akasha.math.geometry.affine_transform import AffineTransform
-from akasha.utils.math import pi2
+from akasha.math import pi2
 
 
 class Ellipse(Curve):

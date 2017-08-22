@@ -11,7 +11,7 @@ import numpy as np
 from akasha.curves.circle import Circle
 from akasha.curves.curve import Curve
 from akasha.utils import issequence
-from akasha.utils.math import pi2, normalize
+from akasha.math import pi2, normalize
 
 
 class Super(Curve):

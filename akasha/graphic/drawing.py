@@ -17,7 +17,7 @@ from akasha.graphic.colour import colorize, white
 from akasha.graphic.primitive.line import bresenham
 from akasha.timing import sampler
 from akasha.utils.log import logger
-from akasha.utils.math import \
+from akasha.math import \
     clip, \
     complex_as_reals, \
     flip_vertical, \
