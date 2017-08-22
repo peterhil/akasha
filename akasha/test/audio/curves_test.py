@@ -18,6 +18,7 @@ from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_di
 
 from akasha.audio.generators import PeriodicGenerator
 from akasha.curves import Curve, Circle, Ellipse, Square, Super
+from akasha.curves.ellipse import ellipse_fit_fitzgibbon
 from akasha.utils.math import pi2, normalize
 from akasha.utils.patterns import Singleton
 
@@ -175,6 +176,10 @@ class TestSuper(object):
         assert o == eval(repr(o))
 
 
+def ellipse_parameters(ellipse):
+    return np.array([ellipse.a, ellipse.b, ellipse.angle, ellipse.origin])
+
+
 class TestEllipse(object):
 
     def test_at(self):
@@ -250,4 +255,52 @@ class TestEllipse(object):
         assert_nulp_diff(
             np.array([exp.a, exp.b, exp.angle, exp.origin]),
             np.array([ell.a, ell.b, ell.angle, ell.origin])
+        )
+
+    def test_ellipse_fit_fitzgibbon(self):
+        points = np.array([
+            0.6153730882866389+0.1684349412020227j,
+            0.4797595596705834+0.2011243355095417j,
+            0.4457112154886673+0.2021464613288909j,
+            0.4238023402141161+0.2021545825531006j,
+            0.3897696453033182+0.2011425910221709j,
+            0.2541605969985578+0.1684310346246555j,
+            0.3897512937581410+0.1357296682136179j,
+            0.4238205462233292+0.1347250678902793j,
+            0.4457088519763241+0.1347276650491862j,
+            0.4797772426076383+0.1357426178659449j
+        ])
+        expected = np.array([
+            0.0330831623206757,
+            0.0000667165668973,
+            0.9462653856399076,
+            -0.028776862289463,
+            -0.3188002645366254,
+            0.0320250431330183
+        ])
+        # Just check that the result matches Matlab/Octave result
+        assert_array_almost_equal(ellipse_fit_fitzgibbon(points), expected)
+
+    samples = np.linspace(0, 1, 17, endpoint=False)
+    ellipse_params = [
+        [ 0.75, 0.125, {'angle': -0.375 * pi2, 'origin': -0.15-0.25j }],
+        # Failure of the Fitzgibbon algorithm - degenerate cases?:
+        [ 0.75,  0.25, {'angle': -0.375 * pi2, 'origin': -0.15-0.25j }],
+        [ 0.75,  0.35, {'angle':  0.375 * pi2, 'origin': -0.15-0.25j }],
+    ]
+    @pytest.mark.parametrize(('a', 'b', 'kwargs'), ellipse_params)
+    def test_ellipse_from_points(self, a, b, kwargs):
+        original = Ellipse(a, b, **kwargs)
+        fitted = Ellipse.from_points(original.at(self.samples))
+        assert_array_almost_equal(
+            ellipse_parameters(fitted),
+            ellipse_parameters(original)
+        )
+
+    def test_general_coefficients(self):
+        original = Ellipse(0.8, 0.5, -0.375*pi2, -0.15-0.25j)
+        fitted = Ellipse.from_points(original.at(self.samples))
+        assert_array_almost_equal(
+            ellipse_parameters(fitted),
+            ellipse_parameters(original)
         )

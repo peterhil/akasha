@@ -7,11 +7,14 @@ Ellipses module
 from __future__ import division
 
 import numpy as np
+import numpy.linalg as la
 import scipy as sc
 
 from cmath import rect
 
 from akasha.curves.curve import Curve
+from akasha.curves.ellipse_fit import ellipse_fit_fitzgibbon
+from akasha.utils.math import complex_as_reals
 from akasha.math.geometry import is_orthogonal, midpoint, rotate_towards
 from akasha.math.geometry.affine_transform import AffineTransform
 from akasha.utils.math import pi2
@@ -155,3 +158,39 @@ class Ellipse(Curve):
         #     Circle.at(np.linspace(0, 1, 500)) * np.abs(s) + s
         #     ]), lines=True)
         return cls(a, b, np.angle(l), c)
+
+    @classmethod
+    def from_points(cls, points):
+        """
+        Make an ellipse by fitting a set of points.
+        """
+        return cls.from_general_coefficients(*ellipse_fit_fitzgibbon(points))
+
+    @classmethod
+    def from_general_coefficients(cls, a, b, c, d, e, f):
+        """
+        See formulas at the end of section:
+        https://en.wikipedia.org/wiki/Ellipse#Canonical_form
+        """
+        # TODO Check for degenerate cases described here:
+        # https://en.wikipedia.org/wiki/Ellipse#General_ellipse
+        den = (b ** 2 - 4.0 * a * c)
+        acb_pythagorean = np.sqrt(((a - c) ** 2) + b ** 2)
+        ab_common = (a * (e ** 2) + c * (d ** 2) - b * d * e + den * f)
+
+        a = -np.sqrt(2.0 * ab_common * (a + c + acb_pythagorean)) / den
+        b = -np.sqrt(2.0 * ab_common * (a + c - acb_pythagorean)) / den
+        # Make sure a is the major axis
+        if a < b:
+            [a, b] = [b, a]
+
+        x = (2.0 * c * d - b * e) / den
+        y = (2.0 * a * e - b * d) / den
+        origin = x + 1j * y
+
+        if b == 0:
+            theta = 0 if a <= c else pi2 / 4.0
+        else:
+            theta = np.arctan((c - a - acb_pythagorean) / b)
+
+        return cls(a, b, theta, origin)
