@@ -11,6 +11,8 @@ Akasha settings module.
 import locale
 import numpy as np
 import sys
+import logging
+
 
 class config(object):
     """
@@ -20,6 +22,7 @@ class config(object):
         """
         Various limits for logging
         """
+        LOGLEVEL = logging.INFO
         FREQUENCY_DEVIATION_CENTS = 0.1
         LOOP_THRESHOLD_PERCENT = 100
 
