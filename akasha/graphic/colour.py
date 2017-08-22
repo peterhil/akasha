@@ -227,13 +227,24 @@ def log_octaves(taus):
 
 def instantaneous_phase(signal, padding=True):
     """
-    Get the instantaneous (angular frequency) phase of the signal
-    by moving the complex signal onto the unit circle (by dividing it by the absolute value),
-    and then get the distances of the consecutive samples, and then angles from these chord lengths.
+    Get the angular frequency (instantaneous phase) of the signal by using chords.
+    Returns the phases as tau angles.
+
+    This works by moving the complex signal samples onto the unit circle
+    (keeps phase and discard amplitude by dividing it by the absolute value).
+
+    Then get the distances of the consecutive samples, and then tau angles from
+    these chord lengths.
     """
-    # Move the complex signal samples onto the unit circle (keep phase and discard amplitude)
-    unit_signal = signal / np.fmax(np.abs(signal), minfloat(0.5)[0])  # TODO Find another way to avoid zero division?
-    chords = pad(distances(unit_signal), -1) if padding else distances(unit_signal)
+    signal = np.asanyarray(signal)
+    if len(signal) > 0:
+        # TODO Find another way to avoid zero division than using minfloat?
+        unit_signal = signal / np.fmax(np.abs(signal), minfloat(0.5)[0])
+
+        dists = distances(unit_signal)
+        chords = pad(dists, -1) if padding and len(dists) > 0 else pad(dists, value=0)
+    else:
+        chords = np.zeros(1, dtype=signal.dtype)
     return chord_to_tau(chords)
 
 
