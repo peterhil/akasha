@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# E1101: Module 'x' has no 'y' member
+#
+# pylint: disable=E1101
 """
 Mathematical utility functions module.
 """
 
 from __future__ import division
 
-import cmath
 import exceptions
 import numpy as np
 import scipy as sc
@@ -26,7 +29,10 @@ from akasha.utils.log import logger
 
 
 pi2 = np.pi * 2.0
-cartesian = np.vectorize(rect, doc="""Return cartesian points from polar coordinate radiuses and angles.""")
+cartesian = np.vectorize(
+    rect,
+    doc="""Return cartesian points from polar coordinate radiuses and angles."""
+)
 
 
 def to_phasor(x):
@@ -373,13 +379,13 @@ def random_phasor(n=1, amp=1.0, random=np.random.random):
     graph(snd)  # or anim(Pcm(snd))
     """
     if np.isscalar(amp):
-        return [cmath.rect(a, b) for a, b in izip(np.repeat(amp, n), pi2 * random(n) - np.pi)]
+        return [rect(a, b) for a, b in izip(np.repeat(amp, n), pi2 * random(n) - np.pi)]
     elif callable(amp):
-        return np.array(map(cmath.rect, *np.array([amp(n), pi2 * random(n) - np.pi])))
+        return np.array(map(rect, *np.array([amp(n), pi2 * random(n) - np.pi])))
     else:
         assert n == len(amp), "Arguments (n, amp) should have the same length, "
         "got: ({0}, {1})".format(n, len(amp))
-        return np.array(map(cmath.rect, *np.array([amp, pi2 * random(n) - np.pi])))
+        return np.array(map(rect, *np.array([amp, pi2 * random(n) - np.pi])))
 
 
 # Primes
@@ -773,7 +779,10 @@ def lambertw(z):
     elif limit < np.abs(z):
         branch = 0
     else:
-        raise ValueError("Argument for lambertw %s should be below %s to get real values out." % (z, limit))
+        raise ValueError(
+            "Argument for lambertw %s should be below %s to get real values out." % \
+            (z, limit)
+        )
     return sc.special.lambertw(z, branch)
 
 
