@@ -38,7 +38,7 @@ def anim(snd, size=800, name='Resonance', antialias=True, lines=False, colours=T
         "Akasha animation is using %s Hz sampler rate and %s fps video rate." %
         (sampler.rate, sampler.videorate))
 
-    sampler.paused = False
+    sampler.paused = True if hasattr(snd, 'frequency') else False
     screen = init_pygame(name, size)
     channel = init_mixer(*mixer_options)
 
@@ -58,6 +58,11 @@ def loop(snd, channel, widget):
     watch = Watch()
     last = 0
 
+    # Handle first time, draw axis and bg
+    first_time = True
+    widget.render(np.array([0, 0, 0], dtype=np.complex128))
+    pg.display.flip()
+
     while True:
         try:
             with Timed() as loop_time:
@@ -66,6 +71,8 @@ def loop(snd, channel, widget):
                 with Timed() as input_time:
                     for event in pg.event.get():
                         if handle_input(snd, watch, event):
+                            if first_time and hasattr(snd, 'frequency') and sampler.paused:
+                                sampler.pause()
                             watch.reset()
                             last = 0
                 if not sampler.paused:
