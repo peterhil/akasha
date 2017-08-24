@@ -15,7 +15,7 @@ from akasha.timing import sampler
 from akasha.types import colour_values, colour_result
 from akasha.utils.decorators import memoized
 from akasha.utils.log import logger
-from akasha.math import distances, minfloat, pad, pi2, rad_to_deg, rad_to_tau
+from akasha.math import fixnans, distances, minfloat, pad, pi2, rad_to_deg, rad_to_tau
 
 
 lowest_audible_hz = 16.35
@@ -286,4 +286,5 @@ def colorize(signal, steps=6 * 255, use_chords=True):
     Colorize a signal according to it's instantaneous frequency.
     """
     colourizer = chords_to_hues if use_chords else angles2hues
-    return get_huemap(steps)[(colourizer(signal) * (steps / 360.0)).astype(np.int)]
+    colours = fixnans(colourizer(signal))
+    return get_huemap(steps)[(colours * (steps / 360.0)).astype(np.int)]

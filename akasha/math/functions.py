@@ -624,6 +624,15 @@ def normalize(signal):
     return signal / sup
 
 
+def fixnans(signal, value=0):
+    """
+    Replace NaN values on signal with a value.
+    """
+    out = np.copy(signal)
+    out[np.isnan(out)] = value
+    return out
+
+
 def inside(arr, low, high):
     """
     Return values of array inside interval [low, high]
