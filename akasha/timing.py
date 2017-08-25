@@ -71,8 +71,19 @@ class Sampler(object):
         """
         return int(round(self.rate / self.videorate))
 
-    def at(self, times, dtype=np.float):
-        return (np.array(times) * self.rate).astype(dtype)
+    def at(self, t, dtype=np.float64):
+        """
+        Return frame numbers from times (t).
+        """
+        return (np.array(t, dtype=np.float64) * self.rate).astype(dtype)
+
+    def slice(self, start, end=None, step=1):
+        """
+        Return times from slice of frame numbers (which can be floats).
+        """
+        if end is None:
+            end = start; start = 0
+        return (np.arange(start, end, step, dtype=np.float64) / self.rate)
 
     def pause(self):
         """

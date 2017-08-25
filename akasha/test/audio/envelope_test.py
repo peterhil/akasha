@@ -14,11 +14,13 @@ Unit tests for Exponential
 import numpy as np
 import pytest
 
+from numpy.testing.utils import \
+     assert_array_almost_equal, \
+     assert_array_almost_equal_nulp as assert_nulp_diff
+
 from akasha.audio.envelope import Exponential
 from akasha.timing import sampler
 from akasha.math import minfloat
-
-from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
 
 
 class TestExponential(object):
@@ -37,7 +39,7 @@ class TestExponential(object):
     def test_exponential_rates(self, rate):
         assert_nulp_diff(
             np.e ** rate,
-            Exponential(rate, 1.0).sample(44100),
+            Exponential(rate, 1.0).at(1.0),
             1
         )
 
@@ -114,3 +116,39 @@ class TestExponential(object):
         e = Exponential.from_scale(1490.2664382038824)
         assert expected.rate == e.rate
         assert e.at(e.scale) == 0
+
+    times = sampler.slice(1000, step=100)
+    expected_half_scale = np.array([
+        1.0, 0.0340716719169156,
+        0.0011608788272139, 0.0000395530825361,
+        0.0000013476396515, 0.0000000459163361,
+        0.0000000015644463, 0.0000000000533033,
+        0.0000000000018161, 0.0000000000000619
+    ])
+
+    def test_at(self):
+        e = Exponential.from_scale(0.5)
+        assert e.at(0.51) == 0
+        assert_array_almost_equal(
+            e.at(self.times),
+            self.expected_half_scale
+        )
+
+    def test_sample_magnitude(self):
+        e = Exponential.from_scale(0.5)
+        assert e[sampler.at(0.51)] == 0
+        assert e[10] == 0.71324599963206747
+
+    def test_sample(self):
+        e = Exponential.from_scale(0.5)
+        assert_array_almost_equal(
+            e[sampler.at(self.times)],
+            self.expected_half_scale
+        )
+
+    def test_sample_with_iterable(self):
+        e = Exponential.from_scale(0.5)
+        assert_array_almost_equal(
+            e[iter(sampler.at(self.times))],
+            self.expected_half_scale
+        )

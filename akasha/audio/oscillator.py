@@ -25,6 +25,12 @@ class Osc(FrequencyRatioMixin, PeriodicGenerator):
         self._hz = Frequency(freq)
         self.curve = curve
 
+    def at(self, t):
+        """
+        Sample oscillator at sample times (t).
+        """
+        return self.curve.at(self.frequency.at(t))
+
     @property
     def sample(self):
         """

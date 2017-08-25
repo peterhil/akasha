@@ -37,6 +37,12 @@ class Generator(object):
                 item = np.arange(*(item.indices(item.stop)))
         return self.sample(item)
 
+    def at(self, t):
+        """
+        Sample sound generator at times (t).
+        """
+        raise NotImplementedError("Please implement method at() in a subclass.")
+
     def __iter__(self):
         return blockwise(self, sampler.blocksize())
 
@@ -71,7 +77,16 @@ class PeriodicGenerator(Generator):
             element_count = abs((item.stop or self.period) - (item.start or 0))
             stop = start + (element_count * step)
             item = np.arange(*(slice(start, stop, step).indices(stop)))
-        return self.sample[np.array(item) % self.period]
+        if np.isscalar(item):
+            return self.sample[np.array(item, dtype=np.int64) % self.period]
+        else:
+            return self.sample[np.fromiter(item, dtype=np.int64) % self.period]
+
+    def at(self, t):
+        """
+        Sample {} at times (t).
+        """.format(self.__class__.__name__)
+        return self.sample(t % self.period)
 
     # Disabled because Numpy gets clever (and slow) when a sound objects have length and
     # they're made into an object array...

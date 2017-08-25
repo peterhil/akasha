@@ -23,6 +23,7 @@ from akasha.timing import sampler
 from akasha.math import map_array, to_phasor, pi2
 
 from fractions import Fraction
+from numpy.testing.utils import assert_array_almost_equal
 from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
 
 
@@ -44,6 +45,17 @@ class TestOscillator(object):
         b = Osc(216, Curve)
         with pytest.raises(NotImplementedError):
             b.curve.at(4)
+
+    def test_at(self):
+        times = sampler.slice(0, 8)
+        o = Osc.from_ratio(1, 8)
+        expected = Circle.roots_of_unity(8)
+        assert_array_almost_equal(o.at(times), expected)
+
+    def test_at_with_iterable(self):
+        o = Osc.from_ratio(1, sampler.rate)
+        expected = Circle.roots_of_unity(7)
+        assert_array_almost_equal(o[iter(xrange(0, 44100, 6300))], expected)
 
     def test_sample(self):
         o, p = 1, sampler.rate

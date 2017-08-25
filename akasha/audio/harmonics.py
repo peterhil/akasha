@@ -90,6 +90,12 @@ class Overtones(FrequencyRatioMixin, Generator):
             oscs = map_array(base, overtones, 'vec')
         return oscs[np.nonzero(oscs)]
 
+    def at(self, t):
+        """
+        Sample Overtones at times (t).
+        """
+        return self.sample(t)
+
     def sample(self, iterable):
         """Sample the overtones."""
         if isinstance(iterable, int):
