@@ -126,7 +126,7 @@ class Overtones(FrequencyRatioMixin, Generator):
                 out *= random_phasor()  # TODO: Move phases to Osc/Frequency!
             if e is not None:
                 out *= e[iterable]
-            frames += out
+            frames += out / self.limit  # normalize partial volume
 
         # TODO: Implement ADSR Envelopes!!!
         if self.sustain is not None:
@@ -143,7 +143,7 @@ class Overtones(FrequencyRatioMixin, Generator):
                     "Sustain with objects of type %s not implemented yet." % type(iterable)
                 )
 
-        return frames / self.limit  # normalize using a single value for whole sound!
+        return frames
 
     def __repr__(self):
         return "%s(sndobj=%s, n=%s, func=%s, damping=%s, rand_phase=%s>" % \
