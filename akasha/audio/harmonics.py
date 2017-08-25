@@ -12,7 +12,7 @@ Harmonic overtones module
 import exceptions
 import numpy as np
 
-from akasha.audio.envelope import Exponential
+from akasha.audio.envelope import Exponential, Gamma
 from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import Generator
 from akasha.audio.oscillator import Osc
