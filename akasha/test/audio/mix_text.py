@@ -27,8 +27,6 @@ from akasha.timing import sampler
 class TestMix(object):
     """Test mixing sound objects"""
 
-    # times = sampler.slice(10000) * sampler.rate
-
     def get_fixture(self, f1=345.6, f2=436, rate=-1):
         o = Osc(f1)
         o2 = Osc(f2)
