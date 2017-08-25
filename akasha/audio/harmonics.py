@@ -107,32 +107,32 @@ class Overtones(FrequencyRatioMixin, Generator):
         partials = []
 
         for o in self.oscs[np.nonzero(self.oscs)]:
-            e = None
-            # square waves
-            # amplitude = float(self.frequency / o.frequency * float(self.frequency))
-            # e = Exponential(0, amp=amplitude)
+            out = o[iterable]
 
-            # triangle waves
-            # amplitude = float(self.frequency ** 2 / o.frequency ** 2 * float(self.frequency))
-            # e = Exponential(0, amp=amplitude)
-
-            # sine waves
-            # e = Exponential(-o.frequency / 100.0)
+            if self.rand_phase:
+                out *= np.array(random_phasor(1))  # TODO: Move phases to Osc/Frequency?
 
             if self.damping:
                 e = Exponential(self.damping(o.frequency))
                 # e = Gamma(-self.damping(o.frequency)[0], 1.0 / max(float(o.frequency) / 100.0, 1.0))
 
-            out = o[iterable]
-            if self.rand_phase:
-                out *= np.array(random_phasor(1))  # TODO: Move phases to Osc/Frequency!
-            if e is not None:
+                # square waves
+                # amplitude = float(self.frequency / o.frequency * float(self.frequency))
+                # e = Exponential(0, amp=amplitude)
+
+                # triangle waves
+                # amplitude = float(self.frequency ** 2 / o.frequency ** 2 * float(self.frequency))
+                # e = Exponential(0, amp=amplitude)
+
+                # sine waves
+                # e = Exponential(-o.frequency / 100.0)
+
                 out *= e[iterable]
 
             partials.append(out)
 
-        # Sum all frames
-        frames = np.sum(partials, axis=0, dtype=np.complex128) / self.limit  # normalize partial volume
+        # Sum all partials and normalize volume
+        frames = np.sum(partials, axis=0, dtype=np.complex128) / self.limit
 
         # TODO: Implement ADSR Envelopes!!!
         if self.sustain is not None:
