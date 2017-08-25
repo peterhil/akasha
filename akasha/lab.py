@@ -17,6 +17,7 @@ from akasha.audio.dtmf import DTMF
 from akasha.audio.envelope import Attack, Exponential, Gamma
 from akasha.audio.frequency import Frequency
 from akasha.audio.harmonics import Overtones
+from akasha.audio.mix import Mix
 from akasha.audio.noise import *
 from akasha.audio.oscillator import *
 from akasha.audio.sound import Sound, Group, Pcm
