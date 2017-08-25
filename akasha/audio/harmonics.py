@@ -108,13 +108,8 @@ class Overtones(FrequencyRatioMixin, Generator):
             frames = np.zeros(len(iterable), dtype=np.complex128)
 
         for o in self.oscs:
-        # for f in self.overtones:
-            # o = deepcopy(self.base)     # Uses deepcopy to preserve superness & other attrs
-            # o.frequency = Frequency(self.frequency * f)
-            #logger.boring("Overtone frequency: %s" % o.frequency)
             if o.frequency == 0:
                 break
-
             e = None
             # square waves
             # amplitude = float(self.frequency / o.frequency * float(self.frequency))
@@ -141,7 +136,6 @@ class Overtones(FrequencyRatioMixin, Generator):
         # TODO: Implement ADSR Envelopes!!!
         if self.sustain is not None:
             sus_damping = lambda f, a = 1.0: -2 * np.log2(float(f)) / 5.0
-            #sus_damping = lambda f: -0.5
             self.sustained = self.sustained or Exponential(sus_damping(self.frequency))
             if isinstance(iterable, slice):
                 indices = np.array(iterable.indices(iterable.stop))
