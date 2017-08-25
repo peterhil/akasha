@@ -101,11 +101,10 @@ class Overtones(FrequencyRatioMixin, Generator):
         return self.sample(t)
 
     def sample(self, iterable):
-        """Sample the overtones."""
-        if isinstance(iterable, int):
-            frames = np.array([0j])
-        else:
-            frames = np.zeros(len(iterable), dtype=np.complex128)
+        """
+        Sample the overtones.
+        """
+        partials = []
 
         for o in self.oscs:
             if o.frequency == 0:
@@ -128,10 +127,14 @@ class Overtones(FrequencyRatioMixin, Generator):
 
             out = o[iterable]
             if self.rand_phase:
-                out *= random_phasor()  # TODO: Move phases to Osc/Frequency!
+                out *= np.array(random_phasor(1))  # TODO: Move phases to Osc/Frequency!
             if e is not None:
                 out *= e[iterable]
-            frames += out / self.limit  # normalize partial volume
+
+            partials.append(out)
+
+        # Sum all frames
+        frames = np.sum(partials, axis=0, dtype=np.complex128) / self.limit  # normalize partial volume
 
         # TODO: Implement ADSR Envelopes!!!
         if self.sustain is not None:
