@@ -6,19 +6,22 @@
 # pylint: disable=E1101
 
 """
-Mix sound objects together by multiplying the components
+Sum sound objects together by adding the components together
 """
 
 import numpy as np
-import scipy as sp
 
 from akasha.audio.generators import Generator
 from akasha.audio.playable_mixin import BaseFrequencyMixin
 
 
-class Mix(BaseFrequencyMixin, Generator):
+def summation(signal, axis=0):
+    return np.sum(signal, axis=axis)
+
+
+class Sum(BaseFrequencyMixin, Generator):
     """
-    Mix sound objects together by multiplying the components.
+    Summation of sound objects.
     """
 
     def __init__(self, *components):
@@ -29,12 +32,12 @@ class Mix(BaseFrequencyMixin, Generator):
 
     def at(self, t):
         """
-        Sample mix at sample times (t).
+        Sample summation at sample times (t).
         """
-        return reduce(np.multiply, [component.at(t) for component in self.components])
+        return summation([component.at(t) for component in self.components]) / float(len(self.components))
 
     def sample(self, frames):
         """
-        Sample mix at frames.
+        Sample summation at frames.
         """
-        return reduce(np.multiply, [component[frames] for component in self.components])
+        return summation([component[frames] for component in self.components]) / float(len(self.components))

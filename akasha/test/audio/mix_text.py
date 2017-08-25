@@ -20,6 +20,7 @@ from akasha.audio.envelope import Exponential
 from akasha.audio.harmonics import Overtones
 from akasha.audio.mix import Mix
 from akasha.audio.oscillator import Osc
+from akasha.audio.sum import Sum
 from akasha.curves import Super
 from akasha.timing import sampler
 
@@ -72,3 +73,31 @@ class TestMix(object):
         [o, o2, e, m] = self.get_fixture(120, 330)
         m.frequency = 420
         assert m.frequency == 420
+
+
+class TestReplacingOvertones(object):
+    """Test replacing Overtones class with Mix objects"""
+
+    def test_mix_overtones(self):
+        s = Super(3, 3, 3, 3)
+        o = Osc(120, curve=s)
+        h = Overtones(o, n=3, func=lambda x: x + 1, rand_phase=False, damping='sine')
+
+        ## Mix generated overtones
+        # TODO: Move this part out of test code, and replace Overtones class!
+        from itertools import izip
+        from akasha.math import map_array
+        overtones = map_array(h.func, np.arange(h.n))
+        base = s
+        # Parts
+        frequencies = o.frequency * overtones
+        oscs = map_array(lambda f: Osc(f, base), frequencies)
+        # phases = random_phasor(h.n)  # TODO implement Phase with at() method to be able to use in Mix?!?
+        envelopes = map_array(lambda f: Exponential(h.damping(f)), frequencies)
+        mix = Sum(*map(lambda part: Mix(*part), izip(oscs, envelopes)))
+        ## End Mix generated overtones
+
+        assert_array_equal(
+            h[sampler.slice(100) * sampler.rate],
+            mix[sampler.slice(100) * sampler.rate]
+        )
