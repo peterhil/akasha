@@ -95,7 +95,7 @@ class Overtones(FrequencyRatioMixin, Generator):
         if isinstance(iterable, int):
             frames = np.array([0j])
         else:
-            frames = np.zeros(len(iterable), dtype=complex)
+            frames = np.zeros(len(iterable), dtype=np.complex128)
 
         for o in self.oscs:
         # for f in self.overtones:

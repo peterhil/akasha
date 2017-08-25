@@ -9,7 +9,6 @@
 Envelopes
 """
 
-
 import numpy as np
 import scipy as sp
 
@@ -27,10 +26,10 @@ class Exponential(Generator):
         super(self.__class__, self).__init__()
 
         if isinstance(rate, tuple):
-            self.rate, self.amp = rate
+            self.rate, self.amp = np.array(rate).astype(np.float64)
         else:
-            self.rate = rate
-            self.amp = amp
+            self.rate = float(rate)
+            self.amp = float(amp)
 
     @property
     def half_life(self):
@@ -67,7 +66,8 @@ class Exponential(Generator):
         Sample the exponential at sampler frames.
         Converts frame numbers to time (ie. 44100 => 1.0).
         """
-        times = np.array(frames) / float(sampler.rate)
+        frames = np.array(frames, dtype=np.float64) if np.isscalar(frames) else np.fromiter(frames, dtype=np.float64)
+        times = frames / float(sampler.rate)
         return self.at(times)
 
     def at(self, times):
