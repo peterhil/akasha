@@ -20,6 +20,7 @@ from akasha.audio.envelope import Exponential
 from akasha.audio.harmonics import Overtones
 from akasha.audio.mix import Mix
 from akasha.audio.oscillator import Osc
+from akasha.audio.scalar import Scalar
 from akasha.audio.sum import Sum
 from akasha.curves import Super
 from akasha.timing import sampler
@@ -92,9 +93,13 @@ class TestReplacingOvertones(object):
         # Parts
         frequencies = o.frequency * overtones
         oscs = map_array(lambda f: Osc(f, base), frequencies)
-        # phases = random_phasor(h.n)  # TODO implement Phase with at() method to be able to use in Mix?!?
         envelopes = map_array(lambda f: Exponential(h.damping(f)), frequencies)
-        mix = Sum(*map(lambda part: Mix(*part), izip(oscs, envelopes)))
+        if h.rand_phase:
+            phases = map_array(lambda phase: Scalar(phase), random_phasor(h.n, 1.0 / h.n))
+        else:
+            phases = map_array(lambda phase: Scalar(phase), np.repeat(1.0 / h.n, h.n).astype(np.complex128))
+        parts = map(lambda part: Mix(*part), izip(oscs, envelopes))
+        mix = Sum(*map(lambda part: Mix(*part), izip(parts, phases)))
         ## End Mix generated overtones
 
         assert_array_equal(
