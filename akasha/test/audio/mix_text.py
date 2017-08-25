@@ -87,7 +87,7 @@ class TestReplacingOvertones(object):
         ## Mix generated overtones
         # TODO: Move this part out of test code, and replace Overtones class!
         from itertools import izip
-        from akasha.math import map_array
+        from akasha.math import map_array, random_phasor
         overtones = map_array(h.func, np.arange(h.n))
         base = s
         # Parts
@@ -95,9 +95,9 @@ class TestReplacingOvertones(object):
         oscs = [Osc(f, base) for f in frequencies]
         envelopes = [Exponential(h.damping(f)) for f in frequencies]
         if h.rand_phase:
-            phases = random_phasor(h.n, 1.0 / h.n)
+            phases = random_phasor(h.n)
         else:
-            phases = np.repeat(1.0 / h.n, h.n).astype(np.complex128)
+            phases = np.repeat(1.0, h.n).astype(np.complex128)
         phases = [Scalar(phase) for phase in phases]
         parts = [Mix(*part) for part in izip(oscs, envelopes)]
         mix = Sum(*[Mix(*part) for part in izip(parts, phases)])
