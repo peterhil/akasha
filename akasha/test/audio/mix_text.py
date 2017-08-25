@@ -92,14 +92,15 @@ class TestReplacingOvertones(object):
         base = s
         # Parts
         frequencies = o.frequency * overtones
-        oscs = map_array(lambda f: Osc(f, base), frequencies)
-        envelopes = map_array(lambda f: Exponential(h.damping(f)), frequencies)
+        oscs = [Osc(f, base) for f in frequencies]
+        envelopes = [Exponential(h.damping(f)) for f in frequencies]
         if h.rand_phase:
-            phases = map_array(lambda phase: Scalar(phase), random_phasor(h.n, 1.0 / h.n))
+            phases = random_phasor(h.n, 1.0 / h.n)
         else:
-            phases = map_array(lambda phase: Scalar(phase), np.repeat(1.0 / h.n, h.n).astype(np.complex128))
-        parts = map(lambda part: Mix(*part), izip(oscs, envelopes))
-        mix = Sum(*map(lambda part: Mix(*part), izip(parts, phases)))
+            phases = np.repeat(1.0 / h.n, h.n).astype(np.complex128)
+        phases = [Scalar(phase) for phase in phases]
+        parts = [Mix(*part) for part in izip(oscs, envelopes)]
+        mix = Sum(*[Mix(*part) for part in izip(parts, phases)])
         ## End Mix generated overtones
 
         assert_array_equal(
