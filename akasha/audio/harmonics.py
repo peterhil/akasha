@@ -106,9 +106,7 @@ class Overtones(FrequencyRatioMixin, Generator):
         """
         partials = []
 
-        for o in self.oscs:
-            if o.frequency == 0:
-                break
+        for o in self.oscs[np.nonzero(self.oscs)]:
             e = None
             # square waves
             # amplitude = float(self.frequency / o.frequency * float(self.frequency))
