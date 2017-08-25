@@ -10,7 +10,6 @@ Mix sound objects together by multiplying the components
 """
 
 import numpy as np
-import scipy as sp
 
 from akasha.audio.generators import Generator
 from akasha.audio.playable_mixin import BaseFrequencyMixin
