@@ -141,7 +141,7 @@ class Sound(Generator):
             for sndobj in self.sounds[sl]:
                 #print "Sound object %s" % sndobj
                 sound += sndobj[items]
-        return sound / max(len(self), 1.0)
+        return sound / max(len(self.sounds), 1.0)
 
     def add(self, sndobj, start=0, dur=None):
         """
