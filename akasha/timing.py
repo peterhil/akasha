@@ -83,7 +83,17 @@ class Sampler(object):
         """
         if end is None:
             end = start; start = 0
-        return (np.arange(start, end, step, dtype=np.float64) / self.rate)
+        return self.times(start, end, step) / self.rate
+
+    def times(self, start, end=None, step=None):
+        """
+        Return an array of sample times from time slice parameters.
+        """
+        if end is None:
+            end = start; start = 0
+        if step is None:
+            step = 1.0 / self.rate
+        return np.arange(start, end, step, dtype=np.float64)
 
     def pause(self):
         """
