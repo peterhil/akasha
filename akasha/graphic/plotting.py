@@ -9,7 +9,7 @@ Graphics plotting module.
 """
 
 import numpy as np
-import pylab
+import pylab as lab
 
 from contextlib import contextmanager
 
@@ -22,12 +22,12 @@ def plotting():
     """
     Context manager for plotting an image interactively using pylab.
     """
-    pylab.interactive(True)
+    lab.interactive(True)
     try:
         yield
     finally:
-        pylab.axis('equal')
-        pylab.show(block=False)
+        lab.axis('equal')
+        lab.show(block=False)
 
 
 def plot_complex_image(signal, cmap='hot'):
@@ -35,7 +35,7 @@ def plot_complex_image(signal, cmap='hot'):
     Show complex signal image using pylab.imshow()
     """
     with plotting():
-        im = pylab.imshow([signal.real, signal.imag], cmap)
+        im = lab.imshow([signal.real, signal.imag], cmap)
     return im
 
 
@@ -44,7 +44,7 @@ def plot_signal(signal):
     Plot complex signal using pylab.plot()
     """
     with plotting():
-        fig = pylab.plot(*complex_as_reals(signal))
+        fig = lab.plot(*complex_as_reals(signal))
     return fig
 
 
@@ -53,7 +53,7 @@ def plot_real_fn(fn, x):
     Plot a real valued function with x values using pylab.plot()
     """
     with plotting():
-        fig = pylab.plot(x, fn(x))
+        fig = lab.plot(x, fn(x))
     return fig
 
 
@@ -65,6 +65,6 @@ def plot_unit(axes=3, scale=1, n=800):
     o = Circle.at(samples) * scale
 
     with plotting():
-        fig = pylab.plot(o.real, o.imag)
-        pylab.axis((-axes, axes, -axes, axes))
+        fig = lab.plot(o.real, o.imag)
+        lab.axis((-axes, axes, -axes, axes))
     return fig
