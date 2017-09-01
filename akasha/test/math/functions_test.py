@@ -14,14 +14,43 @@ Unit tests for mathematical functions
 import pytest
 import numpy as np
 
-from numpy.testing.utils import assert_array_equal
+from numpy.testing.utils import assert_array_equal, assert_array_almost_equal
 
 from akasha.funct import pairwise
 from akasha.math import *
 
 
+class TestMath(object):
+    """
+    Test math functions.
+    """
+    def test_rms(self):
+        assert_array_almost_equal(
+            rms(np.sin(pi2 * np.arange(0, 1.0, 1.0 / sampler.rate))),
+            1.0 / np.sqrt(2)
+        )
+
+    @pytest.mark.parametrize(('amplitude', 'expected'), [
+        (1,       0),
+        (0.5,    -6.02),
+        (0.25,   -12.04),
+        (0.125,  -18.06),
+        (0.0625, -24.08),
+        (0,      -np.inf),
+        # N-bit audio systems -- http://www.jimprice.com/prosound/db.htm
+        (1.0 / 2 ** 16, -96.33),
+        (1.0 / 2 ** 20, -120.41),
+        (1.0 / 2 ** 24, -144.49),
+        (1.0 / 2 ** 32, -192.66),
+    ])
+    def test_db_fs(self, amplitude, expected):
+        assert np.round(db_fs(amplitude), 2) == expected
+
+
 class TestPrimes(object):
-    """Test prime functions."""
+    """
+    Test prime functions.
+    """
 
     @pytest.mark.parametrize(('interval', 'expected'), [
         [

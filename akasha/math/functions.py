@@ -605,6 +605,32 @@ def pcm(signal, bits=16, axis='imag'):
     return np.cast['int' + str(bits)](getattr(signal, axis) * (2 ** bits / 2.0 - 1))
 
 
+def rms(signal):
+    """
+    Root mean square of a signal.
+    https://en.wikipedia.org/wiki/Root_mean_square
+    """
+    signal = signal[np.isfinite(signal) == True]
+    if len(signal) == 0:
+        raise ValueError("RMS of empty signal")
+    return np.sqrt((1.0 / len(signal)) * np.sum(np.power(signal, 2), axis=0))
+
+
+def db_fs(signal, square=False):
+    """
+    Convert amplitude value into dbFS value.
+    The square parameter is for rms of a aquare wave at full amplitude to equal 0 dbFS.
+
+    https://en.wikipedia.org/wiki/DBFS
+    http://www.jimprice.com/prosound/db.htm
+    """
+    if square:
+        reference = 0.5 / (10.0 ** -0.6)  # db_fs(0.5) == -6, but db_fs(1.0) == -3
+    else:
+        reference = 1.0
+    return 20.0 * np.log10(signal / reference)
+
+
 def normalize(signal):
     """
     Normalises signal into interval [-1, +1] and replaces ±NaN and ±Inf values with zeros.
