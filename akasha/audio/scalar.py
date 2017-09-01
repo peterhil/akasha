@@ -19,17 +19,11 @@ class Scalar(Generator):
     Scalar value that can be used with Mix and Sum objects
     """
 
-    def __init__(self, value):
-        self.value = np.array(value, dtype=np.complex128)
+    def __init__(self, value, dtype=np.complex128):
+        self.value = np.array(value, dtype=dtype)
 
     def at(self, t):
         """
         Return scalar value constantly at any time (t).
         """
         return np.repeat(self.value, len(np.asanyarray(t)))
-
-    def sample(self, frames):
-        """
-        Return scalar value constantly at any frame.
-        """
-        return np.repeat(self.value, len(np.asanyarray(frames)))

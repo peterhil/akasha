@@ -43,6 +43,9 @@ class Generator(object):
         """
         raise NotImplementedError("Please implement method at() in a subclass.")
 
+    def sample(self, frames):
+        return self.at(frames / float(sampler.rate))
+
     def __iter__(self):
         return blockwise(self, sampler.blocksize())
 
