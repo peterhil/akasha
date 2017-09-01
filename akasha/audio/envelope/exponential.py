@@ -22,7 +22,7 @@ class Exponential(Generator):
     """
 
     def __init__(self, rate=0.0, amp=1.0):
-        super(self.__class__, self).__init__()
+        # super(self.__class__, self).__init__()
 
         if isinstance(rate, tuple):
             self.rate, self.amp = np.array(rate).astype(np.float64)
