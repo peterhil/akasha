@@ -73,7 +73,7 @@ class Exponential(Generator):
         """
         Sample the exponential at sample times.
         """
-        return self.amp * np.exp(self.rate * times)
+        return np.clip(self.amp * np.exp(self.rate * times), a_min=0.0, a_max=1.0)
 
     # def __len__(self):
     #     return int(np.ceil(np.abs(self.scale)))
