@@ -474,6 +474,14 @@ def div_safe_zero(numerator, denominator, zero_value=np.inf):
     return float(numerator) / float(denominator)
 
 
+def summation(signal, axis=0):
+    """
+    Sum of array elements over a given axis.
+    Differs from Numpy sum only in that the axis parameter default is 0.
+    """
+    return np.sum(signal, axis=axis)
+
+
 def as_fractions(arr, limit=1000000):
     """
     Return array as Fractions with denominators up to the limit given.

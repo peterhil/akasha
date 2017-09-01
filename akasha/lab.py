@@ -19,13 +19,16 @@ from funckit import xoltar as fx
 from scipy.signal import hilbert
 
 from akasha.audio.dtmf import DTMF
-from akasha.audio.envelope import Attack, Exponential, Gamma
+from akasha.audio.envelope import Adsr, Exponential, Gamma
+from akasha.audio.envelope.beta import Beta, InverseBeta
 from akasha.audio.frequency import Frequency
 from akasha.audio.harmonics import Overtones
 from akasha.audio.mix import Mix
 from akasha.audio.noise import *
 from akasha.audio.oscillator import *
+from akasha.audio.scalar import Scalar
 from akasha.audio.sound import Sound, Group, Pcm
+from akasha.audio.sum import Sum
 
 from akasha.control.io.audio import play, write, read
 from akasha.control.io.keyboard import *
@@ -47,7 +50,7 @@ from akasha.math.geometry.curvature import *
 
 from akasha.net.wiki import *
 
-from akasha.timing import sampler
+from akasha.timing import Delay, sampler
 from akasha.tunings import WickiLayout
 
 from akasha.math import *

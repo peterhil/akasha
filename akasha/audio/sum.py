@@ -13,10 +13,7 @@ import numpy as np
 
 from akasha.audio.generators import Generator
 from akasha.audio.playable_mixin import BaseFrequencyMixin
-
-
-def summation(signal, axis=0):
-    return np.sum(signal, axis=axis)
+from akasha.math.functions import summation
 
 
 class Sum(BaseFrequencyMixin, Generator):
