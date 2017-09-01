@@ -11,13 +11,13 @@ Adsr envelopes
 
 import numpy as np
 
+from akasha.audio.delay import Delay
 from akasha.audio.envelope.beta import Beta, InverseBeta
 from akasha.audio.envelope.exponential import Exponential
 from akasha.audio.generators import Generator
 from akasha.audio.mix import Mix
 from akasha.audio.scalar import Scalar
 from akasha.audio.sum import Sum
-from akasha.timing import Delay
 
 
 def iter_param(param):

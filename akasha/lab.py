@@ -18,6 +18,7 @@ from cmath import rect, pi, exp, phase
 from funckit import xoltar as fx
 from scipy.signal import hilbert
 
+from akasha.audio.delay import Delay
 from akasha.audio.dtmf import DTMF
 from akasha.audio.envelope import Adsr, Exponential, Gamma
 from akasha.audio.envelope.beta import Beta, InverseBeta
@@ -50,7 +51,7 @@ from akasha.math.geometry.curvature import *
 
 from akasha.net.wiki import *
 
-from akasha.timing import Delay, sampler
+from akasha.timing import sampler
 from akasha.tunings import WickiLayout
 
 from akasha.math import *
