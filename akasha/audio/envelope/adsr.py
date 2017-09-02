@@ -30,7 +30,7 @@ class Adsr(Generator):
     """
     def __init__(self, attack=(0.15,), decay=(0.25,), sustain=0.5, release=(0.2,), released_at=None, decay_overlap=0):
         self.released_at = released_at
-        self.sustain = Scalar(float(sustain))
+        self.sustain = Scalar(float(sustain), dtype=np.float64)
         self.decay_overlap = decay_overlap
         # Envelope parts
         self.attack = Beta(*iter_param(attack))

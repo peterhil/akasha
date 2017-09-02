@@ -19,7 +19,7 @@ class Scalar(Generator):
     Scalar value that can be used with Mix and Sum objects
     """
 
-    def __init__(self, value, dtype=np.complex128):
+    def __init__(self, value, dtype=np.float64):
         self.value = np.array(value, dtype=dtype)
 
     def at(self, t):

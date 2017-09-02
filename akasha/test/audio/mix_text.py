@@ -98,7 +98,7 @@ class TestReplacingOvertones(object):
             phases = random_phasor(h.n)
         else:
             phases = np.repeat(1.0, h.n).astype(np.complex128)
-        phases = [Scalar(phase) for phase in phases]
+        phases = [Scalar(phase, dtype=np.complex128) for phase in phases]
         parts = [Mix(*part) for part in izip(oscs, envelopes)]
         mix = Sum(*[Mix(*part) for part in izip(parts, phases)])
         ## End Mix generated overtones
