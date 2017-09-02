@@ -105,5 +105,5 @@ class TestReplacingOvertones(object):
 
         assert_array_equal(
             h[sampler.slice(100) * sampler.rate],
-            mix[sampler.slice(100) * sampler.rate]
+            mix[sampler.slice(100) * sampler.rate] / len(parts)
         )

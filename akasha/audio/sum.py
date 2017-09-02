@@ -31,10 +31,10 @@ class Sum(BaseFrequencyMixin, Generator):
         """
         Sample summation at sample times (t).
         """
-        return summation([component.at(t) for component in self.components]) / float(len(self.components))
+        return summation([component.at(t) for component in self.components])
 
     def sample(self, frames):
         """
         Sample summation at frames.
         """
-        return summation([component[frames] for component in self.components]) / float(len(self.components))
+        return summation([component[frames] for component in self.components])
