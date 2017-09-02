@@ -782,9 +782,18 @@ def get_pixels(signal, size):
 
     # Note! np.fix rounds towards zero (rint would round to closest int)
     pixels = np.fix(points).astype(np.int32)
-    values = 1 - ((points - pixels) % 1)
+    values = (1 - ((points - pixels) % 1)).astype(np.uint8)
 
     return pixels, values
+
+
+def as_pixels(values, channels=4):
+    """
+    Repeat values for image channels.
+    """
+    return np.repeat(values, channels) \
+      .astype(np.uint8) \
+      .reshape(len(values), channels)
 
 
 def scale(signal, size):
