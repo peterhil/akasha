@@ -13,6 +13,7 @@ import numpy as np
 import scipy.special as sc
 
 from akasha.audio.envelope.adsr import Adsr
+from akasha.audio.envelope.beta import Beta, InverseBeta
 from akasha.audio.envelope.exponential import Exponential
 from akasha.audio.generators import Generator
 from akasha.timing import sampler

@@ -39,23 +39,23 @@ class Adsr(Generator):
 
     @property
     def decay(self):
-        return Sum(
-            Delay(
-                self.attack.time - self.decay_overlap,
-                InverseBeta(*iter_param(self.decay_params), amp=1.0 - self.sustain_level)
-            ),
-            self.sustain
+        return Delay(
+            self.attack.time - self.decay_overlap,
+            InverseBeta(*iter_param(self.decay_params), amp=1.0 - self.sustain_level)
         )
 
     @property
     def sustain_level(self):
         return self.sustain.value
 
-    def release(self, time=None):
+    def release_at(self, time=None):
         """
         Set release time.
         """
-        self.released_at = time
+        if time is not None:
+            self.released_at = float(time)
+        else:
+            raise ValueError("Release time should be a real number!")
 
     def at(self, t):
         """
@@ -63,7 +63,7 @@ class Adsr(Generator):
         """
         adsr = Mix(
             self.attack,
-            self.decay,
+            self.decay
         )
         if self.released_at is not None:
             adsr = Mix(
