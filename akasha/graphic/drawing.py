@@ -22,6 +22,7 @@ from akasha.graphic.primitive.line import bresenham
 from akasha.timing import sampler
 from akasha.utils.log import logger
 from akasha.math import \
+    as_pixels, \
     clip, \
     complex_as_reals, \
     flip_vertical, \
@@ -151,7 +152,7 @@ def add_alpha(rgb, opacity=255):
     """
     Add alpha channel with specified opacity to the rgb signal.
     """
-    return np.append(rgb, np.array([opacity] * len(rgb)).reshape(len(rgb), 1), 1)
+    return np.append(rgb, np.array([opacity] * len(rgb), dtype=np.uint8).reshape(len(rgb), 1), 1)
 
 
 def draw_lines_pg(signal, screen, size=1000, colours=True, antialias=False):
@@ -217,15 +218,14 @@ def draw_points_aa(signal, img, size=1000, colours=True):
 
     iw = lambda a: inside(a, 0, width)
     ih = lambda a: inside(a, 0, height)
-    area = lambda w: np.repeat(w, ch).reshape(len(signal), ch)
 
     px, value = get_pixels(signal, width - 1)
     color = add_alpha(colorize(signal)) if colours else white
 
-    img[px[0],         px[1], :]         += color * area(value[0] * value[1])
-    img[px[0],         iw(px[1] + 1), :] += color * area(value[0] * (1 - value[1]))
-    img[ih(px[0] + 1), px[1], :]         += color * area((1 - value[0]) * value[1])
-    img[ih(px[0] + 1), iw(px[1] + 1), :] += color * area((1 - value[0]) * (1 - value[1]))
+    img[px[0],         px[1], :]         += color * as_pixels(value[0] * value[1])
+    img[px[0],         iw(px[1] + 1), :] += color * as_pixels(value[0] * (1 - value[1]))
+    img[ih(px[0] + 1), px[1], :]         += color * as_pixels((1 - value[0]) * value[1])
+    img[ih(px[0] + 1), iw(px[1] + 1), :] += color * as_pixels((1 - value[0]) * (1 - value[1]))
 
     return img
 
@@ -251,10 +251,10 @@ def draw_points_aa_old(signal, img, size=1000, colours=True):
 
     color = add_alpha(colorize(signal)) if colours else white
 
-    img[pos[0][1], pos[0][0], :] += color * np.repeat(values_11, 4).reshape(len(signal), 4)
-    img[pos[1][1], pos[1][0], :] += color * np.repeat(values_10, 4).reshape(len(signal), 4)
-    img[pos[2][1], pos[2][0], :] += color * np.repeat(values_01, 4).reshape(len(signal), 4)
-    img[pos[3][1], pos[3][0], :] += color * np.repeat(values_00, 4).reshape(len(signal), 4)
+    img[pos[0][1], pos[0][0], :] += color * as_pixels(values_11)
+    img[pos[1][1], pos[1][0], :] += color * as_pixels(values_10)
+    img[pos[2][1], pos[2][0], :] += color * as_pixels(values_01)
+    img[pos[3][1], pos[3][0], :] += color * as_pixels(values_00)
 
     return img
 
