@@ -14,9 +14,8 @@ Unit tests for Exponential
 import numpy as np
 import pytest
 
-from numpy.testing.utils import \
-     assert_array_almost_equal, \
-     assert_array_almost_equal_nulp as assert_nulp_diff
+from numpy.testing.utils import assert_array_almost_equal
+from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
 
 from akasha.audio.envelope import Exponential
 from akasha.timing import sampler
@@ -35,12 +34,12 @@ class TestExponential(object):
         assert rate == e.rate
         assert amp == e.amp
 
-    @pytest.mark.parametrize('rate', [-1, -2, 0, 1, 5])
+    @pytest.mark.parametrize('rate', [-1, -2, 0, 1, 2, 5])
     def test_exponential_rates(self, rate):
-        assert_nulp_diff(
-            np.e ** rate,
-            Exponential(rate, 1.0).at(1.0),
-            1
+        t = np.linspace(0, 1, 100)
+        assert_array_almost_equal(
+            np.clip(np.exp(t * rate), 0, 1),
+            Exponential(rate, 1.0).at(t)
         )
 
     half_lifes = [
