@@ -6,21 +6,23 @@
 # pylint: disable=E1101
 
 """
-Mixin to create playable composite sound objects
+Tuneable mixin module
 """
 
 import numpy as np
 
+from akasha.audio.mixins.composite import Composite
 
-class BaseFrequencyMixin(object):
 
-    components = []
-
+class Tuneable(Composite):
+    """
+    Mixin to create playable composite sound object that has a tuneable frequency.
+    """
     def _frequency_components(self):
         """
         Return components which have a frequency.
         """
-        return np.array([component for component in self.components if hasattr(component, 'frequency')])
+        return self._components_with_attribute('frequency')
 
     @property
     def frequency(self):

@@ -12,11 +12,11 @@ Sum sound objects together by adding the components together
 import numpy as np
 
 from akasha.audio.generators import Generator
-from akasha.audio.playable_mixin import BaseFrequencyMixin
+from akasha.audio.mixins import Playable
 from akasha.math.functions import summation
 
 
-class Sum(BaseFrequencyMixin, Generator):
+class Sum(Playable, Generator):
     """
     Summation of sound objects.
     """
