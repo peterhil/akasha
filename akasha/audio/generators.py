@@ -43,7 +43,22 @@ class Generator(object):
         raise NotImplementedError("Please implement method at() in a subclass.")
 
     def sample(self, frames):
-        return self.at(frames / float(sampler.rate))
+        """
+        Sample the sound at frame numbers.
+        """
+        if isinstance(frames, slice):
+            frames = np.arange(*frames.indices(frames.stop))
+
+        if isinstance(frames, np.ndarray):
+            return self.at(np.asarray(frames, dtype=np.int64) / float(sampler.rate))
+        elif np.iterable(frames):
+            return self.at(np.fromiter(frames, dtype=np.int64) / float(sampler.rate))
+        elif np.isreal(frames):
+            return self.at(frames / float(sampler.rate))
+        else:
+            raise NotImplementedError(
+                "Sampling generators with objects of type %s not implemented yet." % type(frames)
+            )
 
     def __iter__(self):
         return blockwise(self, sampler.blocksize())

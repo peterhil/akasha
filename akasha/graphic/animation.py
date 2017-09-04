@@ -220,10 +220,10 @@ def handle_input(snd, watch, event):
         else:
             if isinstance(snd, Generator):
                 try:
-                    snd.sustain = sampler.at(watch.time())
+                    snd.sustain = watch.time()
                 except TypeError:
                     logger.warn("Can't get current value from the iterator.")
-                    snd.sustain = 0
+                    snd.sustain = None
                 # logger.debug("Key '%s' (%s) up, sustain: %s" % (pg.key.name(event.key), event.key, snd.sustain))
         return
     # Mouse

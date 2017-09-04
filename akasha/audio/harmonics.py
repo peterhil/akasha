@@ -76,12 +76,9 @@ class Overtones(FrequencyRatioMixin, Generator):
 
     @property
     def oscs(self):
-        """Property to get oscillators."""
-        # TODO cleanup - make an interface for different Oscs!
-        return self.gen_oscs()
-
-    def gen_oscs(self):
-        """Generate oscillators based on overtones."""
+        """
+        Oscillators based on overtones.
+        """
         base = self.base.__class__
         overtones = np.array(float(self.frequency) * self.overtones, dtype=np.float64)
         if 'Super' == self.base.curve.__class__.__name__:
@@ -98,16 +95,11 @@ class Overtones(FrequencyRatioMixin, Generator):
         """
         Sample Overtones at times (t).
         """
-        return self.sample(t)
-
-    def sample(self, iterable):
-        """
-        Sample the overtones.
-        """
         partials = []
+        oscs = self.oscs
 
-        for o in self.oscs[np.nonzero(self.oscs)]:
-            out = o[iterable]
+        for o in oscs[np.nonzero(oscs)]:
+            out = o.at(t)
 
             if self.rand_phase:
                 out *= np.array(random_phasor(1))  # TODO: Move phases to Osc/Frequency?
@@ -127,7 +119,7 @@ class Overtones(FrequencyRatioMixin, Generator):
                 # sine waves
                 # e = Exponential(-o.frequency / 100.0)
 
-                out *= e[iterable]
+                out *= e.at(t)
 
             partials.append(out)
 
@@ -138,14 +130,14 @@ class Overtones(FrequencyRatioMixin, Generator):
         if self.sustain is not None:
             sus_damping = lambda f, a = 1.0: -2 * np.log2(float(f)) / 5.0
             self.sustained = self.sustained or Exponential(sus_damping(self.frequency))
-            if isinstance(iterable, slice):
-                indices = np.array(iterable.indices(iterable.stop))
-                frames *= self.sustained[slice(*list(indices - self.sustain))]
-            elif isinstance(iterable, np.ndarray):
-                frames *= self.sustained[iterable - self.sustain]
+            if isinstance(t, slice):
+                indices = np.array(t.indices(t.stop))
+                frames *= self.sustained.at(slice(*list(indices - self.sustain)))
+            elif isinstance(t, np.ndarray):
+                frames *= self.sustained.at(t - self.sustain)
             else:
                 raise exceptions.NotImplementedError(
-                    "Sustain with objects of type %s not implemented yet." % type(iterable)
+                    "Sustain with objects of type %s not implemented yet." % type(t)
                 )
 
         return frames

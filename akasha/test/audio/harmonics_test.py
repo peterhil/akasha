@@ -25,18 +25,21 @@ class TestOvertones(object):
     Tests for Overtones
     """
 
+    frames = np.arange(0, sampler.rate, 4410, dtype=np.float64)
+    times = frames / float(sampler.rate)
+
     def test_at(self):
-        times = np.linspace(0, 1, 100)
         o = Osc(122.0)
         h = Overtones(o)
-        assert_array_almost_equal(h.at(times), h[times])
+        assert_array_almost_equal(
+            h.at(self.times),
+            h[self.frames]
+        )
 
     def test_sample_with_iterable(self):
         o = Osc(122.0)
         h = Overtones(o)
-        times = sampler.slice(sampler.rate, step=1000)
-        expected = np.array([1.0,  0.204477,  0.041811,  0.008549,  0.001748])
         assert_array_almost_equal(
-            h[iter(times)],
-            expected
+            h[iter(self.frames)],
+            h.at(self.times)
         )
