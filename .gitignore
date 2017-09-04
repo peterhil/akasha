@@ -5,6 +5,7 @@
 .coverage
 .figleaf
 TAGS
+.cache/
 
 doc/
 html/
