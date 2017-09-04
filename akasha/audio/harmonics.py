@@ -9,13 +9,11 @@
 Harmonic overtones module
 """
 
-import exceptions
 import numpy as np
 
 from akasha.audio.envelope import Exponential, Gamma
 from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import Generator
-from akasha.audio.mixins.releasable import Releasable
 from akasha.audio.oscillator import Osc
 
 from akasha.timing import sampler
@@ -24,7 +22,7 @@ from akasha.math import random_phasor, map_array, normalize, pi2
 
 
 # TODO Eventually compose overtones of Mix objects and use Playable, and drop FrequencyRatioMixin
-class Overtones(FrequencyRatioMixin, Releasable, Generator):
+class Overtones(FrequencyRatioMixin, Generator):
     """Harmonical overtones for a sound object having a frequency"""
 
     def __init__(
@@ -53,8 +51,6 @@ class Overtones(FrequencyRatioMixin, Releasable, Generator):
             self.damping = damping
         else:
             self.damping = None
-        self.released_at = None
-        self.release = None
         self.rand_phase = rand_phase
 
     @property
@@ -93,19 +89,6 @@ class Overtones(FrequencyRatioMixin, Releasable, Generator):
     def period(self):
         return np.gcd(map(lambda o: o.frequency, self.oscs)).period
 
-    # TODO Remove when using ADSR envelopes and Mix objects
-    def release_at(self, time=None):
-        """
-        Set release time.
-        """
-        if np.isreal(time):
-            if time is not None:
-                self.released_at = float(time)
-            else:
-                self.released_at = time
-        else:
-            raise ValueError("Release time should be a real number!")
-
     def at(self, t):
         """
         Sample Overtones at times (t).
@@ -139,23 +122,7 @@ class Overtones(FrequencyRatioMixin, Releasable, Generator):
             partials.append(out)
 
         # Sum all partials and normalize volume
-        frames = np.sum(partials, axis=0, dtype=np.complex128) / self.limit
-
-        # TODO: Implement ADSR Envelopes!!!
-        if self.released_at is not None:
-            sus_damping = lambda f, a = 1.0: -2 * np.log2(float(f)) / 5.0
-            self.release = self.release or Exponential(sus_damping(self.frequency))
-            if isinstance(t, slice):
-                indices = np.array(t.indices(t.stop))
-                frames *= self.release.at(slice(*list(indices - self.released_at)))
-            elif isinstance(t, np.ndarray):
-                frames *= self.release.at(t - self.released_at)
-            else:
-                raise exceptions.NotImplementedError(
-                    "Release with objects of type %s not implemented yet." % type(t)
-                )
-
-        return frames
+        return np.sum(partials, axis=0, dtype=np.complex128) / self.limit
 
     def __repr__(self):
         return "%s(sndobj=%s, n=%s, func=%s, damping=%s, rand_phase=%s>" % \
