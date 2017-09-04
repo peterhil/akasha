@@ -11,7 +11,6 @@ Sound generating objects’ base classes.
 
 import numpy as np
 
-from akasha.control.io import audio
 from akasha.funct import blockwise
 from akasha.timing import sampler
 
@@ -48,12 +47,6 @@ class Generator(object):
 
     def __iter__(self):
         return blockwise(self, sampler.blocksize())
-
-    def play(self, *args, **kwargs):
-        """
-        Play sound.
-        """
-        audio.play(self, *args, **kwargs)
 
 
 class PeriodicGenerator(Generator):
