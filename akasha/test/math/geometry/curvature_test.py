@@ -33,24 +33,36 @@ class TestEstimateCurvatureWithCircles(object):
 
     @pytest.mark.parametrize(('points', 'expected'), curvature_dataset)
     def test_estimate_curvature(self, points, expected):
-        assert_array_almost_equal(estimate_curvature(points), expected)
+        assert_array_almost_equal(
+            estimate_curvature(points),
+            expected
+        )
 
     @pytest.mark.parametrize(('points', 'expected'), curvature_dataset)
     def test_estimate_curvature_with_ellipses(self, points, expected):
-        assert_array_almost_equal(estimate_curvature_with_ellipses(points), expected)
+        assert_array_almost_equal(
+            estimate_curvature_with_ellipses(points),
+            expected
+        )
 
     @pytest.mark.parametrize(('points', 'expected'), [
-        [Circle.roots_of_unity(5) * -2, -0.5],
-        [Circle.roots_of_unity(4) * -2, -0.5],
-        [Circle.roots_of_unity(6) * -2, -0.5],
+        [Circle.roots_of_unity(5) * -2, 0.5],
+        [Circle.roots_of_unity(4) * -2, 0.5],
+        [Circle.roots_of_unity(6) * -2, 0.5],
     ])
     def test_estimate_curvature_with_negative_radius(self, points, expected):
-        assert_array_almost_equal(estimate_curvature(points), expected)
+        assert_array_almost_equal(
+            estimate_curvature(points),
+            expected
+        )
 
     @pytest.mark.parametrize(('points', 'expected'), [
-        [Circle.roots_of_unity(5) * 2, 0.5],
-        [Circle.roots_of_unity(4) * 2, 0.5],
-        [Circle.roots_of_unity(6) * -2, -0.5],
+        [np.flipud(Circle.roots_of_unity(5) * 2), -0.5],
+        [np.flipud(Circle.roots_of_unity(4) * 2), -0.5],
+        [np.flipud(Circle.roots_of_unity(6) * 2), -0.5],
     ])
     def test_estimate_curvature_with_reversed_points(self, points, expected):
-        assert_array_almost_equal(estimate_curvature(np.flipud(points)), -expected)
+        assert_array_almost_equal(
+            estimate_curvature(points),
+            expected
+        )
