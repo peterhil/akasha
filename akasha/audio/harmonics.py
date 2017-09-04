@@ -85,10 +85,6 @@ class Overtones(FrequencyRatioMixin, Generator):
             oscs = map_array(base, overtones, 'vec')
         return oscs[np.nonzero(oscs)]
 
-    @property
-    def period(self):
-        return np.gcd(map(lambda o: o.frequency, self.oscs)).period
-
     def at(self, t):
         """
         Sample Overtones at times (t).
