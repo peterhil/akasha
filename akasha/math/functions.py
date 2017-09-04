@@ -791,6 +791,13 @@ def get_pixels(signal, size):
     return pixels, values
 
 
+def roundcast(signal, precision=0, dtype=np.int64):
+    """
+    Round float valued signal and cast into give data type.
+    """
+    return np.round(signal, decimals=precision).astype(dtype)
+
+
 def as_pixels(values, channels=4):
     """
     Repeat values for image channels.

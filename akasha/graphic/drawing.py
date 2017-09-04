@@ -30,7 +30,8 @@ from akasha.math import \
     inside, \
     normalize, \
     pad, \
-    pcm
+    pcm, \
+    roundcast
 
 from itertools import izip
 from PIL import Image
@@ -221,10 +222,10 @@ def draw_points_aa(signal, img, size=1000, colours=True):
     px, value = get_pixels(signal, width - 1)
     color = add_alpha(colorize(signal)) if colours else white
 
-    img[px[0],         px[1], :]         += color * as_pixels(value[0] * value[1])
-    img[px[0],         iw(px[1] + 1), :] += color * as_pixels(value[0] * (1 - value[1]))
-    img[ih(px[0] + 1), px[1], :]         += color * as_pixels((1 - value[0]) * value[1])
-    img[ih(px[0] + 1), iw(px[1] + 1), :] += color * as_pixels((1 - value[0]) * (1 - value[1]))
+    img[px[0],         px[1], :]         += roundcast(color * as_pixels(value[0] * value[1]), dtype=np.uint8)
+    img[px[0],         iw(px[1] + 1), :] += roundcast(color * as_pixels(value[0] * (1 - value[1])), dtype=np.uint8)
+    img[ih(px[0] + 1), px[1], :]         += roundcast(color * as_pixels((1 - value[0]) * value[1]), dtype=np.uint8)
+    img[ih(px[0] + 1), iw(px[1] + 1), :] += roundcast(color * as_pixels((1 - value[0]) * (1 - value[1])), dtype=np.uint8)
 
     return img
 
@@ -250,10 +251,10 @@ def draw_points_aa_old(signal, img, size=1000, colours=True):
 
     color = add_alpha(colorize(signal)) if colours else white
 
-    img[pos[0][1], pos[0][0], :] += color * as_pixels(values_11)
-    img[pos[1][1], pos[1][0], :] += color * as_pixels(values_10)
-    img[pos[2][1], pos[2][0], :] += color * as_pixels(values_01)
-    img[pos[3][1], pos[3][0], :] += color * as_pixels(values_00)
+    img[pos[0][1], pos[0][0], :] += roundcast(color * as_pixels(values_11), dtype=np.uint8)
+    img[pos[1][1], pos[1][0], :] += roundcast(color * as_pixels(values_10), dtype=np.uint8)
+    img[pos[2][1], pos[2][0], :] += roundcast(color * as_pixels(values_01), dtype=np.uint8)
+    img[pos[3][1], pos[3][0], :] += roundcast(color * as_pixels(values_00), dtype=np.uint8)
 
     return img
 
