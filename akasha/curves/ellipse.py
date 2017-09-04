@@ -140,6 +140,7 @@ class Ellipse(Curve):
         Uses Rytz's construction for algorithm:
         http://de.wikipedia.org/wiki/Rytzsche_Achsenkonstruktion#Konstruktion
         """
+        para = np.asarray(para, dtype=np.complex128)
         c = midpoint(para[0], para[2])
         para = para - c
         u, v = para[:2]
