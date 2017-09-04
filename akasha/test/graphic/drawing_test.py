@@ -223,6 +223,7 @@ class TestDrawing(object):
     ])
     @pytest.mark.parametrize(('draw_func'), [
         draw_points_aa,
+        # draw_points_np_aa,
         # draw_points_aa_old,
     ])
     def test_draw_points_antialiased(self, palette, draw_func):
