@@ -83,27 +83,32 @@ class TestReplacingOvertones(object):
         s = Super(3, 3, 3, 3)
         o = Osc(120, curve=s)
         h = Overtones(o, n=3, func=lambda x: x + 1, rand_phase=False, damping='sine')
+        base = s
+        times = sampler.slice(1000) * sampler.rate
 
         ## Mix generated overtones
+
         # TODO: Move this part out of test code, and replace Overtones class!
         from itertools import izip
         from akasha.math import map_array, random_phasor
-        overtones = map_array(h.func, np.arange(h.n))
-        base = s
-        # Parts
+
+        # Partials
+        overtones = map_array(h.func, np.arange(h.n))  # Remember to limit these on Nyquist freq.
         frequencies = o.frequency * overtones
         oscs = [Osc(f, base) for f in frequencies]
         envelopes = [Exponential(h.damping(f)) for f in frequencies]
+        partials = [Mix(*part) for part in izip(oscs, envelopes)]
+
+        # Random phases
         if h.rand_phase:
             phases = random_phasor(h.n)
-        else:
-            phases = np.repeat(1.0, h.n).astype(np.complex128)
-        phases = [Scalar(phase, dtype=np.complex128) for phase in phases]
-        parts = [Mix(*part) for part in izip(oscs, envelopes)]
-        mix = Sum(*[Mix(*part) for part in izip(parts, phases)])
+            phases = [Scalar(phase, dtype=np.complex128) for phase in phases]
+            partials = [Mix(*partial) for partial in izip(partials, phases)]
+        partials = Sum(*partials)
+
         ## End Mix generated overtones
 
         assert_array_equal(
-            h[sampler.slice(100) * sampler.rate],
-            mix[sampler.slice(100) * sampler.rate] / len(parts)
+            h.at(times),
+            partials.at(times) / len(partials.components)
         )
