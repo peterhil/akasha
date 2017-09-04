@@ -52,8 +52,11 @@ class Adsr(Generator):
         """
         Set release time.
         """
-        if time is not None:
-            self.released_at = float(time)
+        if np.isreal(time):
+            if time is not None:
+                self.released_at = float(time)
+            else:
+                self.released_at = time
         else:
             raise ValueError("Release time should be a real number!")
 

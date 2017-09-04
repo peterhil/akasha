@@ -52,7 +52,7 @@ class TestAdsr(object):
         adsr.release_at(0.3)
         assert adsr.released_at == 0.3
         with pytest.raises(ValueError):
-            adsr.release_at(None)
+            adsr.release_at('not_real')
 
     def test_at(self):
         adsr = Adsr(attack=(0.5, 1, 1), decay=(0.5, 1, 1), sustain=0.5, release=(0.5, 1, 1), released_at=2.0, decay_overlap=-0.5)
