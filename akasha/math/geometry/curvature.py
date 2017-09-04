@@ -23,8 +23,8 @@ debug = True
 
 
 if debug:
-    import pylab
-    from akasha.graphic.plotting import plot_signal
+    import pylab as lab
+    from akasha.graphic.plotting import plotting
 
 
 def circle_curvature(a, b, c):
@@ -55,8 +55,8 @@ def ellipse_curvature(para):
     ell = Ellipse.from_conjugate_diameters(points)
 
     if debug:
-        pylab.interactive(False)
-        pylab.plot(*complex_as_reals(ell.at(np.linspace(0, 1, 200))))
+        with plotting():
+            lab.plot(*complex_as_reals(ell.at(np.linspace(0, 1, 200))))
 
     return ell.curvature(np.angle(points[0] - ell.origin) / pi2)
 
@@ -65,7 +65,9 @@ def estimate_curvature_with_ellipses(signal):
     res = np.array([ellipse_curvature(points) for points in consecutive(signal, 3)])
 
     if debug:
-        plot_signal(signal)
-        pylab.savefig('/Users/peterhil/Desktop/ellipse_curvature.png', dpi=300)
+        with plotting():
+            lab.plot(*complex_as_reals(signal), color='k')
+            lab.axis('equal')
+            lab.savefig('/Users/peterhil/Desktop/ellipse_curvature.png', dpi=300)
 
     return res

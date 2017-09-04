@@ -24,8 +24,9 @@ class TestEstimateCurvatureWithCircles(object):
     Unit tests for curvature estimation using circumcircle radius.
     """
     curvature_dataset = [
-        [Circle.roots_of_unity(5) * 2, 0.5],
-        [Circle.roots_of_unity(6) * 0.25, 4],
+        [Circle.roots_of_unity(4) * 4,      1.0 / 4],
+        [Circle.roots_of_unity(5) * 5 + 10, 1.0 / 5],
+        [Circle.roots_of_unity(6) * 6 + 22, 1.0 / 6],
         # Test edge cases on guards
         [[3, 3, 3], np.inf],
         [[1, 2, 3], 0],
