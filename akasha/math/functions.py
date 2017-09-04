@@ -643,6 +643,11 @@ def normalize(signal):
     """
     Normalises signal into interval [-1, +1] and replaces ±NaN and ±Inf values with zeros.
     """
+    if np.isscalar(signal):
+        signal = np.asarray([signal], dtype=np.float64)
+    if len(signal) == 0:
+        return signal
+
     sup = np.max(np.abs(signal))
 
     if not np.all(np.isfinite(signal)):
@@ -650,7 +655,6 @@ def normalize(signal):
         signal = np.ma.masked_invalid(signal).filled(0)
         sup = np.max(np.abs(signal))
         logger.debug("Normalize() substituted max: %s" % sup)
-
     if sup == 0:
         logger.debug("Normalize() got silence!" % sup)
         return signal
