@@ -17,12 +17,13 @@ import sys
 import traceback
 
 from akasha.audio.generators import Generator
+from akasha.audio.mixins.releasable import Releasable
 from akasha.graphic.drawing import get_canvas, blit, draw, video_transfer
+from akasha.math import div_safe_zero, pcm, minfloat
+from akasha.settings import config
 from akasha.timing import sampler, Timed, Watch
 from akasha.tunings import PianoLayout, WickiLayout
 from akasha.utils import issequence
-from akasha.math import div_safe_zero, pcm, minfloat
-from akasha.settings import config
 from akasha.utils.log import logger
 
 keyboard = WickiLayout()
@@ -115,8 +116,8 @@ def loop(snd, channel, widget):
                 del exc
                 break
     cleanup()
-    if isinstance(snd, Generator):
-        snd.sustain = None
+    if isinstance(snd, Releasable):
+        snd.release_at(None)
     return watch
 
 
@@ -187,8 +188,8 @@ def handle_input(snd, watch, event):
         step_size = (5 if event.mod & (pg.KMOD_LSHIFT | pg.KMOD_RSHIFT) else 1)
         # Rewind
         if pg.K_F7 == event.key:
-            if isinstance(snd, Generator):
-                snd.sustain = None
+            if isinstance(snd, Releasable):
+                snd.release_at(None)
             logger.info("Rewind")
             return True  # reset
         # Arrows
@@ -218,13 +219,13 @@ def handle_input(snd, watch, event):
             change_frequency(snd, event.key)
             return True  # reset
         else:
-            if isinstance(snd, Generator):
+            if isinstance(snd, Releasable):
                 try:
-                    snd.sustain = watch.time()
+                    snd.release_at(watch.time())
                 except TypeError:
                     logger.warn("Can't get current value from the iterator.")
-                    snd.sustain = None
-                # logger.debug("Key '%s' (%s) up, sustain: %s" % (pg.key.name(event.key), event.key, snd.sustain))
+                    snd.release_at(None)
+                # logger.debug("Key '%s' (%s) up, released at: %s" % (pg.key.name(event.key), event.key, snd.released_at))
         return
     # Mouse
     elif hasattr(snd, 'frequency') and event.type in (
@@ -344,7 +345,7 @@ def change_frequency(snd, key):
     if new_frequency == 0:
         return False
     snd.frequency = new_frequency
-    if isinstance(snd, Generator):
-        snd.sustain = None
+    if isinstance(snd, Releasable):
+        snd.release_at(None)
     logger.debug("Changed frequency: %s." % (snd.frequency if hasattr(snd, 'frequency') else snd))
     return new_frequency
