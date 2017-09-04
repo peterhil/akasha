@@ -94,9 +94,8 @@ class Overtones(FrequencyRatioMixin, Generator):
         Sample Overtones at times (t).
         """
         partials = []
-        oscs = self.oscs
 
-        for o in oscs[np.nonzero(oscs)]:
+        for o in self.oscs:
             out = o.at(t)
 
             if self.rand_phase:
