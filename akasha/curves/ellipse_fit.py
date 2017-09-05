@@ -75,16 +75,16 @@ def ellipse_fit_halir(points):
     x, y = complex_as_reals(points)
 
     # Build design matrices
-    design_quadratic = np.concatenate(np.array([
+    design_quadratic = np.array([
         x ** 2.0,
         x * y,
         y ** 2.0
-    ]).T)
-    design_linear = np.concatenate(np.array([
+    ]).T
+    design_linear = np.array([
         x,
         y,
-        np.ones(size),
-    ]).T)
+        np.ones(len(points)),
+    ]).T
 
     # Build scatter matrices
     scatter_quadratic = np.dot(design_quadratic.T, design_quadratic)
@@ -92,7 +92,7 @@ def ellipse_fit_halir(points):
     scatter_linear = np.dot(design_linear.T, design_linear)
 
     # Inverse and reduce matrices
-    t_inverse = -np.dot(la.inv(scatter_linear), scatter_combined)
+    t_inverse = np.dot(-la.inv(scatter_linear), scatter_combined.T)
     reduced_scatter = scatter_quadratic + np.dot(scatter_combined, t_inverse)
     premultiplied_inverse_c1 = np.array([
         reduced_scatter[2, :] / 2.0,
@@ -102,9 +102,11 @@ def ellipse_fit_halir(points):
 
     # Solve eigensystem
     [gevalues, gevector] = la.eig(premultiplied_inverse_c1)
+
+    # Find positive eigenvalue
     condition = np.dot(4.0, gevector[0, :]) * gevector[2, :] - gevector[1, :] ** 2.0  # evaluate a’Ca
-    a1 = gevector[np.where(condition > 0)]  # eigenvector for minimum positive eigenvalue
+    a1 = np.squeeze(gevector.T[np.where(condition > 0)])  # eigenvector for minimum positive eigenvalue
 
     # Extract eigenvector corresponding to positive eigenvalue.
     # These are the general form of coefficients for ellipse (A..F).
-    return np.squeeze(np.asarray([a1, np.dot(t_inverse, a1)], dtype=np.float64))
+    return np.array([a1, np.dot(t_inverse, a1)]).flatten()
