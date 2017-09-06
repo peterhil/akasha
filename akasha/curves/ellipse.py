@@ -18,7 +18,7 @@ import scipy as sc
 from cmath import rect
 
 from akasha.curves.curve import Curve
-from akasha.curves.ellipse_fit import ellipse_fit_fitzgibbon
+from akasha.curves.ellipse_fit import ellipse_fit_fitzgibbon, ellipse_fit_halir
 from akasha.math import complex_as_reals
 from akasha.math.geometry import is_orthogonal, midpoint, rotate_towards
 from akasha.math.geometry.affine_transform import AffineTransform
@@ -166,11 +166,17 @@ class Ellipse(Curve):
         return cls(a, b, np.angle(l), c)
 
     @classmethod
-    def from_points(cls, points):
+    def fit_points(cls, points, method='halir'):
         """
-        Make an ellipse by fitting a set of points.
+        Make an ellipse by fitting a set of points using algorithm from Fitzgibbon.
         """
-        return cls.from_general_coefficients(*ellipse_fit_fitzgibbon(points))
+        if method == 'halir':
+            fit_method = ellipse_fit_fitzgibbon
+        elif method == 'fitzgibbon':
+            fit_method = ellipse_fit_halir
+        else:
+            raise NotImplementedError("Method '{}' not implemented.".format(method))
+        return cls.from_general_coefficients(*fit_method(points))
 
     @classmethod
     def from_general_coefficients(cls, a, b, c, d, e, f):

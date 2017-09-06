@@ -15,7 +15,6 @@ import pytest
 import numpy as np
 
 from numpy.testing.utils import assert_array_almost_equal
-from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
 
 from akasha.curves import Ellipse
 from akasha.math import pi2
@@ -29,7 +28,7 @@ class TestEllipse(object):
 
     def test_at(self):
         ell = Ellipse(1, 0.707, pi2 * 1/8)
-        assert_nulp_diff(
+        assert_array_almost_equal(
             np.array([
                  0.7071067811865476+0.7071067811865475j,
                 -0.0881957403979775+0.7827588458787578j,
@@ -45,7 +44,7 @@ class TestEllipse(object):
 
     def test_curvature(self):
         ell = Ellipse(1, 0.707, 0)
-        assert_nulp_diff(
+        assert_array_almost_equal(
             np.array([
                 2.0006041824631042,  0.9778297511146608,  0.7341007514023552,  1.5443093080698087,
                 1.5443093080698089,  0.7341007514023554,  0.9778297511146605,  2.0006041824631042
@@ -55,7 +54,7 @@ class TestEllipse(object):
 
     def test_curvature_with_angle(self):
         ell = Ellipse(1, 0.707, pi2 * 1/8)
-        assert_nulp_diff(
+        assert_array_almost_equal(
             np.array([
                 1.0886620913508018,  0.7137017414039344,  1.3762738179669729,  1.7126777269878259,
                 0.7690728693063869,  0.8889215911627909,  1.9635436556069104,  1.0886620913508018
@@ -65,7 +64,7 @@ class TestEllipse(object):
 
     def test_roc(self):
         ell = Ellipse(1, 0.707, 0)
-        assert_nulp_diff(
+        assert_array_almost_equal(
             np.array([
                 0.4998489999999999,  1.0226729130097203,  1.3622108383484099,  0.6475386729682239,
                 0.6475386729682238,  1.3622108383484095,  1.0226729130097205,  0.4998489999999999
@@ -75,7 +74,7 @@ class TestEllipse(object):
 
     def test_roc_with_angle(self):
         ell = Ellipse(1, 0.707, pi2 * 1/8)
-        assert_nulp_diff(
+        assert_array_almost_equal(
             np.array([
                 0.9185586675101447,  1.4011455233847177,  0.7265995959126772,  0.5838810093938404,
                 1.3002669056599048,  1.1249586127072337,  0.509283303757721 ,  0.9185586675101447
@@ -97,7 +96,7 @@ class TestEllipse(object):
             angle = 2.1056608982703207,
             origin = (0.43107617854365643+0.41113551851222618j)
         )
-        assert_nulp_diff(
+        assert_array_almost_equal(
             np.array([exp.a, exp.b, exp.angle, exp.origin]),
             np.array([ell.a, ell.b, ell.angle, ell.origin])
         )
@@ -109,10 +108,12 @@ class TestEllipse(object):
         [ 0.75,  0.25, {'angle': -0.375 * pi2, 'origin': -0.15-0.25j }],
         [ 0.75,  0.35, {'angle':  0.375 * pi2, 'origin': -0.15-0.25j }],
     ]
+
+    @pytest.mark.parametrize(('fit_method'), ['fitzgibbon', 'halir'])
     @pytest.mark.parametrize(('a', 'b', 'kwargs'), ellipse_params)
-    def test_ellipse_from_points(self, a, b, kwargs):
+    def test_ellipse_fit_points(self, fit_method, a, b, kwargs):
         original = Ellipse(a, b, **kwargs)
-        fitted = Ellipse.from_points(original.at(self.samples))
+        fitted = Ellipse.fit_points(original.at(self.samples), method=fit_method)
         assert_array_almost_equal(
             ellipse_parameters(fitted),
             ellipse_parameters(original)
@@ -120,7 +121,7 @@ class TestEllipse(object):
 
     def test_general_coefficients(self):
         original = Ellipse(0.8, 0.5, -0.375*pi2, -0.15-0.25j)
-        fitted = Ellipse.from_points(original.at(self.samples))
+        fitted = Ellipse.fit_points(original.at(self.samples))
         assert_array_almost_equal(
             ellipse_parameters(fitted),
             ellipse_parameters(original)
