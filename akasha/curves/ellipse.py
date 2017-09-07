@@ -30,9 +30,12 @@ class Ellipse(Curve):
     Ellipse curve
     """
     def __init__(self, a, b, angle=0, origin=0):
-        self.a = a
-        self.b = b
-        self.angle = angle
+        # if np.abs(a) < np.abs(b):
+        #     [a, b] = [b, a]
+        #     angle -= pi2 / 4.0
+        self.a = a # np.abs(a)
+        self.b = b # np.abs(b)
+        self.angle = angle % pi2
         self.origin = origin
 
     def __repr__(self):
@@ -177,6 +180,30 @@ class Ellipse(Curve):
         else:
             raise NotImplementedError("Method '{}' not implemented.".format(method))
         return cls.from_general_coefficients(*fit_method(points))
+
+    @property
+    def general_coefficients(self):
+        """
+        The general form coefficients on an ellipse.
+        https://en.wikipedia.org/wiki/Ellipse#General_ellipse
+        """
+        # Helpers
+        sin_theta = np.sin(self.angle)
+        cos_theta = np.cos(self.angle)
+        sin_theta_sq = sin_theta ** 2.0
+        cos_theta_sq = cos_theta ** 2.0
+        a_sq = self.a ** 2.0
+        b_sq = self.b ** 2.0
+        x = self.origin.real
+        y = self.origin.imag
+        # The general coefficient equations
+        a = a_sq * sin_theta_sq + b_sq * cos_theta_sq
+        b = 2 * (b_sq - a_sq) * sin_theta * cos_theta
+        c = a_sq * cos_theta_sq + b_sq * sin_theta_sq
+        d = -2.0 * a * x - b * y
+        e = -b * x - 2.0 * c * y
+        f = a * x ** 2.0 + b * x * y + c * y ** 2.0 - a_sq * b_sq
+        return np.array([a, b, c, d, e, f])
 
     @classmethod
     def from_general_coefficients(cls, a, b, c, d, e, f):

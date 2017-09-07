@@ -11,6 +11,8 @@
 Unit tests for Ellipse
 """
 
+from __future__ import division
+
 import pytest
 import numpy as np
 
@@ -25,6 +27,17 @@ def ellipse_parameters(ellipse):
 
 
 class TestEllipse(object):
+
+    @pytest.mark.parametrize(('a', 'b'), [
+        [2, 1],
+        [1, 2],
+        # TODO Rotate angle with these on Ellipse.__init__()
+        [-1, 2],
+        [1, -2],
+    ])
+    def test_init_major_axis(self, a, b):
+        ell = Ellipse(a, b)
+        assert ell.a > ell.b > 0, 'A should be the semi-major axis and greater than B!'
 
     def test_at(self):
         ell = Ellipse(1, 0.707, pi2 * 1/8)
@@ -101,6 +114,53 @@ class TestEllipse(object):
             np.array([ell.a, ell.b, ell.angle, ell.origin])
         )
 
+    @pytest.mark.parametrize(('ellipse', 'coefficients'), [
+        # (
+        #     Ellipse(0.514256, 0.375, angle=-1.353736, origin=-0.207206-0.156022j),
+        #     np.array([0.258716, 0.052086, 0.146368, 0.115342, 0.056466, -0.020835])
+        # ),
+        # https://math.stackexchange.com/questions/993625/ellipse-3x2-x6xy-3y5y2-0-what-are-the-semi-major-and-semi-minor-axes-dis
+        (
+            Ellipse(
+                np.sqrt(7.0 / (12.0 * (4.0 + np.sqrt(10)))),
+                np.sqrt(7.0 / (12.0 * (4.0 - np.sqrt(10)))),
+                angle=-np.arctan((np.sqrt(10.0) - 1.0) / 3.0),
+                origin= (-1.0 / 3.0) + 0.5j
+            ),
+            np.array([3, 6, 5, -1, -3, 0], dtype=np.float64)
+        ),
+    ])
+    def test_general_coefficients(self, ellipse, coefficients):
+        # coefficients = np.array([ 0.258716,  0.052086,  0.146368,  0.115342,  0.056466, -0.020835])
+        # ellipse = Ellipse(0.514256, 0.375, angle=-1.353736, origin=-0.207206-0.156022j)
+        assert_array_almost_equal(
+            ellipse.general_coefficients,
+            coefficients
+        )
+
+    def test_ellipse_from_general_coefficients(self):
+        coefficients = np.array([ 0.445 , -0.39  ,  0.445 ,  0.036 ,  0.164 , -0.1368])
+        ellipse = Ellipse.from_general_coefficients(*coefficients)
+        original = Ellipse(0.8, 0.5, -0.375*pi2, -0.15-0.25j)
+
+        # assert_array_almost_equal(
+        #     ellipse.general_coefficients,
+        #     coefficients,
+        #     err_msg='Ellipse from coefficients do not match the coefficients'
+        # )
+        assert_array_almost_equal(
+            ellipse_parameters(ellipse),
+            ellipse_parameters(original),
+            err_msg='Ellipse does not match the original'
+        )
+
+    def test_general_coefficients_cycle(self):
+        ell = Ellipse(0.514256, 0.375, angle=-1.353736, origin=-0.207206-0.156022j)
+        assert_array_almost_equal(
+            ell.general_coefficients,
+            Ellipse.from_general_coefficients(*ell.general_coefficients).general_coefficients
+        )
+
     samples = np.linspace(0, 1, 17, endpoint=False)
     ellipse_params = [
         [ 0.75, 0.125, {'angle': -0.375 * pi2, 'origin': -0.15-0.25j }],
@@ -114,14 +174,6 @@ class TestEllipse(object):
     def test_ellipse_fit_points(self, fit_method, a, b, kwargs):
         original = Ellipse(a, b, **kwargs)
         fitted = Ellipse.fit_points(original.at(self.samples), method=fit_method)
-        assert_array_almost_equal(
-            ellipse_parameters(fitted),
-            ellipse_parameters(original)
-        )
-
-    def test_general_coefficients(self):
-        original = Ellipse(0.8, 0.5, -0.375*pi2, -0.15-0.25j)
-        fitted = Ellipse.fit_points(original.at(self.samples))
         assert_array_almost_equal(
             ellipse_parameters(fitted),
             ellipse_parameters(original)
