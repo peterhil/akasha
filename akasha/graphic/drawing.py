@@ -393,14 +393,11 @@ def imsave(img, filename):
         logger.error("Error when saving image: {}".format(err))
 
 
-def graph(signal, size=1000, dur=None, plot=False, axis=True,
+def graph(signal, size=1000, plot=False, axis=True,
           antialias=True, lines=False, colours=True, img=None):
     """
     Make an image from the sound signal and show it.
     """
-    if dur:
-        signal = signal[:int(round(dur * sampler.rate))]
-
     img = draw(
         signal,
         size=size,
