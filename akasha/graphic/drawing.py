@@ -119,7 +119,7 @@ def draw(
     if lines:
         if screen is None:
             # logger.warn("Drawing lines with Numpy is way too slow for now!")
-            return draw_lines(signal, img, size, colours)
+            return draw_lines(signal, img, size, colours, antialias)
         if antialias and screen is not None:
             draw_lines_pg(signal, screen, size, colours, antialias=True)
         else:
@@ -173,7 +173,7 @@ def draw_lines_pg(signal, screen, size=1000, colours=True, antialias=False):
         getattr(pygame.draw, method + 's')(screen, pygame.Color('orange'), False, pts, 1)
 
 
-def draw_lines(signal, img, size=1000, colours=True):
+def draw_lines(signal, img, size=1000, colours=True, antialias=False):
     """
     Draw antialiased lines with Numpy.
     """
@@ -185,8 +185,22 @@ def draw_lines(signal, img, size=1000, colours=True):
     points = np.rint(get_points(flip_vertical(signal), size) - 0.5).astype(np.uint32).T
     segments = np.hstack((points[:-1], points[1:]))
 
-    for i, coords in enumerate(segments):
-        img[skdraw.bresenham(*coords)] = colors[i] if colours else white
+    try:
+        for i, coords in enumerate(segments):
+            if antialias:
+                [x, y, values] = skdraw.line_aa(*coords)
+                color = colors[i] if colours else white
+
+                # Use alpha values from lines_aa
+                color_values = np.repeat(color[:,np.newaxis], len(values), axis=1).T
+                color_values[:, 3] *= values
+
+                img[x, y] += color_values
+            else:
+                img[skdraw.line(*coords)] = colors[i] if colours else white
+    except IndexError, ValueError:
+        import ipdb
+        ipdb.set_trace()
 
     return img
 
