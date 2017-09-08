@@ -48,7 +48,7 @@ def draw_axis(img, colour=[42, 42, 42, 127]):
     Draw axis on the image with the colour.
     """
     height, width, channels = img.shape
-    img[height / 2.0, :] = img[:, width / 2.0] = colour[:channels]
+    img[height / 2, :] = img[:, width / 2] = colour[:channels]
 
     return img
 
