@@ -34,6 +34,7 @@ for Pygame and Tk windowed Python apps.
     # Note! SDL Needs to be installed with Homebrew, the Macports version fails to put SDL.h on path
     brew install sdl sdl_image sdl_mixer sdl_ttf
     brew install portmidi  # Optional dependency for Pygame
+    brew install libogg libpng
 
 ## 5. Install the other required libraries with Macports
 
