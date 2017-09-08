@@ -2,12 +2,12 @@ Cython==0.21.2
 Louie==1.1
 Pillow>=2.7.0
 m3-cdecimal==2.3
+mercurial>=4.3.1
 -e hg+https://bitbucket.org/ccordoba12/funckit@23bf0cfeb1763385055a51863256eb6b74ea6fe1#egg=funckit-dev
 intervaltree
 ipython>=2.3.1
 librosa==0.3.1
 matplotlib>=1.4.2
-mercurial==3.2.4
 numpy>=1.9.1
 pandas>=0.16.0
 -e hg+https://bitbucket.org/pygame/pygame#egg=pygame-dev
