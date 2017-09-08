@@ -389,7 +389,6 @@ def show(img, plot=False, osx_open=False):
         except OSError, err:
             logger.error("Failed to open the image with a default app: %s" % err)
         finally:
-            image.close()
             tmp.close()
     else:
         image = Image.fromarray(img, 'RGBA')
