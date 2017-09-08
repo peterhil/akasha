@@ -336,13 +336,6 @@ def find_closest_index(arr, target):
     return np.argmin(np.abs(np.atleast_1d(arr) - target))
 
 
-def blockiter(snd):
-    """
-    Iterate sound using blocks of size sampler.blocksize().
-    """
-    return blockwise(snd, sampler.blocksize())
-
-
 # Random
 
 def rand_between(inf, sup, n=1, random=np.random.random):
