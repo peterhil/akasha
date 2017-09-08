@@ -374,32 +374,32 @@ def show(img, plot=False, osx_open=False):
     img = img.transpose((1, 0, 2))
     if (plot and plt):
         plt.interactive(True)
-        imgplot = plt.imshow(img[:, :, :3])
+        imgplot = plt.imshow(img)
         imgplot.set_cmap('hot')
         plt.show(False)
     elif osx_open:
         try:
-            tmp = tempfile.NamedTemporaryFile(dir='/var/tmp', suffix='akasha.png')
+            tmp = tempfile.NamedTemporaryFile(dir='/var/tmp', prefix='akasha_', suffix='.png', delete=False)
             logger.debug("Tempfile: %s" % tmp.name)
-            image = Image.fromarray(img[..., :3], 'RGB')
-            image.save(tmp, 'png')
-            time.sleep(0.5)
+            image = Image.fromarray(img, 'RGBA')
+            image.save(tmp.name, 'png')
             os.system("open " + tmp.name)
         except IOError, err:
             logger.error("Failed to open a temporary file and save the image: %s" % err)
         except OSError, err:
             logger.error("Failed to open the image with a default app: %s" % err)
         finally:
+            image.close()
             tmp.close()
     else:
-        image = Image.fromarray(img[..., :3], 'RGB')
+        image = Image.fromarray(img, 'RGBA')
         image.show()
 
 
 def imsave(img, filename):
     try:
         img = img.transpose((1, 0, 2))
-        image = Image.fromarray(img[..., :3], 'RGB')
+        image = Image.fromarray(img, 'RGBA')
         image.save(filename, 'png')
     except IOError, err:
         logger.error("Failed to save image into {}".format(filename))
@@ -408,7 +408,7 @@ def imsave(img, filename):
 
 
 def graph(signal, size=1000, plot=False, axis=True,
-          antialias=True, lines=False, colours=True, img=None):
+          antialias=True, lines=False, colours=True, img=None, osx_open=False):
     """
     Make an image from the sound signal and show it.
     """
@@ -419,5 +419,4 @@ def graph(signal, size=1000, plot=False, axis=True,
         axis=axis,
         img=img
     )
-
-    show(img, plot and plt)
+    show(img, plot and plt, osx_open)
