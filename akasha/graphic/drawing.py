@@ -11,6 +11,7 @@ Graphics drawing module.
 import numpy as np
 import os
 import pygame
+import pylab as lab
 import tempfile
 import time
 
@@ -37,12 +38,6 @@ from itertools import izip
 from PIL import Image
 from scipy import sparse
 from skimage import draw as skdraw
-
-try:
-    import matplotlib.pyplot as plt
-except ImportError:
-    logger.warn("Can't import pyplot from matplolib!")
-    plt = None
 
 # TODO: Use scipy.sparse matrices to speed up things?
 # Use sparse.coo (coordinate matrix) to build the matrix, and convert to csc/csr for math.
@@ -372,11 +367,11 @@ def show(img, plot=False, osx_open=False):
     Show an image from a Numpy array.
     """
     img = img.transpose((1, 0, 2))
-    if (plot and plt):
-        plt.interactive(True)
-        imgplot = plt.imshow(img)
+    if plot:
+        lab.interactive(True)
+        imgplot = lab.imshow(img)
         imgplot.set_cmap('hot')
-        plt.show(False)
+        lab.show(False)
     elif osx_open:
         try:
             tmp = tempfile.NamedTemporaryFile(dir='/var/tmp', prefix='akasha_', suffix='.png', delete=False)
@@ -418,4 +413,4 @@ def graph(signal, size=1000, plot=False, axis=True,
         axis=axis,
         img=img
     )
-    show(img, plot and plt, osx_open)
+    show(img, plot, osx_open)
