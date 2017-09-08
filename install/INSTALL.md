@@ -11,12 +11,17 @@ Akasha depends on a number of software libraries. To install all the required so
 Download and install the [XQuartz](http://xquartz.macosforge.org/landing/) X11 implementation
 for Pygame and Tk windowed Python apps.
 
-## 3. Create a virtualenv and activate it
+## 3. Make sure your Python version is using a framework build
+
+Matplotlib will not work in a virtual environment unless using a
+[framework build of Python](https://matplotlib.org/faq/osx_framework.html).
+
+## 4. Create a virtualenv and activate it
 
     virtualenv -p python2.7 --system-site-packages venv/py27
     . ./venv/py27/bin/activate
 
-## 4. Install the Pygame dependent SDL libraries with Homebrew or MacPorts
+## 5. Install the Pygame dependent SDL libraries with Homebrew or MacPorts
 
     # Macports
 
@@ -36,7 +41,7 @@ for Pygame and Tk windowed Python apps.
     brew install portmidi  # Optional dependency for Pygame
     brew install libogg libpng
 
-## 5. Install the other required libraries with Macports
+## 6. Install the other required libraries with Macports
 
     # Pillow depends (install with Macports)
     port install freetype
@@ -45,7 +50,7 @@ for Pygame and Tk windowed Python apps.
     brew install libsndfile libsamplerate
     brew install gcc  # Latest GCC versions include gfortran
 
-## 6. Install the Python libraries using Pip
+## 7. Install the Python libraries using Pip
 
 	pip install -r install/requires.pip
 	pip install -r install/test-requires.pip  # Optional for development
