@@ -381,7 +381,7 @@ def show(img, plot=False, osx_open=False):
         try:
             tmp = tempfile.NamedTemporaryFile(dir='/var/tmp', prefix='akasha_', suffix='.png', delete=False)
             logger.debug("Tempfile: %s" % tmp.name)
-            image = Image.fromarray(img, 'RGBA')
+            image = Image.fromarray(img)
             image.save(tmp.name, 'png')
             os.system("open " + tmp.name)
         except IOError, err:
@@ -391,14 +391,14 @@ def show(img, plot=False, osx_open=False):
         finally:
             tmp.close()
     else:
-        image = Image.fromarray(img, 'RGBA')
+        image = Image.fromarray(img)
         image.show()
 
 
 def imsave(img, filename):
     try:
         img = img.transpose((1, 0, 2))
-        image = Image.fromarray(img, 'RGBA')
+        image = Image.fromarray(img)
         image.save(filename, 'png')
     except IOError, err:
         logger.error("Failed to save image into {}".format(filename))
