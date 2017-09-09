@@ -8,18 +8,15 @@
 Graphics drawing module.
 """
 
-import numpy as np
-import os
 import pygame
-import pylab as lab
-import tempfile
-import time
+import numpy as np
 
-from akasha.curves.circle import Circle
+from PIL import Image
+from scipy import sparse
+from skimage import draw as skdraw
+
 from akasha.funct import pairwise
 from akasha.graphic.colour import colorize, white
-from akasha.graphic.primitive.line import bresenham
-from akasha.timing import sampler
 from akasha.utils.log import logger
 from akasha.math import \
     as_pixels, \
@@ -34,19 +31,13 @@ from akasha.math import \
     pcm, \
     roundcast
 
-from itertools import izip
-from PIL import Image
-from scipy import sparse
-from skimage import draw as skdraw
 
-# TODO: Use scipy.sparse matrices to speed up things?
-# Use sparse.coo (coordinate matrix) to build the matrix, and convert to csc/csr for math.
-
-
-def draw_axis(img, colour=[42, 42, 42, 127]):
+def draw_axis(img, colour=None):
     """
     Draw axis on the image with the colour.
     """
+    if colour is None:
+        colour = [42, 42, 42, 127]
     height, width, channels = img.shape
     img[height / 2, :] = img[:, width / 2] = colour[:channels]
 
@@ -78,15 +69,15 @@ def blit(screen, img):
 
 
 def draw(
-    signal,
-    size=1000,
-    antialias=False,
-    lines=False,
-    colours=True,
-    axis=True,
-    img=None,
-    screen=None,
-):
+        signal,
+        size=1000,
+        antialias=False,
+        lines=False,
+        colours=True,
+        axis=True,
+        img=None,
+        screen=None,
+    ):
     """
     Draw the complex sound signal into specified size image.
     """
@@ -99,13 +90,12 @@ def draw(
     # signal = self[start:start+buffersize-1:buffersize] # TODO: Make this cleaner
 
     # TODO: Enable using non-square size.
-
     if img is not None:  # Draw into existing img?
         size = img.shape[0]
     else:
         img = get_canvas(size, axis=axis)
 
-    if len(signal) == 0:
+    if not signal:
         logger.warn('Drawing empty signal!')
         return img
 
@@ -113,17 +103,16 @@ def draw(
 
     if lines:
         if screen is None:
-            # logger.warn("Drawing lines with Numpy is way too slow for now!")
-            return draw_lines(signal, img, size, colours, antialias)
-        if antialias and screen is not None:
-            draw_lines_pg(signal, screen, size, colours, antialias=True)
+            logger.warn("Drawing lines with Numpy is way too slow for now!")
+            img = draw_lines(signal, img, size, colours, antialias)
         else:
-            draw_lines_pg(signal, screen, size, colours, antialias=False)
+            draw_lines_pg(signal, screen, size, colours, antialias)
     else:
         if antialias:
-            return draw_points_aa(signal, img, size, colours)
+            img = draw_points_aa(signal, img, size, colours)
         else:
-            return draw_points(signal, img, size, colours)
+            img = draw_points(signal, img, size, colours)
+    return img
 
 
 def clip_samples(signal):
@@ -132,9 +121,9 @@ def clip_samples(signal):
     """
     clip_max = np.max(np.fmax(np.abs(signal.real), np.abs(signal.imag)))
     if clip_max > 1.0:
-        logger.warn("Clipping signal -- maximum magnitude was: %0.6f" % clip_max)
+        logger.warn("Clipping signal -- maximum magnitude was: %0.6f", clip_max)
         return clip(signal)
-    else:
+    else:  # pylint: disable=R1705
         return signal
 
 
@@ -182,13 +171,13 @@ def draw_lines(signal, img, size=1000, colours=True, antialias=False):
                 color = colors[i] if colours else white
 
                 # Use alpha values from lines_aa
-                color_values = np.repeat(color[:,np.newaxis], len(values), axis=1).T
+                color_values = np.repeat(color[:, np.newaxis], len(values), axis=1).T
                 color_values[:, 3] *= values
 
                 img[x, y] += color_values
             else:
                 img[skdraw.line(*coords)] = colors[i] if colours else white
-    except IndexError, ValueError:
+    except (IndexError, ValueError):
         import ipdb
         ipdb.set_trace()
 
@@ -217,19 +206,19 @@ def draw_points_aa(signal, img, size=1000, colours=True):
     Draw colourized antialiased points from signal.
     """
     # Fixme: Ignores size argument as it is now
-
-    width, height, ch = img.shape
+    width, height, _ = img.shape
 
     iw = lambda a: inside(a, 0, width)
     ih = lambda a: inside(a, 0, height)
 
     px, value = get_pixels(signal, width - 1)
-    color = add_alpha(colorize(signal)) if colours else white
+    colors = add_alpha(colorize(signal)) if colours else white
+    pixels = lambda values: roundcast(colors * as_pixels(values), dtype=np.uint8)
 
-    img[px[0],         px[1], :]         += roundcast(color * as_pixels(value[0] * value[1]), dtype=np.uint8)
-    img[px[0],         iw(px[1] + 1), :] += roundcast(color * as_pixels(value[0] * (1 - value[1])), dtype=np.uint8)
-    img[ih(px[0] + 1), px[1], :]         += roundcast(color * as_pixels((1 - value[0]) * value[1]), dtype=np.uint8)
-    img[ih(px[0] + 1), iw(px[1] + 1), :] += roundcast(color * as_pixels((1 - value[0]) * (1 - value[1])), dtype=np.uint8)
+    img[px[0], px[1], :] += pixels(value[0] * value[1])
+    img[px[0], iw(px[1] + 1), :] += pixels(value[0] * (1 - value[1]))
+    img[ih(px[0] + 1), px[1], :] += pixels((1 - value[0]) * value[1])
+    img[ih(px[0] + 1), iw(px[1] + 1), :] += pixels((1 - value[0]) * (1 - value[1]))
 
     return img
 
@@ -275,6 +264,8 @@ def draw_points(signal, img, size=1000, colours=True):
     return img
 
 
+# TODO: Investigate using scipy.sparse matrices to speed up things?
+# Use sparse.coo (coordinate matrix) to build the matrix, and convert to csc/csr for math.
 def draw_points_coo(signal, img, size=1000, colours=True):
     """
     Draw a bitmap image from a complex signal with optionally colourized pixels.
@@ -315,8 +306,6 @@ def video_transfer(signal, standard='PAL', axis='real', horiz=720):
     Draw a sound signal using the old video tape audio recording technique.
     See: http://en.wikipedia.org/wiki/44100_Hz#Recording_on_video_equipment
     """
-    # TODO: Make Stereo video transfer?
-
     # PAL:
     # 294 × 50 × 3 = 44,100
     # 294 active lines/field × 50 fields/second × 3 samples/line = 44,100 samples/second
