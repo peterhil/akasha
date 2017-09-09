@@ -156,6 +156,45 @@ class TestDrawing(object):
             expected
         )
 
+    @pytest.mark.parametrize(('points', 'expected_xs', 'expected_ys', 'expected_values'), [
+        [
+            0+0j,
+            0, 0,
+            np.array([[
+                [0.25, 0.25],
+                [0.25, 0.25]
+            ]])
+        ],
+        [
+            0.25+0.25j,
+            0, 0,
+            np.array([[
+                [0.1875, 0.1875],
+                [0.0625, 0.5625]
+            ]])
+        ],
+        [
+            0.5+0.5j,
+            0, 0,
+            np.array([[
+                [0, 0],
+                [1, 0]
+            ]])
+        ],
+        [
+            4.75-1.5j,
+            4, -2,
+            np.array([[
+                [0.5, 0.5],
+                [0.5, 0.5]
+            ]])
+        ],
+    ])
+    def test_antialiased_pixels(self, points, expected_xs, expected_ys, expected_values):
+        [xs, ys, values] = antialiased_pixels(points)
+        assert_array_equal(xs, expected_xs)
+        assert_array_equal(ys, expected_ys)
+        assert_array_equal(values, expected_values)
 
     @pytest.mark.parametrize(('palette'), [
         [[255], [0], [42]],

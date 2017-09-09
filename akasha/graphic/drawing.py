@@ -36,7 +36,7 @@ from akasha.math import \
     roundcast, \
     scale_to_coordinates
 
-from itertools import izip
+from itertools import izip, izip_longest
 from PIL import Image
 from scipy import sparse
 from skimage import draw as skdraw
@@ -202,6 +202,30 @@ def draw_lines(signal, img, size=1000, colours=True, antialias=False):
     return img
 
 
+def antialiased_pixels(points):
+    """
+    Return antialiased pixel values for a coordinate point.
+    """
+    points = np.asarray(points, dtype=np.complex128)
+    [cx, cy] = complex_as_reals(points)
+    ax, bx = np.array([0.5 - (cx % 1), (cx % 1) + 0.5])
+    ay, by = np.array([0.5 - (cy % 1), (cy % 1) + 0.5])
+    return [
+        np.floor(cx).astype(np.intp),
+        np.floor(cy).astype(np.intp),
+        np.array([[ax * by, ax * ay], [bx * ay, bx * by]]).T
+    ]
+
+
+def antialias(signal, size):
+    """
+    Antialiased pixel positions and values from complex valued points on a plane.
+    """
+    signal = np.asarray(signal, dtype=np.complex128)
+    points = scale_to_coordinates(signal, size)
+    return antialiased_pixels(points)
+
+
 def draw_points_np_aa(signal, img, size=1000, colours=True):
     """
     Draw colourized antialiased points from signal.
@@ -224,7 +248,6 @@ def draw_points_aa(signal, img, size=1000, colours=True):
     Draw colourized antialiased points from signal.
     """
     # Fixme: Ignores size argument as it is now
-
     width, height, ch = img.shape
 
     iw = lambda a: inside(a, 0, width)
@@ -237,6 +260,29 @@ def draw_points_aa(signal, img, size=1000, colours=True):
     img[px[0],         iw(px[1] + 1), :] += roundcast(color * as_pixels(value[0] * (1 - value[1])), dtype=np.uint8)
     img[ih(px[0] + 1), px[1], :]         += roundcast(color * as_pixels((1 - value[0]) * value[1]), dtype=np.uint8)
     img[ih(px[0] + 1), iw(px[1] + 1), :] += roundcast(color * as_pixels((1 - value[0]) * (1 - value[1])), dtype=np.uint8)
+
+    return img
+
+
+def draw_points_aa_new(signal, img, size=1000, colours=True):
+    """
+    Draw colourized antialiased points from signal.
+    """
+    # Fixme: Ignores size argument as it is now
+    width, height, ch = img.shape
+    size = width
+
+    color = add_alpha(colorize(signal)) if colours else white
+    [xs, ys, alpha_values] = antialias(signal, size - 1)  # Use image size?
+
+    patterns = np.round(
+        np.repeat(color, 4, axis=0) * \
+        np.fromiter(alpha_values.flat, dtype=np.float64)[:,np.newaxis]
+    ).astype(np.int32).reshape(len(alpha_values), 2, 2, 4)
+
+    base = size / 2 - 1
+    indices = np.array([np.indices((2, 2)) + [x, y] + base for (x, y) in izip_longest(xs, ys)])
+    img[indices[:,0,:], indices[:,1,:]] = patterns
 
     return img
 
