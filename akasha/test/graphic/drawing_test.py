@@ -143,7 +143,19 @@ class TestDrawing(object):
     def test_draw_points_np_aa(self):
         pass
 
-    ### Test for point drawing functions
+    ### Tests for point drawing functions
+
+    @pytest.mark.parametrize(('size', 'expected'), [
+        [3, np.array([ 0.5+0.5j,  1.5+1.5j,  2.5+2.5j])],
+        [4, np.array([ 0.5+0.5j,  1.5+1.5j,  2.5+2.5j,  3.5+3.5j])],
+    ])
+    def test_pixel_centers(self, size, expected):
+        signal = np.linspace(-1-1j, 1+1j, size, endpoint=True)
+        assert_array_equal(
+            pixel_centers(signal, size),
+            expected
+        )
+
 
     @pytest.mark.parametrize(('palette'), [
         [[255], [0], [42]],

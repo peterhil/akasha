@@ -597,6 +597,7 @@ def numberof(items):
     """
     return items if np.isscalar(items) else len(items)
 
+
 def pcm(signal, bits=16, axis='imag'):
     """
     Get a pcm sound with integer samples from the complex signal,
@@ -767,7 +768,7 @@ def get_points(signal, size=1000, dtype=np.float64):
     """
     Get coordinate points from a complex signal.
     """
-    return complex_as_reals(scale(np.atleast_1d(signal), size), dtype)
+    return complex_as_reals(pixel_centers(np.atleast_1d(signal), size), dtype)
 
 
 def get_pixels(signal, size):
@@ -799,13 +800,22 @@ def as_pixels(values, channels=4):
       .reshape(len(values), channels)
 
 
-def scale(signal, size):
+def scale_to_coordinates(signal, size):
     """
+    Scale complex signal to given size / 2.0.
+    Clips the signal first to unit rectangle area.
+    """
+    return clip(signal) * (size / 2.0)
+
+
+def pixel_centers(signal, size):
+    """
+    Coordinates of signal points as "pixel centers" on a grid of given size.
+
     Scale complex signal in unit rectangle area to size and interpret values as pixel centers.
     Range of the coordinates will be from 0.5 to size - 0.5.
     """
-    # TODO: Move to math or dsp module
-    return ((clip(signal) + 1 + 1j) / 2.0 * (size - 1) + (0.5 + 0.5j))
+    return ((clip(signal) + (1 + 1j)) / 2.0 * (size - 1) + (0.5 + 0.5j))
 
 
 def scaleto(arr, magnitude=1, inplace=False):

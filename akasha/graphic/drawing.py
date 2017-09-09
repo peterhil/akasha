@@ -32,7 +32,9 @@ from akasha.math import \
     normalize, \
     pad, \
     pcm, \
-    roundcast
+    pixel_centers, \
+    roundcast, \
+    scale_to_coordinates
 
 from itertools import izip
 from PIL import Image
@@ -204,7 +206,7 @@ def draw_points_np_aa(signal, img, size=1000, colours=True):
     """
     Draw colourized antialiased points from signal.
     """
-    points = ((clip(signal) + 1 + 1j) / 2.0 * (size - 1) + (0.5 + 0.5j))
+    points = pixel_centers(signal, size)
     deltas = points - np.round(points)
 
     color = add_alpha(colorize(signal)) if colours else white
