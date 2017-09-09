@@ -130,11 +130,6 @@ def clip_samples(signal):
     """
     Clip a signal into unit rectangle area.
     """
-    # TODO: Move to math or dsp module
-
-    # clip_max = np.max(np.abs(signal)) # unit circle
-    # rectangular abs can be sqrt(2) > 1.0!
-    signal = np.atleast_1d(signal)
     clip_max = np.max(np.fmax(np.abs(signal.real), np.abs(signal.imag)))
     if clip_max > 1.0:
         logger.warn("Clipping signal -- maximum magnitude was: %0.6f" % clip_max)
