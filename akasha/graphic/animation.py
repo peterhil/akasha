@@ -162,7 +162,7 @@ class VideoTransferView(object):
         img = get_canvas(size)
         tfer = video_transfer(signal, standard=self.standard, axis=self.axis, horiz=self.size)
 
-        black = (size - tfer.shape[0]) / 2.0
+        black = int(round((size - tfer.shape[0]) / 2.0))
         img[:, black:-black, :] = tfer[:, :img.shape[1], :].transpose(1, 0, 2)
 
         blit(self._surface, img)
