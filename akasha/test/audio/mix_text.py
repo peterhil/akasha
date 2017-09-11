@@ -17,7 +17,7 @@ import pytest
 from numpy.testing.utils import assert_array_equal, assert_array_almost_equal
 
 from akasha.audio.envelope import Exponential
-from akasha.audio.harmonics import Overtones
+from akasha.audio.harmonics import Harmonics
 from akasha.audio.mix import Mix
 from akasha.audio.oscillator import Osc
 from akasha.audio.scalar import Scalar
@@ -76,19 +76,19 @@ class TestMix(object):
         assert m.frequency == 420
 
 
-class TestReplacingOvertones(object):
-    """Test replacing Overtones class with Mix objects"""
+class TestReplacingHarmonics(object):
+    """Test replacing Harmonics class with Mix objects"""
 
     def test_mix_overtones(self):
         s = Super(3, 3, 3, 3)
         o = Osc(120, curve=s)
-        h = Overtones(o, n=3, func=lambda x: x + 1, rand_phase=False, damping='sine')
+        h = Harmonics(o, n=3, func=lambda x: x + 1, rand_phase=False, damping='sine')
         base = s
         times = sampler.slice(1000) * sampler.rate
 
         ## Mix generated overtones
 
-        # TODO: Move this part out of test code, and replace Overtones class!
+        # TODO: Move this part out of test code, and replace Harmonics class!
         from itertools import izip
         from akasha.math import map_array, random_phasor
 
