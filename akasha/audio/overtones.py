@@ -93,6 +93,7 @@ class Overtones(FrequencyRatioMixin, Generator):
         # TODO Use self.overtones?
         overtones = map_array(self.func, np.arange(self.n))  # Remember to limit these on Nyquist freq.
         frequencies = self.frequency * overtones
+        frequencies = frequencies[np.nonzero(frequencies)]
 
         # TODO Get the base curve another way in order to be able to
         # use Gamma curves on frequency plane for example, or any
@@ -100,7 +101,6 @@ class Overtones(FrequencyRatioMixin, Generator):
         # adding multiply to Playble, and pass methods through on Sum
         # and Mix etc.
         oscs = np.array([Osc(f, self.base.curve) for f in frequencies])
-        oscs = oscs[np.nonzero(oscs)]
 
         envelopes = [
             Exponential(self.damping(f))
