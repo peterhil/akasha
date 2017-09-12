@@ -61,36 +61,12 @@ class Overtones(FrequencyRatioMixin, Generator):
             self.damping = lambda f: 0
         self.rand_phase = rand_phase
 
-    @property
-    def max_overtones(self):
-        """
-        Maximum number of overtones to generate for a frequency.
-        """
-        low_freq_overtone_limit = 10
-        return int(sampler.rate / (2.0 * max(self.frequency, low_freq_overtone_limit)))
-
-    @property
-    def limit(self):
-        """
-        Get the number of overtones to generate for a frequency.
-        """
-        return max(min(self.max_overtones, self.n), 1)
-
-    @property
-    def overtones(self):
-        """
-        Generate overtones using the function given in init.
-        The number of overtones is limited by self.limit.
-        """
-        return np.apply_along_axis(self.func, 0, np.arange(0, self.limit, dtype=np.float64))
-
     # TODO memoize with hash!
     @property
     def partials(self):
         """
         Mix generated overtone partials
         """
-        # TODO Use self.overtones?
         overtones = map_array(self.func, np.arange(self.n))  # Remember to limit these on Nyquist freq.
         frequencies = self.frequency * overtones
         frequencies = frequencies[np.nonzero(frequencies)]
