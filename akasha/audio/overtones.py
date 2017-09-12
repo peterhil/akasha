@@ -84,19 +84,6 @@ class Overtones(FrequencyRatioMixin, Generator):
         """
         return np.apply_along_axis(self.func, 0, np.arange(0, self.limit, dtype=np.float64))
 
-    @property
-    def oscs(self):
-        """
-        Oscillators based on overtones.
-        """
-        base = self.base.__class__
-        overtones = np.array(float(self.frequency) * self.overtones, dtype=np.float64)
-        if 'Super' == self.base.curve.__class__.__name__:
-            oscs = map_array(lambda f: base(f, curve=self.base.curve), overtones, 'vec')
-        else:
-            oscs = map_array(base, overtones, 'vec')
-        return oscs[np.nonzero(oscs)]
-
     # TODO memoize with hash!
     @property
     def partials(self):
@@ -107,9 +94,14 @@ class Overtones(FrequencyRatioMixin, Generator):
         overtones = map_array(self.func, np.arange(self.n))  # Remember to limit these on Nyquist freq.
         frequencies = self.frequency * overtones
 
-        # TODO Get the base curve another way in order to be able
-        # to use Gamma curves on frequency plane for example.
-        oscs = [Osc(f, self.base.curve) for f in frequencies]
+        # TODO Get the base curve another way in order to be able to
+        # use Gamma curves on frequency plane for example, or any
+        # other object with a frequency as the base.  Also consider
+        # adding multiply to Playble, and pass methods through on Sum
+        # and Mix etc.
+        oscs = np.array([Osc(f, self.base.curve) for f in frequencies])
+        oscs = oscs[np.nonzero(oscs)]
+
         envelopes = [
             Exponential(self.damping(f))
             for f in frequencies
