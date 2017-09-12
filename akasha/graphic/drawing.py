@@ -20,6 +20,7 @@ from akasha.funct import pairwise
 from akasha.graphic.colour import colorize, white
 from akasha.graphic.primitive.line import bresenham
 from akasha.timing import sampler
+from akasha.utils import is_silence
 from akasha.utils.log import logger
 from akasha.math import \
     as_pixels, \
@@ -105,7 +106,7 @@ def draw(
     else:
         img = get_canvas(size, axis=axis)
 
-    if len(signal) == 0:
+    if is_silence(signal):
         logger.warn('Drawing empty signal!')
         return img
 
