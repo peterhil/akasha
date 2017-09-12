@@ -107,9 +107,6 @@ class Overtones(FrequencyRatioMixin, Generator):
         overtones = map_array(self.func, np.arange(self.n))  # Remember to limit these on Nyquist freq.
         frequencies = self.frequency * overtones
 
-        # TODO Make cleaner when .at() is replaced with __call__()
-        normalization = Exponential(1.0, amp=1.0 / len(frequencies))
-
         # TODO Get the base curve another way in order to be able
         # to use Gamma curves on frequency plane for example.
         oscs = [Osc(f, self.base.curve) for f in frequencies]
