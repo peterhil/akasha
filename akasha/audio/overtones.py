@@ -18,6 +18,7 @@ from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import Generator
 from akasha.audio.mix import Mix
 from akasha.audio.oscillator import Osc
+from akasha.audio.scalar import Scalar
 from akasha.audio.sum import Sum
 from akasha.math import random_phasor, map_array, normalize, pi2
 from akasha.timing import sampler
@@ -49,12 +50,15 @@ class Overtones(FrequencyRatioMixin, Generator):
                 -5 * np.log2(float(f)) / (10.0),
                 a * float(self.frequency)/float(f)
             )
-        elif damping == 'default':
-            self.damping = lambda f, a=1.0: -5 * np.log2(float(f)) / 1000.0
+        elif damping == 'natural':
+            self.damping = lambda f: (
+                -5 * np.log2(float(f)) / 1000.0
+            )
         elif callable(damping):
             self.damping = damping
         else:
-            self.damping = None
+            # Default is no damping
+            self.damping = lambda f: 0
         self.rand_phase = rand_phase
 
     @property
@@ -103,8 +107,16 @@ class Overtones(FrequencyRatioMixin, Generator):
         overtones = map_array(self.func, np.arange(self.n))  # Remember to limit these on Nyquist freq.
         frequencies = self.frequency * overtones
 
-        oscs = [Osc(f, self.base) for f in frequencies]
-        envelopes = [Exponential(self.damping(f)) for f in frequencies]
+        # TODO Make cleaner when .at() is replaced with __call__()
+        normalization = Exponential(1.0, amp=1.0 / len(frequencies))
+
+        # TODO Get the base curve another way in order to be able
+        # to use Gamma curves on frequency plane for example.
+        oscs = [Osc(f, self.base.curve) for f in frequencies]
+        envelopes = [
+            Exponential(self.damping(f))
+            for f in frequencies
+        ]
         partials = [Mix(*part) for part in izip(oscs, envelopes)]
 
         # Random phases
@@ -113,10 +125,7 @@ class Overtones(FrequencyRatioMixin, Generator):
             phases = [Scalar(phase, dtype=np.complex128) for phase in phases]
             partials = [Mix(*partial) for partial in izip(partials, phases)]
 
-        # TODO Make cleaner when .at() is replaced with __call__()
-        normalization = Exponential(0, amp=1.0 / len(partials))
-
-        return Mix(Sum(*partials), normalization)
+        return Mix(Sum(*partials), Scalar(1.0 / len(frequencies)))
 
     def at(self, t):
         """

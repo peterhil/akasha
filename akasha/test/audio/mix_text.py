@@ -87,7 +87,7 @@ class TestReplacingHarmonics(object):
         kwargs = dict(n=3, func=lambda x: x + 1, rand_phase=False, damping='sine')
         h = Harmonics(o, **kwargs)
         overtones = Overtones(o, **kwargs)
-        times = sampler.slice(1000) * sampler.rate
+        times = sampler.times(1)
 
         assert_array_almost_equal(
             h.at(times),
