@@ -106,7 +106,7 @@ def draw(
             logger.warn("Drawing lines with Numpy is way too slow for now!")
             img = draw_lines(signal, img, size, colours, antialias)
         else:
-            draw_lines_pg(signal, screen, size, colours, antialias)
+            img = draw_lines_pg(signal, screen, size, colours, antialias)
     else:
         if antialias:
             img = draw_points_aa(signal, img, size, colours)
@@ -150,6 +150,7 @@ def draw_lines_pg(signal, screen, size=1000, colours=True, antialias=False):
             getattr(pygame.draw, method)(screen, colors[i], *ends)
     else:
         getattr(pygame.draw, method + 's')(screen, pygame.Color('orange'), False, pts, 1)
+    return None
 
 
 def draw_lines(signal, img, size=1000, colours=True, antialias=False):

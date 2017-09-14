@@ -143,7 +143,8 @@ class ComplexView(object):
                    antialias=self.antialias, lines=self.lines, colours=self.colours,
                    axis=True, screen=self._surface)
 
-        blit(self._surface, img)
+        if img is not None:
+            blit(self._surface, img)
 
 
 class VideoTransferView(object):
