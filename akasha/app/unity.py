@@ -1,11 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+App with graphical user interface (GUI) done with Pygame
+"""
+
 import pygame as pg
 
 
-class App(object):
-
+class Unity(object):
+    """
+    Unity is the original Pygame animated signal that can be played with keyboard and mouse.
+    """
     def __init__(self, width, height=None, flags=pg.HWSURFACE | pg.DOUBLEBUF):
         self._running = False
         self._surface = None
@@ -44,5 +50,5 @@ class App(object):
 
 
 if __name__ == "__main__" :
-    app = App(800)
+    app = Unity(800)
     app.execute()
