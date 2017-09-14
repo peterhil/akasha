@@ -106,8 +106,6 @@ class DTMF(Generator):
 
     def sample(self, iterable):
         """Make DTML dialing tone."""
-        #snd = Sound()
-        #snd.add()
         pass
 
     def __len__(self):
