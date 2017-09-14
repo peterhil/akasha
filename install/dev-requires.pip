@@ -1,0 +1,5 @@
+-r test-requires.pip
+pyflakes>=1.6.0
+pep8>=1.7.0
+pylint>=1.7.2
+ipdb>=0.10.3

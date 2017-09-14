@@ -143,7 +143,8 @@ class ComplexView(object):
                    antialias=self.antialias, lines=self.lines, colours=self.colours,
                    axis=True, screen=self._surface)
 
-        blit(self._surface, img)
+        if img is not None:
+            blit(self._surface, img)
 
 
 class VideoTransferView(object):
@@ -162,7 +163,7 @@ class VideoTransferView(object):
         img = get_canvas(size)
         tfer = video_transfer(signal, standard=self.standard, axis=self.axis, horiz=self.size)
 
-        black = (size - tfer.shape[0]) / 2.0
+        black = int(round((size - tfer.shape[0]) / 2.0))
         img[:, black:-black, :] = tfer[:, :img.shape[1], :].transpose(1, 0, 2)
 
         blit(self._surface, img)

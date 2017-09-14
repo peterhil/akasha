@@ -6,7 +6,7 @@
 # pylint: disable=E1101
 
 """
-Harmonic overtones module
+Harmonics module
 """
 
 import numpy as np
@@ -22,7 +22,7 @@ from akasha.math import random_phasor, map_array, normalize, pi2
 
 
 # TODO Eventually compose overtones of Mix objects and use Playable, and drop FrequencyRatioMixin
-class Overtones(FrequencyRatioMixin, Generator):
+class Harmonics(FrequencyRatioMixin, Generator):
     """Harmonical overtones for a sound object having a frequency"""
 
     def __init__(
@@ -54,40 +54,40 @@ class Overtones(FrequencyRatioMixin, Generator):
         self.rand_phase = rand_phase
 
     @property
-    def max_overtones(self):
-        """Maximum number of overtones to generate for a frequency."""
+    def max_harmonics(self):
+        """Maximum number of harmonics to generate for a frequency."""
         low_freq_overtone_limit = 10
         return int(sampler.rate / (2.0 * max(self.frequency, low_freq_overtone_limit)))
 
     @property
     def limit(self):
-        """Get the number of overtones to generate for a frequency."""
-        return max(min(self.max_overtones, self.n), 1)
+        """Get the number of harmonics to generate for a frequency."""
+        return max(min(self.max_harmonics, self.n), 1)
 
     @property
-    def overtones(self):
+    def harmonics(self):
         """
-        Generate overtones using the function given in init.
-        The number of overtones is limited by self.limit.
+        Generate harmonics using the function given in init.
+        The number of harmonics is limited by self.limit.
         """
         return np.apply_along_axis(self.func, 0, np.arange(0, self.limit, dtype=np.float64))
 
     @property
     def oscs(self):
         """
-        Oscillators based on overtones.
+        Oscillators based on harmonics.
         """
         base = self.base.__class__
-        overtones = np.array(float(self.frequency) * self.overtones, dtype=np.float64)
+        harmonics = np.array(float(self.frequency) * self.harmonics, dtype=np.float64)
         if 'Super' == self.base.curve.__class__.__name__:
-            oscs = map_array(lambda f: base(f, curve=self.base.curve), overtones, 'vec')
+            oscs = map_array(lambda f: base(f, curve=self.base.curve), harmonics, 'vec')
         else:
-            oscs = map_array(base, overtones, 'vec')
+            oscs = map_array(base, harmonics, 'vec')
         return oscs[np.nonzero(oscs)]
 
     def at(self, t):
         """
-        Sample Overtones at times (t).
+        Sample Harmonics at times (t).
         """
         partials = []
 
@@ -124,6 +124,6 @@ class Overtones(FrequencyRatioMixin, Generator):
             (self.__class__.__name__, self.base, self.n, self.func, self.damping, self.rand_phase)
 
     def __str__(self):
-        return "<%s: sndobj=%s, limit=%s, frequency=%s, overtones=%s, func=%s, damping=%s>" % \
+        return "<%s: sndobj=%s, limit=%s, frequency=%s, harmonics=%s, func=%s, damping=%s>" % \
             (self.__class__.__name__, self.base, self.limit, self.frequency,
-             self.overtones, self.func, self.damping)
+             self.harmonics, self.func, self.damping)

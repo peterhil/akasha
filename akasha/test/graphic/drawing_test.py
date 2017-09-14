@@ -262,9 +262,3 @@ class TestDrawing(object):
 
     def test_video_transfer(self):
         pass
-
-    def test_show(self):
-        pass
-
-    def test_graph(self):
-        pass
