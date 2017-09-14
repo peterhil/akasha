@@ -25,7 +25,7 @@ from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import PeriodicGenerator, Generator
 from akasha.audio.oscillator import Osc
 from akasha.timing import sampler
-from akasha.types.numeric import NumericUnit, ComplexUnit, RealUnit
+from akasha.types.numeric import NumericUnit, ComplexUnit, RationalUnit, RealUnit
 from akasha.math import cents_diff
 
 
@@ -167,6 +167,7 @@ class TestFrequency(object):
         assert [
             Frequency,
             FrequencyRatioMixin,
+            RationalUnit,
             RealUnit,
             ComplexUnit,
             NumericUnit,
