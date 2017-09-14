@@ -54,44 +54,29 @@ class Harmonics(FrequencyRatioMixin, Generator):
         self.rand_phase = rand_phase
 
     @property
-    def max_harmonics(self):
-        """Maximum number of harmonics to generate for a frequency."""
-        low_freq_overtone_limit = 10
-        return int(sampler.rate / (2.0 * max(self.frequency, low_freq_overtone_limit)))
-
-    @property
-    def limit(self):
-        """Get the number of harmonics to generate for a frequency."""
-        return max(min(self.max_harmonics, self.n), 1)
-
-    @property
     def harmonics(self):
         """
         Generate harmonics using the function given in init.
-        The number of harmonics is limited by self.limit.
         """
-        return np.apply_along_axis(self.func, 0, np.arange(0, self.limit, dtype=np.float64))
+        return map_array(self.func, np.arange(self.n, dtype=np.float64))
 
+    # TODO memoize with dependencies
     @property
-    def oscs(self):
+    def frequencies(self):
         """
-        Oscillators based on harmonics.
+        Generate frequencies based on harmonics
         """
-        base = self.base.__class__
-        harmonics = np.array(float(self.frequency) * self.harmonics, dtype=np.float64)
-        if 'Super' == self.base.curve.__class__.__name__:
-            oscs = map_array(lambda f: base(f, curve=self.base.curve), harmonics, 'vec')
-        else:
-            oscs = map_array(base, harmonics, 'vec')
-        return oscs[np.nonzero(oscs)]
+        frequencies = self.frequency * self.harmonics
+        return frequencies[np.nonzero(frequencies)]
 
     def at(self, t):
         """
         Sample Harmonics at times (t).
         """
         partials = []
+        oscs = np.array([Osc(f, self.base.curve) for f in self.frequencies])
 
-        for o in self.oscs:
+        for o in oscs:
             out = o.at(t)
 
             if self.rand_phase:
@@ -117,13 +102,13 @@ class Harmonics(FrequencyRatioMixin, Generator):
             partials.append(out)
 
         # Sum all partials and normalize volume
-        return np.sum(partials, axis=0, dtype=np.complex128) / self.limit
+        return np.sum(partials, axis=0, dtype=np.complex128) / len(partials)
 
     def __repr__(self):
-        return "%s(sndobj=%s, n=%s, func=%s, damping=%s, rand_phase=%s>" % \
+        return "%s(sndobj=%r, n=%r, func=%r, damping=%r, rand_phase=%r>" % \
             (self.__class__.__name__, self.base, self.n, self.func, self.damping, self.rand_phase)
 
     def __str__(self):
-        return "<%s: sndobj=%s, limit=%s, frequency=%s, harmonics=%s, func=%s, damping=%s>" % \
-            (self.__class__.__name__, self.base, self.limit, self.frequency,
-             self.harmonics, self.func, self.damping)
+        return "<%s: sndobj=%s, n=%s, frequency=%s, frequencies=%s, func=%s, damping=%s>" % \
+            (self.__class__.__name__, self.base, self.n, self.frequency,
+             self.frequencies, self.func, self.damping)
