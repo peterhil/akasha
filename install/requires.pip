@@ -1,20 +1,20 @@
 # Cython==0.21.2
 # Louie==1.1
-Pillow>=2.7.0
+Pillow>=4.2.1
 m3-cdecimal==2.3
 mercurial>=4.3.1
 -e hg+https://bitbucket.org/ccordoba12/funckit@23bf0cfeb1763385055a51863256eb6b74ea6fe1#egg=funckit-dev
 # intervaltree
 ipython>=5.4.1
 # librosa==0.3.1
-matplotlib>=1.4.2
-numpy>=1.9.1
-pandas>=0.16.0
+matplotlib>=2.0.2
+numpy>=1.11.3
+pandas>=0.20.1
 -e hg+https://bitbucket.org/pygame/pygame#egg=pygame-dev
 # pyinter
-scikit-image>=0.10.1
+scikit-image>=0.11.2
 scikits.audiolab>=0.11.0
 scikits.samplerate==0.3.3
-scipy>=0.15.0
-six==1.9.0
+scipy>=0.19.0
+six>=1.10.0
 wikitools==1.1.1
