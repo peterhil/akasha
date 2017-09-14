@@ -98,17 +98,6 @@ class Pcm(FrequencyRatioMixin, Generator):
         return self.resample_at_freq(items)
 
 
-class Group(FrequencyRatioMixin, Generator):
-    """
-    Group of sound objects.
-    """
-    def __init__(self, *args):
-        super(self.__class__, self).__init__()
-        self.sounds = np.array(*args, dtype=object)
-        # TODO handle zero-frequencies and non-periodic sounds:
-        self.frequency = np.min(np.ma.masked_equal(args, 0).compressed())
-
-
 class Sound(Generator):
     """
     Collection or composition of sound objects.
