@@ -675,9 +675,9 @@ def clip(signal, limit=1.0, inplace=False):
     """
     Clips complex signal to unit rectangle area (-1-1j, +1+1j).
     """
+    signal = np.atleast_1d(signal)
     if np.any(np.isnan(signal)):
         signal = np.nan_to_num(signal)
-
     if not inplace:
         signal = signal.copy()
 

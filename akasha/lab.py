@@ -42,6 +42,7 @@ from akasha.effects.filters import *
 
 from akasha.graphic.animation import *
 from akasha.graphic.drawing import *
+from akasha.graphic.output import *
 from akasha.graphic.plotting import *
 from akasha.graphic.primitive.line import *
 from akasha.graphic.primitive.spline import *
