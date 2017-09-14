@@ -6,7 +6,7 @@
 # pylint: disable=E1101
 
 """
-Generic sound object group containers.
+Pcm sound sample module
 """
 
 import numpy as np
@@ -23,9 +23,13 @@ from akasha.timing import sampler
 from akasha.utils.log import logger
 
 
-class Pcm(FrequencyRatioMixin, Generator):
+# FIXME Make this work again at some point or remove
+# TODO Try using CZT, multiply and ICZT to make resampling faster, but not so accurate
+# TODO Rewrite if and when I manage to make the vector audio samples
+# based on clothoid curve or complex exponential spiral fitting
+class Resample(FrequencyRatioMixin, Generator):
     """
-    Playable PCM (pulse-code modulated aka sampled) sound.
+    PCM (pulse-code modulated aka sampled) sound sample that is resampled when played.
     """
     def __init__(self, snd, base = 441):
         super(self.__class__, self).__init__()
