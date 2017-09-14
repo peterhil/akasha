@@ -27,6 +27,7 @@ from akasha.audio.harmonics import Harmonics
 from akasha.audio.mix import Mix
 from akasha.audio.noise import *
 from akasha.audio.oscillator import *
+from akasha.audio.overtones import Overtones
 from akasha.audio.scalar import Scalar
 from akasha.audio.sound import Sound, Group, Pcm
 from akasha.audio.sum import Sum

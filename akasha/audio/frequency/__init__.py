@@ -223,10 +223,6 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
         else:
             return NotImplemented
 
-    def __nonzero__(self):
-        """Nonzero?"""
-        return self._hz != 0
-
     # TODO: Implement pickling
     # http://docs.python.org/library/pickle.html#the-pickle-protocol
 
