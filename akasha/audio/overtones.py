@@ -61,15 +61,28 @@ class Overtones(FrequencyRatioMixin, Generator):
             self.damping = lambda f: 0
         self.rand_phase = rand_phase
 
+    @property
+    def overtones(self):
+        """
+        Generate overtones using the function given in init.
+        """
+        return map_array(self.func, np.arange(self.n, dtype=np.float64))
+
+    @property
+    def frequencies(self):
+        """
+        Generate frequencies based on overtones
+        """
+        frequencies = self.frequency * self.overtones
+        return frequencies[np.nonzero(frequencies)]
+
     # TODO memoize with hash!
     @property
     def partials(self):
         """
         Mix generated overtone partials
         """
-        overtones = map_array(self.func, np.arange(self.n))  # Remember to limit these on Nyquist freq.
-        frequencies = self.frequency * overtones
-        frequencies = frequencies[np.nonzero(frequencies)]
+        frequencies = self.frequencies  # TODO memoize with dependencies
 
         # TODO Get the base curve another way in order to be able to
         # use Gamma curves on frequency plane for example, or any
@@ -99,10 +112,10 @@ class Overtones(FrequencyRatioMixin, Generator):
         return self.partials.at(t)
 
     def __repr__(self):
-        return "%s(sndobj=%s, n=%s, func=%s, damping=%s, rand_phase=%s>" % \
+        return "%s(sndobj=%r, n=%r, func=%r, damping=%r, rand_phase=%r>" % \
             (self.__class__.__name__, self.base, self.n, self.func, self.damping, self.rand_phase)
 
     def __str__(self):
-        return "<%s: sndobj=%s, limit=%s, frequency=%s, overtones=%s, func=%s, damping=%s>" % \
-            (self.__class__.__name__, self.base, self.limit, self.frequency,
-             self.overtones, self.func, self.damping)
+        return "<%s: sndobj=%s, n=%s, frequency=%s, frequencies=%s, func=%s, damping=%s>" % \
+            (self.__class__.__name__, self.base, self.n, self.frequency,
+             self.frequencies, self.func, self.damping)
