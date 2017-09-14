@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# E1101: Module 'x' has no 'y' member
+# pylint: disable=E1101
+
 """
 Wikipedia API client module.
 """
@@ -17,7 +21,7 @@ from fractions import Fraction
 from funckit.datastruct import head as car, tail as cdr
 
 from akasha.utils.log import logger
-from akasha.utils.math import cents, identity
+from akasha.math import cents, identity
 
 
 def user_agent(req):
@@ -37,7 +41,7 @@ def get_interval_list():
     """
     Get the list of musical pitch intervals table from Wikipedia.
     """
-    site = wiki.Wiki("http://en.wikipedia.org/w/api.php")
+    site = wiki.Wiki("https://en.wikipedia.org/w/api.php")
     params = {
         'action': 'query',
         'prop': 'revisions',

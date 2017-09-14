@@ -6,6 +6,7 @@
 # E1101: Module 'x' has no 'y' member
 #
 # pylint: disable=C0111,R0201,E1101
+
 """
 Unit tests for drawing functions
 """
@@ -184,8 +185,8 @@ class TestDrawing(object):
     @pytest.mark.parametrize(('draw_func'), [
         draw_points,
         draw_points_coo,
-        draw_points_aa,
-        draw_points_aa_old,
+        # draw_points_aa,
+        # draw_points_aa_old,
     ])
     def test_draw_points_coordinates_should_match(self, draw_func):
         """
@@ -222,40 +223,32 @@ class TestDrawing(object):
     ])
     @pytest.mark.parametrize(('draw_func'), [
         draw_points_aa,
-        draw_points_aa_old,
+        # draw_points_np_aa,
+        # draw_points_aa_old,
     ])
     def test_draw_points_antialiased(self, palette, draw_func):
         """
         All point drawing functions should draw correctly.
         """
-        osc = Osc.from_ratio(1, 12)
-        size = 17
+        size = 9
         x, _, a = palette
         l = np.repeat(np.arange(256)[..., np.newaxis], len(palette[2]), 1)
 
         assert_equal_image(
-            np.array([
-                [      _,      _,      _,      _,      _,      _,      _,   l[3],  l[43],      _,      _,      _,      _,      _,      _,      _,   _],
-                [      _,      _,      _,      _,  l[29],   l[9],      _, l[124], l[164],      _,   l[9],  l[29],      _,      _,      _,      _,   _],
-                [      _,      _,      _,      _, l[165],  l[51],      _,      _,      a,      _,  l[51], l[165],      _,      _,      _,      _,   _],
-                [      _,      _,      _,      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _,      _,      _,   _],
-                [      _,  l[29], l[165],      _,      _,      _,      _,      _,      a,      _,      _,      _,      _, l[165],  l[29],      _,   _],
-                [      _,   l[9],  l[51],      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,  l[51],   l[9],      _,   _],
-                [      _,      _,      _,      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _,      _,      _,   _],
-                [   l[3], l[124],      _,      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _, l[124],   l[3],   _],
-                [  l[43], l[164],      a,      a,      a,      a,      a,      a,      a,      a,      a,      a,      a,      a, l[164],  l[43],   a],
-                [      _,      _,      _,      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _,      _,      _,   _],
-                [      _,   l[9],  l[51],      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _,      _,      _,   _],
-                [      _,  l[29], l[165],      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _,      _,      _,   _],
-                [      _,      _,      _,      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _,      _,      _,   _],
-                [      _,      _,      _,      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _,      _,      _,   _],
-                [      _,      _,      _,      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _,      _,      _,   _],
-                [      _,      _,      _,      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _,      _,      _,   _],
-                [      _,      _,      _,      _,      _,      _,      _,      _,      a,      _,      _,      _,      _,      _,      _,      _,   _],
-            ], dtype=np.uint8),
+            np.transpose(np.array([
+                [  l[23],  l[54],      _,      _,      a,      _,      _,      _,      _],
+                [  l[54], l[125],      _,      _,      a,  l[48],  l[16],      _,      _],
+                [      _,      _,      _,  l[25], l[152],  l[143], l[48],      _,      _],
+                [      _,      _,      _, l[102], l[229],      _,      _, l[128],      _],
+                [      a,      a,      a,      a,      a,      a,      a, l[255],      a],
+                [      _,      _,      _,      _,      a,      _,      _,      _,      _],
+                [      _, l[107],  l[71],      _,      a,      _,      _,      _,      _],
+                [      _,  l[46],  l[31],      _,      a,      _,      _,      _,      _],
+                [      _,      _,      _,      _,      a,      _,      _,      _,      _],
+                ], dtype=np.uint8), (1, 0, 2)),
             draw_func(
-                osc[:8] * 0.87,
-                img=draw_axis(
+                np.array([1, 0.5+0.5j, 0.2j, -0.8+0.8j, -0.6-0.8j]),
+                draw_axis(
                     get_canvas(size, channels=len(palette[0]), axis=False),
                     colour=palette[2]
                 ),
@@ -268,10 +261,4 @@ class TestDrawing(object):
         pass
 
     def test_video_transfer(self):
-        pass
-
-    def test_show(self):
-        pass
-
-    def test_graph(self):
         pass

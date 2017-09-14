@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# E1101: Module 'x' has no 'y' member
+#
+# pylint: disable=E1101
+
 """
 What's the frequency Kenneth?
 """
@@ -18,7 +23,8 @@ from akasha.types.numeric import RationalUnit, RealUnit
 from akasha.utils import _super
 from akasha.utils.decorators import memoized
 from akasha.utils.log import logger
-from akasha.utils.math import cents_diff
+from akasha.math import cents_diff
+from akasha.settings import config
 
 
 # TODO Investigate how inheriting from RationalUnit instead of object slows things down
@@ -97,7 +103,7 @@ class FrequencyRatioMixin(RationalUnit):
         if ratio != 0:
             approx = sampler.rate * ratio
             deviation = cents_diff(freq, approx)
-            if deviation != 0:
+            if deviation > config.logging_limits.FREQUENCY_DEVIATION_CENTS:
                 logger.warn("Frequency approx %f for ratio %s deviates from %.3f by %.16f%% cents" % \
                             (approx, ratio, freq, deviation))
         return ratio
@@ -201,6 +207,9 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
         """
         return self.angles(self.ratio)
 
+    def at(self, t):
+        return self._hz * t
+
     def __repr__(self):
         return "Frequency(%s)" % self._hz
 
@@ -217,10 +226,6 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
             return self.ratio == Frequency(float(other)).ratio
         else:
             return NotImplemented
-
-    def __nonzero__(self):
-        """Nonzero?"""
-        return self._hz != 0
 
     # TODO: Implement pickling
     # http://docs.python.org/library/pickle.html#the-pickle-protocol

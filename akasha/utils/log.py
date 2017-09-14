@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
+
 """
 Logging for Akasha.
 
@@ -11,6 +12,7 @@ Date: 2011-12-06
 
 import sys
 import logging
+from akasha.settings import config
 
 
 class ansi(object):
@@ -105,7 +107,7 @@ handler = logging.StreamHandler(sys.stderr)
 
 handler.setFormatter(relformatter)
 logger.addHandler(handler)
-logger.setLevel(logging.BORING)
+logger.setLevel(config.logging_limits.LOGLEVEL)
 
 
 if __name__ == '__main__':

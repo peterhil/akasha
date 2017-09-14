@@ -1,6 +1,5 @@
 -e git+git://github.com/sloonz/pil-py3k.git#egg=PIL-dev
 Pygments==1.5
-Twisted==12.2.0
 distribute==0.6.24
 
 pyzmq==2.2.0.1

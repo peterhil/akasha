@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# E1101: Module 'x' has no 'y' member
+# pylint: disable=E1101
+
 """
 Functional oscillator module using functor objects.
 """
@@ -12,7 +16,7 @@ import operator
 from fractions import Fraction
 
 from akasha.timing import sampler
-from akasha.utils.math import pi2
+from akasha.math import pi2
 
 
 ### Limiter functions

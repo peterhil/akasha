@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 """
 Dual-tone Multifrequency Tones
 """
@@ -105,8 +106,6 @@ class DTMF(Generator):
 
     def sample(self, iterable):
         """Make DTML dialing tone."""
-        #snd = Sound()
-        #snd.add()
         pass
 
     def __len__(self):
