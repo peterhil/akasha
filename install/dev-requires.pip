@@ -1,5 +1,8 @@
 -r test-requires.pip
+-r extra-requires.pip
 pyflakes>=1.6.0
 pep8>=1.7.0
 pylint>=1.7.2
 ipdb>=0.10.3
+ipython>=5.5.0
+sphinx>=1.6.3
