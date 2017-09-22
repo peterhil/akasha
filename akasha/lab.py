@@ -7,6 +7,7 @@ Akasha audio program suite interactive lab.
 
 from __future__ import absolute_import
 
+import funcy
 import numpy as np
 import pylab as lab
 
@@ -15,7 +16,6 @@ lab.interactive(True)
 import akasha
 
 from cmath import rect, pi, exp, phase
-from funckit import xoltar as fx
 from scipy.signal import hilbert
 
 from akasha.audio.delay import Delay

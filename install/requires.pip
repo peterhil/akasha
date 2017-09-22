@@ -1,6 +1,6 @@
 Pillow>=4.2.1
 m3-cdecimal==2.3
--e hg+https://bitbucket.org/ccordoba12/funckit@23bf0cfeb1763385055a51863256eb6b74ea6fe1#egg=funckit-dev
+funcy>=1.9.0
 matplotlib>=1.4.2
 numpy>=1.11.3
 pandas>=0.20.1

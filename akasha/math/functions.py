@@ -366,9 +366,9 @@ def random_phasor(n=1, amp=1.0, random=np.random.random):
     Example
     =======
 
-    from funckit import xoltar as fx
+    import funcy
 
-    rf = fx.curry(np.random.poisson, 100)  # Try different values and random functions
+    rf = funcy.curry(np.random.poisson, 2)(100)  # Try different values and random functions
     snd = normalize(random_phase(44100 * 5, amp=rf))
     graph(snd)  # or anim(Pcm(snd))
     """

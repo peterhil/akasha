@@ -19,7 +19,6 @@ import numpy as np
 import operator as op
 
 from fractions import Fraction
-from funckit import xoltar as fx
 
 from akasha.audio.oscillator import Frequency
 from akasha.control.io.keyboard import kb, pos
