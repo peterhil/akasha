@@ -746,6 +746,13 @@ def pad_right(signal, padding, minlength):
     return pad_minlength(signal, padding, minlength, -1, fromleft=False)
 
 
+def pad_ends(signal, start, end):
+    """
+    Pad a signal with start and end value
+    """
+    return np.append(np.append(start, signal), end)
+
+
 def overlap(signal, n):
     """
     Split the 1-d signal into n overlapping parts.

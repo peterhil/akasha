@@ -14,7 +14,7 @@ from __future__ import division
 import numpy as np
 
 from akasha.funct import consecutive
-from akasha.math import cartesian, normalize, overlap, pad_left, pi2, repeat
+from akasha.math import cartesian, distances, normalize, overlap, pad_left, pi2, repeat
 
 
 def angle_between(a, b, c=None):
@@ -44,6 +44,20 @@ def angles_between(points, *rest):
         return points
     points = pad_left(points, points[0], 3)
     return angle_between(*overlap(points, 3))
+
+
+def triangle_incenter(a, b, c):
+    """
+    Calculate the coordinate of the incenter point on a triangle given vertices a, b, and c (as complex numbers).
+    https://en.wikipedia.org/wiki/Incenter#Cartesian_coordinates
+    """
+    a_side, b_side, c_side = distances(np.array([b, c, a, b], dtype=np.complex128))
+    perimeter = a_side + b_side + c_side
+
+    x = (a_side * a.real + b_side * b.real + c_side * c.real) / perimeter
+    y = (a_side * a.imag + b_side * b.imag + c_side * c.imag) / perimeter
+
+    return x + y * 1j
 
 
 def directions(points):
