@@ -132,13 +132,13 @@ def resonate(signal, poles, zeros=np.array([]), gain=1.0, axis=-1, zi=None):
     poles = pole_frequency(np.array([30, 50, 238., 440., 1441]), [0.99, 0.999, 0.99, 0.87, 0.77])
     anim(normalize(resonate(bjork, poles, gain=1.0)))
     """
-    b, a = dsp.signal.filter_design.zpk2tf(zeros, poles, gain)
+    b, a = sc.signal.filter_design.zpk2tf(zeros, poles, gain)
     logger.debug("Resonate: order: {},\n\tb: {},\n\ta: {}".format(max(len(a), len(b)), b, a))
     if zi == 'auto':
-        zi = dsp.signal.lfilter_zi(b, a)
-        return dsp.signal.lfilter(b, a, signal, axis=axis, zi=zi)[0]
+        zi = sc.signal.lfilter_zi(b, a)
+        return sc.signal.lfilter(b, a, signal, axis=axis, zi=zi)[0]
     else:
-        return dsp.signal.lfilter(b, a, signal)
+        return sc.signal.lfilter(b, a, signal)
 
 
 def resonator_comb(
