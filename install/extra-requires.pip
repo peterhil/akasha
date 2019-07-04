@@ -3,6 +3,3 @@
 # intervaltree
 # librosa==0.3.1
 # pyinter
-scikit-image>=0.11.2
-# scikits.audiolab>=0.11.0
-scikits.samplerate==0.3.3
