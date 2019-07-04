@@ -1,13 +1,19 @@
+*.pyc
 *~
 *,cover
 *.cover
 .coverage
 .figleaf
 TAGS
+.cache/
 
 doc/
 html/
 htmlcov/
+
+\#*\#
+.\#*
+.DS_Store
 
 py2.7/
 venv/
@@ -19,3 +25,4 @@ akasha.egg-info/
 build/
 dist/
 
+src/

@@ -6,6 +6,7 @@
 # E1101: Module 'x' has no 'y' member
 #
 # pylint: disable=C0111,R0201,E1101
+
 """
 Unit tests for Frequency
 """
@@ -25,7 +26,7 @@ from akasha.audio.generators import PeriodicGenerator, Generator
 from akasha.audio.oscillator import Osc
 from akasha.timing import sampler
 from akasha.types.numeric import NumericUnit, ComplexUnit, RealUnit
-from akasha.utils.math import cents_diff
+from akasha.math import cents_diff
 
 
 class TestFrequencyRatioMixin(object):
@@ -249,9 +250,7 @@ class TestFrequency(object):
         assert '100' in s
 
     def test_int(self):
-        sampler.negative_frequencies = True
         assert 21 == int(Frequency(21.5))
-        assert -30 == int(Frequency(-30.5))
 
     def test_pos_neg_abs(self):
         sampler.negative_frequencies = True

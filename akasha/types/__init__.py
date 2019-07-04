@@ -1,16 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# E1101: Module 'x' has no 'y' member
+# pylint: disable=E1101
+
 """
 Types module
 """
 
 import numpy as np
 
-from akasha.utils.math import map_array
+from akasha.math import map_array
 
 
 colour_values = np.float32
-colour_result = np.float32
+colour_result = np.uint8
 
 signed = (int, float, np.signedinteger, np.floating)
 

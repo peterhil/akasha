@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# E1101: Module 'x' has no 'y' member
+#
+# pylint: disable=E1101
+
 """
 Musical tuning systems module.
 
@@ -14,12 +19,11 @@ import numpy as np
 import operator as op
 
 from fractions import Fraction
-from funckit import xoltar as fx
 
 from akasha.audio.oscillator import Frequency
-from akasha.control.io.keyboard import kb
+from akasha.control.io.keyboard import kb, pos
 from akasha.utils.log import logger
-from akasha.utils.math import pi2, find_closest_index, map_array
+from akasha.math import pi2, find_closest_index, map_array
 
 
 class EqualTemperament(object):
@@ -124,6 +128,8 @@ class AbstractLayout(object):
         assert len(pos) == 2, "Expected two arguments or tuple of length two."
         self.origo = (self.origo[0] + pos[0], self.origo[1] + pos[1])
 
+    def get_frequency(self, key):
+        return self.get(*(pos.get(key, pos[None])))
 
 class WickiLayout(AbstractLayout):
     """
@@ -175,7 +181,6 @@ class WickiLayout(AbstractLayout):
         """
         Get a frequency on key position.
         """
-        logger.debug("Getting position: %s %s" % pos)
         if pos == kb.shape:
             return Frequency(0.0)
         else:

@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# E1101: Module 'x' has no 'y' member
+# pylint: disable=E1101
+
 """
 Akasha settings module.
 """
@@ -7,12 +11,21 @@ Akasha settings module.
 import locale
 import numpy as np
 import sys
+import logging
+
 
 class config(object):
     """
     Configuration class.
     """
-    pass
+    class logging_limits(object):
+        """
+        Various limits for logging
+        """
+        LOGLEVEL = logging.INFO
+        FREQUENCY_DEVIATION_CENTS = 0.1
+        LOOP_THRESHOLD_PERCENT = 100
+
 
 def np_setup():
     """

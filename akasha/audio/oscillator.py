@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 """
 The oscillating module.
 """
@@ -8,7 +9,7 @@ from __future__ import division
 
 from numbers import Real
 
-from akasha.audio.curves import Circle
+from akasha.curves import Circle
 from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import PeriodicGenerator
 
@@ -23,6 +24,12 @@ class Osc(FrequencyRatioMixin, PeriodicGenerator):
             raise TypeError("Argument 'freq' must be a real number.")
         self._hz = Frequency(freq)
         self.curve = curve
+
+    def at(self, t):
+        """
+        Sample oscillator at sample times (t).
+        """
+        return self.curve.at(self.frequency.at(t))
 
     @property
     def sample(self):

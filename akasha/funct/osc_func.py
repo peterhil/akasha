@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# E1101: Module 'x' has no 'y' member
+# pylint: disable=E1101
+
 """
 Functional oscillator module.
 """
@@ -10,7 +14,7 @@ import numpy as np
 from cmath import phase, pi
 from datetime import timedelta
 from fractions import Fraction
-from funckit.xoltar import Functor
+# from funckit.xoltar import Functor
 from itertools import imap, islice
 
 
@@ -106,12 +110,12 @@ def angfreq(f):
     return 2 * pi * f
 
 
-class oscf(Functor):
-    """
-    Oscillator function object.
-    """
-    def __call__(self, *args):
-        return np.exp(1j * 2 * pi * (args % 1.0))
+# class oscf(Functor):
+#     """
+#     Oscillator function object.
+#     """
+#     def __call__(self, *args):
+#         return np.exp(1j * 2 * pi * (args % 1.0))
 
 
 def oscillate(phases):

@@ -1,19 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# E1101: Module 'x' has no 'y' member
+#
+# pylint: disable=E1101
+
 """
 Noise and chaos module.
 """
 
+from __future__ import division
+
+import funcy
 import numpy as np
+import pandas as pd
 
 from cmath import rect
 
-from akasha.audio.curves import Circle
+from akasha.curves import Circle
 from akasha.audio.envelope import Exponential
 from akasha.audio.frequency import Frequency
 from akasha.audio.generators import Generator
-from funckit import xoltar as fx
-from akasha.utils.math import normalize, numberof, pi2, random_phasor
+from akasha.math import normalize, numberof, pi2, random_phasor
+from akasha.timing import sampler
 
 
 class Noise(Generator):
@@ -54,6 +63,40 @@ class Noise(Generator):
         return self.function(iterable, self.randomizer)
 
 
+class ColouredNoise(Generator):
+    """
+    Generate coloured noise, with instantaneous frequency differences having some distribution.
+    By default uses standard normal distribution, also known as the Gaussian distribution.
+    """
+    # TODO Make this into a filter for jittering a frequency
+    # TODO Examine using other distributions
+
+    def __init__(self, frequency, deviation=0.1, step=1, log=True):
+        """
+        == Parameters ==
+        frequency: The center of the distribution (mu).
+        deviation: The standard deviation (sigma).
+
+        Example:
+        >>> cn = ColouredNoise(0.01, 0.1)
+        """
+        self.frequency = Frequency(frequency)
+        self.sigma = deviation
+        self.step = step
+        self.randomizer = np.random.lognormal if log else np.random.normal
+
+    @property
+    def mu(self):
+        return self.frequency.ratio
+
+    def sample(self, iterable):
+        length = len(iterable)
+        s = self.randomizer(self.mu, self.sigma, np.ceil(length / float(self.step)))
+        if self.step != 1:
+            s = np.interp(np.arange(length), np.arange(0, length, self.step), s[:length])
+        return c.at(np.cumsum(s))
+
+
 class Rustle(Generator):
     """
     Rustle noise generator.
@@ -74,15 +117,15 @@ class Rustle(Generator):
     def __init__(self, expected=1, frequency=1, envelope=Exponential(0)):
         self.frequency = Frequency(frequency)
         self.expected = expected
-        self.gen = fx.curry(np.random.poisson, self.expected)
+        self.gen = funcy.curry(np.random.poisson, 2)(self.expected)
         self.envelope = envelope
 
-    def sample(self, items):
+    def at(self, times):
         """
         Let it rumble and rustle.
         """
-        return self.envelope[items] * normalize(
-            self.gen(numberof(items)) * Circle.at(self.frequency[items])
+        return self.envelope.at(times) * normalize(
+            self.gen(numberof(times)) * Circle.at(self.frequency.at(times))
         )
 
 
@@ -97,10 +140,10 @@ class Mandelbrot(Generator):
         super(self.__class__, self).__init__()
 
         if random:
-            self.z = random_phasor()
+            self.z = random_phasor()[0]
         else:
             self.z = z if z is not None else 0
-        self.c = c if c is not None else random_phasor()
+        self.c = c if c is not None else random_phasor()[0]
 
     def __iter__(self):
         return self
@@ -140,7 +183,7 @@ class Chaos(Generator):
     """
     # TODO: Make into generic iterator using Generator
 
-    def __init__(self, gen=Mandelbrot, envelope=Exponential(0, amp=0.5)):
+    def __init__(self, gen=Mandelbrot(random=True), envelope=Exponential(0, amp=0.5)):
         super(self.__class__, self).__init__()
         self.gen = gen
         self.envelope = envelope  # TODO: Leave out of sound objects, and compose when sampling?
@@ -155,3 +198,15 @@ class Chaos(Generator):
 
     def __repr__(self):
         return "%s(gen=%s)" % (self.__class__.__name__, repr(self.gen))
+
+
+def random_frequencies(n, low=20, high=sampler.rate/2.0, t=4, window=2, smoothing='exponential'):
+    signal = np.repeat(
+        np.random.random_integers(
+            low, high, np.ceil(float(n) / float(t))) / float(sampler.rate),
+        t)
+    if smoothing == 'exponential':
+        signal = pd.ewma(signal, span=window, min_periods=1)
+    elif smoothing:
+        signal = pd.rolling_mean(signal, window=window, min_periods=1)
+    return np.exp(1j * pi2 * np.cumsum(signal))

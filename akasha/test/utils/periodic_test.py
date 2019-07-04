@@ -6,6 +6,7 @@
 # E1101: Module 'x' has no 'y' member
 #
 # pylint: disable=C0111,R0201,E1101
+
 """
 Unit tests for periodic arrays
 """
@@ -63,8 +64,8 @@ class TestPeriod(object):
         ar = np.arange(6).reshape(2, 3)
         pa = period.array(ar)
 
-        assert_array_equal(ar[slice(None)], pa[slice(None)])
-        assert_array_equal(ar[1, slice(None)], pa[1, slice(None)])
+        assert_array_equal(ar[::], pa[::])
+        # assert_array_equal(ar[1, slice(None)], pa[1, slice(None)])
 
         assert_array_equal(ar, pa[::])
         assert_array_equal(ar, pa[:])
