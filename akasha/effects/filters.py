@@ -1,16 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# E1101: Module 'x' has no 'y' member
+#
+# pylint: disable=E1101
+
 """
 IIR and other filters.
 """
 
 import numpy as np
-
-from scipy import signal as dsp
+import scipy as sc
 
 from akasha.audio.oscillator import Osc
+from akasha.audio.frequency import Frequency, Fraction
+from akasha.dsp import unit_step
+from akasha.dsp.z_transform import czt, iczt
 from akasha.timing import sampler
-from akasha.utils.math import pi2, get_impulses, normalize, complex_as_reals, as_complex, pad
+from akasha.utils.log import logger
+from akasha.math import pi2, get_impulses, normalize, complex_as_reals, as_complex, pad
 
 
 def unosc(signal):
@@ -35,6 +43,37 @@ def unosc(signal):
     unwrap = np.cumsum(impulses)
 
     return s.real + ((s.imag % pi2) + unwrap) * 1j
+
+
+def log_plane(freq, amp1=1, amp2=1):
+    """
+    Return the complex logarithm of a signal from given frequencies (at amplitude 1).
+    Result can be fed to back to np.exp to get the sum of oscillators (additive synthesis of frequencies).
+
+    To test:
+    >>> o882 = Osc(882)
+    >>> o1764 = Osc(1764)
+    >>> s = (o882[:50] + o1764[:50]) / 2
+    >>> unosc(s) - log_plane(882)
+    # Should be almost all zero
+    """
+    # TODO Get (multiple) frequencies from arguments
+    # i1 = Frequency.angles(Fraction(freq, sampler.rate)) * pi2
+    # i2 = Frequency.angles(Fraction(freq * 2, sampler.rate)) * pi2
+    # TODO Filter zero frequencies
+    def ifrequency(freq):
+        return np.arange(0, 1, float(freq) / sampler.rate) * pi2 * 1j
+    if freq != 0:
+        i1 = np.log(amp1) + ifrequency(freq)
+        i2 = np.log(amp2) + ifrequency(freq * 2)
+    else:
+        i1 = i2 = np.zeros(1, dtype=np.float64)
+    i2 = np.hstack([i2, i2])
+
+    angle_diff = np.abs(i2.imag - i1.imag)
+    real = np.log(np.sin((angle_diff + np.pi) / 2))
+    imag = (i1 + i2) / 2
+    return real + imag
 
 
 def freq_shift(signal, a=12.1, b=0.290147):
@@ -71,9 +110,8 @@ def highpass(signal, freq, bins=256, pass_zero=True, scale=False, nyq=sampler.ra
     Highpass filter.
     """
     a = 1
-    b = dsp.firwin(bins, cutoff=freq, pass_zero=pass_zero, scale=scale, nyq=nyq)
-
-    return dsp.lfilter(b, a, signal)
+    b = sc.signal.firwin(bins, cutoff=freq, pass_zero=pass_zero, scale=scale, nyq=nyq)
+    return sc.signal.lfilter(b, a, signal)
 
 
 def lowpass(signal, cutoff=sampler.rate / 2.0, bins=256):
@@ -83,23 +121,28 @@ def lowpass(signal, cutoff=sampler.rate / 2.0, bins=256):
     fs = float(sampler.rate)
     fc = cutoff / fs
     a = 1
-    b = dsp.firwin(bins, cutoff=fc, window='hamming')
+    b = sc.signal.firwin(bins, cutoff=fc, window='hamming')
+    return sc.signal.lfilter(b, a, signal)
 
-    return dsp.lfilter(b, a, signal)
 
-
-def resonate(signal, poles, zeros=np.array([]), gain=1.0, zi=None):
+def resonate(signal, poles, zeros=np.array([]), gain=1.0, axis=-1, zi=None):
     """
-    Resonate a signal with a zero-pole IIR filter.
-    """
-    b, a = dsp.filter_design.zpk2tf(zeros, poles, gain)
-    print b, a, max(len(a), len(b))
-    #zi = dsp.lfilter_zi(b, a)
+    Resonate a signal with an IIR filter based on given poles and zeros.
 
-    if zi is None:
-        return dsp.lfilter(b, a, signal, axis=0, zi=zi)
+    Usage example
+    =============
+
+    bjork = read('Bjork - Human Behaviour.aiff', dur=30)
+    poles = pole_frequency(np.array([30, 50, 238., 440., 1441]), [0.99, 0.999, 0.99, 0.87, 0.77])
+    anim(normalize(resonate(bjork, poles, gain=1.0)))
+    """
+    b, a = sc.signal.filter_design.zpk2tf(zeros, poles, gain)
+    logger.debug("Resonate: order: {},\n\tb: {},\n\ta: {}".format(max(len(a), len(b)), b, a))
+    if zi == 'auto':
+        zi = sc.signal.lfilter_zi(b, a)
+        return sc.signal.lfilter(b, a, signal, axis=axis, zi=zi)[0]
     else:
-        return dsp.lfilter(b, a, signal)
+        return sc.signal.lfilter(b, a, signal)
 
 
 def resonator_comb(
@@ -130,3 +173,36 @@ def resonator_comb(
     #anim(out, dur=playtime, antialias=False)
 
     return out[:int(round(playtime * fs))]
+
+
+def resonator_p1(signal, pole, m=None, gain=1.0):
+    """
+    Complex one pole resonator
+    https://ccrma.stanford.edu/~jos/filters/Complex_Resonator.html
+
+    Note: To get the results normalized to unit circle, set gain to:
+    gain = 1.0/(1 - np.abs(pole))
+
+    Examples
+    ========
+
+    * Windy noise:
+    n = Noise()
+    p = pole_frequency(59)
+    g = 0.99994
+    r = resonator_p1(f, p*g, m=30*sampler.rate, gain=rect(1, 1.0/300*pi2))
+    anim normalize(r)
+
+    * Hoover or car noise:
+    rn = Rustle(0.545, 275, Exponential(-0.05))
+    f  = rn[:10*44100]
+    g = 0.99894
+    r = resonator_p1(f, p*g, m=10*sampler.rate, gain=rect(1, 1.0/300*pi2))
+    anim normalize(r)
+    """
+    signal = np.atleast_1d(signal).astype(np.complex)
+    if m is None: m = len(signal)
+    n = np.arange(m)
+
+    response = unit_step(n) * gain * pole ** n
+    return iczt(czt(signal, m=m) * czt(response, m=m))

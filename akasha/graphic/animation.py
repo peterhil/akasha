@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# E1101: Module 'twisted.internet.reactor' has no 'run/stop/running' member
+# E1101: Module 'x' has no 'y' member
+# pylint: disable=E1101
+
 """
 Animation module
 """
@@ -9,338 +11,342 @@ Animation module
 from __future__ import division
 
 import logging
+import numpy as np
 import pygame as pg
-import time
-
-from funckit import xoltar as fx
-from timeit import default_timer as timer
-from twisted.internet.task import LoopingCall
-from twisted.internet import reactor
+import sys
+import traceback
 
 from akasha.audio.generators import Generator
-from akasha.control.io.keyboard import pos
-from akasha.graphic.drawing import get_canvas, draw, video_transfer
-from akasha.timing import sampler
-from akasha.tunings import WickiLayout
-from akasha.utils.math import pcm
+from akasha.audio.mixins.releasable import Releasable
+from akasha.graphic.drawing import get_canvas, blit, draw, video_transfer
+from akasha.math import div_safe_zero, pcm, minfloat
+from akasha.settings import config
+from akasha.timing import sampler, Timed, Watch
+from akasha.tunings import PianoLayout, WickiLayout
+from akasha.utils import issequence
 from akasha.utils.log import logger
 
+keyboard = WickiLayout()
+# keyboard = PianoLayout()
 
-w = WickiLayout()
-VIDEOFRAME = pg.NUMEVENTS - 1
 
-
-def change_frequency(snd, key):
+def anim(snd, size=800, name='Resonance', antialias=True, lines=False, colours=True,
+         mixer_options=(), style='complex'):
     """
-    Change frequency of the sound based on key position.
+    Animate complex sound signal
     """
-    f = w.get(*(pos.get(key, pos[None])))
-    snd.frequency = f
-    if isinstance(snd, Generator):
-        snd.sustain = None
     logger.info(
-        "Setting NEW frequency: %r for %s, now at frequency: %s" %
-        (f, snd, snd.frequency))
+        "Akasha animation is using %s Hz sampler rate and %s fps video rate." %
+        (sampler.rate, sampler.videorate))
+
+    sampler.paused = True if hasattr(snd, 'frequency') else False
+    screen = init_pygame(name, size)
+    channel = init_mixer(*mixer_options)
+
+    if style == 'complex':
+        widget = ComplexView(screen, antialias=antialias, lines=lines, colours=colours)
+    elif style == 'transfer':
+        widget = VideoTransferView(screen, size=size, standard='PAL', axis='imag')
+    else:
+        logger.err("Unknown animation style: '{0}'".format(style))
+        cleanup()
+    return loop(snd, channel, widget)
 
 
-def handle_input(snd, it, event):
+def loop(snd, channel, widget):
+    clock = pg.time.Clock()
+    t = clock.tick_busy_loop(sampler.videorate)
+    watch = Watch()
+    last = 0
+
+    # Handle first time, draw axis and bg
+    first_time = True
+    widget.render(np.array([0, 0, 0], dtype=np.complex128))
+    pg.display.flip()
+
+    while True:
+        try:
+            with Timed() as loop_time:
+                input_time, audio_time, video_time = 0, 0, 0
+
+                with Timed() as input_time:
+                    for event in pg.event.get():
+                        if handle_input(snd, watch, event):
+                            if first_time and hasattr(snd, 'frequency') and sampler.paused:
+                                sampler.pause()
+                            watch.reset()
+                            last = 0
+                if not sampler.paused:
+                    current = watch.next()
+                    current_slice = slice(sampler.at(last, np.int), sampler.at(current, np.int))
+                    samples = snd[current_slice]
+
+                    if len(samples) == 0 and current_slice.start != current_slice.stop:
+                        raise SystemExit('Sound ended!')
+                    if len(samples) > 0:
+                        with Timed() as audio_time:
+                            queue_audio(samples, channel)
+                        with Timed() as video_time:
+                            widget.render(samples)
+                        pg.display.flip()
+                        last = current
+            if not sampler.paused:
+                percent = float(loop_time) / (1.0 / sampler.videorate) * 100
+                av_percent = (float(audio_time) + float(video_time)) / (1.0 / sampler.videorate) * 100
+                fps = watch.get_fps(int(sampler.videorate))
+                if percent >= config.logging_limits.LOOP_THRESHOLD_PERCENT:
+                    logger.warn(
+                        "Animation: clock tick %d, FPS: %3.3f Hz, loop: %.3f Hz, (%.1f %%), "
+                        "input: %.2f Hz, audio: %.2f Hz, video: %.2f Hz, (%.1f %%)", t, fps, div_safe_zero(1, loop_time), percent,
+                        div_safe_zero(1, input_time), div_safe_zero(1, audio_time), div_safe_zero(1, video_time), av_percent
+                    )
+            t = clock.tick_busy_loop(sampler.videorate)
+        except KeyboardInterrupt, err:
+            # See http://stackoverflow.com/questions/2819931/handling-keyboardinterrupt-when-working-with-pygame
+            logger.info("Got KeyboardInterrupt (CTRL-C)!".format(type(err)))
+            break
+        except SystemExit, err:
+            logger.info("Ending animation: %s" % err.message)
+            break
+        except Exception, err:
+            try:
+                exc = sys.exc_info()[:2]
+                logger.error("Unexpected exception %s: %s\n%s" % (exc[0], exc[1], traceback.format_exc()))
+            finally:
+                del exc
+                break
+    cleanup()
+    if isinstance(snd, Releasable):
+        snd.release_at(None)
+    return watch
+
+
+def queue_audio(samples, channel):
+    """
+    Queue samples into a mixer channel.
+    """
+    channel.queue(pg.sndarray.make_sound(pcm(samples)))
+
+
+class ComplexView(object):
+    """
+    Show a sound signal on screen.
+    """
+    def __init__(self, screen, antialias=True, lines=False, colours=True):
+        self._surface = screen
+        self.antialias = antialias
+        self.lines = lines
+        self.colours = colours
+
+    def render(self, signal):
+        img = draw(signal, self._surface.get_size()[0],
+                   antialias=self.antialias, lines=self.lines, colours=self.colours,
+                   axis=True, screen=self._surface)
+
+        if img is not None:
+            blit(self._surface, img)
+
+
+class VideoTransferView(object):
+    """
+    Show a sound signal using the old video tape audio recording technique.
+    See: http://en.wikipedia.org/wiki/44100_Hz#Recording_on_video_equipment
+    """
+    def __init__(self, screen, size=720, standard='PAL', axis='imag'):
+        self._surface = screen
+        self.size = size
+        self.standard = standard
+        self.axis = axis
+
+    def render(self, signal):
+        size = self._surface.get_size()[0]
+        img = get_canvas(size)
+        tfer = video_transfer(signal, standard=self.standard, axis=self.axis, horiz=self.size)
+
+        black = int(round((size - tfer.shape[0]) / 2.0))
+        img[:, black:-black, :] = tfer[:, :img.shape[1], :].transpose(1, 0, 2)
+
+        blit(self._surface, img)
+
+
+def handle_input(snd, watch, event):
     """
     Handle pygame events.
     """
     # Quit
     if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
-        logger.info("Quitting.")
-        return True
+        raise SystemExit('Quit.')
     # Pause
-    elif (event.type == pg.KEYDOWN and event.key == pg.K_F8) or \
+    elif (event.type in [pg.KEYDOWN, pg.KEYUP] and event.key == pg.K_F8) or \
          (event.type == pg.ACTIVEEVENT and event.state == 3):
-        sampler.pause()
+        if event.type is not pg.KEYUP:
+            sampler.pause()
+            watch.pause()
+        return
     # Key down
     elif event.type == pg.KEYDOWN:
-        logger.debug("Key down: %s" % event)
+        # logger.debug("Key '%s' (%s) down." % (pg.key.name(event.key), event.key))
         step_size = (5 if event.mod & (pg.KMOD_LSHIFT | pg.KMOD_RSHIFT) else 1)
         # Rewind
         if pg.K_F7 == event.key:
-            if isinstance(snd, Generator):
-                snd.sustain = None
+            if isinstance(snd, Releasable):
+                snd.release_at(None)
             logger.info("Rewind")
-            it.send('reset')
+            return True  # reset
         # Arrows
         elif pg.K_UP == event.key:
             if event.mod & (pg.KMOD_LALT | pg.KMOD_RALT):
-                set_timer(sampler.change_frametime(rel=step_size))
+                sampler.change_frametime(rel=step_size)
             else:
-                # w.move(-2, 0)
-                w.base *= 2.0
+                # keyboard.move(-2, 0)
+                keyboard.base *= 2.0
         elif pg.K_DOWN == event.key:
             if event.mod & (pg.KMOD_LALT | pg.KMOD_RALT):
-                set_timer(sampler.change_frametime(rel=-step_size))
+                sampler.change_frametime(rel=-step_size)
             else:
-                # w.move(2, 0)
-                w.base /= 2.0
+                # keyboard.move(2, 0)
+                keyboard.base /= 2.0
         elif pg.K_LEFT == event.key:
-            w.move(0, 1)
+            keyboard.move(0, 1)
         elif pg.K_RIGHT == event.key:
-            w.move(0, -1)
+            keyboard.move(0, -1)
         # Change frequency
         elif hasattr(snd, 'frequency'):
             change_frequency(snd, event.key)
-            it.send('reset')
+            return True  # reset
     # Key up
     elif (event.type == pg.KEYUP and hasattr(snd, 'frequency')):
         if pg.K_CAPSLOCK == event.key:
             change_frequency(snd, event.key)
-            it.send('reset')
+            return True  # reset
         else:
-            if isinstance(snd, Generator):
-                snd.sustain = it.send('current')[0]
-                logger.debug("Key up:   %s, sustain: %s" % (event, snd.sustain))
+            if isinstance(snd, Releasable):
+                try:
+                    snd.release_at(watch.time())
+                except TypeError:
+                    logger.warn("Can't get current value from the iterator.")
+                    snd.release_at(None)
+                # logger.debug("Key '%s' (%s) up, released at: %s" % (pg.key.name(event.key), event.key, snd.released_at))
+        return
+    # Mouse
+    elif hasattr(snd, 'frequency') and event.type in (
+        pg.MOUSEBUTTONDOWN,
+        pg.MOUSEBUTTONUP,
+        pg.MOUSEMOTION
+    ):
+        if (event.type == pg.MOUSEBUTTONDOWN):
+            snd.pitch_bend = 0
+        elif (event.type == pg.MOUSEBUTTONUP):
+            snd.pitch_bend = None
+        elif (event.type == pg.MOUSEMOTION) and getattr(snd, 'pitch_bend', None) is not None:
+            size = pg.display.get_surface().get_size()[1] or 0
+            freq = snd.frequency
+            snd.pitch_bend = event.pos[1]
+
+            logger.debug("Pitch bend == event.pos[0]: %s" % snd.pitch_bend)
+
+            odd = (size + 1) % 2
+            norm_size = (size // 2) * 2 + odd
+            scale = np.logspace(-1 / 4, 1 / 4, norm_size, endpoint=True, base=2)
+            ratio = scale[snd.pitch_bend]
+
+            new_freq = np.clip(
+                snd.frequency * ratio,
+                a_min=-minfloat()[0],
+                a_max=sampler.nyquist
+            )
+            snd.frequency = new_freq
+            logger.info(
+                "Pitched frequency to %s (with ratio %.04f) position %s, bend %s. [%s, %s, %s]" %
+                (
+                    snd.frequency, ratio, event.pos[1], snd.pitch_bend,
+                    scale[0], scale[len(scale)//2], scale[-1]
+                ))
     else:
         logger.debug("Other: %s" % event)
-    return False
+    return
 
 
-def paint_frame(it, ch, paint_fn, clock):
+def init_pygame(name="Resonance", size=800):
     """
-    Queue audio and paint a frame.
+    Initialize Pygame and return a surface.
     """
-    done = False
-    if sampler.paused:
-        return done
-    draw_start = timer()
-    try:
-        samples = it.next()
-        audio = pg.sndarray.make_sound(pcm(samples))
-        ch.queue(audio)
-        paint_fn([samples])  # FIXME wrap samples into a list for xoltar curry to work
-    except StopIteration:
-        logger.debug("Sound ended!")
-        done = True
-        return done
+    pg.quit()
 
-    dc = timer() - draw_start
-    fps = clock.get_fps()
-    t = clock.tick_busy_loop(sampler.videorate)
-    logger.log(
-        logging.BORING,
-        "Animation: clock tick %d, FPS: %3.3f, drawing took: %.4f", t, fps, dc)
-    return done
+    logger.info(
+        "Pygame initialized with %s loaded modules (%s failed)." %
+        pg.init())
+
+    screen = init_display(name, size)
+    logger.info("Inited display %s with flags: %s" % (screen, screen.get_flags()))
+
+    return screen
 
 
-def handle_events(snd, it, ch, paint_fn, clock, twisted_loop=False):
+def init_display(name, size):
     """
-    Event handling dispatcher.
+    Initialize Pygame display and surface arrays.
+    Returns Pygame screen.
     """
-    done = False
-    input_start = timer()
-    events = pg.event.get()
-    for event in events:
-        if twisted_loop or (event.type != VIDEOFRAME):
-            done = handle_input(snd, it, event)
-        if twisted_loop or (event.type == VIDEOFRAME):
-            done |= paint_frame(it, ch, paint_fn, clock)
-        if done:
-            break
-    dc = timer() - input_start
-    if len(events) > 1:
-        logger.debug("Handled %s events in %.4f seconds: %s" % (len(events), dc, events))
-    if done and reactor.running:  # pylint: disable=E1101
-        pg.display.quit()
-        reactor.stop()  # pylint: disable=E1101
-    return done
+    pg.display.quit()
 
+    flags = 0
+    # flags |= pg.SRCALPHA
+    flags |= pg.HWSURFACE
+    # flags |= pg.OPENGL
+    flags |= pg.DOUBLEBUF
 
-def init_pygame():
-    """
-    Initialize Pygame mixer settings and surface array.
-    """
-    # Set mixer defaults: sampler rate, sample type, number of channels, buffer size
-    pg.mixer.pre_init(sampler.rate, pg.AUDIO_S16, 1, 128)
     if 'numpy' in pg.surfarray.get_arraytypes():
         pg.surfarray.use_arraytype('numpy')
-        logger.info("Using %s" % pg.surfarray.get_arraytype().capitalize())
     else:
         raise ImportError('Numpy array package is not installed')
+
+    try:
+        # FIXME get resolution some other way.
+        mode = pg.display.set_mode((size, size), flags, 32 if flags & pg.SRCALPHA else 24)
+        pg.display.set_caption(name)
+        pg.display.init()
+    except Exception, err:
+        logger.error("Something bad happened on init_display(): %s" % err)
+
+    return mode
 
 
 def init_mixer(*args):
     """
     Initialize the Pygame mixer.
     """
-    pg.init()
     pg.mixer.quit()
-    if isinstance(args, (tuple, list)) and len(args) > 0 and args[0]:
-        print args[0]
-        pg.mixer.init(*args[0])
+
+    # Set mixer defaults: sample rate, sample size, number of channels, buffer size
+    if issequence(args) and 0 < len(args) <= 3:
+        pg.mixer.init(*args)
     else:
-        pg.mixer.init(frequency=sampler.rate, size=-16, channels=1, buffer=128)
-    init = pg.mixer.get_init()
-    logger.debug(
-        "Mixer init: %s sampler rate: %s Video rate: %s" %
-        (init, sampler.rate, sampler.videorate))
-    return init
+        pg.mixer.init(frequency=sampler.rate, size=-16, channels=1, buffer=512)
+
+    logger.info(
+        "Mixer has %s Hz sample rate with %s size samples and %s channels." %
+        pg.mixer.get_init())
+    return pg.mixer.find_channel()
 
 
-def blit(screen, img):
+def cleanup():
     """
-    Blit the screen.
+    Clean up: Quit pygame, close iterator.
     """
-    pg.surfarray.blit_array(screen, img[:, :, :-1])  # Drop alpha
-
-
-def show_slice(screen, snd, size=800, antialias=True, lines=False, colours=True):
-    """
-    Show a sound signal on screen.
-    """
-    # FIXME because xoltar uses 'is' to inspect the arguments,
-    # snd samples need to be wrapped into a list!
-    snd = snd[0]
-    if lines and antialias:  # Using Pygame drawing, so blit before
-        img = get_canvas(size)
-        blit(screen, img)
-        img = draw(snd, size,
-                   antialias=antialias, lines=lines, colours=colours,
-                   screen=screen, img=img)
-    else:
-        img = draw(snd, size,
-                   antialias=antialias, lines=lines, colours=colours,
-                   screen=screen)
-        blit(screen, img)
-    pg.display.flip()
-
-
-def show_transfer(screen, snd, size=720, standard='PAL', axis='imag'):
-    """
-    Show a sound signal using the old video tape audio recording technique.
-    See: http://en.wikipedia.org/wiki/44100_Hz#Recording_on_video_equipment
-    """
-    # FIXME because xoltar uses 'is' to inspect the arguments,
-    # snd samples need to be wrapped into a list!
-    snd = snd[0]
-    img = get_canvas(size)
-    tfer = video_transfer(snd, standard=standard, axis=axis, horiz=size)
-    black = (size - tfer.shape[0]) / 2.0
-    img[1 + black:-black, 1:, :] = tfer
-    blit(screen, img)
-    pg.display.flip()
-
-
-def set_timer(ms=sampler.frametime):
-    """
-    Set and start pygame timer interval for VIDEOFRAME events.
-    """
-    pg.time.set_timer(VIDEOFRAME, ms)
-
-
-def handleError(err):
-    """
-    Logging error handler.
-    """
-    logger.error("%s happened!" % str(err))
-    pg.display.quit()
-    reactor.stop()  # pylint: disable=E1101
-    raise err
-
-
-def anim(snd, size=800, name="Resonance", antialias=True, lines=False, colours=True,
-         init=None, loop='pygame'):
-    """
-    Animate complex sound signal
-    """
-    init_pygame()
-    init_mixer(init)
-    pg.display.set_caption(name)
-
-    resolution = (size, size)  # FIXME get resolution some other way.
-    screen = pg.display.set_mode(resolution, pg.SRCALPHA, 32)
-
-    ch = pg.mixer.find_channel()
-    it = iter(snd)
-
-    paint_fn = lambda snd: show_slice(
-        screen,
-        snd,
-        size=size,
-        antialias=antialias,
-        lines=lines,
-        colours=colours,
-    )
-    # paint_fn = fx.curry_function(show_slice, screen, size=size,
-    #                     antialias=antialias, lines=lines, colours=colours)
-    #paint_fn = fx.curry_function(show_transfer, screen, size=size, standard='PAL', axis='imag')
-
-    clock = pg.time.Clock()
-
-    if loop == 'pygame':
-        set_timer()
-        done = False
-        while not done:
-            done = handle_events(snd, it, ch, paint_fn, clock)
-            time.sleep(1 / 1000)  # Fixme: This reduces calls to handle_events, but is it necessary?
-    else:
-        pg.display.init()
-
-        renderCall = LoopingCall(paint_frame, it, ch, paint_fn, clock)
-        inputCall = LoopingCall(handle_events, snd, it, ch, paint_fn, clock)
-
-        renderdef = renderCall.start(1 / sampler.videorate, now=False)
-        renderdef.addErrback(handleError)
-
-        finished = inputCall.start(1 / sampler.videorate / 10, now=False)
-        finished.addErrback(handleError)
-
-        finished.addCallback(lambda ign: renderCall.stop())
-        finished.addCallback(lambda ign: pg.display.quit())
-        reactor.run()  # pylint: disable=E1101
-
-    it.close()
-    del it
-    pg.mixer.quit()
     pg.quit()
+    logger.info("Done cleanup.")
 
 
-class SignalView(object):
+def change_frequency(snd, key):
     """
-    A view for animated sound signal and audio output.
+    Change frequency of the sound based on key position.
     """
-    def __init__(self, position=(0, 0), size=(800, 800), antialias=True, lines=False):
-        self.position = position
-        self.size = size
-        self.antialias = antialias
-        self.lines = lines
-
-
-class Window(object):
-    """
-    Pygame based window.
-    """
-    def __init__(
-        self,
-        clock=reactor,
-        display=pg.display,
-        event=pg.event,
-        view=SignalView,
-        size=(800, 800),
-        name="Resonance"
-    ):
-        self.clock = clock
-        self.display = display
-        self.event = event
-        self.size = size
-        self.viewType = view
-        self._view = view(size=size)
-        pg.display.set_caption(name)
-
-    def go(self, snd):
-        """
-        Go live with the Window.
-        """
-        self.display.init()
-        # self.display.set_caption(name)
-
-        renderCall = LoopingCall(handle_events, (snd, iter(snd), paint_frame, self.clock))
-        renderdef = renderCall.start(1 / sampler.videorate, now=False)
-        renderdef.addCallback(lambda ign: self.display.quit())
-        renderdef.addErrback(handleError)
-
-        reactor.run()  # pylint: disable=E1101
+    new_frequency = keyboard.get_frequency(key)
+    if new_frequency == 0:
+        return False
+    snd.frequency = new_frequency
+    if isinstance(snd, Releasable):
+        snd.release_at(None)
+    logger.debug("Changed frequency: %s." % (snd.frequency if hasattr(snd, 'frequency') else snd))
+    return new_frequency

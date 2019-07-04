@@ -11,6 +11,10 @@ doc/
 html/
 htmlcov/
 
+\#*\#
+.\#*
+.DS_Store
+
 py2.7/
 venv/
 virtualenvs/
@@ -21,3 +25,4 @@ akasha.egg-info/
 build/
 dist/
 
+src/

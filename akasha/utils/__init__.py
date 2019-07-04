@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 """
 Utilities for Akasha
 """
+
+import numpy as np
 
 
 def _super(self):
@@ -25,3 +28,52 @@ def issequence(arg):
         and hasattr(arg, "__getitem__")
         or hasattr(arg, "__iter__")
     )
+
+
+def is_empty(signal):
+    """
+    Return true if signal is empty.
+    """
+    return np.asanyarray(signal).size == 0
+
+
+def is_silence(signal):
+    """
+    Return true if signal is empty or all zeros.
+    """
+    return np.all(np.asanyarray(signal) == 0)
+
+
+def norm_shape(shape):
+    """
+    Normalize numpy array shapes so they're always expressed as a tuple,
+    even for one-dimensional shapes.
+
+    Parameters
+        shape - an int, or a tuple of ints
+
+    Returns
+        a shape tuple
+    """
+    try:
+        i = int(shape)
+        return (i,)
+    except TypeError:
+        pass  # shape was not a number
+    try:
+        t = tuple(shape)
+        return t
+    except TypeError:
+        pass  # shape was not iterable
+    raise TypeError('shape must be an int, or a tuple of ints')
+
+
+def trace_c(frame, event, arg):
+    """
+    Trace C calls for debugging.
+
+    Usage: sys.settrace(trace_c)
+    """
+    if event == 'c_call' or arg is not None and 'IPython' not in frame.f_code.co_filename:
+        print("%s, %s: %d" % (event, frame.f_code.co_filename, frame.f_lineno))
+    return trace

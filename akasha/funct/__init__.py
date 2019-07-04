@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# E1101: Module 'x' has no 'y' member
+# pylint: disable=E1101
+
 """
 Functional programming utility functions.
 """
@@ -89,6 +93,19 @@ def count_step(start=0, step=1):
         yield g.next()
 
 
+def consecutive(signal, n):
+    """
+    Iterates over n consecutive samples from the signal at a time.
+
+    Example
+    -------
+
+    >>> list(consecutive(np.linspace(0, 1, 5), 2))
+    [(0.0, 0.25), (0.25, 0.5), (0.5, 0.75), (0.75, 1.0)]
+    """
+    return izip(*[signal[start:] for start in xrange(n)])
+
+
 def blockwise(iterable, step=1, start=0):
     """
     Blockwise iterator with blocksize equal to step parameter.
@@ -123,8 +140,9 @@ def blockwise(iterable, step=1, start=0):
                     val = (yield indices)
                 if val == 'reset':
                     blocks = reset()
-                    indices = (start, step)
-                    val = (yield True)
+                    indices = blocks.next()
+                    block = iterable[slice(*np.append(indices, np.sign(step)))]
+                    val = (yield block)
         else:
             raise StopIteration
 

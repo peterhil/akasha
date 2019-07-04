@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# E1101: Module 'x' has no 'y' member
+# pylint: disable=E1101
+
 """
 Graphic line drawing functions.
 """
@@ -7,7 +11,7 @@ Graphic line drawing functions.
 import numpy as np
 
 from akasha.types import assert_type, signed
-from akasha.utils.math import complex_as_reals
+from akasha.math import complex_as_reals
 
 from skimage import draw as skdraw
 
