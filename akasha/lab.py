@@ -32,7 +32,6 @@ from akasha.audio.scalar import Scalar
 from akasha.audio.resample import Resample
 from akasha.audio.sum import Sum
 from akasha.audio.padsynth import *
-from akasha.audio.sound import Sound, Group, Pcm
 
 from akasha.control.io.audio import play, write, read
 from akasha.control.io.keyboard import *
