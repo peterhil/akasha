@@ -20,7 +20,7 @@ import scipy as sc
 from itertools import izip
 
 from akasha.audio.frequency import Frequency
-from akasha.math import random_phasor
+from akasha.math import normalize, random_phasor
 
 
 class GaussianCurve(object):
@@ -60,4 +60,4 @@ class Padsynth(object):
         self.curve = GaussianFrequencyCurve(freqs, sigmas)
 
     def __call__(self, at):
-        return sc.ifft(random_phases(self.curve(np.asanyarray(at))))
+        return normalize(sc.ifft(random_phases(self.curve(np.asanyarray(at)))))
