@@ -11,3 +11,4 @@ wikitools==1.1.1
 scikit-image>=0.11.2
 scikits.audiolab>=0.11.0
 -e git+https://github.com/cournape/samplerate#egg=scikits.samplerate
+future>=0.17.1  # used for: from builtins import zip

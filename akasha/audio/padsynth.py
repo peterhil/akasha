@@ -17,7 +17,7 @@ from __future__ import division
 import numpy as np
 import scipy as sc
 
-from itertools import izip
+from builtins import zip
 
 from akasha.audio.frequency import Frequency
 from akasha.math import normalize, random_phasor
@@ -41,7 +41,7 @@ class GaussianCurve(object):
 class GaussianFrequencyCurve(object):
 
     def __init__(self, freqs, sigmas):
-        self.gaussians = [GaussianCurve(f, s) for f, s in izip(freqs, sigmas)]
+        self.gaussians = [GaussianCurve(f, s) for f, s in zip(freqs, sigmas)]
 
     def __call__(self, at):
         return np.apply_along_axis(np.sum, 0, [g(np.asanyarray(at)) for g in self.gaussians])

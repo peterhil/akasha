@@ -12,7 +12,8 @@ import collections
 import numpy as np
 import re
 
-from itertools import count, islice, izip, tee
+from builtins import zip
+from itertools import count, islice, tee
 
 from akasha.utils.log import logger
 
@@ -65,7 +66,7 @@ def pairwise(iterable):
     """
     a, b = tee(iterable)
     next(b, None)
-    return izip(a, b)
+    return zip(a, b)
 
 
 def consume(iterator, n=None):
@@ -103,7 +104,7 @@ def consecutive(signal, n):
     >>> list(consecutive(np.linspace(0, 1, 5), 2))
     [(0.0, 0.25), (0.25, 0.5), (0.5, 0.75), (0.75, 1.0)]
     """
-    return izip(*[signal[start:] for start in xrange(n)])
+    return zip(*[signal[start:] for start in xrange(n)])
 
 
 def blockwise(iterable, step=1, start=0):
