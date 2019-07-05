@@ -1,3 +1,4 @@
+-r dev-requires.pip
 # Cython==0.21.2
 # Louie==1.1
 # intervaltree
