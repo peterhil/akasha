@@ -10,6 +10,7 @@ Wikipedia API client module.
 
 from __future__ import division
 
+import funcy
 import locale
 import logging
 import numpy as np
@@ -18,7 +19,6 @@ import re
 
 from wikitools import wiki, api
 from fractions import Fraction
-from funckit.datastruct import head as car, tail as cdr
 
 from akasha.utils.log import logger
 from akasha.math import cents, identity
@@ -31,9 +31,9 @@ def user_agent(req):
     product = 'Akasha-Resonance'
     url = 'http://composed.nu/peterhil/'
     platform = '; '.join(np.array(os.uname())[[0, 2, 4]])
-    system = '(' + platform + '; ' + car(locale.getlocale()) + ')'
+    system = '(' + platform + '; ' + funcy.first(locale.getlocale()) + ')'
     browser_platform = req.headers['User-agent'][0]
-    python_version = 'Python/' + car(os.sys.version.split(' '))
+    python_version = 'Python/' + funcy.first(os.sys.version.split(' '))
     return (browser_platform, system, product + ' (' + url + ')', python_version)
 
 
@@ -113,7 +113,7 @@ def template_items(string):
     """
     wiki_template = re.compile(r"{{([A-Za-z]+)\|(.*)}}")
     res = re.findall(wiki_template, string)
-    return car(res) if res else (u'', u'')
+    return funcy.first(res) if res else (u'', u'')
 
 
 def template_value(string):
@@ -129,15 +129,15 @@ def parse_interval_name(string, only_first=False):
     """
     try:
         value = template_value(string)
-        name = car(value.split('|'))
+        name = funcy.first(value.split('|'))
         if only_first:
-            name = car(car(name.split(' or ')).split(','))
+            name = funcy.first(funcy.first(name.split(' or ')).split(','))
         audio = template_value(value).split('|')
         try:
             audio.remove('help=no')
         except ValueError:
             pass
-        return (name, car(audio))
+        return (name, funcy.first(audio))
     except KeyError:
         logger.error("KeyError for string: %s" % string)
         return (name, "")
@@ -168,7 +168,7 @@ def parse_wiki(res, loglevel=logging.ANIMA):
     pgs = res['query']['pages']
     content = pgs[pgs.keys()[0]]['revisions'][0]['*']
     table = remove_wiki_links(filter_tags(content, 'ref')).split('|+')[1].split('\n|-\n|')[:-1]
-    legend, table = car(table), cdr(table)
+    legend, table = funcy.first(table), funcy.rest(table)
     out = []
     for row in table:
         rec = [k.strip() for k in row.split('||')]
