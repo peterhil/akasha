@@ -11,7 +11,6 @@ Mathematical utility functions module.
 
 from __future__ import division
 
-import exceptions
 import numpy as np
 import scipy as sc
 import sys
@@ -288,7 +287,7 @@ def map_array(func, arr, method='vec', dtype=None):
     elif method == 'map':
         res = np.array(map(func, arr.flat))  # pylint: disable=W0141
     else:
-        raise exceptions.NotImplementedError("map_array(): method '{0}' missing.".format(method))
+        raise NotImplementedError("map_array(): method '{0}' missing.".format(method))
 
     if dtype is not None:
         res = res.astype(dtype)
