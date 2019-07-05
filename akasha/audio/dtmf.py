@@ -8,9 +8,9 @@ Dual-tone Multifrequency Tones
 import sys
 
 if sys.version_info <= (3, 0):
-    import string  # pylint: disable=W0402
+    from string import maketrans # pylint: disable=W0402
 else:
-    import bytes as string
+    from bytes import maketrans
 
 from akasha.audio.generators import Generator
 from akasha.timing import sampler
@@ -85,7 +85,7 @@ class DTMF(Generator):
         l, h = divmod(i, 4)
         table[nkeys[i]] = (lo[l], hi[h])
 
-    alphabet_trans = string.maketrans(
+    alphabet_trans = maketrans(
         ''.join(['ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PQRS', 'TUV', 'WXYZ', ' ', '-']),
         ''.join(['222', '333', '444', '555', '666', '7777', '888', '9999', '0', '-'])
     )
