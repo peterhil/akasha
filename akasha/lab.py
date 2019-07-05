@@ -19,7 +19,7 @@ from cmath import rect, pi, exp, phase
 from scipy.signal import hilbert
 
 from akasha.audio.delay import Delay
-from akasha.audio.dtmf import DTMF
+# from akasha.audio.dtmf import DTMF
 from akasha.audio.envelope import Adsr, Exponential, Gamma
 from akasha.audio.envelope.beta import Beta, InverseBeta
 from akasha.audio.frequency import Frequency
