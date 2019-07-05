@@ -7,9 +7,9 @@
 
 import numpy as np
 import os
+import scikits.audiolab as audiolab
 
 from scipy.signal import hilbert
-from scikits import audiolab
 from scikits.audiolab import Format, Sndfile, available_file_formats, available_encodings
 
 from akasha.timing import sampler, time_slice
