@@ -33,8 +33,8 @@ from akasha.audio.resample import Resample
 from akasha.audio.sum import Sum
 from akasha.audio.padsynth import *
 
-# from akasha.control.io.audio import play, write, read
-from akasha.control.io.keyboard import *
+# from akasha.io.audio import play, write, read
+from akasha.io.keyboard import *
 
 from akasha.curves import *
 
