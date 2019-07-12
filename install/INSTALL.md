@@ -48,6 +48,7 @@ Matplotlib will not work in a virtual environment unless using a
 
     # Scikits-audiofile and scikits-samplerate depends
     brew install libsndfile libsamplerate
+    brew install portaudio
     brew install gcc  # Latest GCC versions include gfortran
 
 ## 7. Install the Python libraries using Pip

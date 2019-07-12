@@ -5,10 +5,10 @@
 # librosa==0.3.1
 # pyinter
 # wxpython>=4.0.6  # For Maplotlib wxAgg backend
-PyAudio  # Portaudio bindings
+
+## Alternative audio IO libraries
+soundfile>=0.10.2
+#-e git+https://github.com/bastibe/SoundFile#egg=soundfile-dev
+#pyao  # libao bindings
 #sndfile
 #-e git+https://github.com/sangoma/sndfile#egg=sndfile-dev
-soundfile
-#-e git+https://github.com/bastibe/SoundFile#egg=soundfile-dev
-python-wavefile
-#-e git+https://github.com/vokimon/python-wavefile#egg=python-wavefile
