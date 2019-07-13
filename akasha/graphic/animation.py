@@ -106,7 +106,7 @@ def loop(snd, channel, widget):
             logger.info("Got KeyboardInterrupt (CTRL-C)!".format(type(err)))
             break
         except SystemExit as err:
-            logger.info("Ending animation: %s" % err.message)
+            logger.info("Ending animation: %s" % err)
             break
         except Exception as err:
             try:
