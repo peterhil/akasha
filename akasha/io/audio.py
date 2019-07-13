@@ -44,19 +44,30 @@ def get_format(*args, **kwargs):
 
 # Audiolab read, write and play
 
-def play(sndobj, axis='imag', fs=sampler.rate, dur=5.0, start=0, time=False):
+def play(
+        sndobj,
+        dur=5.0,
+        start=0,
+        axis='imag',
+        fs=sampler.rate
+    ):
     """
     Play out a sound.
     """
-    time = time_slice(dur, start, time)
+    time = time_slice(dur, start)
     if isinstance(sndobj[0], np.floating):
         axis = 'real'
     audiolab.play(getattr(sndobj[time], axis), fs)
 
 
-def write(sndobj, filename='test_sound', axis='imag', fmt=Format(**defaults),
-          fs=sampler.rate, dur=5.0, start=0, time=False,
-          sdir=relative_path('../../Sounds/2010_Python_Resonance/')):
+def write(
+        sndobj,
+        filename='test_sound',
+        axis='imag',
+        fmt=Format(**defaults),
+        fs=sampler.rate, dur=5.0, start=0, time=False,
+        sdir=relative_path('../../Sounds/2010_Python_Resonance/'),
+    ):
     """
     Write a sound file.
     """
@@ -67,7 +78,7 @@ def write(sndobj, filename='test_sound', axis='imag', fmt=Format(**defaults),
 
     filename = filename + '_' + axis + '.' + fmt.file_format
 
-    time = time_slice(dur, start, time)
+    time = time_slice(dur, start)
     data = getattr(sndobj[time], axis)
 
     if np.ndim(data) <= 1:
@@ -84,8 +95,16 @@ def write(sndobj, filename='test_sound', axis='imag', fmt=Format(**defaults),
         hdl.close()
 
 
-def read(filename, dur=5.0, start=0, time=False, fs=sampler.rate, complex=True,
-         sdir=relative_path('../../Sounds/_Music samples/'), *args, **kwargs):
+def read(
+        filename,
+        dur=5.0,
+        start=0,
+        fs=sampler.rate,
+        complex=True,
+        sdir=relative_path('../../Sounds/_Music samples/'),
+        *args,
+        **kwargs
+    ):
     """
     Read a sound file in.
     """
@@ -98,7 +117,7 @@ def read(filename, dur=5.0, start=0, time=False, fs=sampler.rate, complex=True,
 
     format = os.path.splitext(filename)[1][1:]
     check_format(format)
-    time = time_slice(dur, start, time)
+    time = time_slice(dur, start)
 
     # Get and call appropriate reader function
     func = getattr(audiolab, format + 'read')
