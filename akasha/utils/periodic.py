@@ -160,14 +160,14 @@ class period(np.ndarray, object):
         )
 
     # def __getslice__(self, i, j):
-    #     if debug_gs: print "In %s %s: i=%s j=%s" % (__name__, whoami(), i, j)
+    #     if debug_gs: print("In %s %s: i=%s j=%s" % (__name__, whoami(), i, j))
     #     return _super(self).__getslice__(
     #         int(i), #self._mod(i, 0),
     #         int(j), #self._mod(j, 1)
     #     )
 
     # def __setslice__(self, i, j, y):
-    #     if debug_gs: print "In %s %s: i=%s j=%s y=%s" % (__name__, whoami(), i, j, y)
+    #     if debug_gs: print("In %s %s: i=%s j=%s y=%s" % (__name__, whoami(), i, j, y))
     #     _super(self).__setslice__(
     #         i, #self._mod(i, 0),
     #         j, #self._mod(j, 1),

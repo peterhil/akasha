@@ -62,7 +62,7 @@ def get_mapping(layout, section='main', mapping=np.empty([6, 25], dtype=object))
         for col in range(len(kbsect[row])):
             key = kbsect[row][col]
             mapping[row, col + basecol] = key
-            #print "({0:d}, {1:d}) = {2!s}".format(row, col+basecol, key)
+            #print("({0:d}, {1:d}) = {2!s}".format(row, col+basecol, key))
     return mapping
 
 

@@ -183,7 +183,7 @@ def parse_wiki(res, loglevel=logging.ANIMA):
         rec[-12:] = [rec[-12:]]
         # Factors
         rec[3] = parse_freq_ratio(rec[3])
-        print "Factors:", rec[3]
+        print("Factors:", rec[3])
         # Freq. ratio
         if rec[2] != 0:
             rec[2] = parse_freq_ratio(rec[2])

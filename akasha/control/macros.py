@@ -9,7 +9,7 @@ from types import FunctionType, CodeType
 def funcprinter(func):
     for feat in dir(func.func_code):
         if feat[0:3] == 'co_':
-            print feat, '=>', func.func_code.__getattribute__(feat)
+            print(feat, '=>', func.func_code.__getattribute__(feat))
 
 
 def macro(func):
