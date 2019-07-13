@@ -20,7 +20,7 @@ import operator as op
 from fractions import Fraction
 
 from akasha.audio.oscillator import Frequency
-from akasha.control.io.keyboard import kb, pos
+from akasha.io.keyboard import kb, pos
 from akasha.utils.log import logger
 from akasha.math import pi2, find_closest_index, map_array
 
