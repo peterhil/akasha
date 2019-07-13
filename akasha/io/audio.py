@@ -63,10 +63,12 @@ def play(
 def write(
         sndobj,
         filename='test_sound',
+        fmt=default_format,
+        dur=5.0,
+        start=0,
         axis='imag',
-        fmt=Format(**defaults),
-        fs=sampler.rate, dur=5.0, start=0, time=False,
-        sdir=relative_path('../../Sounds/2010_Python_Resonance/'),
+        fs=sampler.rate,
+        sdir=relative_path('../../Sounds/Out/'),
     ):
     """
     Write a sound file.
