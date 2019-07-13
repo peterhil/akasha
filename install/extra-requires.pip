@@ -9,6 +9,5 @@
 ## Alternative audio IO libraries
 soundfile>=0.10.2
 #-e git+https://github.com/bastibe/SoundFile#egg=soundfile-dev
-#pyao  # libao bindings
 #sndfile
 #-e git+https://github.com/sangoma/sndfile#egg=sndfile-dev
