@@ -125,8 +125,10 @@ def read(
     func = getattr(audiolab, format + 'read')
     (data, fs, enc) = func(filename, last=time.stop, first=time.start)
 
+    # Make mono
+    # TODO Enable stereo and multichannel
     if data.ndim > 1:
-        data = data.transpose()[-1]  # Make mono, take left [0] or right [-1] channel.
+        data = data.transpose()[-1]
 
     if complex:
         return hilbert(data)
