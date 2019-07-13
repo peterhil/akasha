@@ -71,9 +71,9 @@ def do(func, func_args, func_kargs, Monad):
 def handle_monadic_throws(func, func_args, func_kargs, Monad):
     try:
         return func(*func_args, **func_kargs)
-    except MonadReturn, ret:
+    except MonadReturn as ret:
         return Monad.unit(ret.value)
-    except Done, done:
+    except Done as done:
         assert isinstance(done.monad, Monad)
         return done.monad
 

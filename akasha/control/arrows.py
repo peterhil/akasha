@@ -7,8 +7,6 @@
 
 import numpy as np
 
-from exceptions import TypeError, AttributeError
-
 
 class Arrow(object):
     def __init__(self, func):
@@ -36,10 +34,7 @@ class Arrow(object):
         if name in self.__dict__:
             return self.__dict__[name]
         else:
-            try:
-                return self.func.__getattribute__(name)
-            except AttributeError, e:
-                raise AttributeError(e)
+            return self.func.__getattribute__(name)
 
     def __call__(self, *args, **kargs):
         return self.func(*args, **kargs)

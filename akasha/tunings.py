@@ -14,7 +14,6 @@ http://www.youtube.com/watch?v=0j-YXgXTpoA
 
 from __future__ import division
 
-import exceptions
 import numpy as np
 import operator as op
 
@@ -28,7 +27,7 @@ from akasha.math import pi2, find_closest_index, map_array
 
 class EqualTemperament(object):
     """
-    Equal temperament tuning: 
+    Equal temperament tuning:
     http://en.wikipedia.org/wiki/Equal_temperament
     """
     def __init__(self, n=12, scale=2.0):
@@ -174,7 +173,7 @@ class WickiLayout(AbstractLayout):
             self.gen = generators
             self.origo = origo
         else:
-            raise exceptions.AttributeError(
+            raise AttributeError(
                 "Expected two generators, got: {0!r}".format(generators))
 
     def get(self, *pos):
