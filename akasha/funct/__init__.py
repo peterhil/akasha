@@ -12,7 +12,7 @@ import collections
 import numpy as np
 import re
 
-from builtins import zip
+from builtins import range, zip
 from itertools import count, islice, tee
 
 from akasha.utils.log import logger
@@ -104,7 +104,7 @@ def consecutive(signal, n):
     >>> list(consecutive(np.linspace(0, 1, 5), 2))
     [(0.0, 0.25), (0.25, 0.5), (0.5, 0.75), (0.75, 1.0)]
     """
-    return zip(*[signal[start:] for start in xrange(n)])
+    return zip(*[signal[start:] for start in range(n)])
 
 
 def blockwise(iterable, step=1, start=0):

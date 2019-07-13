@@ -15,7 +15,7 @@ import numpy as np
 import scipy as sc
 import sys
 
-from builtins import zip
+from builtins import range, zip
 if sys.version_info >= (2, 7):
     from collections import OrderedDict
 else:
@@ -408,7 +408,7 @@ def pascal_line(n):
     Line of Pascal's triangle using binomial coefficients
     """
     line = [1]
-    [line.append(line[k] * (n-k) / (k+1)) for k in xrange(n)]
+    [line.append(line[k] * (n-k) / (k+1)) for k in range(n)]
     return line
 
 
@@ -756,7 +756,7 @@ def overlap(signal, n):
     """
     Split the 1-d signal into n overlapping parts.
     """
-    return np.array([signal[p : len(signal) - q] for p, q in enumerate(reversed(xrange(n)))])
+    return np.array([signal[p : len(signal) - q] for p, q in enumerate(reversed(range(n)))])
 
 
 def distances(signal, start=None, end=None):

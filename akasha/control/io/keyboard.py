@@ -17,6 +17,8 @@ from __future__ import division
 import json
 import numpy as np
 
+from builtins import range
+
 from akasha import settings
 from akasha.control.io import relative_path
 
@@ -56,8 +58,8 @@ def get_mapping(layout, section='main', mapping=np.empty([6, 25], dtype=object))
     else:
         basecol = 0
     kbsect = layout[section]
-    for row in xrange(len(kbsect)):
-        for col in xrange(len(kbsect[row])):
+    for row in range(len(kbsect)):
+        for col in range(len(kbsect[row])):
             key = kbsect[row][col]
             mapping[row, col + basecol] = key
             #print "({0:d}, {1:d}) = {2!s}".format(row, col+basecol, key)
@@ -76,7 +78,7 @@ def get_keyboard(layout=get_layout()):
 def get_map(kb, key='key'):
     mp = {}
     cols = kb.shape[1]
-    for i in xrange(kb.size):
+    for i in range(kb.size):
         code = kb.item(i).get(key)
         if code:
             mp[code] = divmod(i, cols)

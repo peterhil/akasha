@@ -7,6 +7,7 @@ Dual-tone Multifrequency Tones
 
 import sys
 
+from builtins import range
 if sys.version_info <= (3, 0):
     from string import maketrans # pylint: disable=W0402
 else:
@@ -81,7 +82,7 @@ class DTMF(Generator):
 
     table = dict()
 
-    for i in xrange(len(nkeys)):
+    for i in range(len(nkeys)):
         l, h = divmod(i, 4)
         table[nkeys[i]] = (lo[l], hi[h])
 

@@ -9,6 +9,7 @@ import numpy as np
 import os
 import scikits.audiolab as audiolab
 
+from builtins import range
 from scipy.signal import hilbert
 from scikits.audiolab import Format, Sndfile, available_file_formats, available_encodings
 
@@ -34,7 +35,7 @@ def get_format(*args, **kwargs):
         res = args[0]
     else:
         params = defaults.copy()
-        for i in xrange(len(args)):
+        for i in range(len(args)):
             params[['type', 'encoding', 'endianness'][i]] = args[i]
         params.update(kwargs)
         res = Format(**params)
