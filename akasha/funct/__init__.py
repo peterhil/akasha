@@ -89,9 +89,9 @@ def count_step(start=0, step=1):
     Get an iterator that advances from start with step at a time.
     """
     g = (start + step * i for i in count())
-    yield g.next()
+    yield next(g)
     while True:
-        yield g.next()
+        yield next(g)
 
 
 def consecutive(signal, n):
@@ -126,7 +126,7 @@ def blockwise(iterable, step=1, start=0):
     blocks = reset()
     while True:
         try:
-            indices = blocks.next()
+            indices = next(blocks)
             block = iterable[slice(*np.append(indices, np.sign(step)))]
         except StopIteration:
             break
@@ -141,7 +141,7 @@ def blockwise(iterable, step=1, start=0):
                     val = (yield indices)
                 if val == 'reset':
                     blocks = reset()
-                    indices = blocks.next()
+                    indices = next(blocks)
                     block = iterable[slice(*np.append(indices, np.sign(step)))]
                     val = (yield block)
         else:
