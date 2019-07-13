@@ -104,8 +104,6 @@ def read(
         fs=sampler.rate,
         complex=True,
         sdir=relative_path('../../Sounds/_Music samples/'),
-        *args,
-        **kwargs
     ):
     """
     Read a sound file in.
