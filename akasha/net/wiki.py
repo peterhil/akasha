@@ -152,8 +152,8 @@ def parse_freq_ratio(string):
     >>> parse_freq_ratio("2<sup>7</sup> : 5.0<sup>3</sup>")
     u'2 ** Fraction(7, 1) / 5.0 ** Fraction(3, 1)'
     """
-    re_div = re.compile(ur" ?(:|÷|\xf7) ?", re.UNICODE)
-    re_mul = re.compile(ur" ?(·|\xc2\xb7|\xb7|&middot;) ?", re.UNICODE)
+    re_div = re.compile(r" ?(:|÷|\xf7) ?", re.UNICODE)
+    re_mul = re.compile(r" ?(·|\xc2\xb7|\xb7|&middot;) ?", re.UNICODE)
     out = remove_templates(string)
     out = re.sub(re_mul, u' * ', out, re.UNICODE)
     out = re.sub(re_div, u' / ', out, re.UNICODE)
