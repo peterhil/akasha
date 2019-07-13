@@ -52,7 +52,7 @@ from akasha.graphic.primitive.spline import *
 from akasha.math.geometry import *
 from akasha.math.geometry.curvature import *
 
-from akasha.net.wiki import *
+# from akasha.net.wiki import *
 
 from akasha.timing import sampler
 from akasha.tunings import WickiLayout
