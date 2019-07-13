@@ -14,7 +14,7 @@ from scipy.signal import hilbert
 from scikits.audiolab import Format, Sndfile, available_file_formats, available_encodings
 
 from akasha.timing import sampler, time_slice
-from akasha.io import relative_path
+from akasha.io import file_extension, relative_path
 
 
 defaults = {
@@ -115,8 +115,8 @@ def read(
     if filename[0] != '/':
         filename = '/'.join([sdir, filename])  # Relative path
 
-    format = os.path.splitext(filename)[1][1:]
-    check_format(format)
+    extension = file_extension(filename)
+    check_format(extension)
     time = time_slice(dur, start)
 
     # Get and call appropriate reader function
