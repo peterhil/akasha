@@ -9,6 +9,7 @@ from __future__ import division
 
 import numbers
 import operator
+import six
 
 from abc import ABCMeta, abstractproperty
 from cdecimal import Decimal
@@ -144,7 +145,10 @@ class ComplexUnit(NumericUnit):
     __sub__, __rsub__ = ops(operator.sub)
     __mul__, __rmul__ = ops(operator.mul)
     __pow__, __rpow__ = ops(operator.pow)
-    __div__, __rdiv__ = ops(operator.div)
+    if six.PY2:
+        __div__, __rdiv__ = ops(operator.div)
+    else:
+        __floordiv__, __rfloordiv__ = ops(operator.floordiv)
     __truediv__, __rtruediv__ = ops(operator.truediv)
     __mod__, __rmod__ = ops(operator.mod)
 

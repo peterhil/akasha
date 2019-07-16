@@ -2593,7 +2593,7 @@ class DictImporter(object):
         return None
 
     def load_module(self, fullname):
-        # print "load_module:",  fullname
+        # print("load_module:",  fullname)
         from types import ModuleType
         try:
             s = self.sources[fullname]

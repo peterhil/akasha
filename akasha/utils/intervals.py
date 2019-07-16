@@ -7,6 +7,8 @@ Interval tree module.
 
 from __future__ import absolute_import
 
+from builtins import range
+
 
 class Interval(object):
     """
@@ -40,7 +42,7 @@ class IntervalTree(object):
 
     This is a modified port of this BSD Licensed Ruby implementation of augmented interval tree:
     https://github.com/misshie/interval-tree/blob/master/lib/interval_tree.rb
-    
+
     The code this is modified from a Python port by Tyler Kahn:
     http://forrst.com/posts/Interval_Tree_implementation_in_python-e0K
     """
@@ -69,7 +71,7 @@ class IntervalTree(object):
                 s_center.append(k)
 
         return Node(x_center, s_center, self.divide_intervals(s_left), self.divide_intervals(s_right))
-        
+
     def center(self, intervals):
         """
         """
@@ -83,7 +85,7 @@ class IntervalTree(object):
         if end:
             result = []
 
-            for j in xrange(begin, end+1):
+            for j in range(begin, end+1):
                 for k in self.search(j):
                     result.append(k)
                 result = list(set(result))

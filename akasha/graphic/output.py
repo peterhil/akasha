@@ -43,9 +43,9 @@ def show(img, plot=False, osx_open=False):
             image = Image.fromarray(img)
             image.save(tmp.name, 'png')
             os.system("open " + tmp.name)
-        except IOError, err:
+        except IOError as err:
             logger.error("Failed to open a temporary file and save the image: %s", err)
-        except OSError, err:
+        except OSError as err:
             logger.error("Failed to open the image with a default app: %s", err)
         finally:
             tmp.close()
@@ -62,9 +62,9 @@ def imsave(img, filename):
         img = img.transpose((1, 0, 2))
         image = Image.fromarray(img)
         image.save(filename, 'png')
-    except IOError, err:
+    except IOError as err:
         logger.error("Failed to save image into file: '%s'\n\nError was: %s", filename, err)
-    except OSError, err:
+    except OSError as err:
         logger.error("OS error when saving image: %s", err)
     finally:
         image.close()

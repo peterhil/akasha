@@ -71,9 +71,9 @@ def do(func, func_args, func_kargs, Monad):
 def handle_monadic_throws(func, func_args, func_kargs, Monad):
     try:
         return func(*func_args, **func_kargs)
-    except MonadReturn, ret:
+    except MonadReturn as ret:
         return Monad.unit(ret.value)
-    except Done, done:
+    except Done as done:
         assert isinstance(done.monad, Monad)
         return done.monad
 
@@ -148,8 +148,8 @@ def failable_monad_examle():
         val3 = yield fdiv(val1, val2)
         mreturn(val3)
 
-    print with_failable(0.0)
-    print with_failable(1.0)
+    print(with_failable(0.0))
+    print(with_failable(1.0))
 
 
 class StateChanger(Monad):
@@ -211,7 +211,7 @@ def state_changer_monad_example():
         state = yield get_state()
         mreturn(val2)
 
-    print with_dict_state().run({})  # (2, {"a" : 2, "b" : 2})
+    print(with_dict_state().run({}))  # (2, {"a" : 2, "b" : 2})
 
 
 class ContinuationMonad(Monad):
@@ -281,7 +281,7 @@ def continuation_monad_example():
     @do(ContinuationMonad)
     def print_all(mb):
         while True:
-            print (yield mb.receive())
+            print((yield mb.receive()))
 
     original = Mailbox()
     multiplied = Mailbox()

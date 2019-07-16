@@ -19,7 +19,7 @@ from cmath import rect, pi, exp, phase
 from scipy.signal import hilbert
 
 from akasha.audio.delay import Delay
-from akasha.audio.dtmf import DTMF
+# from akasha.audio.dtmf import DTMF
 from akasha.audio.envelope import Adsr, Exponential, Gamma
 from akasha.audio.envelope.beta import Beta, InverseBeta
 from akasha.audio.frequency import Frequency
@@ -31,8 +31,9 @@ from akasha.audio.overtones import Overtones
 from akasha.audio.scalar import Scalar
 from akasha.audio.resample import Resample
 from akasha.audio.sum import Sum
+from akasha.audio.padsynth import *
 
-from akasha.control.io.audio import play, write, read
+# from akasha.control.io.audio import play, write, read
 from akasha.control.io.keyboard import *
 
 from akasha.curves import *
@@ -51,7 +52,7 @@ from akasha.graphic.primitive.spline import *
 from akasha.math.geometry import *
 from akasha.math.geometry.curvature import *
 
-from akasha.net.wiki import *
+# from akasha.net.wiki import *
 
 from akasha.timing import sampler
 from akasha.tunings import WickiLayout

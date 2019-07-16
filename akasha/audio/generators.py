@@ -11,6 +11,8 @@ Sound generating objects’ base classes.
 
 import numpy as np
 
+from builtins import range
+
 from akasha.funct import blockwise
 from akasha.timing import sampler
 
@@ -27,7 +29,7 @@ class Generator(object):
             if hasattr(self, '__len__'):
                 # Mimick ndarray slicing, ie. clip the slice indices
                 res = np.clip(np.array([item.start, item.stop]), a_min=None, a_max=len(self))
-                for i in xrange(len(res)):
+                for i in range(len(res)):
                     if res[i] is not None and np.sign(res[i]) == -1:
                         res[i] = max(-len(self) - 1, res[i])
                 item = slice(res[0], res[1], item.step)

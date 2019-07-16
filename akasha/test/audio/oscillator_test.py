@@ -11,9 +11,10 @@
 Unit tests for oscillator.py
 """
 
+import numpy as np
 import pytest
 
-import numpy as np
+from builtins import range
 
 from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import PeriodicGenerator

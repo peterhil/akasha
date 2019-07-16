@@ -101,14 +101,14 @@ def loop(snd, channel, widget):
                         div_safe_zero(1, input_time), div_safe_zero(1, audio_time), div_safe_zero(1, video_time), av_percent
                     )
             t = clock.tick_busy_loop(sampler.videorate)
-        except KeyboardInterrupt, err:
+        except KeyboardInterrupt as err:
             # See http://stackoverflow.com/questions/2819931/handling-keyboardinterrupt-when-working-with-pygame
             logger.info("Got KeyboardInterrupt (CTRL-C)!".format(type(err)))
             break
-        except SystemExit, err:
-            logger.info("Ending animation: %s" % err.message)
+        except SystemExit as err:
+            logger.info("Ending animation: %s" % err)
             break
-        except Exception, err:
+        except Exception as err:
             try:
                 exc = sys.exc_info()[:2]
                 logger.error("Unexpected exception %s: %s\n%s" % (exc[0], exc[1], traceback.format_exc()))
@@ -306,7 +306,7 @@ def init_display(name, size):
         mode = pg.display.set_mode((size, size), flags, 32 if flags & pg.SRCALPHA else 24)
         pg.display.set_caption(name)
         pg.display.init()
-    except Exception, err:
+    except Exception as err:
         logger.error("Something bad happened on init_display(): %s" % err)
 
     return mode

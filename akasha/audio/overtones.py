@@ -11,7 +11,7 @@ Overtones module
 
 import numpy as np
 
-from itertools import izip
+from builtins import zip
 
 from akasha.audio.envelope import Exponential, Gamma
 from akasha.audio.frequency import Frequency, FrequencyRatioMixin
@@ -95,13 +95,13 @@ class Overtones(FrequencyRatioMixin, Generator):
             Exponential(self.damping(f))
             for f in frequencies
         ]
-        partials = [Mix(*part) for part in izip(oscs, envelopes)]
+        partials = [Mix(*part) for part in zip(oscs, envelopes)]
 
         # Random phases
         if self.rand_phase:
             phases = random_phasor(self.n)
             phases = [Scalar(phase, dtype=np.complex128) for phase in phases]
-            partials = [Mix(*partial) for partial in izip(partials, phases)]
+            partials = [Mix(*partial) for partial in zip(partials, phases)]
 
         return Mix(Sum(*partials), Scalar(1.0 / len(frequencies)))
 

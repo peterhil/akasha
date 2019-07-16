@@ -12,6 +12,7 @@ import pygame
 import numpy as np
 
 from PIL import Image
+from builtins import range
 from scipy import sparse
 from skimage import draw as skdraw
 
@@ -40,7 +41,7 @@ def draw_axis(img, colour=None):
     if colour is None:
         colour = [42, 42, 42, 127]
     height, width, channels = img.shape
-    img[height / 2, :] = img[:, width / 2] = colour[:channels]
+    img[height // 2, :] = img[:, width // 2] = colour[:channels]
 
     return img
 
@@ -332,7 +333,7 @@ def video_transfer(signal, standard='PAL', axis='real', horiz=720):
     if isinstance(signal[0], np.complex):
         signal = getattr(signal, axis)
 
-    #for block in xrange(0, len(signal), framesize):
+    #for block in range(0, len(signal), framesize):
     #    pass # draw frame
 
     img = get_canvas(3, vert, axis=False)  # Stretch to horiz. width later!

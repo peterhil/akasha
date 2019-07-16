@@ -17,6 +17,8 @@ import cmath
 import funcy
 import numpy as np
 
+from builtins import range
+
 from akasha.utils.log import logger, logging
 from akasha.math import map_array, normalize, as_polar, as_rect
 
@@ -114,7 +116,7 @@ def tape_compress(signal, norm_level=0.95):
     # Calculate result - could use np.ufunc.accumulate?
     out = np.empty(len(amp))
     out[0] = signal[0]
-    for i in xrange(len(amp) - 1):
+    for i in range(len(amp) - 1):
         out[i + 1] = mag2(amp[i], amp[i + 1], out[i], norm_level)
     return out
 
