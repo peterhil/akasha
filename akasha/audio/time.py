@@ -5,10 +5,15 @@
 High precision time module
 """
 
+import sys
+if sys.version_info >= (3, 3, 0):
+    from decimal import Decimal, getcontext
+else:
+    from cdecimal import Decimal, getcontext
+
 from timeit import default_timer as clock
 
 from akasha.types.numeric import RealUnit
-from cdecimal import Decimal, getcontext
 
 
 getcontext().prec = 32

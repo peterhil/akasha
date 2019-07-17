@@ -10,9 +10,15 @@ from __future__ import division
 import numbers
 import operator
 import six
+import sys
 
 from abc import ABCMeta, abstractproperty
-from cdecimal import Decimal
+
+if sys.version_info >= (3, 3, 0):
+    from decimal import Decimal
+else:
+    from cdecimal import Decimal
+
 from fractions import Fraction
 
 

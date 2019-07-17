@@ -12,11 +12,19 @@ Unit tests for time
 """
 
 import pytest
+import sys
 import timeit
+
+if sys.version_info >= (3, 3, 0):
+    from decimal import Decimal, getcontext
+else:
+    from cdecimal import Decimal, getcontext
 
 from akasha.audio.time import Chrono, ps, ns, us, ms, seconds, minutes, hours, days, months, years
 from akasha.types.numeric import RealUnit
-from cdecimal import Decimal, getcontext
+
+
+getcontext().prec = 32
 
 
 class TestChrono(object):
