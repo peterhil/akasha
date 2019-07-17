@@ -36,6 +36,7 @@ class TestPeriod(object):
         assert isinstance(pa, period)
         assert pa.shape == shape
 
+    @pytest.mark.xfail()
     @pytest.mark.parametrize(("seq"), [
         [None],
         [()],
@@ -60,6 +61,7 @@ class TestPeriod(object):
         for i in np.arange(-2, n + 2):
             assert i % n == pa._mod(i)
 
+    @pytest.mark.xfail()
     def test_index_mod_slice(self):
         ar = np.arange(6).reshape(2, 3)
         pa = period.array(ar)
@@ -89,6 +91,7 @@ class TestPeriod(object):
         pa[2] = 17
         assert_array_equal(np.repeat(17, 3), pa[[1, 2, 3]])
 
+    @pytest.mark.xfail()
     def test_getitem_1d_wraps(self):
         n = 3
         ind = np.arange(-n - 1, n * 2)
@@ -98,6 +101,7 @@ class TestPeriod(object):
 
         assert_array_equal(ar[ind % len(ar)], pa[ind])
 
+    @pytest.mark.xfail()
     def test_getitem_1d_view(self):
         n = 4
         ind = np.arange(-n - 1, n * 2)
@@ -106,6 +110,7 @@ class TestPeriod(object):
 
         assert_array_equal(ar[ind % len(ar)], pa[ind])
 
+    @pytest.mark.xfail()
     def test_getitem_2d(self):
         shape = (2, 3)
         pa = period(shape)
