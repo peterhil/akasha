@@ -555,7 +555,7 @@ def factor_supersets(factors_in, redundant=None, limit=None):
             msg = "\t#%s:\tSet %s is subset of %s, will add missing factors of %s to redundant"
             logger.info(msg % (ind, fset, factors_in[lim], j))
             msg = "#%s:\tMoving %s from essential to redundant. (factors in %s)"
-            logger.warn(msg % (ind, j, factors_in[j]))
+            logger.warning(msg % (ind, j, factors_in[j]))
             if j in ess:
                 red[j] = ess.pop(j)
             for f in fset:
@@ -566,7 +566,7 @@ def factor_supersets(factors_in, redundant=None, limit=None):
                 #     for k in re2.keys():
                 #         if (not k in red) and k in ess:
                 #             msg = "\t#%s:\t\tMoving %s to redundant. (factors in %s)"
-                #             logger.warn(msg % (ind, k, factors_in[k]))
+                #             logger.warning(msg % (ind, k, factors_in[k]))
                 #             if k in ess:
                 #                 red[k] = ess.pop(k)  #es2[k]
     #logger.debug("\t#%s:\tEssential keys: %s redundant keys: %s" % (ind, ess.keys(), red.keys()))

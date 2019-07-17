@@ -98,14 +98,14 @@ def draw(
         img = get_canvas(size, axis=axis)
 
     if is_silence(signal):
-        logger.warn('Drawing empty signal!')
+        logger.warning('Drawing empty signal!')
         return img
 
     signal = clip_samples(signal)
 
     if lines:
         if screen is None:
-            logger.warn("Drawing lines with Numpy is way too slow for now!")
+            logger.warning("Drawing lines with Numpy is way too slow for now!")
             img = draw_lines(signal, img, size, colours, antialias)
         else:
             img = draw_lines_pg(signal, screen, size, colours, antialias)
@@ -123,7 +123,7 @@ def clip_samples(signal):
     """
     clip_max = np.max(np.fmax(np.abs(signal.real), np.abs(signal.imag)))
     if clip_max > 1.0:
-        logger.warn("Clipping signal -- maximum magnitude was: %0.6f", clip_max)
+        logger.warning("Clipping signal -- maximum magnitude was: %0.6f", clip_max)
         return clip(signal)
     else:  # pylint: disable=R1705
         return signal

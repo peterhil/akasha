@@ -26,7 +26,7 @@ class memoized(object):
         except TypeError:
             # uncachable -- for instance, passing a list as an argument.
             # Better to not cache than to blow up entirely.
-            logger.warn("Arguments '%s' not memoized for function %s!" % (args, self.func))
+            logger.warning("Arguments '%s' not memoized for function %s!" % (args, self.func))
             return self.func(*args)
 
     def __repr__(self):

@@ -110,7 +110,7 @@ class TestDrawing(object):
                 assert mock.called_once_with(signal, d['screen'], d['size'], d['colours'])
 
     def test_clip_samples(self):
-        with patch('akasha.utils.log.logger.warn') as log:
+        with patch('akasha.utils.log.logger.warning') as log:
             assert -1+1j == clip_samples(-3+4j)
             assert log.called_once_with("Clipping signal -- maximum magnitude was: 5.000000")
 

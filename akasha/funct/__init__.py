@@ -112,7 +112,7 @@ def blockwise(iterable, step=1, start=0):
     Blockwise iterator with blocksize equal to step parameter.
     """
     if np.sign(step) == -1:
-        logger.warn(
+        logger.warning(
             "Blockwise will lose first value on negative step, "
             "because of Numpy array's indexing bug."
         )
