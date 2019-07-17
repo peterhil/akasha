@@ -128,6 +128,7 @@ class TestFrequencyAliasing(object):
     def freq(ratio):
         return Frequency.from_ratio(ratio)
 
+    @pytest.mark.filterwarnings("ignore:invalid value encountered in log2")
     def testPreventAliasing(self):
         """It should prevent aliasing when given a ratio out of range 0 to 1/2."""
         sampler.prevent_aliasing = True
