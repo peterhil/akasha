@@ -25,16 +25,35 @@ from akasha.math.geometry.affine_transform import AffineTransform
 from akasha.math import pi2
 
 
+__all__ = ['Ellipse']
+
+
+def ellipse_axes_normalised(a, b, angle=0):
+    if a < 0:
+        a = -a
+        angle += np.pi
+    if b < 0:
+        b = -b
+
+    return a, b, angle % pi2
+
+
 class Ellipse(Curve):
     """
     Ellipse curve
+
+    Parameters are normalised so that:
+    - Parameter `a` always determines the direction (given by the `angle` parameter)
+    - Both `a` and `b` are >= 0
+    - Parameter `b` can be greater than `a`, so use Ellipse#major if you need the major axis length
     """
     def __init__(self, a, b, angle=0, origin=0):
-        # if np.abs(a) < np.abs(b):
-        #     [a, b] = [b, a]
-        #     # angle -= pi2 / 4.0  # TODO Calculate this properly
-        self.a = a  # np.abs(a)
-        self.b = b  # np.abs(b)
+        # Note! If thinking of making a always the semi-major axis,
+        # the angle needs to be rotated plus or minus 90 degrees or so.
+        # It is not as easy as it sounds, and care needs to be taken to make it correct!
+        (a, b, angle) = ellipse_axes_normalised(a, b, angle)
+        self.a = a
+        self.b = b
         self.angle = angle % pi2
         self.origin = origin
 
