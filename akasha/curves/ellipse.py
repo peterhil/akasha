@@ -30,11 +30,11 @@ class Ellipse(Curve):
     Ellipse curve
     """
     def __init__(self, a, b, angle=0, origin=0):
-        if np.abs(a) < np.abs(b):
-            [a, b] = [b, a]
-            # angle -= pi2 / 4.0  # TODO Calculate this properly
-        self.a = np.abs(a)
-        self.b = np.abs(b)
+        # if np.abs(a) < np.abs(b):
+        #     [a, b] = [b, a]
+        #     # angle -= pi2 / 4.0  # TODO Calculate this properly
+        self.a = a  # np.abs(a)
+        self.b = b  # np.abs(b)
         self.angle = angle % pi2
         self.origin = origin
 
