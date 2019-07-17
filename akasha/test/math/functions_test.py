@@ -77,7 +77,7 @@ class TestPrimes(object):
             primes(*interval)
         )
 
-    @pytest.mark.slow
+    # @pytest.mark.skip(reason='this can be slow')
     def test_primes_peak_to_peak(self):
         assert_array_equal(
             np.array([19, 32, 26, 26, 28, 30, 28, 28, 32], dtype=np.uint64),
