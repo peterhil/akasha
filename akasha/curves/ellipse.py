@@ -38,6 +38,16 @@ class Ellipse(Curve):
         self.angle = angle % pi2
         self.origin = origin
 
+    @property
+    def major(self):
+        a, b = np.abs(self.a), np.abs(self.b)
+        return a if a > b else b
+
+    @property
+    def minor(self):
+        a, b = np.abs(self.a), np.abs(self.b)
+        return b if a > b else a
+
     def __repr__(self):
         return "%s(%r, %r, %r, %r)" % (self.__class__.__name__, self.a, self.b, self.angle, self.origin)
 
