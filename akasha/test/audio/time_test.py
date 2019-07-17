@@ -68,4 +68,4 @@ class TestChrono(object):
     def test_now(self):
         latency = timeit.timeit(Chrono.now, number=3)
         diff = -(Chrono.now() - Chrono.now())
-        assert 0 < diff < latency
+        assert 0 < float(diff) < latency
