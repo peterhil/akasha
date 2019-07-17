@@ -24,7 +24,7 @@ class PyTest(Command):
     def run(self):
         import subprocess
         import sys
-        errno = subprocess.call([sys.executable, 'runtests.py', 'akasha/test'])
+        errno = subprocess.call([sys.executable, '-m', 'pytest', 'akasha/test'])
         raise SystemExit(errno)
 
 setup(
