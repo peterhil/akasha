@@ -201,21 +201,3 @@ class TestEllipse(object):
             ell.general_coefficients,
             Ellipse.from_general_coefficients(*ell.general_coefficients).general_coefficients
         )
-
-    samples = np.linspace(0, 1, 17, endpoint=False)
-    ellipse_params = [
-        [ 0.75, 0.125, {'angle': -0.375 * pi2, 'origin': -0.15-0.25j }],
-        # Failure of the Fitzgibbon algorithm - degenerate cases?:
-        [ 0.75,  0.25, {'angle': -0.375 * pi2, 'origin': -0.15-0.25j }],
-        [ 0.75,  0.35, {'angle':  0.375 * pi2, 'origin': -0.15-0.25j }],
-    ]
-
-    @pytest.mark.parametrize(('fit_method'), ['fitzgibbon', 'halir'])
-    @pytest.mark.parametrize(('a', 'b', 'kwargs'), ellipse_params)
-    def test_ellipse_fit_points(self, fit_method, a, b, kwargs):
-        original = Ellipse(a, b, **kwargs)
-        fitted = Ellipse.fit_points(original.at(self.samples), method=fit_method)
-        assert_array_almost_equal(
-            ellipse_parameters(fitted),
-            ellipse_parameters(original)
-        )
