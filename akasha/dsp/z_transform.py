@@ -38,10 +38,11 @@ def czt(signal, m=None, w=None, a=1.0, normalize=False):
     k = np.arange(m)
     lp2 = int(power_limit(m + l - 1, 2, np.ceil))
 
-    y = np.append(signal * (a ** -n) * chirp(w, n), np.zeros(lp2 - l))
+    y = signal * (a ** -n) * chirp(w, n)
+    y_pad = np.append(y, np.zeros(lp2 - l))  # zero pad
     vn = np.roll(ichirp(w, np.arange(lp2) - l), -l)
 
-    g = sc.ifft(sc.fft(y) * sc.fft(vn))[:m]
+    g = sc.ifft(sc.fft(y_pad) * sc.fft(vn))[:m]
     scale = 1.0 / l if normalize else 1.0
     return scale * (g * chirp(w, k))
 
