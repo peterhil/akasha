@@ -30,6 +30,7 @@ class TestMath(object):
             1.0 / np.sqrt(2)
         )
 
+    @pytest.mark.filterwarnings("ignore:divide by zero")
     @pytest.mark.parametrize(('amplitude', 'expected'), [
         (1,       0),
         (0.5,    -6.02),
