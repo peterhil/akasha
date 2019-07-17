@@ -36,7 +36,7 @@ def czt(signal, m=None, w=None, a=1.0, normalize=False):
     if w is None: w = np.exp(-1j * pi2 / m)
     n = np.arange(l)
     k = np.arange(m)
-    lp2 = power_limit(m + l - 1, 2, np.ceil)
+    lp2 = int(power_limit(m + l - 1, 2, np.ceil))
 
     y = np.append(signal * (a ** -n) * chirp(w, n), np.zeros(lp2 - l))
     vn = np.roll(ichirp(w, np.arange(lp2) - l), -l)
