@@ -29,10 +29,10 @@ __all__ = ['Ellipse']
 
 
 def ellipse_axes_normalised(a, b, angle=0):
-    if a < 0:
+    if float(a) < 0:
         a = -a
         angle += np.pi
-    if b < 0:
+    if float(b) < 0:
         b = -b
 
     return a, b, angle % pi2
@@ -247,14 +247,14 @@ class Ellipse(Curve):
         a = -np.sqrt(2.0 * ab_common * (a + c + acb_pythagorean)) / den
         b = -np.sqrt(2.0 * ab_common * (a + c - acb_pythagorean)) / den
         # Make sure a is the major axis
-        if a < b:
+        if float(a) < float(b):
             [a, b] = [b, a]
 
         x = (2.0 * c * d - b * e) / den
         y = (2.0 * a * e - b * d) / den
         origin = x + 1j * y
 
-        if b == 0:
+        if float(b) == 0:
             theta = 0 if a <= c else pi2 / 4.0
         else:
             theta = np.arctan((c - a - acb_pythagorean) / b)
