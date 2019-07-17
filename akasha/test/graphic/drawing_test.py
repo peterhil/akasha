@@ -151,7 +151,6 @@ class TestDrawing(object):
     ])
     @pytest.mark.parametrize(('draw_func'), [
         draw_points,
-        draw_points_coo,
     ])
     def test_draw_points(self, palette, draw_func):
         """
@@ -184,7 +183,6 @@ class TestDrawing(object):
 
     @pytest.mark.parametrize(('draw_func'), [
         draw_points,
-        draw_points_coo,
         # draw_points_aa,
         # draw_points_aa_old,
     ])

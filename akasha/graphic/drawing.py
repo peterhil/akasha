@@ -267,21 +267,6 @@ def draw_points(signal, img, size=1000, colours=True):
     return img
 
 
-# TODO: Investigate using scipy.sparse matrices to speed up things?
-# Use sparse.coo (coordinate matrix) to build the matrix, and convert to csc/csr for math.
-def draw_points_coo(signal, img, size=1000, colours=True):
-    """
-    Draw a bitmap image from a complex signal with optionally colourized pixels.
-    """
-    points = np.rint(get_points(flip_vertical(signal), size) - 0.5).astype(np.uint32)
-    coords = sparse.coo_matrix(points, dtype=np.uint32).todense()
-
-    color = add_alpha(colorize(signal)) if colours else white
-
-    img[coords[0], coords[1]] = color[..., :img.shape[2]]
-    return img
-
-
 def hist_graph(signal, size=1000):
     """
     Use Numpy histogram2d to make an image from the complex signal.
