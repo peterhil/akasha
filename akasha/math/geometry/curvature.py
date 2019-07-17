@@ -57,15 +57,15 @@ def ellipse_curvature(para, debug=False):
 
 
 def estimate_curvature_with_ellipses(signal, debug=False):
-    res = np.array([ellipse_curvature(points) for points in consecutive(signal, 3)])
+    res = np.array([ellipse_curvature(points, debug) for points in consecutive(signal, 3)])
 
     if debug:
         import pylab as lab
         from akasha.graphic.plotting import plotting
 
         with plotting():
+            lab.interactive(True)
             lab.plot(*complex_as_reals(signal), color='k')
             lab.axis('equal')
-            lab.savefig('/Users/peterhil/Desktop/ellipse_curvature.png', dpi=300)
 
     return res
