@@ -45,12 +45,11 @@ complex_operations = [
     'add',
     'sub',
     'mul',
-    'div',
+    'truediv',
     'pow',
 ]
 
 real_operations = complex_operations + [
-    'truediv',
     'floordiv',
     'mod',
     'ge',
