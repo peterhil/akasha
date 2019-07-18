@@ -253,6 +253,7 @@ class TestFrequency(object):
     def test_int(self):
         assert 21 == int(Frequency(21.5))
 
+    @pytest.mark.filterwarnings("ignore:invalid value encountered in log2")
     def test_pos_neg_abs(self):
         sampler.negative_frequencies = True
         hz = 440
