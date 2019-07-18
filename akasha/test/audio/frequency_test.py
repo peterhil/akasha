@@ -178,7 +178,7 @@ class TestFrequency(object):
 
     def test_meta(self):
         assert issubclass(Frequency, numbers.Real)
-        assert isinstance(Frequency, abc.ABCMeta)
+        assert Frequency.__metaclass__ ==  abc.ABCMeta
 
     def test_class(self):
         assert issubclass(Frequency, RealUnit)
