@@ -56,7 +56,7 @@ class TestOscillator(object):
     def test_at_with_iterable(self):
         o = Osc.from_ratio(1, sampler.rate)
         expected = Circle.roots_of_unity(7)
-        assert_array_almost_equal(o[iter(xrange(0, 44100, 6300))], expected)
+        assert_array_almost_equal(o[iter(range(0, 44100, 6300))], expected)
 
     def test_sample(self):
         o, p = 1, sampler.rate
