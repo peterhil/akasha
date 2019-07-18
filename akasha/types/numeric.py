@@ -10,18 +10,9 @@ from __future__ import division
 import numbers
 import operator
 import six
-import sys
-
-if sys.version_info >= (3, 3, 0):
-    from decimal import Decimal, getcontext
-else:
-    from cdecimal import Decimal, getcontext
 
 from abc import ABCMeta, abstractproperty
 from fractions import Fraction
-
-
-getcontext().prec = 32
 
 
 def ops(op):
@@ -46,10 +37,6 @@ def ops(op):
             return calc(self.value, other, cls)
         elif isinstance(other, self.__class__):
             return calc(self.value, other.value, cls)
-
-        elif isinstance(other, Decimal):
-            return calc(Decimal(self.value), Decimal(other), cls)
-
         elif isinstance(other, numbers.Integral):
             return calc(int(self), int(other), cls)
         elif isinstance(other, numbers.Real):
@@ -69,10 +56,6 @@ def ops(op):
             return calc(other, self.value, cls)
         elif isinstance(other, self.__class__):
             return calc(other.value, self.value, cls)
-
-        elif isinstance(other, Decimal):
-            return calc(Decimal(other), Decimal(self.value), cls)
-
         elif isinstance(other, numbers.Number):
             return calc(other, self.value, cls)
         else:

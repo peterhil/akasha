@@ -16,12 +16,12 @@ import sys
 import timeit
 
 if sys.version_info >= (3, 3, 0):
-    from decimal import getcontext
+    from decimal import Decimal, getcontext
 else:
-    from cdecimal import getcontext
+    from cdecimal import Decimal, getcontext
 
 from akasha.audio.time import Chrono, ps, ns, us, ms, seconds, minutes, hours, days, months, years
-from akasha.types.numeric import Decimal, RealUnit
+from akasha.types.numeric import RealUnit
 
 
 class TestChrono(object):

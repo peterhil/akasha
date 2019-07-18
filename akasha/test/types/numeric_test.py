@@ -22,7 +22,7 @@ import pytest
 from abc import ABCMeta, abstractproperty
 from fractions import Fraction
 
-from akasha.types.numeric import Decimal, NumericUnit, ComplexUnit, RationalUnit, RealUnit, IntegralUnit
+from akasha.types.numeric import NumericUnit, ComplexUnit, RationalUnit, RealUnit, IntegralUnit
 
 
 class Numeric(NumericUnit):
@@ -75,7 +75,6 @@ class TestComplexUnit(object):
         'Rational': Fraction,
         'Real': float,
         'Complex': complex,
-        'Number': Decimal,
     }
 
     def op_params(self, operation, field):
