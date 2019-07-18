@@ -97,6 +97,7 @@ class TestOscRoots(object):
 
         assert_nulp_diff(a, b, nulp=1)
 
+    @pytest.mark.filterwarnings("ignore:Fraction.__float__ returned non-float")
     def test_phasors(self):
         """It should be accurate.
         Uses angles to make testing easier.
