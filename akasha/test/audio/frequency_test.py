@@ -92,7 +92,7 @@ class TestFrequencyRatioMixin(object):
 
     def test_nonzero(self):
         assert Frequency(self.a4)
-        assert not Frequency(self.silence)
+        assert Frequency(self.silence) == False
 
     def test_cmp(self):
         """It should compare correctly."""
