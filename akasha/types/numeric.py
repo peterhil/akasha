@@ -12,14 +12,16 @@ import operator
 import six
 import sys
 
-from abc import ABCMeta, abstractproperty
-
 if sys.version_info >= (3, 3, 0):
-    from decimal import Decimal
+    from decimal import Decimal, getcontext
 else:
-    from cdecimal import Decimal
+    from cdecimal import Decimal, getcontext
 
+from abc import ABCMeta, abstractproperty
 from fractions import Fraction
+
+
+getcontext().prec = 32
 
 
 def ops(op):

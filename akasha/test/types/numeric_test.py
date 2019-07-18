@@ -19,9 +19,10 @@ import itertools
 import operator
 import pytest
 
-from akasha.types.numeric import NumericUnit, ComplexUnit, RationalUnit, RealUnit, IntegralUnit
-from cdecimal import Decimal
+from abc import ABCMeta, abstractproperty
 from fractions import Fraction
+
+from akasha.types.numeric import Decimal, NumericUnit, ComplexUnit, RationalUnit, RealUnit, IntegralUnit
 
 
 class Numeric(NumericUnit):

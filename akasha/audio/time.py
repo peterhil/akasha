@@ -6,6 +6,7 @@ High precision time module
 """
 
 import sys
+
 if sys.version_info >= (3, 3, 0):
     from decimal import Decimal, getcontext
 else:
