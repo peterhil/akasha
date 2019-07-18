@@ -14,7 +14,7 @@ Unit tests for oscillator.py
 import numpy as np
 import pytest
 
-from builtins import range
+from builtins import range, zip
 
 from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import PeriodicGenerator
@@ -109,7 +109,7 @@ class TestOscRoots(object):
             angles = 180 - ((180 - angles) % 360)  # wrap 'em to -180..180!
 
             a = to_phasor(o.sample)
-            b = np.array(zip([1] * period, angles))
+            b = np.array(list(zip([1] * period, angles)))
 
             assert_nulp_diff(a.real, b.real, nulp=25)  # FIXME: nulp should be smaller!
             assert_nulp_diff(a.imag, b.imag, nulp=1)
