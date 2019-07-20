@@ -14,7 +14,7 @@ Unit tests for oscillator.py
 import numpy as np
 import pytest
 
-from builtins import range
+from builtins import range, zip
 
 from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import PeriodicGenerator
@@ -56,7 +56,7 @@ class TestOscillator(object):
     def test_at_with_iterable(self):
         o = Osc.from_ratio(1, sampler.rate)
         expected = Circle.roots_of_unity(7)
-        assert_array_almost_equal(o[iter(xrange(0, 44100, 6300))], expected)
+        assert_array_almost_equal(o[iter(range(0, 44100, 6300))], expected)
 
     def test_sample(self):
         o, p = 1, sampler.rate
@@ -97,6 +97,7 @@ class TestOscRoots(object):
 
         assert_nulp_diff(a, b, nulp=1)
 
+    @pytest.mark.filterwarnings("ignore:Fraction.__float__ returned non-float")
     def test_phasors(self):
         """It should be accurate.
         Uses angles to make testing easier.
@@ -109,7 +110,7 @@ class TestOscRoots(object):
             angles = 180 - ((180 - angles) % 360)  # wrap 'em to -180..180!
 
             a = to_phasor(o.sample)
-            b = np.array(zip([1] * period, angles))
+            b = np.array(list(zip([1] * period, angles)))
 
             assert_nulp_diff(a.real, b.real, nulp=25)  # FIXME: nulp should be smaller!
             assert_nulp_diff(a.imag, b.imag, nulp=1)

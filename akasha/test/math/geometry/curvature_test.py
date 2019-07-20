@@ -24,9 +24,10 @@ class TestEstimateCurvatureWithCircles(object):
     Unit tests for curvature estimation using circumcircle radius.
     """
     curvature_dataset = [
-        [Circle.roots_of_unity(4) * 4,      1.0 / 4],
-        [Circle.roots_of_unity(5) * 5 + 10, 1.0 / 5],
-        [Circle.roots_of_unity(6) * 6 + 22, 1.0 / 6],
+        [Circle.roots_of_unity(4) * 4,        1.0 /  4],
+        [Circle.roots_of_unity(5) * 5 + 10,   1.0 /  5],
+        [Circle.roots_of_unity(6) * 6 + 30,   1.0 /  6],
+        [Circle.roots_of_unity(17) * 17 + 17, 1.0 / 17],
         # Test edge cases on guards
         [[3, 3, 3], np.inf],
         [[1, 2, 3], 0],
@@ -39,6 +40,7 @@ class TestEstimateCurvatureWithCircles(object):
             expected
         )
 
+    @pytest.mark.xfail(reason='Five point estimation could work')
     @pytest.mark.parametrize(('points', 'expected'), curvature_dataset)
     def test_estimate_curvature_with_ellipses(self, points, expected):
         assert_array_almost_equal(

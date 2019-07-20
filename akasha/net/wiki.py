@@ -193,11 +193,11 @@ def parse_wiki(res, loglevel=logging.ANIMA):
                 rec[0] = cts
                 err = (cts - rec[0])
                 if np.abs(err) >= 0.005:
-                    logger.warn(
+                    logger.warning(
                         "%s '%s' has a too big error %.5f with it's cents %.5f != %.5f" %
                         (rec[2], rec[1], err, rec[0], cts)
                     )
             else:
-                logger.warn("Parsed cents is %s for record:\n\t\t%s" % (cts, rec))
+                logger.warning("Parsed cents is %s for record:\n\t\t%s" % (cts, rec))
         out.append(rec)
     return (out, legend)

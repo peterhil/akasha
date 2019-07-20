@@ -92,7 +92,7 @@ class TestFrequencyRatioMixin(object):
 
     def test_nonzero(self):
         assert Frequency(self.a4)
-        assert not Frequency(self.silence)
+        assert Frequency(self.silence) == False
 
     def test_cmp(self):
         """It should compare correctly."""
@@ -128,6 +128,7 @@ class TestFrequencyAliasing(object):
     def freq(ratio):
         return Frequency.from_ratio(ratio)
 
+    @pytest.mark.filterwarnings("ignore:invalid value encountered in log2")
     def testPreventAliasing(self):
         """It should prevent aliasing when given a ratio out of range 0 to 1/2."""
         sampler.prevent_aliasing = True
@@ -177,7 +178,7 @@ class TestFrequency(object):
 
     def test_meta(self):
         assert issubclass(Frequency, numbers.Real)
-        assert isinstance(Frequency, abc.ABCMeta)
+        assert Frequency.__metaclass__ ==  abc.ABCMeta
 
     def test_class(self):
         assert issubclass(Frequency, RealUnit)
@@ -252,6 +253,7 @@ class TestFrequency(object):
     def test_int(self):
         assert 21 == int(Frequency(21.5))
 
+    @pytest.mark.filterwarnings("ignore:invalid value encountered in log2")
     def test_pos_neg_abs(self):
         sampler.negative_frequencies = True
         hz = 440

@@ -30,6 +30,7 @@ class TestMath(object):
             1.0 / np.sqrt(2)
         )
 
+    @pytest.mark.filterwarnings("ignore:divide by zero")
     @pytest.mark.parametrize(('amplitude', 'expected'), [
         (1,       0),
         (0.5,    -6.02),
@@ -76,7 +77,7 @@ class TestPrimes(object):
             primes(*interval)
         )
 
-    @pytest.mark.slow
+    # @pytest.mark.skip(reason='this can be slow')
     def test_primes_peak_to_peak(self):
         assert_array_equal(
             np.array([19, 32, 26, 26, 28, 30, 28, 28, 32], dtype=np.uint64),

@@ -98,14 +98,14 @@ def draw(
         img = get_canvas(size, axis=axis)
 
     if is_silence(signal):
-        logger.warn('Drawing empty signal!')
+        logger.warning('Drawing empty signal!')
         return img
 
     signal = clip_samples(signal)
 
     if lines:
         if screen is None:
-            logger.warn("Drawing lines with Numpy is way too slow for now!")
+            logger.warning("Drawing lines with Numpy is way too slow for now!")
             img = draw_lines(signal, img, size, colours, antialias)
         else:
             img = draw_lines_pg(signal, screen, size, colours, antialias)
@@ -123,7 +123,7 @@ def clip_samples(signal):
     """
     clip_max = np.max(np.fmax(np.abs(signal.real), np.abs(signal.imag)))
     if clip_max > 1.0:
-        logger.warn("Clipping signal -- maximum magnitude was: %0.6f", clip_max)
+        logger.warning("Clipping signal -- maximum magnitude was: %0.6f", clip_max)
         return clip(signal)
     else:  # pylint: disable=R1705
         return signal
@@ -264,21 +264,6 @@ def draw_points(signal, img, size=1000, colours=True):
     color = add_alpha(colorize(signal)) if colours else white
 
     img[points[0], points[1]] = color[..., :img.shape[2]]
-    return img
-
-
-# TODO: Investigate using scipy.sparse matrices to speed up things?
-# Use sparse.coo (coordinate matrix) to build the matrix, and convert to csc/csr for math.
-def draw_points_coo(signal, img, size=1000, colours=True):
-    """
-    Draw a bitmap image from a complex signal with optionally colourized pixels.
-    """
-    points = np.rint(get_points(flip_vertical(signal), size) - 0.5).astype(np.uint32)
-    coords = sparse.coo_matrix(points, dtype=np.uint32).todense()
-
-    color = add_alpha(colorize(signal)) if colours else white
-
-    img[coords[0], coords[1]] = color[..., :img.shape[2]]
     return img
 
 

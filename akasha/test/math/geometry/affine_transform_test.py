@@ -33,4 +33,4 @@ class TestAffineTransform(object):
         sq = Square.at(np.arange(0.125, 1.125, 0.25 / 2))
         af = AffineTransform()
         af.estimate(sq, sq * 0.5)
-        assert_array_almost_equal(np.diag([0.5, 0.5, 1]), af._matrix)
+        assert_array_almost_equal(np.diag([0.5, 0.5, 1]), af.params)

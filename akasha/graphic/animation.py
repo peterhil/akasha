@@ -95,7 +95,7 @@ def loop(snd, channel, widget):
                 av_percent = (float(audio_time) + float(video_time)) / (1.0 / sampler.videorate) * 100
                 fps = watch.get_fps(int(sampler.videorate))
                 if percent >= config.logging_limits.LOOP_THRESHOLD_PERCENT:
-                    logger.warn(
+                    logger.warning(
                         "Animation: clock tick %d, FPS: %3.3f Hz, loop: %.3f Hz, (%.1f %%), "
                         "input: %.2f Hz, audio: %.2f Hz, video: %.2f Hz, (%.1f %%)", t, fps, div_safe_zero(1, loop_time), percent,
                         div_safe_zero(1, input_time), div_safe_zero(1, audio_time), div_safe_zero(1, video_time), av_percent
@@ -224,7 +224,7 @@ def handle_input(snd, watch, event):
                 try:
                     snd.release_at(watch.time())
                 except TypeError:
-                    logger.warn("Can't get current value from the iterator.")
+                    logger.warning("Can't get current value from the iterator.")
                     snd.release_at(None)
                 # logger.debug("Key '%s' (%s) up, released at: %s" % (pg.key.name(event.key), event.key, snd.released_at))
         return
