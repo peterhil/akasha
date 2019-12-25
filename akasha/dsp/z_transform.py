@@ -13,8 +13,12 @@ from __future__ import division
 
 import numpy as np
 import scipy as sc
+import sys
 
-from scipy.fft import fft, ifft
+if sys.version_info >= (3, 0):
+    from scipy.fft import fft, ifft
+else:
+    [fft, ifft] = sc.fft, sc.ifft
 
 from akasha.math import pi2, power_limit
 
