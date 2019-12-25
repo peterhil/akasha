@@ -14,6 +14,8 @@ from __future__ import division
 import numpy as np
 import scipy as sc
 
+from scipy.fft import fft, ifft
+
 from akasha.math import pi2, power_limit
 
 
@@ -42,7 +44,7 @@ def czt(signal, m=None, w=None, a=1.0, normalize=False):
     y_pad = np.append(y, np.zeros(lp2 - l))  # zero pad
     vn = np.roll(ichirp(w, np.arange(lp2) - l), -l)
 
-    g = sc.ifft(sc.fft(y_pad) * sc.fft(vn))[:m]
+    g = ifft(fft(y_pad) * fft(vn))[:m]
     scale = 1.0 / l if normalize else 1.0
     return scale * (g * chirp(w, k))
 
