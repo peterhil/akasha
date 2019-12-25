@@ -14,7 +14,7 @@ Unit tests for Ellipse fitting functions
 import numpy as np
 import pytest
 
-from numpy.testing.utils import assert_array_almost_equal
+from numpy.testing import assert_array_almost_equal
 
 from akasha.curves import Ellipse
 from akasha.curves.ellipse_fit import ellipse_fit_fitzgibbon, ellipse_fit_halir

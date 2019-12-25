@@ -16,7 +16,7 @@ from __future__ import division
 import pytest
 import numpy as np
 
-from numpy.testing.utils import assert_array_almost_equal
+from numpy.testing import assert_array_almost_equal
 
 from akasha.curves import Ellipse
 from akasha.math import pi2

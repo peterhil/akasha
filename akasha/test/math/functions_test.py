@@ -14,7 +14,7 @@ Unit tests for mathematical functions
 import pytest
 import numpy as np
 
-from numpy.testing.utils import assert_array_equal, assert_array_almost_equal
+from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 from akasha.funct import pairwise
 from akasha.math import *

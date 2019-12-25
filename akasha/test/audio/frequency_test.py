@@ -18,8 +18,8 @@ import operator
 import pytest
 
 from fractions import Fraction
-from numpy.testing.utils import assert_array_equal
-from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
+from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_almost_equal_nulp as assert_nulp_diff
 
 from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import PeriodicGenerator, Generator

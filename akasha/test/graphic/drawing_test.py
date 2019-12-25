@@ -20,7 +20,7 @@ from akasha.utils.log import logger
 from akasha.test import assert_equal_image
 
 from mock import patch
-from numpy.testing.utils import assert_array_equal
+from numpy.testing import assert_array_equal
 
 
 class TestDrawing(object):

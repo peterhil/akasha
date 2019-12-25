@@ -16,7 +16,7 @@ import pytest
 
 from akasha.curves import Square
 from akasha.math.geometry.affine_transform import AffineTransform
-from numpy.testing.utils import assert_array_almost_equal
+from numpy.testing import assert_array_almost_equal
 
 
 class TestAffineTransform(object):

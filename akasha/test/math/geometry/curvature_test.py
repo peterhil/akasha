@@ -16,7 +16,7 @@ import pytest
 
 from akasha.curves import Circle
 from akasha.math.geometry.curvature import estimate_curvature, estimate_curvature_with_ellipses
-from numpy.testing.utils import assert_array_almost_equal
+from numpy.testing import assert_array_almost_equal
 
 
 class TestEstimateCurvatureWithCircles(object):
