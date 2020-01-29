@@ -363,11 +363,32 @@ function-naming-style=snake_case
 #function-rgx=
 
 # Good variable names which should always be accepted, separated by a comma
-good-names=i,
+good-names=a, a1, a2, a3, a4, ab, af, at,
+           b, bx, by,
+           c,
+           d, d1, d2, dx, dy,
+           e, e2,
+           f, f0, f1, f2, fc, fl, fn, fs, fv,
+           g,
+           h, hz,
+           i, i1, i2, ih, im, iw,
            j,
-           k,
-           ex,
-           Run,
+           k, k2, kb, ks,
+           l, ls,
+           m, mp, ms, mu, mv,
+           n, n2, na,
+           o, o1, o2, op,
+           p, px,
+           q,
+           r,
+           s, s2, sp, sq, ss, sx, sy,
+           t, t2, tr, tt,
+           u, ur, uv,
+           v, v1, v2, vn,
+           w, wi, ws,
+           x, x0, x1,
+           y, y0, y1,
+           z, z1, z2, zi,
            _
 
 # Include a hint for the correct naming format with invalid-name
