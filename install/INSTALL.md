@@ -52,5 +52,4 @@ Matplotlib will not work in a virtual environment unless using a
 
 ## 7. Install the Python libraries using Pip
 
-	pip install -r install/requires.pip
-	pip install -r install/test-requires.pip  # Optional for development
+	pip install -r install/dev-requires.pip
