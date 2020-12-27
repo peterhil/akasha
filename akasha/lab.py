@@ -29,7 +29,7 @@ from akasha.audio.noise import *
 from akasha.audio.oscillator import *
 from akasha.audio.overtones import Overtones
 from akasha.audio.scalar import Scalar
-from akasha.audio.resample import Resample
+# from akasha.audio.resample import Resample
 from akasha.audio.sum import Sum
 from akasha.audio.padsynth import *
 
