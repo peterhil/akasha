@@ -11,5 +11,6 @@ sudo apt-get install libportmidi-dev \
   libsmpeg-dev
 
 cd akasha-git
-pip install -r install/test-requires.pip
+pip install -r install/base.pip
+pip install -r install/dev-requires.pip
 ```
