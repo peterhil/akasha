@@ -14,8 +14,8 @@ Unit tests for generators
 import numpy as np
 
 from fractions import Fraction
-from numpy.testing.utils import assert_array_equal
-from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
+from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_almost_equal_nulp as assert_nulp_diff
 
 from akasha.audio.generators import Generator
 from akasha.audio.oscillator import Osc

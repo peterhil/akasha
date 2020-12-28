@@ -12,7 +12,6 @@ import operator
 import six
 
 from abc import ABCMeta, abstractproperty
-from cdecimal import Decimal
 from fractions import Fraction
 
 
@@ -38,10 +37,6 @@ def ops(op):
             return calc(self.value, other, cls)
         elif isinstance(other, self.__class__):
             return calc(self.value, other.value, cls)
-
-        elif isinstance(other, Decimal):
-            return calc(Decimal(self.value), Decimal(other), cls)
-
         elif isinstance(other, numbers.Integral):
             return calc(int(self), int(other), cls)
         elif isinstance(other, numbers.Real):
@@ -61,10 +56,6 @@ def ops(op):
             return calc(other, self.value, cls)
         elif isinstance(other, self.__class__):
             return calc(other.value, self.value, cls)
-
-        elif isinstance(other, Decimal):
-            return calc(Decimal(other), Decimal(self.value), cls)
-
         elif isinstance(other, numbers.Number):
             return calc(other, self.value, cls)
         else:

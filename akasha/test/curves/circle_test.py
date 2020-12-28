@@ -13,7 +13,7 @@ Unit tests for Circle
 
 import numpy as np
 
-from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
+from numpy.testing import assert_array_almost_equal_nulp as assert_nulp_diff
 
 from akasha.curves import Curve, Circle
 from akasha.math import pi2

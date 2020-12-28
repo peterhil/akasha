@@ -10,7 +10,7 @@ import sys
 from setuptools import setup, Command
 
 PACKAGE_NAME = 'akasha'
-PACKAGE_VERSION = '0.0.3'
+PACKAGE_VERSION = '0.1.0'
 
 # with open('README.rst', 'r') as readme:
 #     README_TEXT = readme.read()
@@ -24,7 +24,7 @@ class PyTest(Command):
     def run(self):
         import subprocess
         import sys
-        errno = subprocess.call([sys.executable, 'runtests.py', 'akasha/test'])
+        errno = subprocess.call([sys.executable, '-m', 'pytest', 'akasha/test'])
         raise SystemExit(errno)
 
 setup(
