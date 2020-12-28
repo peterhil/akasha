@@ -1,9 +1,10 @@
 Pillow>=4.2.1
 m3-cdecimal==2.3
 funcy>=1.9.0
+future>=0.17.1  # used for: from builtins import zip
 matplotlib>=1.4.2
 numpy>=1.16.5
-pandas>=0.24.2
+pandas==0.22.0
 # -e hg+https://bitbucket.org/pygame/pygame@7213968d5e819dad85416589bea835ce40b9f6be#egg=pygame-dev
 # -e git+https://github.com/pygame/pygame#egg=pygame-dev
 pygame>=1.9.6
@@ -11,11 +12,3 @@ scipy>=1.2.2
 six>=1.10.0
 wikitools==1.1.1
 scikit-image>=0.11.2
-scikits.audiolab>=0.11.0
-PyAudio>=0.2.11  # portaudio bindings
-wavefile>=1.5
-#-e git+https://github.com/vokimon/python-wavefile#egg=wavefile-dev
-soundfile>=0.10.2
-#-e git+https://github.com/bastibe/SoundFile#egg=soundfile-dev
--e git+https://github.com/cournape/samplerate#egg=scikits.samplerate
-future<0.17,>=0.16  # used for: from builtins import zip

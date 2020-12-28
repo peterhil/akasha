@@ -25,5 +25,6 @@ sudo apt-get install libportmidi-dev \
 
 ```
 cd akasha-git
-pip install -r install/dev-requires.pip
+pip install -r install/dev-requires.pip  # Or
+pip install -r install/extra-requires.pip
 ```

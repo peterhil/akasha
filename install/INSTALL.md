@@ -21,6 +21,16 @@ Matplotlib will not work in a virtual environment unless using a
     virtualenv -p python2.7 --system-site-packages venv/py27
     . ./venv/py27/bin/activate
 
+Install Python 3 versions on a virtualenv using venv module, because [Matplotlib =>1.5 does not support virtualenv easily](https://matplotlib.org/faq/osx_framework.html):
+
+    python3.4 -m venv venv/py34
+    . ./venv/py34/bin/activate
+
+Python3 [versions before 3.5.3 only support openssl@1.0](https://github.com/pyenv/pyenv/issues/950). So to install Python 3.4 with pyenv and brew (scikits.audiolab and/or scikits.resample do not seem to work with Python 3.6):
+
+    PYTHON_BUILD_HOMEBREW_OPENSSL_FORMULA=openssl@1.0 \
+    pyenv install -v 3.4.10
+
 ## 5. Install the Pygame dependent SDL libraries with Homebrew or MacPorts
 
     # Macports
@@ -53,4 +63,6 @@ Matplotlib will not work in a virtual environment unless using a
 
 ## 7. Install the Python libraries using Pip
 
-	pip install -r install/dev-requires.pip
+	pip install -r install/requires.pip  # Or
+	pip install -r install/dev-requires.pip  # For development
+	pip install -r install/extra-requires.pip  # For development extras
