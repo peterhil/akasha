@@ -2,7 +2,7 @@ Pillow>=4.2.1
 m3-cdecimal==2.3
 funcy>=1.9.0
 matplotlib>=1.4.2
-pandas>=0.22.0
+pandas==0.22.0
 # -e hg+https://bitbucket.org/pygame/pygame@7213968d5e819dad85416589bea835ce40b9f6be#egg=pygame-dev
 # -e git+https://github.com/pygame/pygame#egg=pygame-dev
 pygame>=1.9.6
