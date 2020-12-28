@@ -1,3 +1,0 @@
-wheel
-future>=0.17.1  # used for: from builtins import zip
-numpy>=1.16.5

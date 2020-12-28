@@ -62,6 +62,6 @@ Python3 [versions before 3.5.3 only support openssl@1.0](https://github.com/pyen
 
 ## 7. Install the Python libraries using Pip
 
-	pip install -r install/base.pip
 	pip install -r install/requires.pip  # Or
 	pip install -r install/dev-requires.pip  # For development
+	pip install -r install/extra-requires.pip  # For development extras

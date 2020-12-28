@@ -6,6 +6,8 @@
 # pyinter
 # wxpython>=4.0.6  # For Maplotlib wxAgg backend
 PyAudio  # Portaudio bindings
+scikits.audiolab>=0.11.0
+-e git+https://github.com/cournape/samplerate#egg=scikits.samplerate
 #sndfile
 #-e git+https://github.com/sangoma/sndfile#egg=sndfile-dev
 soundfile
