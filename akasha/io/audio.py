@@ -120,7 +120,7 @@ def read(
     time = time_slice(dur, start)
 
     # Get and call appropriate reader function
-    func = getattr(audiolab, format + 'read')
+    func = getattr(audiolab, extension.lower() + 'read')
     (data, fs, enc) = func(filename, last=time.stop, first=time.start)
 
     # Make mono
