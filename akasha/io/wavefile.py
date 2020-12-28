@@ -80,7 +80,7 @@ def read(
         data = data[-1]
 
     if complex:
-thina        return hilbert(data)  # TODO Move to anim
+        return hilbert(data)  # TODO Move to anim
     else:
         return data
 
