@@ -112,7 +112,11 @@ def write(
     if filename[0] != '/':
         filename = '/'.join([sdir, filename])  # Relative path
 
-    # filename = filename + '_' + axis + '.' + fmt.file_format
+    extension = file_extension(filename)
+    if not extension:
+        if axis == 'imag':
+            filename = filename + '_' + axis
+        filename = filename + '.' + fmt.lower()
 
     time = time_slice(dur, start)
     data = getattr(sndobj[time], axis)
