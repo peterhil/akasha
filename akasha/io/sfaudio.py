@@ -17,7 +17,7 @@ def play(
         sndobj,
         dur=5.0,
         start=0,
-        axis='imag',
+        axis='real',
         fs=sampler.rate,
         buffer_size=512
     ):
@@ -89,7 +89,7 @@ def write(
         filename='test_sound',
         dur=5.0,
         start=0,
-        axis='imag',
+        axis='real',
         fs=sampler.rate,
         fmt='WAV',
         subtype=None,

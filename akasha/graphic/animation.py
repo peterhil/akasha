@@ -46,7 +46,7 @@ def anim(snd, size=800, name='Resonance', antialias=True, lines=False, colours=T
     if style == 'complex':
         widget = ComplexView(screen, antialias=antialias, lines=lines, colours=colours)
     elif style == 'transfer':
-        widget = VideoTransferView(screen, size=size, standard='PAL', axis='imag')
+        widget = VideoTransferView(screen, size=size, standard='PAL', axis='real')
     else:
         logger.err("Unknown animation style: '{0}'".format(style))
         cleanup()
@@ -152,7 +152,7 @@ class VideoTransferView(object):
     Show a sound signal using the old video tape audio recording technique.
     See: http://en.wikipedia.org/wiki/44100_Hz#Recording_on_video_equipment
     """
-    def __init__(self, screen, size=720, standard='PAL', axis='imag'):
+    def __init__(self, screen, size=720, standard='PAL', axis='real'):
         self._surface = screen
         self.size = size
         self.standard = standard
