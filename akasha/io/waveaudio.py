@@ -29,16 +29,17 @@ def play(
     time = time_slice(dur, start)
     if isinstance(sndobj[0], np.floating):
         axis = 'real'
+    data = getattr(sndobj[time], axis).astype(np.float32)
 
     stream = pa.open(
         format=pyaudio.paFloat32,
-        channels=2,
+        channels=1,
         rate=fs,
         frames_per_buffer=buffer_size,
         output=True,
     )
 
-    for frame in blockwise(getattr(sndobj[time], axis), buffer_size):
+    for frame in blockwise(data, buffer_size):
         stream.write(frame.flatten(), frame.shape[-1])
 
     stream.close()
