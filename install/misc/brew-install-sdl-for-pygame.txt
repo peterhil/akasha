@@ -1,0 +1,14 @@
+# Pygame
+#
+# Install SDL before Pygame with:
+# % brew install sdl sdl_image sdl_mixer sdl_ttf portmidi
+# % brew install --HEAD smpeg
+#
+# See http://stackoverflow.com/questions/8458911/pygame-in-a-virtualenv
+#pygame==1.9.1release
+#pygame==1.9.2pre
+-e hg+http://bitbucket.org/pygame/pygame
+# If installing manually, use:
+# % sudo pip install hg+http://bitbucket.org/pygame/pygame
+# and afterwards:
+# % chown -R /usr/local/lib/python2.7/site-packages/pygame*
