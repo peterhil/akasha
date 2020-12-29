@@ -10,9 +10,6 @@ from akasha.timing import sampler, time_slice
 from akasha.utils.log import logger
 
 
-pa = pyaudio.PyAudio()
-
-
 def play(
         sndobj,
         dur=5.0,
@@ -24,6 +21,7 @@ def play(
     """
     Play a sound using PyAudio bindings for portaudio.
     """
+    pa = pyaudio.PyAudio()
     time = time_slice(dur, start)
     if isinstance(sndobj[0], np.floating):
         axis = 'real'
