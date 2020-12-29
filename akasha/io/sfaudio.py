@@ -84,15 +84,30 @@ def read(
 def write(
         sndobj,
         filename='test_sound',
-        fmt='AIFF',
         dur=5.0,
         start=0,
         axis='imag',
         fs=sampler.rate,
+        fmt='WAV',
+        subtype=None,
+        endian=None,
         sdir=relative_path('../../Sounds/Out/'),
     ):
     """
     Write a sound file.
+
+    Most common formats:
+    - WAV (or W64, RF64)
+    - AIFF
+    - AU
+
+    Subtype can be:
+    - PCM_S8, PCM_16, PCM_24, PCM_32 (or PCM_U8 for WAV and RAW only)
+    - FLOAT, DOUBLE
+    - ULAW, ALAW, and many others
+
+    See python-soundfile for all available format, subtype and endian options:
+    https://github.com/bastibe/python-soundfile/blob/master/soundfile.py#L38
     """
     if filename[0] != '/':
         filename = '/'.join([sdir, filename])  # Relative path
@@ -114,8 +129,8 @@ def write(
         data,
         fs,
         format=fmt,
-        subtype=None,
-        endian=None,
+        subtype=subtype,
+        endian=endian,
     )
 
 
