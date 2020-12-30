@@ -426,7 +426,7 @@ def estimate_arc_length(signal, mean=sc.stats.hmean):
     return mean(np.abs(np.array([fst, snd])), axis=0)
 
 
-def clothoid_curve(n, a, t, t2, use_range=True):
+def clothoid_curve(n, a, t, t2, use_range=False):
     # s = np.abs(a) * np.abs(t2 - t)
     # resolution = 10  # dots per arc length unit
     # points = s * resolution
@@ -441,7 +441,7 @@ def clothoid_curve(n, a, t, t2, use_range=True):
     if use_range:
         tt = np.arange(t, t2 + step, step)
     else:
-        tt = np.linspace(t, t2, np.abs(t2 - t) * points + 1, endpoint=True)
+        tt = np.linspace(t, t2, points + 1, endpoint=True)
     print(tt)
     return clothoid_gray(tt, n, a * step)
 
