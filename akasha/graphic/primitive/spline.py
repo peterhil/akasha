@@ -463,9 +463,11 @@ def clothoid_segments(signal, ends='open', mean=np.mean):
 
     # Segments
     # s = np.ones(len(signal) - 1)
-    # s = estimate_arc_length(signal, mean) / scales
+    s = estimate_arc_length(signal, mean) / scales
     # s = distances(signal)
-    s = scales
+    # s = scales
+
+    logger.debug('Lengths: k = {}, phi = {}, s = {}'.format(len(k), len(phi), len(s)))
 
     k[1:-1] = -np.sign(turtle_turns(signal)) * np.abs(k[1:-1])
 
@@ -473,6 +475,8 @@ def clothoid_segments(signal, ends='open', mean=np.mean):
     phis = overlap(phi, 2).T
     # ss = repeat(s / 2, 2).reshape(2, len(s)).T  # TODO find out correct lengths of the parts of clothoid segment!!!
     ss = np.concatenate((s / 2, s)).reshape(2, len(s)).T
+
+    logger.debug('Lengths: ks = {}, phis = {}, ss = {}'.format(len(ks), len(phis), len(ss)))
 
     segments = np.hstack((ks, phis, ss))
     logger.debug( "Segments (k, k2, phi, phi2, s, s2):\n%r" % segments )
