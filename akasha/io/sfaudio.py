@@ -7,6 +7,7 @@ import soundfile as sf
 
 from scipy.signal import hilbert
 
+from akasha.audio.channels import num_channels
 from akasha.funct import blockwise
 from akasha.io import file_extension, relative_path
 from akasha.timing import sampler, time_slice
@@ -30,16 +31,21 @@ def play(
         axis = 'real'
     data = getattr(sndobj[time], axis).astype(np.float32)
 
+    n_channels = num_channels(data)
+    if n_channels > 2:
+        # TODO Use mapping argument with python-sounddevice library to overcome this or DIY?
+        raise NotImplementedError("Only mono and stereo sounds are supported for now")
+
     stream = pa.open(
         format=pyaudio.paFloat32,
-        channels=1,
+        channels=num_channels(data),
         rate=fs,
         frames_per_buffer=buffer_size,
         output=True,
     )
 
     for frame in blockwise(data, buffer_size):
-        stream.write(frame.flatten(), frame.shape[-1])
+        stream.write(frame.flatten().tobytes(), num_frames=frame.shape[0])
 
     stream.close()
 
@@ -57,8 +63,8 @@ def read(
     """
     # TODO Do some conversion if sampling rates differ?
 
-    if filename[0] != '/':
-        filename = '/'.join([sdir, filename])  #Relative path
+    if filename[0] != '/':  # Relative path
+        filename = '/'.join([sdir, filename])
 
     extension = file_extension(filename)
     check_format(extension)
@@ -73,13 +79,8 @@ def read(
         dtype=np.float64,
     )
 
-    # Make mono
-    # TODO Enable stereo and multichannel
-    if data.ndim > 1:
-        data = data.transpose()[-1]
-
     if complex:
-        return hilbert(data)  # TODO Move to anim
+        return hilbert(data, axis=0)  # TODO Move to anim
     else:
         return data
 
@@ -123,13 +124,6 @@ def write(
 
     time = time_slice(dur, start)
     data = getattr(sndobj[time], axis)
-
-    if np.ndim(data) <= 1:
-        n_channels = 1
-    elif np.ndim(data) == 2:
-        n_channels = data.shape[1]
-    else:
-        RuntimeError("Only rank 0, 1, and 2 arrays supported as audio data")
 
     sf.write(
         filename,
