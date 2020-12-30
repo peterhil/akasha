@@ -16,7 +16,7 @@ import scipy as sc
 
 from akasha.curves import Ellipse
 from akasha.funct import consecutive
-from akasha.math.geometry import orient, turtle_turns, vectors, wrap_ends
+from akasha.math.geometry import orient, repeat_ends, turtle_turns, vectors, wrap_ends
 from akasha.math.geometry.curvature import estimate_curvature
 from akasha.utils.log import logger
 from akasha.math import abslogsign, abspowersign, as_complex, cartesian, distances, lambertw, map_array, overlap, pi2, rect, repeat
@@ -449,9 +449,16 @@ def clothoid_segments(signal, ends='open', mean=np.mean):
     directions = np.angle(vectors(signal))
     scales = 1 / distances(signal)
 
+    if ends == 'open':
+        wrapped = repeat_ends(signal, 1)
+    elif ends == 'closed':
+        wrapped = wrap_ends(signal)
+    else:
+        raise NotImplementedError('Unknown method for handling ends')
+
     # Points
     phi = clothoid_tangents(signal, ends)
-    k = estimate_curvature(signal, ends) #/ np.append(scales, 1)
+    k = estimate_curvature(wrapped) #/ np.append(scales, 1)
 
     # Segments
     # s = np.ones(len(signal) - 1)
