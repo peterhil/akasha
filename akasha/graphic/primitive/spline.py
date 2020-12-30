@@ -223,7 +223,8 @@ def clothoid_segment(k, k2, phi, phi2, s, s2):
     logger.debug("n1: %s, a1: %s" % (n, a))
     logger.debug("n2: %s, a2: %s" % (n2, a2))
 
-    return ((n, a, t, t2), (n2, a2, t, t2))
+    # return ((n, a, t, t2), (n2, a2, t, t2))
+    return np.array([n, a, t, t2])
 
 
 def clothoid_tangents(points, ends=None):
