@@ -60,7 +60,7 @@ def clothoid_gray_hg(t, exponent=2, norm=1):
 
 
 def fresnel(t, exponent):
-    return np.exp(1j * (np.abs(t) ** (exponent + 1) / (exponent + 1)))
+    return np.exp(1j * np.abs(t) ** exponent)
 
 
 def clothoid_gray(t, exponent=2, scale=1):
