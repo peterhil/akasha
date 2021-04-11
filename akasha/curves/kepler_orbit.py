@@ -12,6 +12,7 @@ Ellipses module
 from __future__ import division
 
 import numpy as np
+from scipy.optimize import newton
 
 from akasha.curves.curve import Curve
 from akasha.math import pi2
@@ -39,13 +40,15 @@ class KeplerOrbit(Curve):
     - scale:
       Scaling factor for making long periods of time approachable to listening
     """
-    def __init__(self, perihelion, semimajor, eccentricity=0.75, period=1, scale=43200):
+    def __init__(self, perihelion, semimajor, eccentricity=0.85, period=1, scale=43200, newton=True, ph=0):
         # self.mu = mu
         self.perihelion = perihelion  # Distance from sun (origin) to perihelion (closest) point
         self.a = semimajor
         self.period = period
         self.eccentricity = eccentricity
         self.scale = scale
+        self.newton = newton
+        self.ph = 0  # Time of perihelion passage
 
     @property
     def mean_motion(self):
@@ -55,23 +58,48 @@ class KeplerOrbit(Curve):
         """
         return pi2 / self.period
 
-    def mean_anomaly(self, t, ph=0):
+    def mean_anomaly(self, t):
         """
         Mean anomaly
-        https://en.wikipedia.org/wiki/Mean_anomaly
-
-        ph: time of perihelion passage
+        https://en.wikipedia.org/wiki/Mean_anomaly#Formulae
         """
-        return self.mean_motion * (t - ph)
+        # Alternatively use the standard gravitational parameter
+        # μ = G * M, see link above for details
+        return self.mean_motion * (t - self.ph)
 
-    def true_anomaly(self, t, ph=0):
+    def eccentric_anomaly(self, t):
         """
-        Mean anomaly
-        https://en.wikipedia.org/wiki/Mean_anomaly
+        Eccentric anomaly
+        https://en.wikipedia.org/wiki/Eccentric_anomaly
+        """
+        ma = self.mean_anomaly(t)
+        ecc = self.eccentricity
 
-        ph: time of perihelion passage
+        def kepler_equation(e):
+            return e - ecc * np.sin(e) - ma
+
+        def ke_prime(e):
+            return 1 - ecc * np.cos(e)
+
+        return newton(kepler_equation, ma, ke_prime, tol=1.48e-08, maxiter=50)
+
+    def true_anomaly(self, t):
         """
-        ma = self.mean_anomaly(t, ph=0)
+        True anomaly
+        https://en.wikipedia.org/wiki/True_anomaly#From_the_eccentric_anomaly
+        """
+        ea = self.eccentric_anomaly(t)
+        ecc = self.eccentricity
+        nu = np.arctan2(np.sqrt(1 - ecc ** 2) * np.sin(ea), np.cos(ea) - ecc)
+
+        return nu
+
+    def true_anomaly_fourier(self, t):
+        """
+        True anomaly
+        https://en.wikipedia.org/wiki/True_anomaly#From_the_mean_anomaly
+        """
+        ma = self.mean_anomaly(t)
         ecc = self.eccentricity
 
         # Approximation through Fourier expansion, fails on large eccentricity!
@@ -83,11 +111,14 @@ class KeplerOrbit(Curve):
         return ta
 
     def at(self, t):
-        ta = self.true_anomaly(t)
         ecc = self.eccentricity
 
-        # Polar radius formula from focal point for ellipse:
-        # https://en.wikipedia.org/wiki/Ellipse#Polar_form_relative_to_focus
+        if self.newton:
+            ta = self.true_anomaly(t)
+        else:
+            ta = self.true_anomaly_fourier(t)
+            # Polar radius formula from focal point for ellipse:
+            # https://en.wikipedia.org/wiki/Ellipse#Polar_form_relative_to_focus
         radius = self.a * (1 - ecc ** 2) / (1 + ecc * np.cos(ta))
 
         return np.array(radius * np.exp(1j * ta), dtype=np.complex128)
