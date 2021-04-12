@@ -10,10 +10,11 @@ Animation module
 
 from __future__ import division
 
-import numpy as np
-import pygame as pg
 import sys
 import traceback
+
+import numpy as np
+import pygame as pg
 
 from akasha.audio.mixins.releasable import Releasable
 from akasha.graphic.drawing import get_canvas, blit, draw, video_transfer
@@ -34,8 +35,9 @@ def anim(snd, size=800, name='Resonance', antialias=True, lines=False, colours=T
     Animate complex sound signal
     """
     logger.info(
-        "Akasha animation is using %s Hz sampler rate and %s fps video rate." %
-        (sampler.rate, sampler.videorate))
+        "Akasha animation is using %s Hz sampler rate and %s fps video rate.",
+        sampler.rate, sampler.videorate
+    )
 
     sampler.paused = True if hasattr(snd, 'frequency') else False
     screen = init_pygame(name, size)
@@ -46,7 +48,7 @@ def anim(snd, size=800, name='Resonance', antialias=True, lines=False, colours=T
     elif style == 'transfer':
         widget = VideoTransferView(screen, size=size, standard='PAL', axis='real')
     else:
-        logger.error("Unknown animation style: '{0}'".format(style))
+        logger.error("Unknown animation style: '%s'", style)
         cleanup()
         return False
 
@@ -106,12 +108,12 @@ def loop(snd, channel, widget):
             logger.info("Got KeyboardInterrupt (CTRL-C)!")
             break
         except SystemExit as err:
-            logger.info("Ending animation: %s" % err)
+            logger.info("Ending animation: %s", err)
             break
         except Exception:
             try:
                 exc = sys.exc_info()[:2]
-                logger.error("Unexpected exception %s: %s\n%s" % (exc[0], exc[1], traceback.format_exc()))
+                logger.error("Unexpected exception %s: %s\n%s", exc[0], exc[1], traceback.format_exc())
             finally:
                 del exc
                 break
@@ -185,7 +187,7 @@ def handle_input(snd, watch, event):
         return
     # Key down
     elif event.type == pg.KEYDOWN:
-        # logger.debug("Key '%s' (%s) down." % (pg.key.name(event.key), event.key))
+        # logger.debug("Key '%s' (%s) down.", pg.key.name(event.key), event.key)
         step_size = (5 if event.mod & (pg.KMOD_LSHIFT | pg.KMOD_RSHIFT) else 1)
         # Rewind
         if pg.K_F7 == event.key:
@@ -226,7 +228,7 @@ def handle_input(snd, watch, event):
                 except TypeError:
                     logger.warning("Can't get current value from the iterator.")
                     snd.release_at(None)
-                # logger.debug("Key '%s' (%s) up, released at: %s" % (pg.key.name(event.key), event.key, snd.released_at))
+                # logger.debug("Key '%s' (%s) up, released at: %s", pg.key.name(event.key), event.key, snd.released_at)
         return
     # Mouse
     elif hasattr(snd, 'frequency') and event.type in (
@@ -234,15 +236,15 @@ def handle_input(snd, watch, event):
         pg.MOUSEBUTTONUP,
         pg.MOUSEMOTION
     ):
-        if (event.type == pg.MOUSEBUTTONDOWN):
+        if event.type == pg.MOUSEBUTTONDOWN:
             snd.pitch_bend = 0
-        elif (event.type == pg.MOUSEBUTTONUP):
+        elif event.type == pg.MOUSEBUTTONUP:
             snd.pitch_bend = None
         elif (event.type == pg.MOUSEMOTION) and getattr(snd, 'pitch_bend', None) is not None:
             size = pg.display.get_surface().get_size()[1] or 0
             snd.pitch_bend = event.pos[1]
 
-            logger.debug("Pitch bend == event.pos[0]: %s" % snd.pitch_bend)
+            logger.debug("Pitch bend == event.pos[0]: %s", snd.pitch_bend)
 
             odd = (size + 1) % 2
             norm_size = (size // 2) * 2 + odd
@@ -256,13 +258,12 @@ def handle_input(snd, watch, event):
             )
             snd.frequency = new_freq
             logger.info(
-                "Pitched frequency to %s (with ratio %.04f) position %s, bend %s. [%s, %s, %s]" %
-                (
-                    snd.frequency, ratio, event.pos[1], snd.pitch_bend,
-                    scale[0], scale[len(scale)//2], scale[-1]
-                ))
+                "Pitched frequency to %s (with ratio %.04f) position %s, bend %s. [%s, %s, %s]",
+                snd.frequency, ratio, event.pos[1], snd.pitch_bend,
+                scale[0], scale[len(scale)//2], scale[-1]
+            )
     else:
-        logger.debug("Other: %s" % event)
+        logger.debug("Other: %s", event)
     return
 
 
@@ -273,11 +274,11 @@ def init_pygame(name="Resonance", size=800):
     pg.quit()
 
     logger.info(
-        "Pygame initialized with %s loaded modules (%s failed)." %
-        pg.init())
+        "Pygame initialized with %s loaded modules (%s failed)." % pg.init()
+    )
 
     screen = init_display(name, size)
-    logger.info("Inited display %s with flags: %s" % (screen, screen.get_flags()))
+    logger.info("Inited display %s with flags: %s", screen, screen.get_flags())
 
     return screen
 
@@ -306,7 +307,7 @@ def init_display(name, size):
         pg.display.set_caption(name)
         pg.display.init()
     except Exception as err:
-        logger.error("Something bad happened on init_display(): %s" % err)
+        logger.error("Something bad happened on init_display(): %s", err)
 
     return mode
 
@@ -325,7 +326,9 @@ def init_mixer(*args):
 
     logger.info(
         "Mixer has %s Hz sample rate with %s size samples and %s channels." %
-        pg.mixer.get_init())
+        pg.mixer.get_init()
+    )
+
     return pg.mixer.find_channel()
 
 
@@ -349,5 +352,5 @@ def change_frequency(snd, key):
     snd.frequency = new_frequency
     if isinstance(snd, Releasable):
         snd.release_at(None)
-    logger.debug("Changed frequency: %s." % (snd.frequency if hasattr(snd, 'frequency') else snd))
+    logger.debug("Changed frequency: %s.", snd.frequency if hasattr(snd, 'frequency') else snd)
     return new_frequency
