@@ -24,10 +24,6 @@ class KeplerOrbit(Curve):
     https://en.wikipedia.org/wiki/Kepler%27s_laws_of_planetary_motion#Position_as_a_function_of_time
 
     Parameters:
-    - mu:
-      Standard gravitational parameter μ of a celestial body is
-      the product of the gravitational constant G and the mass M of
-      the body.
     - period:
       Orbital period is the time an astronomical
       object takes to complete one orbit around another object.
@@ -37,18 +33,20 @@ class KeplerOrbit(Curve):
       perfect circle.  A value of 0 is a circular orbit, values
       between 0 and 1 form an elliptic orbit, 1 is a parabolic escape
       orbit, and greater than 1 is a hyperbola.
-    - scale:
-      Scaling factor for making long periods of time approachable to listening
     """
-    def __init__(self, perihelion, semimajor, eccentricity=0.85, period=1, scale=43200, newton=True, ph=0):
-        # self.mu = mu
+    def __init__(self, perihelion, semimajor, eccentricity=0.85, period=1, newton=True, name='', ph=0):
+        self.name = name
         self.perihelion = perihelion  # Distance from sun (origin) to perihelion (closest) point
         self.a = semimajor
         self.period = period
         self.eccentricity = eccentricity
-        self.scale = scale
         self.newton = newton
         self.ph = 0  # Time of perihelion passage
+
+    def __repr__(self):
+        return "%s(%r, %r, eccentricity=%r, period=%r, name=%r)" % (
+            self.__class__.__name__, self.perihelion, self.a, self.eccentricity, self.period, self.name
+        )
 
     @property
     def mean_motion(self):
