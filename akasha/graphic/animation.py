@@ -48,8 +48,10 @@ def anim(snd, size=800, name='Resonance', antialias=True, lines=False, colours=T
     elif style == 'transfer':
         widget = VideoTransferView(screen, size=size, standard='PAL', axis='real')
     else:
-        logger.err("Unknown animation style: '{0}'".format(style))
+        logger.error("Unknown animation style: '{0}'".format(style))
         cleanup()
+        return False
+
     return loop(snd, channel, widget)
 
 
