@@ -10,13 +10,11 @@ Animation module
 
 from __future__ import division
 
-import logging
 import numpy as np
 import pygame as pg
 import sys
 import traceback
 
-from akasha.audio.generators import Generator
 from akasha.audio.mixins.releasable import Releasable
 from akasha.graphic.drawing import get_canvas, blit, draw, video_transfer
 from akasha.math import div_safe_zero, pcm, minfloat
@@ -103,14 +101,14 @@ def loop(snd, channel, widget):
                         div_safe_zero(1, input_time), div_safe_zero(1, audio_time), div_safe_zero(1, video_time), av_percent
                     )
             t = clock.tick_busy_loop(sampler.videorate)
-        except KeyboardInterrupt as err:
+        except KeyboardInterrupt:
             # See http://stackoverflow.com/questions/2819931/handling-keyboardinterrupt-when-working-with-pygame
-            logger.info("Got KeyboardInterrupt (CTRL-C)!".format(type(err)))
+            logger.info("Got KeyboardInterrupt (CTRL-C)!")
             break
         except SystemExit as err:
             logger.info("Ending animation: %s" % err)
             break
-        except Exception as err:
+        except Exception:
             try:
                 exc = sys.exc_info()[:2]
                 logger.error("Unexpected exception %s: %s\n%s" % (exc[0], exc[1], traceback.format_exc()))
@@ -242,7 +240,6 @@ def handle_input(snd, watch, event):
             snd.pitch_bend = None
         elif (event.type == pg.MOUSEMOTION) and getattr(snd, 'pitch_bend', None) is not None:
             size = pg.display.get_surface().get_size()[1] or 0
-            freq = snd.frequency
             snd.pitch_bend = event.pos[1]
 
             logger.debug("Pitch bend == event.pos[0]: %s" % snd.pitch_bend)
