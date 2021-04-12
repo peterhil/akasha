@@ -161,21 +161,29 @@ class VideoTransferView(object):
         blit(self._surface, img)
 
 
+def key_pause(event):
+    return (event.type == pg.KEYDOWN and event.key == pg.K_F8) \
+        or (event.type == pg.ACTIVEEVENT and event.state == 3)
+
+
+def key_escape(event):
+    return (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE)
+
+
 def handle_input(snd, watch, event):
     """
     Handle pygame events.
     """
     # Quit
-    if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
+    if event.type == pg.QUIT or key_escape(event):
         raise SystemExit('Quit.')
 
     # Pause
-    if (event.type in [pg.KEYDOWN, pg.KEYUP] and event.key == pg.K_F8) or \
-         (event.type == pg.ACTIVEEVENT and event.state == 3):
-        if event.type is not pg.KEYUP:
-            sampler.pause()
-            watch.pause()
+    if key_pause(event):
+        sampler.pause()
+        watch.pause()
         return
+
     # Key down
     elif event.type == pg.KEYDOWN:
         # logger.debug("Key '%s' (%s) down.", pg.key.name(event.key), event.key)
