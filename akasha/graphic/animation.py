@@ -10,9 +10,6 @@ Animation module
 
 from __future__ import division
 
-import sys
-import traceback
-
 import numpy as np
 import pygame as pg
 
@@ -110,13 +107,6 @@ def loop(snd, channel, widget):
         except SystemExit as err:
             logger.info("Ending animation: %s", err)
             break
-        except Exception:
-            try:
-                exc = sys.exc_info()[:2]
-                logger.error("Unexpected exception %s: %s\n%s", exc[0], exc[1], traceback.format_exc())
-            finally:
-                del exc
-                break
     cleanup()
     if isinstance(snd, Releasable):
         snd.release_at(None)
@@ -178,8 +168,9 @@ def handle_input(snd, watch, event):
     # Quit
     if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
         raise SystemExit('Quit.')
+
     # Pause
-    elif (event.type in [pg.KEYDOWN, pg.KEYUP] and event.key == pg.K_F8) or \
+    if (event.type in [pg.KEYDOWN, pg.KEYUP] and event.key == pg.K_F8) or \
          (event.type == pg.ACTIVEEVENT and event.state == 3):
         if event.type is not pg.KEYUP:
             sampler.pause()
@@ -301,13 +292,10 @@ def init_display(name, size):
     else:
         raise ImportError('Numpy array package is not installed')
 
-    try:
-        # FIXME get resolution some other way.
-        mode = pg.display.set_mode((size, size), flags, 32 if flags & pg.SRCALPHA else 24)
-        pg.display.set_caption(name)
-        pg.display.init()
-    except Exception as err:
-        logger.error("Something bad happened on init_display(): %s", err)
+    # FIXME get resolution some other way.
+    mode = pg.display.set_mode((size, size), flags, 32 if flags & pg.SRCALPHA else 24)
+    pg.display.set_caption(name)
+    pg.display.init()
 
     return mode
 
