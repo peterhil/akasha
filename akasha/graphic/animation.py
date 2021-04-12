@@ -336,8 +336,10 @@ def cleanup():
     """
     Clean up: Quit pygame, close iterator.
     """
+    logger.info("Doing cleanup.")
+    pg.mixer.quit()
+    pg.display.quit()
     pg.quit()
-    logger.info("Done cleanup.")
 
 
 def change_frequency(snd, key):
