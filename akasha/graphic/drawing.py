@@ -46,7 +46,7 @@ def draw_axis(img, colour=None):
     return img
 
 
-def get_canvas(width=1000, height=None, channels=4, axis=True):
+def get_canvas(width=1000, height=None, channels=4):
     """
     Get a Numpy array suitable for use as a drawing canvas.
     """
@@ -54,10 +54,6 @@ def get_canvas(width=1000, height=None, channels=4, axis=True):
         height = width
 
     img = np.zeros((height, width, channels), np.uint8)  # Note: y, x
-
-    # FIXME: axis argument for get_canvas should accept a colour value, or it shouldn't exist
-    if axis:
-        img = draw_axis(img)
 
     return img
 
@@ -95,7 +91,9 @@ def draw(
     if img is not None:  # Draw into existing img?
         size = img.shape[0]
     else:
-        img = get_canvas(size, axis=axis)
+        img = get_canvas(size)
+        if axis:
+            img = draw_axis(img)
 
     if is_silence(signal):
         logger.warning('Drawing empty signal!')
@@ -140,7 +138,8 @@ def draw_lines_pg(signal, screen, size=1000, colours=True, antialias=False):
     """
     Draw (antialiased) lines with Pygame.
     """
-    img = get_canvas(size, axis=True)
+    img = get_canvas(size)
+    img = draw_axis(img)
     blit(screen, img)
 
     method = 'aaline' if antialias else 'line'
@@ -321,7 +320,7 @@ def video_transfer(signal, standard='PAL', axis='real', horiz=720):
     #for block in range(0, len(signal), framesize):
     #    pass # draw frame
 
-    img = get_canvas(3, vert, axis=False)  # Stretch to horiz. width later!
+    img = get_canvas(3, vert)  # Stretch to horiz. width later!
     fv = img.flat
 
     s = pcm(signal[:framesize] * 256, bits=8, axis='real').astype(np.uint8)
