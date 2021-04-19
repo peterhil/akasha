@@ -42,12 +42,13 @@ from akasha import dsp
 from akasha.effects.tape import *
 from akasha.effects.filters import *
 
-from akasha.graphic.animation import *
 from akasha.graphic.drawing import *
 from akasha.graphic.output import *
 from akasha.graphic.plotting import *
 from akasha.graphic.primitive.line import *
 from akasha.graphic.primitive.spline import *
+
+from akasha.gui.animation import *
 
 from akasha.math.geometry import *
 from akasha.math.geometry.curvature import *

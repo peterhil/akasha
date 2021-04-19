@@ -15,7 +15,7 @@ import pygame as pg
 
 from akasha.audio.mixins.releasable import Releasable
 from akasha.graphic.drawing import get_canvas
-from akasha.graphic.widgets import ComplexView, VideoTransferView
+from akasha.gui.widgets import ComplexView, VideoTransferView
 from akasha.math import div_safe_zero, pcm, minfloat
 from akasha.settings import config
 from akasha.timing import sampler, Timed, Watch
