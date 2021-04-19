@@ -58,6 +58,17 @@ def get_canvas(width=1000, height=None, channels=4):
     return img
 
 
+def draw_blank(img):
+    """
+    """
+    black = [0, 0, 0, 127]
+    height, width, channels = img.shape
+    img[::] = black[:channels]
+
+    return img
+
+
+
 def blit(screen, img):
     """
     Blit the screen.
@@ -92,8 +103,9 @@ def draw(
         size = img.shape[0]
     else:
         img = get_canvas(size)
-        if axis:
-            img = draw_axis(img)
+
+    if axis:
+        img = draw_axis(img)
 
     if is_silence(signal):
         logger.warning('Drawing empty signal!')
@@ -106,12 +118,13 @@ def draw(
             logger.warning("Drawing lines with Numpy is way too slow for now!")
             img = draw_lines(signal, img, size, colours, antialias)
         else:
-            img = draw_lines_pg(signal, screen, size, colours, antialias)
+            img = draw_lines_pg(signal, screen, img, size, colours, antialias)
     else:
         if antialias:
             img = draw_points_aa(signal, img, size, colours)
         else:
             img = draw_points(signal, img, size, colours)
+
     return img
 
 
@@ -134,11 +147,11 @@ def add_alpha(rgb, opacity=255):
     return np.append(rgb, np.array([opacity] * len(rgb), dtype=np.uint8).reshape(len(rgb), 1), 1)
 
 
-def draw_lines_pg(signal, screen, size=1000, colours=True, antialias=False):
+def draw_lines_pg(signal, screen, img, size=1000, colours=True, antialias=False):
     """
     Draw (antialiased) lines with Pygame.
     """
-    img = get_canvas(size)
+    draw_blank(img)
     img = draw_axis(img)
     blit(screen, img)
 

@@ -14,6 +14,7 @@ import numpy as np
 import pygame as pg
 
 from akasha.audio.mixins.releasable import Releasable
+from akasha.graphic.drawing import get_canvas
 from akasha.graphic.widgets import ComplexView, VideoTransferView
 from akasha.math import div_safe_zero, pcm, minfloat
 from akasha.settings import config
@@ -41,7 +42,7 @@ def anim(snd, size=800, name='Resonance', antialias=True, lines=False, colours=T
     channel = init_mixer(*mixer_options)
 
     if style == 'complex':
-        widget = ComplexView(screen, antialias=antialias, lines=lines, colours=colours)
+        widget = ComplexView(screen, size, antialias=antialias, lines=lines, colours=colours)
     elif style == 'transfer':
         widget = VideoTransferView(screen, size=size, standard='PAL', axis='real')
     else:
