@@ -61,7 +61,7 @@ def get_canvas(width=1000, height=None, channels=4):
 def draw_blank(img):
     """
     """
-    black = [0, 0, 0, 127]
+    black = [0, 0, 0, 255]
     height, width, channels = img.shape
     img[::] = black[:channels]
 
