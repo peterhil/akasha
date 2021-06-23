@@ -10,38 +10,59 @@ Follow these steps to install the dependencies.
 
 ## 2. Install Python and create a virtualenv
 
-Using Pyenv (recommended):
+### Notes
 
-    pyenv install 2.7.18
-    pyenv virtualenv -p python2.7 2.7.18 akasha-27
-    workon akasha-27
-
-    pyenv install 3.6.10
-    pyenv virtualenv --creator venv -p python3.6 3.6.10 akasha-36
-    workon akasha-36
-
-Using virtualenv or venv module (old way):
-
-    virtualenv -p python2.7 --system-site-packages venv/py27
-    . ./venv/py27/bin/activate
-
-    python3.4 -m venv venv/py34
-    . ./venv/py34/bin/activate
-
-**Notes:**
-
-1. Install Python 3 versions on a virtualenv using [venv] module, because
-   [Matplotlib needs] a framework build of Python.
+1. **Important:** Install Python 3 versions on a virtualenv using [venv] module,
+   because [Matplotlib needs] a framework build of Python. With Python 2, the
+   only option seems to be using another Matplotlib backend on Mac OS X, unless
+   a [Framework Python] is installed separately and used.
 
 2. Python versions before 3.5.3 only [support openssl@1.0]. To install
    Python 3.4 with pyenv and homebrew:
 
-    PYTHON_BUILD_HOMEBREW_OPENSSL_FORMULA=openssl@1.0 \
-    pyenv install -v 3.4.10
+        PYTHON_BUILD_HOMEBREW_OPENSSL_FORMULA=openssl@1.0 \
+        pyenv install -v 3.4.10
 
-3. Current versions of scikits.audiolab and/or scikits.resample do not seem to
-   work well with Python 3.6.
+3. Current versions of `scikits.audiolab` and/or `scikits.resample` do not seem to work well with Python 3.6.
 
+### Using Pyenv
+
+    pyenv install 2.7.18
+    pyenv virtualenv 2.7.18 akasha-27
+    workon akasha-27
+
+    pyenv install 3.6.13
+    pyenv virtualenv -f --python python3.6 --pip 21.1.2 3.6.13 akasha-36
+    workon akasha-36
+
+ Not recommended for Python 2, see notes below.
+
+### Using venv module
+
+    python3.6 -m venv --prompt akasha-36 venv/py36
+    . ./venv/py36/bin/activate
+
+ Recommended for Python 3
+
+### Using virtualenv with Python 2
+
+    virtualenv -p python2.7 --prompt '(akasha-27) ' venv/py27
+    . ./venv/py27/bin/activate
+
+Use graphically installed [Framework Python] or some other backend than `macosx` or `wxagg` on Matplotlib!
+
+### Using miniconda
+
+    # Install miniconda, and then:
+    conda update -n base -c defaults conda
+    conda create -n akasha-27 python=2.7 pip
+    conda init zsh
+    conda activate akasha-27
+    pip install -r install/dev-requires.pip
+    conda install python.app
+    # Then somehow use ipython with pythonw?!
+
+[Framework Python]: https://docs.python.org/3/using/mac.html
 [Matplotlib needs]: https://matplotlib.org/faq/osx_framework.html
 [support openssl@1.0]: https://github.com/pyenv/pyenv/issues/950
 [venv]: https://docs.python.org/3/library/venv.html
