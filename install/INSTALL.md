@@ -94,4 +94,12 @@ Using virtualenv or venv module (old way):
     o = Osc(220, curve=s)
     h = Harmonics(o, n=1, rand_phase=False)
     snd = Mix(e, h)
+
+    # Animate and play
     anim(snd, antialias=True, lines=True)
+
+    # Graph signal
+    graph(snd, antialias=True, lines=True)
+
+    # Plot signal using Matplotlib
+    plot_signal(snd[:5*sampler.rate])
