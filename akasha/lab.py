@@ -9,6 +9,14 @@ from __future__ import absolute_import
 
 import funcy
 import numpy as np
+import sys
+
+# Workaround for a Virtualenv bug from year 2011!
+# https://github.com/pypa/virtualenv/issues/54
+if sys.version_info < (3, 0, 0):
+    import matplotlib
+    matplotlib.use('TkAgg')
+
 import pylab as lab
 
 lab.interactive(True)
