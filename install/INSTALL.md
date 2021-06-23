@@ -87,10 +87,11 @@ Using virtualenv or venv module (old way):
 ## 6. Start experimenting
 
     ipython
-    >>>
+
     from akasha.lab import *
-
-    s = Super(4, 2, 2, 2)  # Or use Circle()
+    e = Exponential(-0.987, amp=0.9)
+    s = Super(6, 1.5, 1.5, 1.5)
     o = Osc(220, curve=s)
-
-    anim(o, antialias=True, lines=False)
+    h = Harmonics(o, n=1, rand_phase=False)
+    snd = Mix(e, h)
+    anim(snd, antialias=True, lines=True)
