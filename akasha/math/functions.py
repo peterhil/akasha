@@ -28,7 +28,10 @@ from akasha.timing import sampler
 from akasha.utils.log import logger
 
 
-pi2 = np.pi * 2.0
+pi = np.pi
+pi2 = tau = np.pi * 2.0
+
+
 cartesian = np.vectorize(
     rect,
     doc="""Return cartesian points from polar coordinate radiuses and angles."""

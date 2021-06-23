@@ -19,7 +19,46 @@ from akasha.funct import consecutive
 from akasha.math.geometry import orient, turtle_turns, vectors, wrap_ends
 from akasha.math.geometry.curvature import estimate_curvature
 from akasha.utils.log import logger
-from akasha.math import abslogsign, abspowersign, as_complex, cartesian, distances, lambertw, map_array, overlap, pi2, rect, repeat
+from akasha.math import abslogsign, abspowersign, as_complex, cartesian, distances, lambertw, map_array, overlap, pi, tau, rect, repeat
+
+
+def intuitive_clothoid_piece(a_radius, b_radius, a_theta, b_theta, points = 101):
+    """
+    Return a clothoid piece turning around origo from complex point a to complex point b
+    """
+    amp = np.linspace(a_radius, b_radius, points, dtype=np.float64)
+    theta = np.linspace(a_theta, b_theta, points, dtype=np.float64)
+
+    return cartesian(amp, theta)
+
+
+def intuitive_clothoid(a, b, c_radius, d_radius, c_theta, d_theta, points=101):
+    """
+    Define a clothoid segment with two points and two vectors that define radius and tangent towards points
+    """
+    c = rect(c_radius, c_theta)
+    d = rect(d_radius, d_theta)
+    spline = intuitive_clothoid_piece(c_radius, d_radius, c_theta, d_theta, points)
+    slide = np.linspace(a - c, b - d, points)
+    curve = spline + slide
+
+    return np.concatenate((np.array([a, a - c]), curve, np.array([b - d, b])), dtype=np.complex128)
+
+
+def intuitive_clothoid_original(a, b, ct1, ct2, points=100, scale = 1):
+    """
+    Define a clothoid segment with two points and two vectors that define radius and tangent towards points
+    """
+    control_point_1 = a + ct1
+    control_point_2 = b + ct2
+
+    amp = np.linspace(np.abs(ct1), np.abs(ct2), points)
+    theta = (((np.linspace(np.angle(ct1), np.angle(ct2), points) + pi) % tau) - pi) % tau
+
+    slide_line = np.linspace(a + ct1, b + ct2, points)
+    curve = a + amp * np.exp(scale / points * 1j * tau * theta) + slide_line
+
+    return curve
 
 
 def clothoid_erf(t):
