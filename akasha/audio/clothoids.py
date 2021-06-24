@@ -1,3 +1,29 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+Audio compression algorithm based on clothoids
+"""
+
+from __future__ import division
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+from pyclothoids import Clothoid
+
+from akasha.audio.envelope import Exponential
+from akasha.audio.harmonics import Harmonics
+from akasha.audio.mix import Mix
+from akasha.audio.oscillator import Osc
+from akasha.curves import Super
+from akasha.graphic.plotting import plot_signal
+from akasha.math import pi2
+from akasha.math.geometry import midpoint
+from akasha.timing import sampler
+from akasha.utils.log import logger
+
+
 def polygon_osc(n=6, curve=Super(6, 1.5, 1.5, 1.5), harmonics=1, rand_phase=False):
     o = Osc(sampler.rate / n, curve=curve)
     h = Harmonics(o, n=harmonics, rand_phase=rand_phase)
@@ -17,7 +43,9 @@ def test_clothoids(snd, n=6, simple=False):
     else:
         mids = np.array([np.angle(points[i] - midpoint(points[i - 1], points[i + 1])) for i in np.arange(n)])
         tangents = (mids + quarter) % pi2
-        print('tangents:', tangents / pi2)
+
+    logger.debug('points:', points, points.shape)
+    logger.debug('tangents:', tangents / pi2, tangents.shape)
 
     clothoid_list = [
         Clothoid.G1Hermite(

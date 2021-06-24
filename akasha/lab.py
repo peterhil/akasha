@@ -26,6 +26,7 @@ import akasha
 from cmath import rect, pi, exp, phase
 from scipy.signal import hilbert
 
+from akasha.audio.clothoids import *
 from akasha.audio.delay import Delay
 # from akasha.audio.dtmf import DTMF
 from akasha.audio.envelope import Adsr, Exponential, Gamma
