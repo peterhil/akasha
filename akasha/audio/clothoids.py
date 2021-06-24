@@ -12,10 +12,7 @@ import numpy as np
 
 from pyclothoids import Clothoid
 
-from akasha.audio.envelope import Exponential
-from akasha.audio.harmonics import Harmonics
-from akasha.audio.mix import Mix
-from akasha.audio.oscillator import Osc
+from akasha.audio import Exponential, Harmonics, Mix, Osc
 from akasha.curves import Super
 from akasha.graphic.plotting import plot_signal
 from akasha.math import pi2
