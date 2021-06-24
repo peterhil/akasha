@@ -5,6 +5,7 @@ future>=0.17.1  # used for: from builtins import zip
 matplotlib>=1.4.2
 numpy>=1.16.5
 pandas==0.22.0
+pyclothoids==0.1.3
 # -e hg+https://bitbucket.org/pygame/pygame@7213968d5e819dad85416589bea835ce40b9f6be#egg=pygame-dev
 # -e git+https://github.com/pygame/pygame#egg=pygame-dev
 pygame>=1.9.6
