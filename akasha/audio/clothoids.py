@@ -33,20 +33,21 @@ def polygon_osc(n=6, harmonics=1, rand_phase=False):
 def test_clothoids(snd, n=6, simple=False):
     deg = pi2
     quarter = pi2 / 4
-    indices = np.arange(-1, n + 1)
+    indices = np.arange(-1, n + 2)
     points = snd[indices]
 
     if simple:
         # Works for circles and super ellipses
-        tangents = (deg * (np.arange(-1, n + 1) / n + 0.25)) % deg
+        # tangents = (deg * (np.arange(-1, n + 1) / n + 0.25)) % deg
+        tangents = np.angle(points) + quarter
     else:
-        mids = np.array([np.angle(points[i] - midpoint(points[i - 1], points[i + 1])) for i in np.arange(n)])
+        mids = np.array([np.angle(points[i] - midpoint(points[i - 1], points[i + 1])) for i in np.arange(0, n + 1)])
         tangents = (mids + quarter) % pi2
 
     logger.debug("points %r:\n%r", points.shape, points)
     logger.debug("tangents %r:\n%r", tangents.shape, tangents / pi2)
 
-    clothoid_list = [
+    clothoid_list = np.array([
         Clothoid.G1Hermite(
             points[i].real,
             points[i].imag,
@@ -55,8 +56,9 @@ def test_clothoids(snd, n=6, simple=False):
             points[i + 1].imag,
             tangents[i + 1],
         )
-        for i in np.arange(n - 1)
-    ]
+        for i in np.arange(1, n)
+    ])
+    logger.debug("clothoid list %r:\n%r", clothoid_list.shape, clothoid_list)
 
     return clothoid_list
 
@@ -65,13 +67,13 @@ def plot_clothoids_test(n=6, simple=False, debug=False, use_env=False, **kwargs)
     snd = polygon_osc(n, **kwargs)
     if use_env:
         env = Exponential(-0.987, amp=0.9)
-        snd = Mix(osc, env)
+        snd = Mix(snd, env)
 
     if debug:
         logger.setLevel(logging.DEBUG)
         np.set_printoptions(precision=2)
         plot_signal(snd[:n + 1])
 
-    clothoid_list = test_clothoids(snd, n, simple)
+    clothoid_list = test_clothoids(snd, n + 1, simple)
     for i in clothoid_list:
         plt.plot( *i.SampleXY(500) )
