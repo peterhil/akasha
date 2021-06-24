@@ -58,7 +58,9 @@ def test_clothoids(snd, n=6, simple=False):
         )
         for i in np.arange(1, n)
     ])
-    logger.debug("clothoid list %r:\n%r", clothoid_list.shape, clothoid_list)
+    logger.debug("clothoid list shape: %r", clothoid_list.shape)
+    if n < 10:
+        logger.debug("clothoid list:\n%r", clothoid_list)
 
     return clothoid_list
 
