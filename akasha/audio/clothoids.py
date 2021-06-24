@@ -7,6 +7,7 @@ Audio compression algorithm based on clothoids
 
 from __future__ import division
 
+import logging
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -41,8 +42,8 @@ def test_clothoids(snd, n=6, simple=False):
         mids = np.array([np.angle(points[i] - midpoint(points[i - 1], points[i + 1])) for i in np.arange(n)])
         tangents = (mids + quarter) % pi2
 
-    logger.debug('points:', points, points.shape)
-    logger.debug('tangents:', tangents / pi2, tangents.shape)
+    logger.debug("points %r:\n%r", points.shape, points)
+    logger.debug("tangents %r:\n%r", tangents.shape, tangents / pi2)
 
     clothoid_list = [
         Clothoid.G1Hermite(
@@ -59,12 +60,15 @@ def test_clothoids(snd, n=6, simple=False):
     return clothoid_list
 
 
-def plot_clothoids_test(n=6, simple=False, debug=False, **kwargs):
-    osc = polygon_osc(n, **kwargs)
-    env = Exponential(-0.987, amp=0.9)
-    snd = Mix(osc, env)
+def plot_clothoids_test(n=6, simple=False, debug=False, use_env=False, **kwargs):
+    snd = polygon_osc(n, **kwargs)
+    if use_env:
+        env = Exponential(-0.987, amp=0.9)
+        snd = Mix(osc, env)
 
     if debug:
+        logger.setLevel(logging.DEBUG)
+        np.set_printoptions(precision=2)
         plot_signal(snd[:n + 1])
 
     clothoid_list = test_clothoids(snd, n, simple)
