@@ -22,10 +22,10 @@ from akasha.timing import sampler
 from akasha.utils.log import logger
 
 
-def polygon_osc(n=6, harmonics=1, rand_phase=False):
+def polygon_osc(n=6, harmonics=1, damping=None, rand_phase=False):
     s = Super(n, 1.5, 1.5, 1.5)
     o = Osc(sampler.rate / n, curve=s)
-    h = Harmonics(o, n=harmonics, rand_phase=rand_phase)
+    h = Harmonics(o, n=harmonics, damping=damping, rand_phase=rand_phase)
 
     return h
 
