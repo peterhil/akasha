@@ -48,6 +48,8 @@ def test_clothoids(snd, n=6, simple=False):
     logger.debug("tangents %r:\n%r", tangents.shape, tangents / pi2)
 
     clothoid_list = np.array([
+        # Also see SolveG2 on Pyclothoids documentation for G2 continuity:
+        # https://pyclothoids.readthedocs.io/en/latest/basic.html
         Clothoid.G1Hermite(
             points[i].real,
             points[i].imag,
