@@ -42,7 +42,10 @@ from akasha.audio.scalar import Scalar
 from akasha.audio.sum import Sum
 from akasha.audio.padsynth import *
 
-# from akasha.io.audio import play, write, read
+if sys.version_info < (3, 0, 0):
+    from akasha.io.audio import play, write, read
+else:
+    from akasha.io.sfaudio import play, write, read
 from akasha.io.keyboard import *
 
 from akasha.curves import *
