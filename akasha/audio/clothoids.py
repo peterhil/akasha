@@ -70,16 +70,39 @@ def test_clothoids(snd, n=6, simple=False):
     return clothoid_list
 
 
+def resample_with_clothoids(
+    clothoids,
+    ratio,
+):
+    n = len(clothoids)
+
+    indices = np.array(np.divmod(
+        np.divide(np.arange(ratio * n, dtype=np.float64), ratio),
+        1,
+    )).T
+
+    logger.debug("Resample with indices %r", indices.shape)
+
+    samples = np.array([
+        clothoids[int(i)].X(t) + 1j * clothoids[int(i)].Y(t)
+        for [i, t] in indices
+    ], dtype=np.complex128)
+
+    return samples
+
+
 def plot_clothoids_test(
     n=6,
     simple=False,
     debug=False,
     use_env=False,
-    samples=None,
+    signal=None,
+    plot=True,
+    samples=50,
     **kwargs,
 ):
-    if samples is not None:
-        snd = samples
+    if signal is not None:
+        snd = signal
     else:
         snd = polygon_osc(n, **kwargs)
         if use_env:
@@ -91,6 +114,10 @@ def plot_clothoids_test(
         np.set_printoptions(precision=2)
         plot_signal(snd[:n + 1])
 
-    clothoid_list = test_clothoids(snd, n + 1, simple)
-    for i in clothoid_list:
-        plt.plot(*i.SampleXY(500))
+    clothoids = test_clothoids(snd, n + 1, simple)
+
+    if plot:
+        for i in clothoids:
+            plt.plot(*i.SampleXY(samples))
+
+    return clothoids
