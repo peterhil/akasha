@@ -31,7 +31,7 @@ def polygon_osc(n=6, harmonics=1, damping=None, rand_phase=False):
 
 
 def test_clothoids(snd, n=6, simple=False):
-    deg = pi2
+    # deg = pi2
     quarter = pi2 / 4
     indices = np.arange(-1, n + 2)
     points = snd[indices]
@@ -41,7 +41,10 @@ def test_clothoids(snd, n=6, simple=False):
         # tangents = (deg * (np.arange(-1, n + 1) / n + 0.25)) % deg
         tangents = np.angle(points) + quarter
     else:
-        mids = np.array([np.angle(points[i] - midpoint(points[i - 1], points[i + 1])) for i in np.arange(0, n + 1)])
+        mids = np.array([
+            np.angle(points[i] - midpoint(points[i - 1], points[i+1]))
+            for i in np.arange(0, n + 1)
+        ])
         tangents = (mids + quarter) % pi2
 
     logger.debug("points %r:\n%r", points.shape, points)
@@ -67,11 +70,21 @@ def test_clothoids(snd, n=6, simple=False):
     return clothoid_list
 
 
-def plot_clothoids_test(n=6, simple=False, debug=False, use_env=False, **kwargs):
-    snd = polygon_osc(n, **kwargs)
-    if use_env:
-        env = Exponential(-0.987, amp=0.9)
-        snd = Mix(snd, env)
+def plot_clothoids_test(
+    n=6,
+    simple=False,
+    debug=False,
+    use_env=False,
+    samples=None,
+    **kwargs,
+):
+    if samples is not None:
+        snd = samples
+    else:
+        snd = polygon_osc(n, **kwargs)
+        if use_env:
+            env = Exponential(-0.987, amp=0.9)
+            snd = Mix(snd, env)
 
     if debug:
         logger.setLevel(logging.DEBUG)
@@ -80,4 +93,4 @@ def plot_clothoids_test(n=6, simple=False, debug=False, use_env=False, **kwargs)
 
     clothoid_list = test_clothoids(snd, n + 1, simple)
     for i in clothoid_list:
-        plt.plot( *i.SampleXY(500) )
+        plt.plot(*i.SampleXY(500))
