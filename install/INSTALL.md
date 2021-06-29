@@ -35,7 +35,11 @@ Follow these steps to install the dependencies.
     pyenv virtualenv -f --python python3.6 --pip 21.1.2 3.6.13 akasha-36
     workon akasha-36
 
- Not recommended for Python 2, see notes below.
+[Building Framework Python] on MacOS:
+
+    env PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.6.13
+
+Not recommended for Python 2, see notes below.
 
 ### Using venv module
 
@@ -62,6 +66,7 @@ Use graphically installed [Framework Python] or some other backend than `macosx`
     conda install python.app
     # Then somehow use ipython with pythonw?!
 
+[Building Framework Python]: https://github.com/pyenv/pyenv/wiki#how-to-build-cpython-with-framework-support-on-os-x
 [Framework Python]: https://docs.python.org/3/using/mac.html
 [Matplotlib needs]: https://matplotlib.org/faq/osx_framework.html
 [support openssl@1.0]: https://github.com/pyenv/pyenv/issues/950
