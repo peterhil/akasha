@@ -11,6 +11,7 @@ pkgs.mkShell {
         SDL2_mixer
         SDL2_ttf
         # blas
+        # expat
         freetype
         # gfortran
         # lapack
@@ -19,14 +20,15 @@ pkgs.mkShell {
         libsamplerate
         libsndfile
         portaudio
+        # readline
     ];
 
-    shellHook = ''
-        # export LD_LIBRARY_PATH="${pkgs.libsamplerate}/lib:${pkgs.libsndfile}/lib:${pkgs.portaudio}/lib:$LD_LIBRARY_PATH"
+    # shellHook = ''
+    #     export LD_LIBRARY_PATH="${pkgs.libsamplerate}/lib:${pkgs.libsndfile}/lib:${pkgs.portaudio}/lib:$LD_LIBRARY_PATH"
 
-        # export DYLD_FALLBACK_LIBRARY_PATH="${pkgs.libsamplerate}/lib:${pkgs.libsndfile}/lib:${pkgs.portaudio}/lib:$DYLD_FALLBACK_LIBRARY_PATH"
+    #     export DYLD_FALLBACK_LIBRARY_PATH="${pkgs.libsamplerate}/lib:${pkgs.libsndfile}/lib:${pkgs.portaudio}/lib:$DYLD_FALLBACK_LIBRARY_PATH"
 
-        # Change to 10.04 when Nix switches to newer SDK:
-        # export MACOSX_DEPLOYMENT_TARGET="10.12"
-    '';
+    #     # Change to 10.04 when Nix switches to newer SDK:
+    #     export MACOSX_DEPLOYMENT_TARGET="10.12"
+    # '';
 }
