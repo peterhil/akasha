@@ -20,7 +20,7 @@ from akasha.timing import sampler
 from akasha.utils import issequence
 
 
-def stft(signal, n_fft=2048, frame_size=None, hop=None, window=sc.signal.hamming, roll=True, normalize=True, wargs=[]):
+def stft(signal, n_fft=2048, frame_size=None, hop=None, window=np.hamming, roll=True, normalize=True, wargs=[]):
     """
     Short time fourier transform.
     """
@@ -40,7 +40,7 @@ def stft_tjoa(x, fs, framesz, hop):
     """
     framesamp = int(framesz * fs)
     hopsamp = int(hop * fs)
-    w = sc.hamming(framesamp)
+    w = np.hamming(framesamp)
     X = sc.array(
         [sc.fft(w * x[i:i + framesamp]) for i in range(0, len(x) - framesamp, hopsamp)]
     )
@@ -108,7 +108,7 @@ def tjoa_demo(signal=None):
     pylab.show()
 
 
-def windowed_frames(signal, n_fft=2048, frame_size=None, hop=None, window=sc.signal.hamming, wargs=[]):
+def windowed_frames(signal, n_fft=2048, frame_size=None, hop=None, window=np.hamming, wargs=[]):
     """
     Signal frames windowed with the given window function applied using the given frame and hop size.
     Frames are zero padded to n_fft length.
