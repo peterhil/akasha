@@ -15,6 +15,7 @@ import numpy as np
 
 from timeit import default_timer as timer
 
+from akasha.utils import is_empty
 from akasha.utils.log import logger
 
 
@@ -171,13 +172,13 @@ class Watch(object):
             self.paused = 0
 
     def get_fps(self, n=None):
-        if len(self.timings) == 0:
-            return 0
-
         if n is None:
             ts = np.ediff1d(np.array(self.timings))
         elif n > 0:
             ts = np.ediff1d(np.array(self.timings[-n:]))
-        # print('timings:', ts)
 
-        return np.median(1.0 / ts[ts >= 2e-3])
+        # print('timings:', ts)
+        ts = ts[ts >= 2e-3]  # Filter trash values after reset
+        if is_empty(ts): return 0
+
+        return np.median(1.0 / ts)
