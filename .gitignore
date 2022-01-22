@@ -26,3 +26,5 @@ build/
 dist/
 
 src/
+
+*.core
