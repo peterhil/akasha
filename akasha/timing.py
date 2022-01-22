@@ -144,7 +144,7 @@ class Watch(object):
         if self.paused:
             self.paused = self.epoch
         self.lasttime = 0
-        self.timings = []
+        self.timings = [0]
 
     def time(self):
         if not self.paused:
