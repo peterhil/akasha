@@ -136,15 +136,15 @@ class Timed(object):
 class Watch(object):
     def __init__(self, maxstops=5):
         self.paused = 0
-        self.reset()
         self.maxstops = maxstops
+        self.timings = []
+        self.reset()
 
     def reset(self):
         self.epoch = timer()
         if self.paused:
             self.paused = self.epoch
         self.lasttime = 0
-        self.timings = [0]
 
     def time(self):
         if not self.paused:
@@ -171,7 +171,13 @@ class Watch(object):
             self.paused = 0
 
     def get_fps(self, n=None):
+        if len(self.timings) == 0:
+            return 0
+
         if n is None:
-            return np.average(1.0 / np.ediff1d(np.array(self.timings)))
+            ts = np.ediff1d(np.array(self.timings))
         elif n > 0:
-            return np.average(1.0 / np.ediff1d(np.array(self.timings[-n:])))
+            ts = np.ediff1d(np.array(self.timings[-n:]))
+        # print('timings:', ts)
+
+        return np.median(1.0 / ts[ts >= 2e-3])

@@ -93,7 +93,7 @@ def loop(snd, channel, widget):
             if not sampler.paused:
                 percent = float(loop_time) / (1.0 / sampler.videorate) * 100
                 av_percent = (float(audio_time) + float(video_time)) / float(loop_time) * 100
-                fps = watch.get_fps(int(sampler.videorate))
+                fps = watch.get_fps()
                 if percent >= config.logging_limits.LOOP_THRESHOLD_PERCENT:
                     logger.warning(
                         "Anim: (%d) %.1f%% %.1f fps,\tloop: %.1fhz "
