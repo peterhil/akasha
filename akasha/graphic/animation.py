@@ -96,9 +96,9 @@ def loop(snd, channel, widget):
                 fps = watch.get_fps(int(sampler.videorate))
                 if percent >= config.logging_limits.LOOP_THRESHOLD_PERCENT:
                     logger.warning(
-                        "Animation: %.1f fps (%d) %.1f%%, loop: %.1fhz, "
-                        "video: %.1fhz, io: %.1fhz, audio: %.0fhz, (%.1f%%)", fps, t, percent, div_safe_zero(1, loop_time),
-                        div_safe_zero(1, video_time), div_safe_zero(1, input_time), div_safe_zero(1, audio_time), av_percent
+                        "Anim: (%d) %.1f%% %.1f fps,\tloop: %.1fhz "
+                        "(%.1f%%) video: %.1fhz audio: %.1fkhz io: %.1fkhz", t, percent, fps, div_safe_zero(1, loop_time),
+                        av_percent, div_safe_zero(1, video_time), div_safe_zero(1e-3, audio_time), div_safe_zero(1e-3, input_time)
                     )
             t = clock.tick_busy_loop(sampler.videorate)
         except KeyboardInterrupt as err:
