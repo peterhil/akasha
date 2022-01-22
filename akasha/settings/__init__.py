@@ -25,7 +25,7 @@ class config(object):
         """
         LOGLEVEL = logging.INFO
         FREQUENCY_DEVIATION_CENTS = 0.1
-        LOOP_THRESHOLD_PERCENT = 100
+        LOOP_THRESHOLD_PERCENT = 90
 
 
 def np_setup():

@@ -134,7 +134,7 @@ class Timed(object):
 
 
 class Watch(object):
-    def __init__(self, maxstops=100):
+    def __init__(self, maxstops=5):
         self.paused = 0
         self.reset()
         self.maxstops = maxstops
