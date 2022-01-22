@@ -19,6 +19,8 @@ class config(object):
     """
     Configuration class.
     """
+    BASE_FREQUENCY = 54  # 432 Hz / 8
+
     class logging_limits(object):
         """
         Various limits for logging
