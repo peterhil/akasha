@@ -92,13 +92,13 @@ def loop(snd, channel, widget):
                         last = current
             if not sampler.paused:
                 percent = float(loop_time) / (1.0 / sampler.videorate) * 100
-                av_percent = (float(audio_time) + float(video_time)) / (1.0 / sampler.videorate) * 100
+                av_percent = (float(audio_time) + float(video_time)) / float(loop_time) * 100
                 fps = watch.get_fps(int(sampler.videorate))
                 if percent >= config.logging_limits.LOOP_THRESHOLD_PERCENT:
                     logger.warning(
-                        "Animation: clock tick %d, FPS: %3.3f Hz, loop: %.3f Hz, (%.1f %%), "
-                        "input: %.2f Hz, audio: %.2f Hz, video: %.2f Hz, (%.1f %%)", t, fps, div_safe_zero(1, loop_time), percent,
-                        div_safe_zero(1, input_time), div_safe_zero(1, audio_time), div_safe_zero(1, video_time), av_percent
+                        "Animation: %.1f fps (%d) %.1f%%, loop: %.1fhz, "
+                        "video: %.1fhz, io: %.1fhz, audio: %.0fhz, (%.1f%%)", fps, t, percent, div_safe_zero(1, loop_time),
+                        div_safe_zero(1, video_time), div_safe_zero(1, input_time), div_safe_zero(1, audio_time), av_percent
                     )
             t = clock.tick_busy_loop(sampler.videorate)
         except KeyboardInterrupt as err:
