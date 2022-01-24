@@ -187,7 +187,7 @@ def draw_lines(signal, img, size=1000, colours=True, antialias=False):
 
                 # Use alpha values from lines_aa
                 color_values = np.repeat(color[:, np.newaxis], len(values), axis=1).T
-                color_values[:, 3] *= values
+                color_values[:, 3] = (values * color_values[:, 3]).astype(np.uint8)
 
                 img[x, y] += color_values
             else:
