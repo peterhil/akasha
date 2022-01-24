@@ -25,18 +25,47 @@ from akasha.math.geometry.affine_transform import AffineTransform
 from akasha.math import pi2
 
 
+__all__ = ['Ellipse']
+
+
+def ellipse_axes_normalised(a, b, angle=0):
+    if float(a) < 0:
+        a = -a
+        angle += np.pi
+    if float(b) < 0:
+        b = -b
+
+    return a, b, angle % pi2
+
+
 class Ellipse(Curve):
     """
     Ellipse curve
+
+    Parameters are normalised so that:
+    - Parameter `a` always determines the direction (given by the `angle` parameter)
+    - Both `a` and `b` are >= 0
+    - Parameter `b` can be greater than `a`, so use Ellipse#major if you need the major axis length
     """
     def __init__(self, a, b, angle=0, origin=0):
-        # if np.abs(a) < np.abs(b):
-        #     [a, b] = [b, a]
-        #     angle -= pi2 / 4.0
-        self.a = a # np.abs(a)
-        self.b = b # np.abs(b)
+        # Note! If thinking of making a always the semi-major axis,
+        # the angle needs to be rotated plus or minus 90 degrees or so.
+        # It is not as easy as it sounds, and care needs to be taken to make it correct!
+        (a, b, angle) = ellipse_axes_normalised(a, b, angle)
+        self.a = a
+        self.b = b
         self.angle = angle % pi2
         self.origin = origin
+
+    @property
+    def major(self):
+        a, b = np.abs(self.a), np.abs(self.b)
+        return a if a > b else b
+
+    @property
+    def minor(self):
+        a, b = np.abs(self.a), np.abs(self.b)
+        return b if a > b else a
 
     def __repr__(self):
         return "%s(%r, %r, %r, %r)" % (self.__class__.__name__, self.a, self.b, self.angle, self.origin)
@@ -101,9 +130,7 @@ class Ellipse(Curve):
         """
         Eccentricity of the ellipse: https://en.wikipedia.org/wiki/Ellipse#Eccentricity
         """
-        a, b = self.a, self.b
-        if a < b: a, b = b, a
-        return np.sqrt(1 - (b / a) ** 2)
+        return np.sqrt(1.0 - (self.minor / self.major) ** 2)
 
     @classmethod
     def from_rhombus(cls, para):
@@ -220,14 +247,14 @@ class Ellipse(Curve):
         a = -np.sqrt(2.0 * ab_common * (a + c + acb_pythagorean)) / den
         b = -np.sqrt(2.0 * ab_common * (a + c - acb_pythagorean)) / den
         # Make sure a is the major axis
-        if a < b:
+        if float(a) < float(b):
             [a, b] = [b, a]
 
         x = (2.0 * c * d - b * e) / den
         y = (2.0 * a * e - b * d) / den
         origin = x + 1j * y
 
-        if b == 0:
+        if float(b) == 0:
             theta = 0 if a <= c else pi2 / 4.0
         else:
             theta = np.arctan((c - a - acb_pythagorean) / b)

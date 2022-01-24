@@ -8,21 +8,21 @@
 # pylint: disable=C0111,R0201,E1101
 
 """
-Unit tests for Overtones
+Unit tests for Harmonics
 """
 
 import numpy as np
 
-from numpy.testing.utils import assert_array_almost_equal
+from numpy.testing import assert_array_almost_equal
 
+from akasha.audio.harmonics import Harmonics
 from akasha.audio.oscillator import Osc
-from akasha.audio.harmonics import Overtones
 from akasha.timing import sampler
 
 
-class TestOvertones(object):
+class TestHarmonics(object):
     """
-    Tests for Overtones
+    Tests for Harmonics
     """
 
     frames = np.arange(0, sampler.rate, 4410, dtype=np.float64)
@@ -30,7 +30,7 @@ class TestOvertones(object):
 
     def test_at(self):
         o = Osc(122.0)
-        h = Overtones(o)
+        h = Harmonics(o)
         assert_array_almost_equal(
             h.at(self.times),
             h[self.frames]
@@ -38,7 +38,7 @@ class TestOvertones(object):
 
     def test_sample_with_iterable(self):
         o = Osc(122.0)
-        h = Overtones(o)
+        h = Harmonics(o)
         assert_array_almost_equal(
             h[iter(self.frames)],
             h.at(self.times)

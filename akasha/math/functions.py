@@ -11,18 +11,17 @@ Mathematical utility functions module.
 
 from __future__ import division
 
-import exceptions
 import numpy as np
 import scipy as sc
 import sys
 
+from builtins import range, zip
 if sys.version_info >= (2, 7):
     from collections import OrderedDict
 else:
     from ordereddict import OrderedDict
 from cmath import rect
 from fractions import Fraction
-from itertools import izip
 
 from akasha.funct import blockwise
 from akasha.timing import sampler
@@ -288,7 +287,7 @@ def map_array(func, arr, method='vec', dtype=None):
     elif method == 'map':
         res = np.array(map(func, arr.flat))  # pylint: disable=W0141
     else:
-        raise exceptions.NotImplementedError("map_array(): method '{0}' missing.".format(method))
+        raise NotImplementedError("map_array(): method '{0}' missing.".format(method))
 
     if dtype is not None:
         res = res.astype(dtype)
@@ -366,14 +365,14 @@ def random_phasor(n=1, amp=1.0, random=np.random.random):
     Example
     =======
 
-    from funckit import xoltar as fx
+    import funcy
 
-    rf = fx.curry(np.random.poisson, 100)  # Try different values and random functions
+    rf = funcy.curry(np.random.poisson, 2)(100)  # Try different values and random functions
     snd = normalize(random_phase(44100 * 5, amp=rf))
     graph(snd)  # or anim(Pcm(snd))
     """
     if np.isscalar(amp):
-        return np.array([rect(a, b) for a, b in izip(np.repeat(amp, n), pi2 * random(n) - np.pi)])
+        return np.array([rect(a, b) for a, b in zip(np.repeat(amp, n), pi2 * random(n) - np.pi)])
     elif callable(amp):
         return np.array(map(rect, *np.array([amp(n), pi2 * random(n) - np.pi])))
     else:
@@ -409,7 +408,7 @@ def pascal_line(n):
     Line of Pascal's triangle using binomial coefficients
     """
     line = [1]
-    [line.append(line[k] * (n-k) / (k+1)) for k in xrange(n)]
+    [line.append(line[k] * (n-k) / (k+1)) for k in range(n)]
     return line
 
 
@@ -556,7 +555,7 @@ def factor_supersets(factors_in, redundant=None, limit=None):
             msg = "\t#%s:\tSet %s is subset of %s, will add missing factors of %s to redundant"
             logger.info(msg % (ind, fset, factors_in[lim], j))
             msg = "#%s:\tMoving %s from essential to redundant. (factors in %s)"
-            logger.warn(msg % (ind, j, factors_in[j]))
+            logger.warning(msg % (ind, j, factors_in[j]))
             if j in ess:
                 red[j] = ess.pop(j)
             for f in fset:
@@ -567,7 +566,7 @@ def factor_supersets(factors_in, redundant=None, limit=None):
                 #     for k in re2.keys():
                 #         if (not k in red) and k in ess:
                 #             msg = "\t#%s:\t\tMoving %s to redundant. (factors in %s)"
-                #             logger.warn(msg % (ind, k, factors_in[k]))
+                #             logger.warning(msg % (ind, k, factors_in[k]))
                 #             if k in ess:
                 #                 red[k] = ess.pop(k)  #es2[k]
     #logger.debug("\t#%s:\tEssential keys: %s redundant keys: %s" % (ind, ess.keys(), red.keys()))
@@ -598,12 +597,11 @@ def numberof(items):
     return items if np.isscalar(items) else len(items)
 
 
-def pcm(signal, bits=16, axis='imag'):
+def pcm(signal, bits=16, axis='real'):
     """
     Get a pcm sound with integer samples from the complex signal,
     that is playable and usable with most audio libraries.
     """
-    #if isinstance(signal[0], np.floating): axis = 'real'
     return np.cast['int' + str(bits)](getattr(signal, axis) * (2 ** bits / 2.0 - 1))
 
 
@@ -676,9 +674,9 @@ def clip(signal, limit=1.0, inplace=False):
     """
     Clips complex signal to unit rectangle area (-1-1j, +1+1j).
     """
+    signal = np.atleast_1d(signal)
     if np.any(np.isnan(signal)):
         signal = np.nan_to_num(signal)
-
     if not inplace:
         signal = signal.copy()
 
@@ -747,11 +745,18 @@ def pad_right(signal, padding, minlength):
     return pad_minlength(signal, padding, minlength, -1, fromleft=False)
 
 
+def pad_ends(signal, start, end):
+    """
+    Pad a signal with start and end value
+    """
+    return np.append(np.append(start, signal), end)
+
+
 def overlap(signal, n):
     """
     Split the 1-d signal into n overlapping parts.
     """
-    return np.array([signal[p : len(signal) - q] for p, q in enumerate(reversed(xrange(n)))])
+    return np.array([signal[p : len(signal) - q] for p, q in enumerate(reversed(range(n)))])
 
 
 def distances(signal, start=None, end=None):

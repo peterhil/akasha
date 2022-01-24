@@ -13,6 +13,12 @@ from __future__ import division
 
 import numpy as np
 import scipy as sc
+import sys
+
+if sys.version_info >= (3, 5):
+    from scipy.fft import fft, ifft
+else:
+    [fft, ifft] = sc.fft, sc.ifft
 
 from akasha.math import pi2, power_limit
 
@@ -36,12 +42,13 @@ def czt(signal, m=None, w=None, a=1.0, normalize=False):
     if w is None: w = np.exp(-1j * pi2 / m)
     n = np.arange(l)
     k = np.arange(m)
-    lp2 = power_limit(m + l - 1, 2, np.ceil)
+    lp2 = int(power_limit(m + l - 1, 2, np.ceil))
 
-    y = np.append(signal * (a ** -n) * chirp(w, n), np.zeros(lp2 - l))
+    y = signal * (a ** -n) * chirp(w, n)
+    y_pad = np.append(y, np.zeros(lp2 - l))  # zero pad
     vn = np.roll(ichirp(w, np.arange(lp2) - l), -l)
 
-    g = sc.ifft(sc.fft(y) * sc.fft(vn))[:m]
+    g = ifft(fft(y_pad) * fft(vn))[:m]
     scale = 1.0 / l if normalize else 1.0
     return scale * (g * chirp(w, k))
 

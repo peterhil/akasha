@@ -14,12 +14,13 @@ Unit tests for Mix
 import numpy as np
 import pytest
 
-from numpy.testing.utils import assert_array_equal, assert_array_almost_equal
+from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 from akasha.audio.envelope import Exponential
-from akasha.audio.harmonics import Overtones
+from akasha.audio.harmonics import Harmonics
 from akasha.audio.mix import Mix
 from akasha.audio.oscillator import Osc
+from akasha.audio.overtones import Overtones
 from akasha.audio.scalar import Scalar
 from akasha.audio.sum import Sum
 from akasha.curves import Super
@@ -76,39 +77,19 @@ class TestMix(object):
         assert m.frequency == 420
 
 
-class TestReplacingOvertones(object):
-    """Test replacing Overtones class with Mix objects"""
+class TestReplacingHarmonics(object):
+    """Test replacing Harmonics class with Mix objects"""
 
     def test_mix_overtones(self):
         s = Super(3, 3, 3, 3)
         o = Osc(120, curve=s)
-        h = Overtones(o, n=3, func=lambda x: x + 1, rand_phase=False, damping='sine')
         base = s
-        times = sampler.slice(1000) * sampler.rate
+        kwargs = dict(n=3, func=lambda x: x + 1, rand_phase=False, damping='sine')
+        h = Harmonics(o, **kwargs)
+        overtones = Overtones(o, **kwargs)
+        times = sampler.times(1)
 
-        ## Mix generated overtones
-
-        # TODO: Move this part out of test code, and replace Overtones class!
-        from itertools import izip
-        from akasha.math import map_array, random_phasor
-
-        # Partials
-        overtones = map_array(h.func, np.arange(h.n))  # Remember to limit these on Nyquist freq.
-        frequencies = o.frequency * overtones
-        oscs = [Osc(f, base) for f in frequencies]
-        envelopes = [Exponential(h.damping(f)) for f in frequencies]
-        partials = [Mix(*part) for part in izip(oscs, envelopes)]
-
-        # Random phases
-        if h.rand_phase:
-            phases = random_phasor(h.n)
-            phases = [Scalar(phase, dtype=np.complex128) for phase in phases]
-            partials = [Mix(*partial) for partial in izip(partials, phases)]
-        partials = Sum(*partials)
-
-        ## End Mix generated overtones
-
-        assert_array_equal(
+        assert_array_almost_equal(
             h.at(times),
-            partials.at(times) / len(partials.components)
+            overtones.at(times)
         )

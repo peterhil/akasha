@@ -14,9 +14,11 @@ Tape compression module.
 """
 
 import cmath
+import funcy
 import numpy as np
 
-from funckit import xoltar as fx
+from builtins import range
+
 from akasha.utils.log import logger, logging
 from akasha.math import map_array, normalize, as_polar, as_rect
 
@@ -114,7 +116,7 @@ def tape_compress(signal, norm_level=0.95):
     # Calculate result - could use np.ufunc.accumulate?
     out = np.empty(len(amp))
     out[0] = signal[0]
-    for i in xrange(len(amp) - 1):
+    for i in range(len(amp) - 1):
         out[i + 1] = mag2(amp[i], amp[i + 1], out[i], norm_level)
     return out
 
@@ -151,7 +153,7 @@ def gamma_compress(signal, g, amp=1.0, normal=True):
     if normal:
         phi[:, 0] = normalize(phi[:, 0])
 
-    vgamma = np.vectorize(fx.curry_function(gamma, g, amp))
+    vgamma = np.vectorize(funcy.curry(gamma, 3)(g)(amp))
     phi[:, 0] = np.apply_along_axis(vgamma, 0, phi[:, 0]) * (1.0 / amp)  # @TODO amp can't be zero
 
     return as_rect(phi).T

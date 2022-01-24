@@ -11,11 +11,11 @@ Noise and chaos module.
 
 from __future__ import division
 
+import funcy
 import numpy as np
 import pandas as pd
 
 from cmath import rect
-from funckit import xoltar as fx
 
 from akasha.curves import Circle
 from akasha.audio.envelope import Exponential
@@ -117,15 +117,15 @@ class Rustle(Generator):
     def __init__(self, expected=1, frequency=1, envelope=Exponential(0)):
         self.frequency = Frequency(frequency)
         self.expected = expected
-        self.gen = fx.curry_function(np.random.poisson, self.expected)
+        self.gen = funcy.curry(np.random.poisson, 2)(self.expected)
         self.envelope = envelope
 
-    def sample(self, items):
+    def at(self, times):
         """
         Let it rumble and rustle.
         """
-        return self.envelope[items] * normalize(
-            self.gen(numberof(items)) * Circle.at(self.frequency[items])
+        return self.envelope.at(times) * normalize(
+            self.gen(numberof(times)) * Circle.at(self.frequency.at(times))
         )
 
 

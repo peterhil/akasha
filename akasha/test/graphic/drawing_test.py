@@ -20,7 +20,7 @@ from akasha.utils.log import logger
 from akasha.test import assert_equal_image
 
 from mock import patch
-from numpy.testing.utils import assert_array_equal
+from numpy.testing import assert_array_equal
 
 
 class TestDrawing(object):
@@ -29,7 +29,7 @@ class TestDrawing(object):
     """
 
     def test_draw_axis(self):
-        img = get_canvas(width=4, height=3, channels=1, axis=False)
+        img = get_canvas(width=4, height=3, channels=1)
         o = [0]
         x = [92]
         assert_array_equal(
@@ -42,7 +42,7 @@ class TestDrawing(object):
         )
 
     def test_draw_axis_rgba(self):
-        img = get_canvas(width=3, height=3, channels=4, axis=False)
+        img = get_canvas(width=3, height=3, channels=4)
         o = [0, 0, 0, 0]
         x = [33, 42, 51, 192]
         assert_array_equal(
@@ -63,7 +63,7 @@ class TestDrawing(object):
     def test_get_canvas(self, width, height, channels):
         assert_array_equal(
             np.zeros([height if height is not None else width, width, channels]),
-            get_canvas(width, height, channels, axis=False)
+            get_canvas(width, height, channels)
         )
 
     @pytest.mark.parametrize(('func', 'args'), [
@@ -110,7 +110,7 @@ class TestDrawing(object):
                 assert mock.called_once_with(signal, d['screen'], d['size'], d['colours'])
 
     def test_clip_samples(self):
-        with patch('akasha.utils.log.logger.warn') as log:
+        with patch('akasha.utils.log.logger.warning') as log:
             assert -1+1j == clip_samples(-3+4j)
             assert log.called_once_with("Clipping signal -- maximum magnitude was: 5.000000")
 
@@ -202,7 +202,6 @@ class TestDrawing(object):
     ])
     @pytest.mark.parametrize(('draw_func'), [
         draw_points,
-        draw_points_coo,
     ])
     def test_draw_points(self, palette, draw_func):
         """
@@ -225,7 +224,7 @@ class TestDrawing(object):
             draw_func(
                 osc[:6] * 2,
                 img=draw_axis(
-                    get_canvas(size, channels=len(palette[0]), axis=False),
+                    get_canvas(size, channels=len(palette[0])),
                     colour=palette[2]
                 ),
                 size=size,
@@ -235,7 +234,6 @@ class TestDrawing(object):
 
     @pytest.mark.parametrize(('draw_func'), [
         draw_points,
-        draw_points_coo,
         # draw_points_aa,
         # draw_points_aa_old,
     ])
@@ -262,7 +260,7 @@ class TestDrawing(object):
             ], dtype=np.uint8).transpose(1, 0, 2),
             draw_func(
                 np.linspace(0, 1+1j, 5, endpoint=True),
-                img=get_canvas(size, channels=channels, axis=False),
+                img=get_canvas(size, channels=channels),
                 size=size,
                 colours=False
             )
@@ -300,7 +298,7 @@ class TestDrawing(object):
             draw_func(
                 np.array([1, 0.5+0.5j, 0.2j, -0.8+0.8j, -0.6-0.8j]),
                 draw_axis(
-                    get_canvas(size, channels=len(palette[0]), axis=False),
+                    get_canvas(size, channels=len(palette[0])),
                     colour=palette[2]
                 ),
                 size=size,
@@ -312,10 +310,4 @@ class TestDrawing(object):
         pass
 
     def test_video_transfer(self):
-        pass
-
-    def test_show(self):
-        pass
-
-    def test_graph(self):
         pass

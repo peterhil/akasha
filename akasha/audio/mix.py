@@ -11,6 +11,8 @@ Mix sound objects together by multiplying the components
 
 import numpy as np
 
+from functools import reduce
+
 from akasha.audio.generators import Generator
 from akasha.audio.mixins import Playable
 
