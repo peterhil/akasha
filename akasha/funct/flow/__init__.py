@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
-Control module includes typing decorators, Monads and Arrows
+Flow-based programming module includes typing decorators, Monads and Arrows
 
 Copyright (c) 2011 Peter Hillerström. All rights reserved.
 

@@ -1,17 +1,16 @@
 #!/usr/bin/env python
 # encoding: utf-8
 #
-# Copyright (c) 2009-2012, Peter Hillerström <peter.hillerstrom@gmail.com>
+# Copyright (c) 2009-2017, Peter Hillerström <peter.hillerstrom@gmail.com>
 # All rights reserved.
 
 from __future__ import with_statement
 
 import sys
-# from distutils.core import setup, Command
 from setuptools import setup, Command
 
 PACKAGE_NAME = 'akasha'
-PACKAGE_VERSION = '0.0.1-dev'
+PACKAGE_VERSION = '0.1.0'
 
 # with open('README.rst', 'r') as readme:
 #     README_TEXT = readme.read()
@@ -25,7 +24,7 @@ class PyTest(Command):
     def run(self):
         import subprocess
         import sys
-        errno = subprocess.call([sys.executable, 'runtests.py', 'akasha/test'])
+        errno = subprocess.call([sys.executable, '-m', 'pytest', 'akasha/test'])
         raise SystemExit(errno)
 
 setup(
@@ -34,13 +33,18 @@ setup(
     packages=[
         'akasha',
         'akasha.audio',
+        'akasha.audio.envelope',
+        'akasha.audio.mixins',
         'akasha.control',
         'akasha.control.io',
+        'akasha.curves',
+        'akasha.dsp',
         'akasha.effects',
         'akasha.funct',
-        'akasha.funct.xoltar',
         'akasha.graphic',
         'akasha.graphic.primitive',
+        'akasha.math',
+        'akasha.math.geometry',
         'akasha.net',
         'akasha.settings',
         'akasha.types',
@@ -49,25 +53,21 @@ setup(
     package_data={
         'akasha.settings': ['keymaps/*.json'],
     },
-    requires = [
-        'PIL (==1.1.7)',
-        'Twisted (==12.2.0)',
-        'cdecimal (>=2.3)',
+    install_requires = [
+        'Pillow (>=4.2.1)',
+        'm3-cdecimal (>=2.3)',
         'funckit (==0.8.0)',
-        'ipython (>=0.13)',
-        'librosa (==0.3.1)',
-        'matplotlib (>=1.1.1)',
-        'numpy (>=1.6.2)',
-        'ordereddict (>=1.1)' if sys.version_info < (2, 7) else 'collections',
-        'pandas (>=0.16.0)',
-        'py (>=1.4.11)',
+        'ipython (>=5.4.1)',
+        'matplotlib (>=1.4.2)',
+        'numpy (>=1.11.3)',
+        'ordereddict (>=1.1)' if sys.version_info < (2, 7) else '',
+        'pandas (>=1.3.5)',
         'pygame (>=1.9.2)',
+        'scikit-image (>=0.11.2)',
         'scikits.audiolab (>=0.11.0)',
-        # 'scikit-image (>=0.7.1)',
         'scikits.samplerate (>=0.3.3)',
-        'scipy (>=0.10.0)',
-        'txosc (>=0.2.0)',
-        'wikitools (>=1.1.1)',
+        'scipy (>=0.19.0)',
+        'wikitools (==1.1.1)',
     ],
     # scripts=['bin/akasha'],
 

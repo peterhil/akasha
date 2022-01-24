@@ -5,6 +5,14 @@
 Utilities for Akasha
 """
 
+import os
+import numpy as np
+
+
+system = os.uname().sysname
+open_cmd = 'open' if system == 'Darwin' else 'xdg-open'
+
+
 def _super(self):
     """
     Easier to remember function to get the super class for self (or passed in instance).
@@ -25,6 +33,20 @@ def issequence(arg):
         and hasattr(arg, "__getitem__")
         or hasattr(arg, "__iter__")
     )
+
+
+def is_empty(signal):
+    """
+    Return true if signal is empty.
+    """
+    return np.asanyarray(signal).size == 0
+
+
+def is_silence(signal):
+    """
+    Return true if signal is empty or all zeros.
+    """
+    return np.all(np.asanyarray(signal) == 0)
 
 
 def norm_shape(shape):

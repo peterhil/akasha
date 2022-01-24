@@ -6,7 +6,7 @@
 # pylint: disable=E1101
 
 """
-Generic sound object group containers.
+Pcm sound sample module
 """
 
 import numpy as np
@@ -23,9 +23,13 @@ from akasha.timing import sampler
 from akasha.utils.log import logger
 
 
-class Pcm(FrequencyRatioMixin, Generator):
+# FIXME Make this work again at some point or remove
+# TODO Try using CZT, multiply and ICZT to make resampling faster, but not so accurate
+# TODO Rewrite if and when I manage to make the vector audio samples
+# based on clothoid curve or complex exponential spiral fitting
+class Resample(FrequencyRatioMixin, Generator):
     """
-    Playable PCM (pulse-code modulated aka sampled) sound.
+    PCM (pulse-code modulated aka sampled) sound sample that is resampled when played.
     """
     def __init__(self, snd, base = 441):
         super(self.__class__, self).__init__()
@@ -86,7 +90,7 @@ class Pcm(FrequencyRatioMixin, Generator):
             return self.snd[items]
         else:
             if isinstance(items, slice) and items.stop >= len(self):
-                logger.warn("Normalising {0} for length {1}".format(items, len(self)))
+                logger.warning("Normalising {0} for length {1}".format(items, len(self)))
                 items = slice(items.start, min(items.stop, len(self), items.step))
             # return self.resample(self.snd[items], ratio)
             return self.sc_resample(self.snd[items], ratio)
@@ -96,68 +100,3 @@ class Pcm(FrequencyRatioMixin, Generator):
         Sample the pcm sampled sound signal.
         """
         return self.resample_at_freq(items)
-
-
-class Group(FrequencyRatioMixin, Generator):
-    """
-    Group of sound objects.
-    """
-    def __init__(self, *args):
-        super(self.__class__, self).__init__()
-        self.sounds = np.array(*args, dtype=object)
-        # TODO handle zero-frequencies and non-periodic sounds:
-        self.frequency = np.min(np.ma.masked_equal(args, 0).compressed())
-
-
-class Sound(Generator):
-    """
-    Collection or composition of sound objects.
-    """
-    def __init__(self, *args):
-        super(self.__class__, self).__init__()
-        self.sounds = {}
-        for s in args:
-            self.add(s)
-
-    def sample(self, items):
-        """
-        Sample all sound objects.
-        """
-        if isinstance(items, Number):
-            # FIXME should return scalar, not array!
-            start = int(items)
-            stop = start + 1
-        elif isinstance(items, np.ndarray):
-            start = 0
-            stop = len(items)
-        else:
-            start = items.start or 0
-            stop = items.stop
-        sl = (start, stop)
-
-        sound = np.zeros((stop - start), dtype=complex)
-        for sl in self.sounds:
-            #print "Slice start %s, stop %s" % sl
-            for sndobj in self.sounds[sl]:
-                #print "Sound object %s" % sndobj
-                sound += sndobj[items]
-        return sound / max(len(self.sounds), 1.0)
-
-    def add(self, sndobj, start=0, dur=None):
-        """
-        Add a sound object.
-        """
-        if dur:
-            end = start + dur
-        elif hasattr(sndobj, "len"):
-            end = start + len(sndobj)
-        else:
-            end = None
-
-        sl = (start, end)
-
-        if (sl in self.sounds):
-            self.sounds[sl].append(sndobj)
-        else:
-            self.sounds[sl] = [sndobj]
-        return self

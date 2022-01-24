@@ -7,8 +7,6 @@
 
 import numpy as np
 
-from exceptions import TypeError, AttributeError
-
 
 class Arrow(object):
     def __init__(self, func):
@@ -36,10 +34,7 @@ class Arrow(object):
         if name in self.__dict__:
             return self.__dict__[name]
         else:
-            try:
-                return self.func.__getattribute__(name)
-            except AttributeError, e:
-                raise AttributeError(e)
+            return self.func.__getattribute__(name)
 
     def __call__(self, *args, **kargs):
         return self.func(*args, **kargs)
@@ -86,23 +81,23 @@ def compose(f, g, unpack=False):
 
 def decoratorFunctionWithArguments(arg1, arg2, arg3):
     def wrap(f):
-        print "Inside wrap()"
+        print("Inside wrap()")
 
         def wrapped_f(*args):
-            print "Inside wrapped_f()"
-            print "Decorator arguments:", arg1, arg2, arg3
+            print("Inside wrapped_f()")
+            print("Decorator arguments:", arg1, arg2, arg3)
             f(*args)
-            print "After f(*args)"
+            print("After f(*args)")
         return wrapped_f
     return wrap
 
 
 def check_args(func, *args, **kargs):
     ### TODO handle kwargs
-    print "check_args:", func, args, kargs
-    print func.__dict__
+    print("check_args:", func, args, kargs)
+    print(func.__dict__)
     for (arg, arg_type) in zip(args, func.accepts):
-        print arg, arg_type
+        print(arg, arg_type)
         if not issubclass(type(arg), arg_type):
             err = "Argument {0} has wrong type {1}, expected {2}."
             raise TypeError(err.format(arg, type(arg), arg_type))
@@ -130,13 +125,13 @@ def ftype(accepts, returns):
     to ensure correct composition of functions.
     """
     def make_decorator(func):
-        print "Inside make_decorator:", func, accepts, returns
+        print("Inside make_decorator:", func, accepts, returns)
         func.accepts = accepts
         func.returns = returns
         func.signature = {'accepts': accepts, 'returns': returns}
 
         def decorated(*args, **kargs):
-            print "Inside decorated:", args, kargs
+            print("Inside decorated:", args, kargs)
             return check_args(func, *args, **kargs)
 
         decorated.__name__ = func.__name__
@@ -145,7 +140,7 @@ def ftype(accepts, returns):
         decorated.returns = returns
         decorated.signature = {'accepts': accepts, 'returns': returns}
 
-        print "Func signature", func.signature
+        print("Func signature", func.signature)
         return decorated
 
     return make_decorator
@@ -159,9 +154,9 @@ class typed(object):
     to ensure correct composition of functions.
     """
     def __init__(self, accepts, returns):
-        print "inside init():", self, accepts, returns
+        print("inside init():", self, accepts, returns)
         self.signature = {'accepts': accepts, 'returns': returns}
-        print self.signature
+        print(self.signature)
 
     @property
     def accepts(self):
@@ -172,9 +167,9 @@ class typed(object):
         return self.signature['returns']
 
     def check_args(self, *args):
-        print "inside check_args:", self, args
+        print("inside check_args:", self, args)
         for (arg, arg_type) in zip(args, self.accepts):
-            print arg, arg_type
+            print(arg, arg_type)
             if not issubclass(type(arg), arg_type):
                 err = "Argument {0} has wrong type {1}, expected {2}."
                 raise TypeError(err.format(arg, type(arg), arg_type))
@@ -187,13 +182,13 @@ class typed(object):
 
     def __call__(self, func, *args):
         self.func = func
-        print "inside call(): args", self, func, args
+        print("inside call(): args", self, func, args)
 
         def wrap(*args):
-            print "inside wrap()", self, func, args
+            print("inside wrap()", self, func, args)
 
             def decorated(*args):
-                print "inside decorated()", self, func, args
+                print("inside decorated()", self, func, args)
                 return self.check_args(*args)
             return decorated
         wrap.__name__ = func.__name__

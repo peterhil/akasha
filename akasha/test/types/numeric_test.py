@@ -19,9 +19,10 @@ import itertools
 import operator
 import pytest
 
-from akasha.types.numeric import NumericUnit, ComplexUnit, RationalUnit, RealUnit, IntegralUnit
-from cdecimal import Decimal
+from abc import ABCMeta, abstractproperty
 from fractions import Fraction
+
+from akasha.types.numeric import NumericUnit, ComplexUnit, RationalUnit, RealUnit, IntegralUnit
 
 
 class Numeric(NumericUnit):
@@ -44,12 +45,11 @@ complex_operations = [
     'add',
     'sub',
     'mul',
-    'div',
+    'truediv',
     'pow',
 ]
 
 real_operations = complex_operations + [
-    'truediv',
     'floordiv',
     'mod',
     'ge',
@@ -75,7 +75,6 @@ class TestComplexUnit(object):
         'Rational': Fraction,
         'Real': float,
         'Complex': complex,
-        'Number': Decimal,
     }
 
     def op_params(self, operation, field):

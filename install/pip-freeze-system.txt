@@ -1,7 +1,0 @@
-distribute==0.6.24
-git-remote-helpers==0.1.0
-pygame==1.9.2pre
-vboxapi==1.0
-virtualenv==1.7
-virtualenvwrapper==2.10.1
-wsgiref==0.1.2

@@ -10,7 +10,9 @@ Adsr envelopes
 """
 
 import numpy as np
-import scipy as sc
+
+from scipy import special
+from scipy import stats
 
 from akasha.utils import _super
 
@@ -34,9 +36,13 @@ class Beta(object):
         """
         Sample beta cdf at times.
         """
+        times = times / self.time
         times = np.where(times < 0, 0, times)  # Fix NaNs for negative time values
-        beta = sc.stats.betai(self.a, self.b, times / self.time)
-        return np.clip(self.amp * beta, a_min=0, a_max=1)
+
+        beta = special.beta(self.a, self.b) * stats.beta.cdf(times, self.a, self.b)
+        clipped = np.clip(self.amp * beta, a_min=0, a_max=1)
+
+        return clipped
 
 
 class InverseBeta(Beta):

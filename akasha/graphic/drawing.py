@@ -12,11 +12,13 @@ import pygame
 import numpy as np
 
 from PIL import Image
+from builtins import range
 from scipy import sparse
 from skimage import draw as skdraw
 
 from akasha.funct import pairwise
 from akasha.graphic.colour import colorize, white
+from akasha.utils import is_silence
 from akasha.utils.log import logger
 from akasha.math import \
     as_pixels, \
@@ -39,12 +41,12 @@ def draw_axis(img, colour=None):
     if colour is None:
         colour = [42, 42, 42, 127]
     height, width, channels = img.shape
-    img[height / 2, :] = img[:, width / 2] = colour[:channels]
+    img[height // 2, :] = img[:, width // 2] = colour[:channels]
 
     return img
 
 
-def get_canvas(width=1000, height=None, channels=4, axis=True):
+def get_canvas(width=1000, height=None, channels=4):
     """
     Get a Numpy array suitable for use as a drawing canvas.
     """
@@ -53,11 +55,18 @@ def get_canvas(width=1000, height=None, channels=4, axis=True):
 
     img = np.zeros((height, width, channels), np.uint8)  # Note: y, x
 
-    # FIXME: axis argument for get_canvas should accept a colour value, or it shouldn't exist
-    if axis:
-        img = draw_axis(img)
+    return img
+
+
+def draw_blank(img):
+    """
+    """
+    black = [0, 0, 0, 255]
+    height, width, channels = img.shape
+    img[::] = black[:channels]
 
     return img
+
 
 
 def blit(screen, img):
@@ -93,25 +102,29 @@ def draw(
     if img is not None:  # Draw into existing img?
         size = img.shape[0]
     else:
-        img = get_canvas(size, axis=axis)
+        img = get_canvas(size)
 
-    if len(signal) == 0:
-        logger.warn('Drawing empty signal!')
+    if axis:
+        img = draw_axis(img)
+
+    if is_silence(signal):
+        logger.warning('Drawing empty signal!')
         return img
 
     signal = clip_samples(signal)
 
     if lines:
         if screen is None:
-            logger.warn("Drawing lines with Numpy is way too slow for now!")
+            logger.warning("Drawing lines with Numpy is way too slow for now!")
             img = draw_lines(signal, img, size, colours, antialias)
         else:
-            img = draw_lines_pg(signal, screen, size, colours, antialias)
+            img = draw_lines_pg(signal, screen, img, size, colours, antialias)
     else:
         if antialias:
             img = draw_points_aa(signal, img, size, colours)
         else:
             img = draw_points(signal, img, size, colours)
+
     return img
 
 
@@ -121,7 +134,7 @@ def clip_samples(signal):
     """
     clip_max = np.max(np.fmax(np.abs(signal.real), np.abs(signal.imag)))
     if clip_max > 1.0:
-        logger.warn("Clipping signal -- maximum magnitude was: %0.6f", clip_max)
+        logger.warning("Clipping signal -- maximum magnitude was: %0.6f", clip_max)
         return clip(signal)
     else:  # pylint: disable=R1705
         return signal
@@ -134,11 +147,12 @@ def add_alpha(rgb, opacity=255):
     return np.append(rgb, np.array([opacity] * len(rgb), dtype=np.uint8).reshape(len(rgb), 1), 1)
 
 
-def draw_lines_pg(signal, screen, size=1000, colours=True, antialias=False):
+def draw_lines_pg(signal, screen, img, size=1000, colours=True, antialias=False):
     """
     Draw (antialiased) lines with Pygame.
     """
-    img = get_canvas(size, axis=True)
+    draw_blank(img)
+    img = draw_axis(img)
     blit(screen, img)
 
     method = 'aaline' if antialias else 'line'
@@ -173,7 +187,7 @@ def draw_lines(signal, img, size=1000, colours=True, antialias=False):
 
                 # Use alpha values from lines_aa
                 color_values = np.repeat(color[:, np.newaxis], len(values), axis=1).T
-                color_values[:, 3] *= values
+                color_values[:, 3] = (values * color_values[:, 3]).astype(np.uint8)
 
                 img[x, y] += color_values
             else:
@@ -265,21 +279,6 @@ def draw_points(signal, img, size=1000, colours=True):
     return img
 
 
-# TODO: Investigate using scipy.sparse matrices to speed up things?
-# Use sparse.coo (coordinate matrix) to build the matrix, and convert to csc/csr for math.
-def draw_points_coo(signal, img, size=1000, colours=True):
-    """
-    Draw a bitmap image from a complex signal with optionally colourized pixels.
-    """
-    points = np.rint(get_points(flip_vertical(signal), size) - 0.5).astype(np.uint32)
-    coords = sparse.coo_matrix(points, dtype=np.uint32).todense()
-
-    color = add_alpha(colorize(signal)) if colours else white
-
-    img[coords[0], coords[1]] = color[..., :img.shape[2]]
-    return img
-
-
 def hist_graph(signal, size=1000):
     """
     Use Numpy histogram2d to make an image from the complex signal.
@@ -331,10 +330,10 @@ def video_transfer(signal, standard='PAL', axis='real', horiz=720):
     if isinstance(signal[0], np.complex):
         signal = getattr(signal, axis)
 
-    #for block in xrange(0, len(signal), framesize):
+    #for block in range(0, len(signal), framesize):
     #    pass # draw frame
 
-    img = get_canvas(3, vert, axis=False)  # Stretch to horiz. width later!
+    img = get_canvas(3, vert)  # Stretch to horiz. width later!
     fv = img.flat
 
     s = pcm(signal[:framesize] * 256, bits=8, axis='real').astype(np.uint8)

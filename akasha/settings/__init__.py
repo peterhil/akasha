@@ -10,6 +10,7 @@ Akasha settings module.
 
 import locale
 import numpy as np
+import six
 import sys
 import logging
 
@@ -18,13 +19,15 @@ class config(object):
     """
     Configuration class.
     """
+    BASE_FREQUENCY = 54  # 432 Hz / 8
+
     class logging_limits(object):
         """
         Various limits for logging
         """
         LOGLEVEL = logging.INFO
         FREQUENCY_DEVIATION_CENTS = 0.1
-        LOOP_THRESHOLD_PERCENT = 100
+        LOOP_THRESHOLD_PERCENT = 90
 
 
 def np_setup():
@@ -41,6 +44,6 @@ def np_setup():
     assert locale.getlocale()[1] in ('UTF8', 'UTF-8'), \
         "Unicode not enabled! Current locale is: %s.%s" % locale.getlocale()
 
-    if isinstance(sys.stdin, file):
+    if six.PY2 and isinstance(sys.stdin, file):
         assert sys.stdin.encoding == 'UTF-8', \
             "Unicode input not enabled! Current input encoding is: %s" % sys.stdin.encoding

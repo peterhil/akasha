@@ -14,7 +14,7 @@ Unit tests for ADSR envelopes
 import numpy as np
 import pytest
 
-from numpy.testing.utils import assert_array_almost_equal
+from numpy.testing import assert_array_almost_equal
 
 from akasha.audio import Delay, Scalar, Sum
 from akasha.audio.envelope import Adsr, Beta, InverseBeta

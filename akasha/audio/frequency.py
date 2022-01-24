@@ -101,7 +101,7 @@ class FrequencyRatioMixin(object):
             approx = sampler.rate * ratio
             deviation = cents_diff(freq, approx)
             if deviation > config.logging_limits.FREQUENCY_DEVIATION_CENTS:
-                logger.warn("Frequency approx %f for ratio %s deviates from %.3f by %.16f%% cents" % \
+                logger.warning("Frequency approx %f for ratio %s deviates from %.3f by %.16f%% cents" % \
                             (approx, ratio, freq, deviation))
         return ratio
 
@@ -222,10 +222,6 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
             return self.ratio == Frequency(float(other)).ratio
         else:
             return NotImplemented
-
-    def __nonzero__(self):
-        """Nonzero?"""
-        return self._hz != 0
 
     # TODO: Implement pickling
     # http://docs.python.org/library/pickle.html#the-pickle-protocol

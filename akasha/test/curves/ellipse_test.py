@@ -16,7 +16,7 @@ from __future__ import division
 import pytest
 import numpy as np
 
-from numpy.testing.utils import assert_array_almost_equal
+from numpy.testing import assert_array_almost_equal
 
 from akasha.curves import Ellipse
 from akasha.math import pi2
@@ -26,18 +26,59 @@ def ellipse_parameters(ellipse):
     return np.array([ellipse.a, ellipse.b, ellipse.angle, ellipse.origin])
 
 
+def axis_orientations(a=2.0, b=1.0):
+    return np.array([
+        [ 1,  1],
+        [-1,  1],
+        [-1, -1],
+        [ 1, -1],
+    ]) * (a, b)
+
+
+half = 1 / 2 * pi2
+sixth = 1 / 6 * pi2
+
+
 class TestEllipse(object):
 
-    @pytest.mark.parametrize(('a', 'b'), [
-        [2, 1],
-        [1, 2],
-        # TODO Rotate angle with these on Ellipse.__init__()
-        [-1, 2],
-        [1, -2],
-    ])
-    def test_init_major_axis(self, a, b):
-        ell = Ellipse(a, b)
-        assert ell.a > ell.b > 0, 'A should be the semi-major axis and greater than B!'
+    @pytest.mark.parametrize(('params', 'expected'), [
+        [( 2,  1, sixth), ( 2,  1, sixth)],
+        [(-2,  1, sixth), ( 2,  1, sixth + half)],
+        [(-2, -1, sixth), ( 2,  1, sixth + half)],
+        [( 2, -1, sixth), ( 2,  1, sixth)],
+        ])
+    def test_init_normalisation(self, params, expected):
+        ell = Ellipse(*params)
+        assert_array_almost_equal(ellipse_parameters(ell)[:3], expected)
+
+    @pytest.mark.parametrize(('params', 'expected'), [
+        # B as semi-major axis
+        [( 1,  2, sixth), ( 1,  2, sixth)],
+        [(-1, -2, sixth), ( 1,  2, sixth + half)],
+        ])
+    def test_init_normalisation_b_major(self, params, expected):
+        ell = Ellipse(*params)
+        assert_array_almost_equal(ellipse_parameters(ell)[:3], expected)
+
+    @pytest.mark.parametrize(('angle'), [
+        half,
+        -sixth,
+        -3 * half,
+        ])
+    def test_init_angle(self, angle):
+        ell = Ellipse(2, 1, angle)
+        assert ell.angle == (angle % pi2), 'Ellipse angle should be modulo pi2!'
+
+    @pytest.mark.parametrize(('ab', 'majmin'), [
+        [( 2,  1), (2, 1)],
+        [( 3,  4), (4, 3)],
+        [(-6,  5), (6, 5)],
+        [(-7, -8), (8, 7)]
+        ])
+    def test_major_minor_axes(self, ab, majmin):
+        ell = Ellipse(*ab)
+        assert ell.major > ell.minor > 0, 'The semi-major axis should be greater than the semi-minor axis!'
+        assert (ell.major, ell.minor) == majmin
 
     def test_at(self):
         ell = Ellipse(1, 0.707, pi2 * 1/8)
@@ -114,12 +155,13 @@ class TestEllipse(object):
             np.array([ell.a, ell.b, ell.angle, ell.origin])
         )
 
+    @pytest.mark.xfail()
     @pytest.mark.parametrize(('ellipse', 'coefficients'), [
-        # (
-        #     Ellipse(0.514256, 0.375, angle=-1.353736, origin=-0.207206-0.156022j),
-        #     np.array([0.258716, 0.052086, 0.146368, 0.115342, 0.056466, -0.020835])
-        # ),
         # https://math.stackexchange.com/questions/993625/ellipse-3x2-x6xy-3y5y2-0-what-are-the-semi-major-and-semi-minor-axes-dis
+        (
+            Ellipse(0.514256, 0.375, angle=-1.353736, origin=-0.207206-0.156022j),
+            np.array([0.258716, 0.052086, 0.146368, 0.115342, 0.056466, -0.020835])
+        ),
         (
             Ellipse(
                 np.sqrt(7.0 / (12.0 * (4.0 + np.sqrt(10)))),
@@ -129,7 +171,7 @@ class TestEllipse(object):
             ),
             np.array([3, 6, 5, -1, -3, 0], dtype=np.float64)
         ),
-    ])
+        ])
     def test_general_coefficients(self, ellipse, coefficients):
         # coefficients = np.array([ 0.258716,  0.052086,  0.146368,  0.115342,  0.056466, -0.020835])
         # ellipse = Ellipse(0.514256, 0.375, angle=-1.353736, origin=-0.207206-0.156022j)
@@ -138,6 +180,7 @@ class TestEllipse(object):
             coefficients
         )
 
+    @pytest.mark.xfail()
     def test_ellipse_from_general_coefficients(self):
         coefficients = np.array([ 0.445 , -0.39  ,  0.445 ,  0.036 ,  0.164 , -0.1368])
         ellipse = Ellipse.from_general_coefficients(*coefficients)
@@ -154,27 +197,10 @@ class TestEllipse(object):
             err_msg='Ellipse does not match the original'
         )
 
+    @pytest.mark.xfail()
     def test_general_coefficients_cycle(self):
         ell = Ellipse(0.514256, 0.375, angle=-1.353736, origin=-0.207206-0.156022j)
         assert_array_almost_equal(
             ell.general_coefficients,
             Ellipse.from_general_coefficients(*ell.general_coefficients).general_coefficients
-        )
-
-    samples = np.linspace(0, 1, 17, endpoint=False)
-    ellipse_params = [
-        [ 0.75, 0.125, {'angle': -0.375 * pi2, 'origin': -0.15-0.25j }],
-        # Failure of the Fitzgibbon algorithm - degenerate cases?:
-        [ 0.75,  0.25, {'angle': -0.375 * pi2, 'origin': -0.15-0.25j }],
-        [ 0.75,  0.35, {'angle':  0.375 * pi2, 'origin': -0.15-0.25j }],
-    ]
-
-    @pytest.mark.parametrize(('fit_method'), ['fitzgibbon', 'halir'])
-    @pytest.mark.parametrize(('a', 'b', 'kwargs'), ellipse_params)
-    def test_ellipse_fit_points(self, fit_method, a, b, kwargs):
-        original = Ellipse(a, b, **kwargs)
-        fitted = Ellipse.fit_points(original.at(self.samples), method=fit_method)
-        assert_array_almost_equal(
-            ellipse_parameters(fitted),
-            ellipse_parameters(original)
         )
