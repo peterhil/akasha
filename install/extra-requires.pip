@@ -1,14 +1,24 @@
 -r dev-requires.pip
+
 # Cython==0.21.2
 # Louie==1.1
 # intervaltree
 # librosa==0.3.1
 # pyinter
 # wxpython>=4.0.6  # For Maplotlib wxAgg backend
-PyAudio  # Portaudio bindings
-#sndfile
-#-e git+https://github.com/sangoma/sndfile#egg=sndfile-dev
-soundfile
-#-e git+https://github.com/bastibe/SoundFile#egg=soundfile-dev
-python-wavefile
-#-e git+https://github.com/vokimon/python-wavefile#egg=python-wavefile
+
+## Alternative audio IO libraries
+
+PyAudio>=0.2.11  # portaudio bindings
+
+scikits.audiolab>=0.11.0
+
+-e git+https://github.com/cournape/samplerate#egg=scikits.samplerate
+
+# sndfile
+# -e git+https://github.com/sangoma/sndfile#egg=sndfile-dev
+
+# sounddevice>=0.4.1
+
+soundfile>=0.10.2
+# -e git+https://github.com/bastibe/SoundFile#egg=soundfile-dev

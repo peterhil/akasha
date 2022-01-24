@@ -14,7 +14,7 @@ from scipy.signal import hilbert
 from scikits.audiolab import Format, Sndfile, available_file_formats, available_encodings
 
 from akasha.timing import sampler, time_slice
-from akasha.control.io import relative_path
+from akasha.io import file_extension, relative_path
 
 
 defaults = {
@@ -44,19 +44,32 @@ def get_format(*args, **kwargs):
 
 # Audiolab read, write and play
 
-def play(sndobj, axis='imag', fs=sampler.rate, dur=5.0, start=0, time=False):
+def play(
+        sndobj,
+        dur=5.0,
+        start=0,
+        axis='imag',
+        fs=sampler.rate
+    ):
     """
     Play out a sound.
     """
-    time = time_slice(dur, start, time)
+    time = time_slice(dur, start)
     if isinstance(sndobj[0], np.floating):
         axis = 'real'
     audiolab.play(getattr(sndobj[time], axis), fs)
 
 
-def write(sndobj, filename='test_sound', axis='imag', fmt=Format(**defaults),
-          fs=sampler.rate, dur=5.0, start=0, time=False,
-          sdir=relative_path('../../Sounds/2010_Python_Resonance/')):
+def write(
+        sndobj,
+        filename='test_sound',
+        fmt=default_format,
+        dur=5.0,
+        start=0,
+        axis='imag',
+        fs=sampler.rate,
+        sdir=relative_path('../../Sounds/Out/'),
+    ):
     """
     Write a sound file.
     """
@@ -67,7 +80,7 @@ def write(sndobj, filename='test_sound', axis='imag', fmt=Format(**defaults),
 
     filename = filename + '_' + axis + '.' + fmt.file_format
 
-    time = time_slice(dur, start, time)
+    time = time_slice(dur, start)
     data = getattr(sndobj[time], axis)
 
     if np.ndim(data) <= 1:
@@ -84,8 +97,14 @@ def write(sndobj, filename='test_sound', axis='imag', fmt=Format(**defaults),
         hdl.close()
 
 
-def read(filename, dur=5.0, start=0, time=False, fs=sampler.rate, complex=True,
-         sdir=relative_path('../../Sounds/_Music samples/'), *args, **kwargs):
+def read(
+        filename,
+        dur=5.0,
+        start=0,
+        fs=sampler.rate,
+        complex=True,
+        sdir=relative_path('../../Sounds/_Music samples/'),
+    ):
     """
     Read a sound file in.
     """
@@ -96,16 +115,18 @@ def read(filename, dur=5.0, start=0, time=False, fs=sampler.rate, complex=True,
     if filename[0] != '/':
         filename = '/'.join([sdir, filename])  # Relative path
 
-    format = os.path.splitext(filename)[1][1:]
-    check_format(format)
-    time = time_slice(dur, start, time)
+    extension = file_extension(filename)
+    check_format(extension)
+    time = time_slice(dur, start)
 
     # Get and call appropriate reader function
-    func = getattr(audiolab, format + 'read')
+    func = getattr(audiolab, extension.lower() + 'read')
     (data, fs, enc) = func(filename, last=time.stop, first=time.start)
 
+    # Make mono
+    # TODO Enable stereo and multichannel
     if data.ndim > 1:
-        data = data.transpose()[-1]  # Make mono, take left [0] or right [-1] channel.
+        data = data.transpose()[-1]
 
     if complex:
         return hilbert(data)

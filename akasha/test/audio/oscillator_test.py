@@ -24,8 +24,8 @@ from akasha.timing import sampler
 from akasha.math import map_array, to_phasor, pi2
 
 from fractions import Fraction
-from numpy.testing.utils import assert_array_almost_equal
-from numpy.testing.utils import assert_array_almost_equal_nulp as assert_nulp_diff
+from numpy.testing import assert_array_almost_equal
+from numpy.testing import assert_array_almost_equal_nulp as assert_nulp_diff
 
 
 class TestOscillator(object):

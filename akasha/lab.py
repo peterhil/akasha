@@ -9,6 +9,14 @@ from __future__ import absolute_import
 
 import funcy
 import numpy as np
+import sys
+
+# Workaround for a Virtualenv bug from year 2011!
+# https://github.com/pypa/virtualenv/issues/54
+if sys.version_info < (3, 0, 0):
+    import matplotlib
+    matplotlib.use('TkAgg')
+
 import pylab as lab
 
 lab.interactive(True)
@@ -29,12 +37,15 @@ from akasha.audio.noise import *
 from akasha.audio.oscillator import *
 from akasha.audio.overtones import Overtones
 from akasha.audio.scalar import Scalar
-from akasha.audio.resample import Resample
+# from akasha.audio.resample import Resample
 from akasha.audio.sum import Sum
 from akasha.audio.padsynth import *
 
-# from akasha.control.io.audio import play, write, read
-from akasha.control.io.keyboard import *
+if sys.version_info < (3, 0, 0):
+    from akasha.io.audio import play, write, read
+else:
+    from akasha.io.sfaudio import play, write, read
+from akasha.io.keyboard import *
 
 from akasha.curves import *
 
