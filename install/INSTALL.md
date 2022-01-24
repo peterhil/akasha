@@ -35,7 +35,11 @@ Follow these steps to install the dependencies.
     pyenv virtualenv -f --python python3.6 --pip 21.1.2 3.6.13 akasha-36
     workon akasha-36
 
- Not recommended for Python 2, see notes below.
+[Building Framework Python] on MacOS:
+
+    env PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.6.13
+
+Not recommended for Python 2, see notes below.
 
 ### Using venv module
 
@@ -62,6 +66,7 @@ Use graphically installed [Framework Python] or some other backend than `macosx`
     conda install python.app
     # Then somehow use ipython with pythonw?!
 
+[Building Framework Python]: https://github.com/pyenv/pyenv/wiki#how-to-build-cpython-with-framework-support-on-os-x
 [Framework Python]: https://docs.python.org/3/using/mac.html
 [Matplotlib needs]: https://matplotlib.org/faq/osx_framework.html
 [support openssl@1.0]: https://github.com/pyenv/pyenv/issues/950
@@ -106,22 +111,23 @@ Use graphically installed [Framework Python] or some other backend than `macosx`
 	pip install -r install/dev-requires.pip  # For development
 	pip install -r install/extra-requires.pip  # For development extras
 
-## 6. Start experimenting
+## 6. Start experimenting with bpython or ipython
 
-    ipython
+```
+from akasha.lab import *
 
-    from akasha.lab import *
-    e = Exponential(-0.987, amp=0.9)
-    s = Super(6, 1.5, 1.5, 1.5)
-    o = Osc(220, curve=s)
-    h = Harmonics(o, n=1, rand_phase=False)
-    snd = Mix(e, h)
+e = Exponential(-0.957, amp=0.75)
+s = Super(5, 1.7, 1.7, 1)
+o = Osc(108, curve=s)
+h = Overtones(o, n=5, rand_phase=False)
+snd = Mix(e, h)
 
-    # Animate and play
-    anim(snd, antialias=True, lines=True)
+# Animate and play
+anim(snd, antialias=True, lines=True)
 
-    # Graph signal
-    graph(snd, antialias=True, lines=True)
+# Graph signal
+graph(snd, antialias=True, lines=True)
 
-    # Plot signal using Matplotlib
-    plot_signal(snd[:5*sampler.rate])
+# Plot signal using Matplotlib
+plot_signal(snd[:5*sampler.rate])
+```
