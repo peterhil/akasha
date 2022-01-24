@@ -5,7 +5,12 @@
 Utilities for Akasha
 """
 
+import os
 import numpy as np
+
+
+system = os.uname().sysname
+open_cmd = 'open' if system == 'Darwin' else 'xdg-open'
 
 
 def _super(self):
