@@ -12,12 +12,13 @@ import logging
 import numpy as np
 
 from akasha.timing import sampler
-from akasha.types import colour_values, colour_result
 from akasha.utils.decorators import memoized
 from akasha.utils.log import logger
 from akasha.math import fixnans, distances, minfloat, pad, pi2, rad_to_deg, rad_to_tau
 
 
+colour_result = np.uint8
+colour_values = np.float32
 lowest_audible_hz = 16.35
 white = np.array([255, 255, 255, 255])
 
