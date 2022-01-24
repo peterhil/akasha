@@ -25,4 +25,8 @@ akasha.egg-info/
 build/
 dist/
 
+debug_*.py
 src/
+
+.direnv/
+*.core

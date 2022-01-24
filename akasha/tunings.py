@@ -14,22 +14,21 @@ http://www.youtube.com/watch?v=0j-YXgXTpoA
 
 from __future__ import division
 
-import exceptions
 import numpy as np
 import operator as op
 
 from fractions import Fraction
-from funckit import xoltar as fx
 
 from akasha.audio.oscillator import Frequency
-from akasha.control.io.keyboard import kb, pos
+from akasha.io.keyboard import kb, pos
+from akasha.settings import config
 from akasha.utils.log import logger
 from akasha.math import pi2, find_closest_index, map_array
 
 
 class EqualTemperament(object):
     """
-    Equal temperament tuning: 
+    Equal temperament tuning:
     http://en.wikipedia.org/wiki/Equal_temperament
     """
     def __init__(self, n=12, scale=2.0):
@@ -157,7 +156,7 @@ class WickiLayout(AbstractLayout):
     #
     # Good for testing with 44100 Hz sampling rate
 
-    def __init__(self, base=Frequency(441.0), origo=(1, 5), generators=(
+    def __init__(self, base=Frequency(config.BASE_FREQUENCY), origo=(1, 5), generators=(
             # LucyTuning.L(3) * LucyTuning.s(1), LucyTuning.s(1)
             (Fraction(3,2), Fraction(9,8)) # Pythagorean or Just intonation (3-limit)
             # EqualTemperament(5).generators
@@ -175,7 +174,7 @@ class WickiLayout(AbstractLayout):
             self.gen = generators
             self.origo = origo
         else:
-            raise exceptions.AttributeError(
+            raise AttributeError(
                 "Expected two generators, got: {0!r}".format(generators))
 
     def get(self, *pos):
@@ -194,7 +193,7 @@ class PianoLayout(AbstractLayout):
     """
     Classical piano layout.
     """
-    def __init__(self, base=Frequency(441.0), origo=(1, 5)):
+    def __init__(self, base=Frequency(config.BASE_FREQUENCY), origo=(1, 5)):
         self.base = base
         self.origo = origo
         self.gen = 2 ** (1 / 12.0)

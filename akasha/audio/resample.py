@@ -90,7 +90,7 @@ class Resample(FrequencyRatioMixin, Generator):
             return self.snd[items]
         else:
             if isinstance(items, slice) and items.stop >= len(self):
-                logger.warn("Normalising {0} for length {1}".format(items, len(self)))
+                logger.warning("Normalising {0} for length {1}".format(items, len(self)))
                 items = slice(items.start, min(items.stop, len(self), items.step))
             # return self.resample(self.snd[items], ratio)
             return self.sc_resample(self.snd[items], ratio)

@@ -19,14 +19,6 @@ from akasha.math.geometry import circumcircle_radius, circumcircle_radius_alt, i
 from akasha.math import all_equal, complex_as_reals, div_safe_zero, pi2
 
 
-debug = True
-
-
-if debug:
-    import pylab as lab
-    from akasha.graphic.plotting import plotting
-
-
 def circle_curvature(a, b, c):
     """
     Discrete curvature estimation.
@@ -41,7 +33,7 @@ def estimate_curvature(signal):
     return np.array([circle_curvature(*points) for points in consecutive(signal, 3)])
 
 
-def ellipse_curvature(para):
+def ellipse_curvature(para, debug=False):
     """
     Fit ellipse from three points using conjugate diameters.
     """
@@ -55,19 +47,25 @@ def ellipse_curvature(para):
     ell = Ellipse.from_conjugate_diameters(points)
 
     if debug:
+        import pylab as lab
+        from akasha.graphic.plotting import plotting
+
         with plotting():
             lab.plot(*complex_as_reals(ell.at(np.linspace(0, 1, 200))))
 
     return ell.curvature(np.angle(points[0] - ell.origin) / pi2)
 
 
-def estimate_curvature_with_ellipses(signal):
-    res = np.array([ellipse_curvature(points) for points in consecutive(signal, 3)])
+def estimate_curvature_with_ellipses(signal, debug=False):
+    res = np.array([ellipse_curvature(points, debug) for points in consecutive(signal, 3)])
 
     if debug:
+        import pylab as lab
+        from akasha.graphic.plotting import plotting
+
         with plotting():
+            lab.interactive(True)
             lab.plot(*complex_as_reals(signal), color='k')
             lab.axis('equal')
-            lab.savefig('/Users/peterhil/Desktop/ellipse_curvature.png', dpi=300)
 
     return res

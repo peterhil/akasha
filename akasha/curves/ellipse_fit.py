@@ -38,7 +38,7 @@ def ellipse_fit_fitzgibbon(points):
     size = len(x)
 
     # Build design matrix
-    design = np.matrix([
+    design = np.array([
         x * x,
         x * y,
         y * y,
