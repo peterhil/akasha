@@ -108,7 +108,3 @@ handler = logging.StreamHandler(sys.stderr)
 handler.setFormatter(relformatter)
 logger.addHandler(handler)
 logger.setLevel(config.logging_limits.LOGLEVEL)
-
-
-if __name__ == '__main__':
-    pass

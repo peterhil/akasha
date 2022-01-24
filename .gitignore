@@ -29,3 +29,4 @@ debug_*.py
 src/
 
 .direnv/
+*.core

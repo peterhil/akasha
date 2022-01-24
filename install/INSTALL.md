@@ -111,22 +111,23 @@ Use graphically installed [Framework Python] or some other backend than `macosx`
 	pip install -r install/dev-requires.pip  # For development
 	pip install -r install/extra-requires.pip  # For development extras
 
-## 6. Start experimenting
+## 6. Start experimenting with bpython or ipython
 
-    ipython
+```
+from akasha.lab import *
 
-    from akasha.lab import *
-    e = Exponential(-0.987, amp=0.9)
-    s = Super(6, 1.5, 1.5, 1.5)
-    o = Osc(220, curve=s)
-    h = Harmonics(o, n=1, rand_phase=False)
-    snd = Mix(e, h)
+e = Exponential(-0.957, amp=0.75)
+s = Super(5, 1.7, 1.7, 1)
+o = Osc(108, curve=s)
+h = Overtones(o, n=5, rand_phase=False)
+snd = Mix(e, h)
 
-    # Animate and play
-    anim(snd, antialias=True, lines=True)
+# Animate and play
+anim(snd, antialias=True, lines=True)
 
-    # Graph signal
-    graph(snd, antialias=True, lines=True)
+# Graph signal
+graph(snd, antialias=True, lines=True)
 
-    # Plot signal using Matplotlib
-    plot_signal(snd[:5*sampler.rate])
+# Plot signal using Matplotlib
+plot_signal(snd[:5*sampler.rate])
+```
