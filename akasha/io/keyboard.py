@@ -20,7 +20,7 @@ import numpy as np
 from builtins import range
 
 from akasha import settings
-from akasha.control.io import relative_path
+from akasha.io import relative_path
 
 
 #  E1234567890123 456 789E

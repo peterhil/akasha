@@ -61,7 +61,7 @@ setup(
         'matplotlib (>=1.4.2)',
         'numpy (>=1.11.3)',
         'ordereddict (>=1.1)' if sys.version_info < (2, 7) else '',
-        'pandas (>=0.20.1)',
+        'pandas (>=1.3.5)',
         'pygame (>=1.9.2)',
         'scikit-image (>=0.11.2)',
         'scikits.audiolab (>=0.11.0)',
