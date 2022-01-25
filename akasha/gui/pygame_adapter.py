@@ -8,6 +8,7 @@ Pygame GUI module
 import pygame as pg
 
 from akasha.math import pcm
+from akasha.settings import config
 from akasha.timing import sampler
 from akasha.utils import issequence
 from akasha.utils.log import logger
@@ -67,14 +68,17 @@ class PygameGui:
         if issequence(args) and 0 < len(args) <= 3:
             pg.mixer.init(*args)
         else:
-            pg.mixer.init(frequency=sampler.rate, size=-16, channels=1, buffer=512)
+            pg.mixer.init(frequency=sampler.rate,
+                          size=config.audio.SAMPLETYPE,
+                          channels=config.audio.CHANNELS,
+                          buffer=config.audio.BUFFERSIZE)
 
         logger.info(
             "Mixer has %s Hz sample rate with %s size samples and %s channels." %
             pg.mixer.get_init()
         )
 
-        return pg.mixer.find_channel()
+        return pg.mixer.find_channel(force=True)
 
     def cleanup(self):
         """
@@ -105,7 +109,7 @@ class PygameGui:
         """
         Queue samples into a mixer channel.
         """
-        return channel.queue(pg.sndarray.make_sound(pcm(samples)))
+        return channel.queue(pg.sndarray.make_sound(pcm(samples, bits=config.audio.SAMPLETYPE)))
 
     @staticmethod
     def key_pause(event):

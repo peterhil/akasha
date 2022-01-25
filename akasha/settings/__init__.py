@@ -24,6 +24,12 @@ class sampling(object):
     NEGATIVE = False
 
 
+class audio(object):
+    BUFFERSIZE = 512
+    CHANNELS = 1
+    SAMPLETYPE = -16
+
+
 class frequency(object):
     BASE = 54.0  # 432 Hz / 8
     AUDIBLE_MIN = 1.0
@@ -45,6 +51,7 @@ class config(object):
     """
     Configuration class.
     """
+    audio = audio
     frequency = frequency
     sampling = sampling
     logging_limits = logging_limits

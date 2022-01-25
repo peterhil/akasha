@@ -596,12 +596,20 @@ def numberof(items):
     """
     return items if np.isscalar(items) else len(items)
 
+
 def pcm(signal, bits=16, axis='imag'):
     """
     Get a pcm sound with integer samples from the complex signal,
     that is playable and usable with most audio libraries.
     """
-    return np.cast['int' + str(bits)](getattr(signal, axis) * (2 ** bits / 2.0 - 1))
+    real = getattr(signal, axis)
+    abs_bits = np.abs(bits) # Pygame mixer uses negative ints to indicate uint type
+    if isinstance(bits, np.float):
+        return np.cast['float' + str(int(abs_bits))](real)
+    else:
+        scale = 2 ** (abs_bits - 1) - 1
+        int_type = 'uint' if bits < 0 else 'int'
+        return np.cast[int_type + str(abs_bits)](real * scale)
 
 
 def rms(signal):
