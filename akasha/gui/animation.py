@@ -12,6 +12,7 @@ from __future__ import division
 
 import numpy as np
 
+from akasha.audio.frequency import Frequency
 from akasha.audio.mixins.releasable import Releasable
 from akasha.graphic.drawing import get_canvas
 from akasha.gui.widgets import ComplexView, VideoTransferView
@@ -138,18 +139,18 @@ def handle_input(gui, snd, watch, event):
             logger.info("Rewind")
             return True  # reset
         # Arrows
-        elif gui.keyup(event):
+        elif gui.key_up(event):
             if gui.key_alt(event):
                 sampler.change_frametime(rel=step_size)
             else:
                 # keyboard.move(-2, 0)
-                keyboard.base *= 2.0
+                keyboard.base = np.clip(keyboard.base * 2.0, a_min=Frequency(1), a_max=Frequency.from_ratio(1, 4))
         elif gui.key_down(event):
             if gui.key_alt(event):
                 sampler.change_frametime(rel=-step_size)
             else:
                 # keyboard.move(2, 0)
-                keyboard.base /= 2.0
+                keyboard.base = np.clip(keyboard.base / 2.0, a_min=Frequency(1), a_max=Frequency.from_ratio(1, 2))
         elif gui.key_left(event):
             keyboard.move(0, 1)
         elif gui.key_right(event):
@@ -158,6 +159,7 @@ def handle_input(gui, snd, watch, event):
         elif hasattr(snd, 'frequency'):
             change_frequency(snd, event.key)
             return True  # reset
+        logger.debug('Keyboard base: %s', keyboard.base)
     # Key up
     elif (gui.keyup(event) and hasattr(snd, 'frequency')):
         if gui.key_caps_lock(event):
