@@ -26,7 +26,7 @@ keyboard = WickiLayout()
 # keyboard = PianoLayout()
 
 
-def anim(snd, size=800, name='Resonance', gui=PygameGui(),
+def anim(snd, size=800, name='Resonance', gui=PygameGui,
          antialias=True, lines=False, colours=True,
          mixer_options=(), style='complex'):
     """
@@ -36,8 +36,8 @@ def anim(snd, size=800, name='Resonance', gui=PygameGui(),
         "Akasha animation is using %s Hz sampler rate and %s fps video rate.",
         sampler.rate, sampler.videorate
     )
-
     sampler.paused = True if hasattr(snd, 'frequency') else False
+    gui = gui()
     screen = gui.init(name, size)
     channel = gui.init_mixer(*mixer_options)
 
