@@ -65,7 +65,7 @@ class FrequencyRatioMixin(object):
         The wrapped and antialised rational approximation of self's frequency.
         This should be used when sampling the signal.
         """
-        return self.wrap(self.antialias(self.to_ratio(self._hz)))
+        return self.antialias(self.to_ratio(self._hz))
 
     @property
     def hz(self):

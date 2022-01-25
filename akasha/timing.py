@@ -24,7 +24,7 @@ class Sampler(object):
     A sampler object, providing parameters for sampling.
     """
 
-    def __init__(self, rate=44100, frametime=40, antialias=True, allow_negative=False):
+    def __init__(self, rate=44100, frametime=40, antialias=False, allow_negative=False):
         """
         Parameters:
         -----------
