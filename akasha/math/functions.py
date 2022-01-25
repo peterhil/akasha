@@ -596,7 +596,7 @@ def numberof(items):
     """
     return items if np.isscalar(items) else len(items)
 
-def pcm(signal, bits=16, axis='real'):
+def pcm(signal, bits=16, axis='imag'):
     """
     Get a pcm sound with integer samples from the complex signal,
     that is playable and usable with most audio libraries.
