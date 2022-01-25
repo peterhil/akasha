@@ -202,8 +202,8 @@ def handle_input(gui, snd, watch, event):
                 snd.frequency, ratio, event.pos[1], snd.pitch_bend,
                 scale[0], scale[len(scale)//2], scale[-1]
             )
-    else:
-        logger.debug("Other: %s", event)
+    # else:
+    #     logger.debug("Other: %s", event)
     return
 
 
