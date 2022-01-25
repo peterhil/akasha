@@ -144,13 +144,13 @@ def handle_input(gui, snd, watch, event):
                 sampler.change_frametime(rel=step_size)
             else:
                 # keyboard.move(-2, 0)
-                keyboard.base = np.clip(keyboard.base * 2.0, a_min=Frequency(1.6875), a_max=Frequency(6_912))
+                keyboard.base = np.clip(keyboard.base * 2.0, a_min=Frequency(6.75), a_max=Frequency(6_912))
         elif gui.key_down(event):
             if gui.key_alt(event):
                 sampler.change_frametime(rel=-step_size)
             else:
                 # keyboard.move(2, 0)
-                keyboard.base = np.clip(keyboard.base / 2.0, a_min=Frequency(1.6875), a_max=Frequency(6_912))
+                keyboard.base = np.clip(keyboard.base / 2.0, a_min=Frequency(6.75), a_max=Frequency(6_912))
         elif gui.key_left(event):
             keyboard.move(0, 1)
         elif gui.key_right(event):
@@ -211,7 +211,7 @@ def change_frequency(snd, key):
     """
     Change frequency of the sound based on key position.
     """
-    frequency = np.clip(keyboard.get_frequency(key), a_min=Frequency(13.5), a_max=Frequency.from_ratio(1, 4))
+    frequency = np.clip(keyboard.get_frequency(key), a_min=Frequency(1.6875), a_max=Frequency.from_ratio(1, 3))
     snd.frequency = frequency or snd.frequency
     if isinstance(snd, Releasable):
         snd.release_at(None)
