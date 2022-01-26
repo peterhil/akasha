@@ -10,8 +10,9 @@ Graphic line drawing functions.
 
 import numpy as np
 
-from akasha.types import assert_type, signed
 from akasha.math import complex_as_reals
+from akasha.types.simple import signed
+from akasha.utils.assertions import assert_type
 
 from skimage import draw as skdraw
 
