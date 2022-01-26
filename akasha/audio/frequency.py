@@ -11,11 +11,12 @@ What's the frequency Kenneth?
 
 from __future__ import division
 
-import numpy as np
 import operator
 
 from fractions import Fraction
 from numbers import Number, Real
+
+import numpy as np
 
 from akasha.audio.generators import PeriodicGenerator
 from akasha.timing import sampler
@@ -28,6 +29,8 @@ from akasha.settings import config
 
 
 def is_audible(frequency):
+    """Is the frequency audible?
+    """
     audible = {
         'min': config.frequency.AUDIBLE_MIN,
         'max': config.frequency.AUDIBLE_MAX,
@@ -36,6 +39,8 @@ def is_audible(frequency):
 
 
 def octaves():
+    """Audible octaves based on config.frequency.BASE
+    """
     frequencies = config.frequency.BASE * 2.0 ** np.arange(-10, 15)
     return np.fromiter(filter(is_audible, frequencies), dtype=np.float64)
 
@@ -50,7 +55,7 @@ class FrequencyRatioMixin(object):
     _hz = 0.0
 
     @classmethod
-    def from_ratio(cls, ratio, den=False, *args, **kwargs):
+    def from_ratio(cls, ratio, den=False, *args, **kwargs):  # pylint: disable=W1113
         """
         New instance from fractional ratio.
         """
@@ -81,8 +86,7 @@ class FrequencyRatioMixin(object):
         ratio = self.antialias(self.to_ratio(self._hz))
         if not sampler.prevent_aliasing or sampler.negative_frequencies:
             return self.wrap(ratio)
-        else:
-            return ratio
+        return ratio
 
     @property
     def hz(self):
@@ -121,8 +125,10 @@ class FrequencyRatioMixin(object):
             if deviation > config.logging_limits.FREQUENCY_DEVIATION_CENTS:
                 logger.warning(
                     "Frequency approx %f for ratio %s deviates from "
-                    "%.3f by %.16f%% cents" %
-                    (approx, ratio, freq, deviation))
+                    "%.3f by %.16f%% cents",
+                    approx, ratio,
+                    freq, deviation
+                )
         return ratio
 
     @staticmethod
@@ -158,10 +164,9 @@ class FrequencyRatioMixin(object):
             # pylint: disable=C0111,E1102
             if isinstance(other, FrequencyRatioMixin):
                 return op(self.ratio, other.ratio)
-            elif isinstance(other, Number):
+            if isinstance(other, Number):
                 return op(float(self), float(other))
-            else:
-                return NotImplemented
+            return NotImplemented
 
         comparison.__name__ = '__' + op.__name__ + '__'
         comparison.__doc__ = op.__doc__
@@ -240,8 +245,7 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
         Frequency's initialisation."""
         if isinstance(other, Real):
             return self.ratio == Frequency(float(other)).ratio
-        else:
-            return NotImplemented
+        return NotImplemented
 
     # TODO: Implement pickling
     # http://docs.python.org/library/pickle.html#the-pickle-protocol
