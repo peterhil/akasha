@@ -106,7 +106,7 @@ def cents(*args):
     array([[   0.        ,  104.9554095 ,  203.91000173,  297.51301613,
              386.31371386,  470.78090733,  551.31794236,  628.27434727]])
     """
-    return 1200.0 * np.log2(args)
+    return np.sign(args) * 1200.0 * np.log2(np.abs(args))
 
 
 def cents_diff(a, b):
