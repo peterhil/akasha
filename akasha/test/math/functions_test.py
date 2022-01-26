@@ -16,7 +16,7 @@ import numpy as np
 
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
-from akasha.funct import pairwise
+from akasha.funct.itertools import pairwise
 from akasha.math import *
 
 

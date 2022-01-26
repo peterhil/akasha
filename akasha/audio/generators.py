@@ -13,7 +13,7 @@ import numpy as np
 
 from builtins import range
 
-from akasha.funct import blockwise
+from akasha.funct.itertools import blockwise
 from akasha.timing import sampler
 
 

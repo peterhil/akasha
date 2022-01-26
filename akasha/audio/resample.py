@@ -18,7 +18,7 @@ from akasha import dsp
 
 from akasha.audio.frequency import FrequencyRatioMixin, Frequency
 from akasha.audio.generators import Generator
-from akasha.funct import blockwise
+from akasha.funct.itertools import blockwise
 from akasha.timing import sampler
 from akasha.utils.log import logger
 from akasha.utils.python import _super

@@ -8,7 +8,7 @@ import soundfile as sf
 from scipy.signal import hilbert
 
 from akasha.audio.channels import num_channels
-from akasha.funct import blockwise
+from akasha.funct.itertools import blockwise
 from akasha.io import file_extension, relative_path
 from akasha.timing import sampler, time_slice
 from akasha.utils.log import logger

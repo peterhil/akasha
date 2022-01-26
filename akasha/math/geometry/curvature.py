@@ -14,7 +14,7 @@ from __future__ import division
 import numpy as np
 
 from akasha.curves import Ellipse
-from akasha.funct import consecutive
+from akasha.funct.itertools import consecutive
 from akasha.math.geometry import circumcircle_radius, circumcircle_radius_alt, is_collinear
 from akasha.math import all_equal, complex_as_reals, div_safe_zero, pi2
 

@@ -6,6 +6,9 @@
 
 """
 Functional programming utility functions.
+
+Mostly from itertools recipes:
+http://docs.python.org/library/itertools.html#recipes
 """
 
 import collections
@@ -16,8 +19,6 @@ from itertools import count, islice, tee
 
 from akasha.utils.log import logger
 
-
-# itertools recipes -- http://docs.python.org/library/itertools.html#recipes
 
 def take(n, iterable):
     """

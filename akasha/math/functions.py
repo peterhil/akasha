@@ -23,7 +23,7 @@ else:
 from cmath import rect
 from fractions import Fraction
 
-from akasha.funct import blockwise
+from akasha.funct.itertools import blockwise
 from akasha.timing import sampler
 from akasha.utils.log import logger
 

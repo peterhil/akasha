@@ -13,7 +13,7 @@ from __future__ import division
 
 import numpy as np
 
-from akasha.funct import consecutive
+from akasha.funct.itertools import consecutive
 from akasha.math import cartesian, distances, normalize, overlap, pad_left, pi2, repeat
 
 

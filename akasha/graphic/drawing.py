@@ -16,7 +16,7 @@ from builtins import range
 from scipy import sparse
 from skimage import draw as skdraw
 
-from akasha.funct import pairwise
+from akasha.funct.itertools import pairwise
 from akasha.graphic.colour import colorize, white
 from akasha.utils.array import is_silence
 from akasha.utils.log import logger
