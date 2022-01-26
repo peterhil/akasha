@@ -17,7 +17,7 @@ import pytest
 from akasha.audio.oscillator import Osc
 from akasha.graphic.drawing import *
 from akasha.utils.log import logger
-from akasha.test import assert_equal_image
+from akasha.test.utils.assertions import assert_equal_image
 
 from mock import patch
 from numpy.testing import assert_array_equal
