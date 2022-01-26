@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
+class Timed(object):
+    """
+    Time some code using with statement.
+    """
+    elapsed = 0
+
+    def __enter__(self):
+        self.start = timer()
+        return self
+
+    def __exit__(self, *args):
+        self.end = timer()
+        self.elapsed = self.end - self.start
+
+    def __float__(self):
+        return float(self.elapsed)
