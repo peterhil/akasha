@@ -39,7 +39,7 @@ half = 1 / 2 * pi2
 sixth = 1 / 6 * pi2
 
 
-class TestEllipse(object):
+class TestEllipse():
 
     @pytest.mark.parametrize(('params', 'expected'), [
         [( 2,  1, sixth), ( 2,  1, sixth)],

@@ -27,7 +27,7 @@ from itertools import imap, islice
 
 ### Time related functions ###
 
-class sampler(object):
+class sampler():
     """
     Sampler.
     """

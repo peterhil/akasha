@@ -6,7 +6,7 @@ Oop design patterns module
 """
 
 
-class Singleton(object):
+class Singleton():
     """
     Create a singleton.
     Use as a mixin to make all instances of a class singletons.

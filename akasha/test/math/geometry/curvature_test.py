@@ -19,7 +19,7 @@ from akasha.math.geometry.curvature import estimate_curvature, estimate_curvatur
 from numpy.testing import assert_array_almost_equal
 
 
-class TestEstimateCurvatureWithCircles(object):
+class TestEstimateCurvatureWithCircles():
     """
     Unit tests for curvature estimation using circumcircle radius.
     """

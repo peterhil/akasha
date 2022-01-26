@@ -28,7 +28,7 @@ from numpy.testing import assert_array_almost_equal
 from numpy.testing import assert_array_almost_equal_nulp as assert_nulp_diff
 
 
-class TestOscillator(object):
+class TestOscillator():
     """Test oscillator"""
 
     def test_class(self):
@@ -76,7 +76,7 @@ class TestOscillator(object):
         assert o == eval(repr(o))
 
 
-class TestOscRoots(object):
+class TestOscRoots():
     """Test root generating functions."""
 
     def test_root_func_sanity(self):

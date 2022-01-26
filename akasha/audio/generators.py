@@ -17,7 +17,7 @@ from akasha.funct.itertools import blockwise
 from akasha.timing import sampler
 
 
-class Generator(object):
+class Generator():
     """
     Sound generator base class.
     """

@@ -27,7 +27,7 @@ from akasha.curves import Super
 from akasha.timing import sampler
 
 
-class TestMix(object):
+class TestMix():
     """Test mixing sound objects"""
 
     def get_fixture(self, f1=345.6, f2=436, rate=-1):
@@ -77,7 +77,7 @@ class TestMix(object):
         assert m.frequency == 420
 
 
-class TestReplacingHarmonics(object):
+class TestReplacingHarmonics():
     """Test replacing Harmonics class with Mix objects"""
 
     def test_mix_overtones(self):

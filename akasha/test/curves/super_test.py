@@ -22,7 +22,7 @@ from akasha.math import normalize
 from akasha.utils.patterns import Singleton
 
 
-class TestSuper(object):
+class TestSuper():
 
     pts = np.arange(0, 1, 1.0 / 8, dtype=np.float64)
 

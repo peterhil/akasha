@@ -23,7 +23,7 @@ from akasha.utils.log import logger, logging
 from akasha.math import map_array, normalize, as_polar, as_rect
 
 
-class Magnet(object):
+class Magnet():
     """
     Model magnetization direction of particles.
 

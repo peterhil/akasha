@@ -17,7 +17,7 @@ from scipy import stats
 from akasha.utils.python import _super
 
 
-class Beta(object):
+class Beta():
     """
     Envelope curves using beta distribution's cumulative distribution functions,
     that are stretched to some time scale.

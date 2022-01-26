@@ -1,7 +1,7 @@
 from akasha.graphic.drawing import draw_blank, get_canvas, blit, draw, video_transfer
 
 
-class ComplexView(object):
+class ComplexView():
     """
     Show a sound signal on screen.
     """
@@ -30,7 +30,7 @@ class ComplexView(object):
             blit(self.surface, img)
 
 
-class VideoTransferView(object):
+class VideoTransferView():
     """
     Show a sound signal using the old video tape audio recording technique.
     See: http://en.wikipedia.org/wiki/44100_Hz#Recording_on_video_equipment

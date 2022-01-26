@@ -23,7 +23,7 @@ from mock import patch
 from numpy.testing import assert_array_equal
 
 
-class TestDrawing(object):
+class TestDrawing():
     """
     Unit tests for drawing module.
     """

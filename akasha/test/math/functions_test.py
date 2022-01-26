@@ -20,7 +20,7 @@ from akasha.funct.itertools import pairwise
 from akasha.math import *
 
 
-class TestMath(object):
+class TestMath():
     """
     Test math functions.
     """
@@ -48,7 +48,7 @@ class TestMath(object):
         assert np.round(db_fs(amplitude), 2) == expected
 
 
-class TestPrimes(object):
+class TestPrimes():
     """
     Test prime functions.
     """

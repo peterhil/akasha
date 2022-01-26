@@ -8,7 +8,7 @@ Decorators module
 from akasha.utils.log import logger
 
 
-class memoized(object):
+class memoized():
     """Decorator that caches a function's return value each time it is called.
     If called later with the same arguments, the cached value is returned, and
     not re-evaluated.

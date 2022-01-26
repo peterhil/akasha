@@ -11,7 +11,7 @@ Functional timing module.
 import numpy as np
 
 
-class sampler(object):
+class sampler():
     """
     Sampler.
     """

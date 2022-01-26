@@ -6,7 +6,7 @@ import numpy as np
 from akasha.utils.array import is_empty
 
 
-class Watch(object):
+class Watch():
     def __init__(self, maxstops=5):
         self.paused = 0
         self.maxstops = maxstops

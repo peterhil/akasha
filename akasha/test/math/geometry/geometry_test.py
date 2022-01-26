@@ -20,7 +20,7 @@ from numpy.testing import assert_array_almost_equal
 from akasha.math import all_equal
 
 
-class TestGeometryFunctions(object):
+class TestGeometryFunctions():
     """
     Unit tests for geometry functions.
     """
@@ -55,7 +55,7 @@ class TestGeometryFunctions(object):
         assert midpoint(a, b) == expected
 
 
-class TestCircumcircleRadius(object):
+class TestCircumcircleRadius():
     """
     Unit tests for circumcircle radius.
     """

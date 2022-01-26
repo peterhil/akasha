@@ -17,7 +17,7 @@ from akasha.settings import config
 from akasha.utils.log import logger
 
 
-class Sampler(object):
+class Sampler():
     """
     A sampler object, providing parameters for sampling.
     """

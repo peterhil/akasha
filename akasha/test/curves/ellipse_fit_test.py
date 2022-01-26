@@ -23,7 +23,7 @@ from akasha.test.curves.ellipse_test import ellipse_parameters
 from akasha.timing import sampler
 
 
-class TestEllipseFit(object):
+class TestEllipseFit():
     para = np.array([ 0.375+0.125j,  0.000+0.5j,  -0.750-0.25j ])
     ell = Ellipse.from_conjugate_diameters(para)
     times = sampler.slice(0, sampler.rate, 4410)

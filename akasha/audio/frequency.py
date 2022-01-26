@@ -45,7 +45,7 @@ def octaves():
     return np.fromiter(filter(is_audible, frequencies), dtype=np.float64)
 
 
-class FrequencyRatioMixin(object):
+class FrequencyRatioMixin():
     """Mixin to enable memoization of sound objects with Frequency
     through rational approximation.
     """

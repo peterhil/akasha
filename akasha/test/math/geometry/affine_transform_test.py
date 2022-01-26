@@ -19,7 +19,7 @@ from akasha.math.geometry.affine_transform import AffineTransform
 from numpy.testing import assert_array_almost_equal
 
 
-class TestAffineTransform(object):
+class TestAffineTransform():
     """
     Unit tests for AffineTransform class.
     """

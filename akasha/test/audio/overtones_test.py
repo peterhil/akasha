@@ -23,7 +23,7 @@ from akasha.audio.scalar import Scalar
 from akasha.timing import sampler
 
 
-class TestOvertones(object):
+class TestOvertones():
     """
     Tests for Overtones
     """

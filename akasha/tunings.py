@@ -26,7 +26,7 @@ from akasha.utils.log import logger
 from akasha.math import pi2, find_closest_index, map_array
 
 
-class EqualTemperament(object):
+class EqualTemperament():
     """
     Equal temperament tuning:
     http://en.wikipedia.org/wiki/Equal_temperament
@@ -77,7 +77,7 @@ class EqualTemperament(object):
         return "<%s: %s>" % (self.__class__.__name__, self.n)
 
 
-class LucyTuning(object):
+class LucyTuning():
     """
     Lucy tuning:
     http://www.lucytune.com/
@@ -117,7 +117,7 @@ class LucyTuning(object):
 
 
 
-class AbstractLayout(object):
+class AbstractLayout():
     """
     Abstract base class for musical keyboard layouts.
     """

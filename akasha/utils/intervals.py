@@ -10,7 +10,7 @@ from __future__ import absolute_import
 from builtins import range
 
 
-class Interval(object):
+class Interval():
     """
     Interval.
     """
@@ -36,7 +36,7 @@ class Interval(object):
         return "%s(%s, %s)" % (self.__class__.__name__, self.inf, self.sup)
 
 
-class IntervalTree(object):
+class IntervalTree():
     """
     Interval tree.
 
@@ -116,7 +116,7 @@ class IntervalTree(object):
         return sorted(intervals, key=lambda x: x.inf)
 
 
-class Node(object):
+class Node():
     """
     Interval tree node.
     """

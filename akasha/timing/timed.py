@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-class Timed(object):
+class Timed():
     """
     Time some code using with statement.
     """

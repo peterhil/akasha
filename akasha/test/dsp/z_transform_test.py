@@ -25,7 +25,7 @@ z_transforms = [
     ]
 
 
-class TestZTransform(object):
+class TestZTransform():
     """Test chirp z-transform."""
 
     @pytest.mark.parametrize(('Z',), z_transforms)
@@ -68,7 +68,7 @@ class TestZTransform(object):
             )
 
 
-class TestInverseZTransform(object):
+class TestInverseZTransform():
     """Test inverse chirp z-transform."""
 
     def test_iczt(self):

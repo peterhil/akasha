@@ -65,7 +65,7 @@ integral_operations = real_operations + [
 ]
 
 
-class TestComplexUnit(object):
+class TestComplexUnit():
     """Test algebraic field mixin."""
 
     unit = Complex

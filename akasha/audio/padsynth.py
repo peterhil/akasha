@@ -23,7 +23,7 @@ from akasha.audio.frequency import Frequency
 from akasha.math import normalize, random_phasor
 
 
-class GaussianCurve(object):
+class GaussianCurve():
 
     def __init__(self, frequency, sigma, scale=1.0, base=0.0):
         self.frequency = frequency
@@ -38,7 +38,7 @@ class GaussianCurve(object):
         return "{0}({1}, {2}, {3}, {4})".format(self.__class__.__name__, self.frequency, self.sigma, self.scale, self.base)
 
 
-class GaussianFrequencyCurve(object):
+class GaussianFrequencyCurve():
 
     def __init__(self, freqs, sigmas):
         self.gaussians = [GaussianCurve(f, s) for f, s in zip(freqs, sigmas)]
@@ -54,7 +54,7 @@ def random_phases(reals):
     return reals * random_phasor(len(reals), 1)
 
 
-class Padsynth(object):
+class Padsynth():
 
     def __init__(self, freqs, sigmas):
         self.curve = GaussianFrequencyCurve(freqs, sigmas)

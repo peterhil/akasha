@@ -34,7 +34,7 @@ class LinearGenerator(Generator):
         return np.array(iterable) * float(self.ratio)
 
 
-class TestGenerator(object):
+class TestGenerator():
     """Test generator"""
 
     def test_class(self):
@@ -79,7 +79,7 @@ class TestGenerator(object):
 # Out[54]: [array([10, 11, 12])] <-- SHOULD be array(11, 12)!!!
 
 
-class TestPeriodicGenerator(object):
+class TestPeriodicGenerator():
     """Test periodic generator"""
 
     @classmethod

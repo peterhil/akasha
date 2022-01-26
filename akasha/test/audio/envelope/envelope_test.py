@@ -22,7 +22,7 @@ from akasha.timing import sampler
 from akasha.math import minfloat
 
 
-class TestExponential(object):
+class TestExponential():
     """
     Tests for Exponential envelope curves.
     """

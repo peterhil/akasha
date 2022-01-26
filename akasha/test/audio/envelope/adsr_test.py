@@ -20,7 +20,7 @@ from akasha.audio import Delay, Scalar, Sum
 from akasha.audio.envelope import Adsr, Beta, InverseBeta
 
 
-class TestAdsr(object):
+class TestAdsr():
     """
     Tests for ADSR envelopes.
     """

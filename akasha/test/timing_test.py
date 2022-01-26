@@ -19,7 +19,7 @@ from numpy.testing import assert_array_almost_equal
 from akasha.timing import sampler
 
 
-class TestSampler(object):
+class TestSampler():
     """Test sampler"""
 
     @pytest.mark.parametrize(('dtype', 'times'), [

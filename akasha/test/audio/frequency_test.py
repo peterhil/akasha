@@ -29,7 +29,7 @@ from akasha.types.numeric import NumericUnit, ComplexUnit, RealUnit
 from akasha.math import cents_diff
 
 
-class TestFrequencyRatioMixin(object):
+class TestFrequencyRatioMixin():
     """
     Test Frequency ratios.
     """
@@ -115,7 +115,7 @@ class TestFrequencyRatioMixin(object):
         assert int(self.hz) == int(Frequency(self.hz))
 
 
-class TestFrequencyAliasing(object):
+class TestFrequencyAliasing():
     """
     Test (preventing the) aliasing of frequencies out of range 0 to sample rate.
     """
@@ -159,7 +159,7 @@ class TestFrequencyAliasing(object):
         assert self.freq(self.negative).ratio == self.negative % 1
 
 
-class TestFrequency(object):
+class TestFrequency():
     """
     Test frequencies
     """

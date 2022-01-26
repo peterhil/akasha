@@ -24,7 +24,7 @@ from akasha.audio.time import Chrono, ps, ns, us, ms, seconds, minutes, hours, d
 from akasha.types.numeric import RealUnit
 
 
-class TestChrono(object):
+class TestChrono():
     """
     Tests of time
     """

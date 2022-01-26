@@ -4,7 +4,7 @@
 import numpy as np
 
 
-class Composite(object):
+class Composite():
     """
     Mixin to create composite sound object from components.
     """

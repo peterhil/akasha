@@ -15,7 +15,7 @@ import logging
 from akasha.settings import config
 
 
-class ansi(object):
+class ansi():
     """
     ANSI colour codes
     """
@@ -80,7 +80,7 @@ class ansi(object):
         self.RESET = ''
 
 
-class ColorFormatter(logging.Formatter, object):
+class ColorFormatter(logging.Formatter):
     """
     Color log formatter, that maps log levels to colors.
     """

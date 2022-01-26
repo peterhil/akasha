@@ -66,7 +66,7 @@ def ops(op):
     return forward, reverse
 
 
-class NumericUnit(object):
+class NumericUnit():
     """
     Base numeric unit mixin for automatic arithmetic operations.
     """
