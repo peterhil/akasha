@@ -33,9 +33,9 @@ class Osc(FrequencyRatioMixin, PeriodicGenerator):
         return self.curve.at(self.frequency.at(t))
 
     @property
-    def sample(self):
+    def cycle(self):
         """
-        Sample one period of the oscillator curve with the current frequency.
+        One cycle of the oscillator curve with the current frequency.
         """
         return self.curve.at(Frequency.angles(self.ratio))
 

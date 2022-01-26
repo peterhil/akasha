@@ -158,7 +158,7 @@ def resonator_comb(
     Apply a resonating IIR filter comb to a signal.
     """
     # Is dampen double the Q value?
-    roots = Osc(1).sample
+    roots = Osc(1).cycle
     fs = sampler.rate
     out = normalize(
         pad(signal[:int(round(sp_dur * fs))], -1, int(round(playtime * fs - sp_dur * fs)), 0) +

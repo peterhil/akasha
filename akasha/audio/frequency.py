@@ -221,8 +221,8 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
         return ratio.numerator * np.arange(0, 1, step, dtype=np.float64)
 
     @property
-    def sample(self):
-        """Sample one period of the Frequency
+    def cycle(self):
+        """Frequency cycle of one period
         """
         return self.angles(self.ratio)
 

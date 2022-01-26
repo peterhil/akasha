@@ -58,11 +58,11 @@ class TestOscillator(object):
         expected = Circle.roots_of_unity(7)
         assert_array_almost_equal(o[iter(range(0, 44100, 6300))], expected)
 
-    def test_sample(self):
+    def test_cycle(self):
         o, p = 1, sampler.rate
         expected = np.exp(1j * pi2 * o * np.arange(0, 1.0, 1.0 / p, dtype=np.float64))
         assert_nulp_diff(
-            Osc.from_ratio(o, p).sample,
+            Osc.from_ratio(o, p).cycle,
             expected,
             1
         )
@@ -82,7 +82,7 @@ class TestOscRoots(object):
     def test_root_func_sanity(self):
         """It should give sane values."""
         wi = 2 * np.pi * 1j
-        a = Osc.from_ratio(1, 8).sample
+        a = Osc.from_ratio(1, 8).cycle
         b = np.array([
             +1 + 0j, np.exp(wi * 1 / 8),
             +0 + 1j, np.exp(wi * 3 / 8),
@@ -109,7 +109,7 @@ class TestOscRoots(object):
             angles = map_array(fractional_angle, np.arange(0, period), method='vec')
             angles = 180 - ((180 - angles) % 360)  # wrap 'em to -180..180!
 
-            a = to_phasor(o.sample)
+            a = to_phasor(o.cycle)
             b = np.array(list(zip([1] * period, angles)))
 
             assert_nulp_diff(a.real, b.real, nulp=25)  # FIXME: nulp should be smaller!

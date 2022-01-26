@@ -93,11 +93,11 @@ class TestPeriodicGenerator(object):
 
     def test_getitem_with_slice(self):
         assert_array_equal(
-            self.o.sample,
+            self.o.cycle,
             self.o[::]
         )
         assert_array_equal(
-            Osc.from_ratio(1, 3).sample,
+            Osc.from_ratio(1, 3).cycle,
             self.o[:3:2]
         )
         assert_array_equal(

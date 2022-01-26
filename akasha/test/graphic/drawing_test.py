@@ -99,7 +99,7 @@ class TestDrawing(object):
             'screen': None,
         }
 
-        signal = Osc.from_ratio(1, 3).sample
+        signal = Osc.from_ratio(1, 3).cycle
         d = draw_defaults.copy()
         d.update(args)
 
@@ -114,9 +114,9 @@ class TestDrawing(object):
             assert -1+1j == clip_samples(-3+4j)
             assert log.called_once_with("Clipping signal -- maximum magnitude was: 5.000000")
 
-    def test_clip_samples_noop(self):
+    def test_clip_cycle_noop(self):
         o = Osc.from_ratio(1, 16)
-        assert_array_equal(o.sample, clip_samples(o.sample))
+        assert_array_equal(o.cycle, clip_samples(o.cycle))
 
     @pytest.mark.parametrize('rgb', [
         [

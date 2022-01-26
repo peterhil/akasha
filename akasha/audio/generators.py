@@ -91,9 +91,9 @@ class PeriodicGenerator(Generator):
             stop = start + (element_count * step)
             item = np.arange(*(slice(start, stop, step).indices(stop)))
         if np.isscalar(item):
-            return self.sample[np.array(item, dtype=np.int64) % self.period]
+            return self.cycle[np.array(item, dtype=np.int64) % self.period]
         else:
-            return self.sample[np.fromiter(item, dtype=np.int64) % self.period]
+            return self.cycle[np.fromiter(item, dtype=np.int64) % self.period]
 
     def at(self, t):
         """

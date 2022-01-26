@@ -234,11 +234,11 @@ class TestFrequency(object):
             1
         )
 
-    def test_sample(self):
+    def test_cycle(self):
         ratio = Fraction(3, 17)
         assert_array_equal(
             Frequency.angles(ratio),
-            Frequency.from_ratio(ratio).sample
+            Frequency.from_ratio(ratio).cycle
         )
 
     def test_repr(self):
