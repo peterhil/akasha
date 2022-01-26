@@ -27,6 +27,15 @@ from akasha.math import cents_diff
 from akasha.settings import config
 
 
+def is_audible(frequency):
+    return config.frequency.AUDIBLE_MIN < frequency < config.frequency.AUDIBLE_MAX
+
+
+def octaves():
+    frequencies = config.frequency.BASE * 2.0 ** np.arange(-10, 15)
+    return np.fromiter(filter(is_audible, frequencies), dtype=np.float64)
+
+
 class FrequencyRatioMixin(object):
     """
     Mixin to enable memoization of sound objects with Frequency through rational approximation.
@@ -65,7 +74,7 @@ class FrequencyRatioMixin(object):
         The wrapped and antialised rational approximation of self's frequency.
         This should be used when sampling the signal.
         """
-        return self.wrap(self.antialias(self.to_ratio(self._hz)))
+        return self.antialias(self.to_ratio(self._hz))
 
     @property
     def hz(self):

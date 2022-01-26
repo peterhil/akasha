@@ -15,6 +15,7 @@ import numpy as np
 
 from timeit import default_timer as timer
 
+from akasha.settings import config
 from akasha.utils import is_empty
 from akasha.utils.log import logger
 
@@ -24,7 +25,13 @@ class Sampler(object):
     A sampler object, providing parameters for sampling.
     """
 
-    def __init__(self, rate=44100, frametime=40, antialias=True, allow_negative=False):
+    def __init__(
+        self,
+        rate=config.sampling.RATE,
+        frametime=config.sampling.FRAMETIME,
+        antialias=config.sampling.ANTIALIAS,
+        allow_negative=config.sampling.NEGATIVE,
+        ):
         """
         Parameters:
         -----------

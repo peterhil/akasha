@@ -156,7 +156,7 @@ class WickiLayout(AbstractLayout):
     #
     # Good for testing with 44100 Hz sampling rate
 
-    def __init__(self, base=Frequency(config.BASE_FREQUENCY), origo=(1, 5), generators=(
+    def __init__(self, base=Frequency(config.frequency.BASE), origo=(1, 5), generators=(
             # LucyTuning.L(3) * LucyTuning.s(1), LucyTuning.s(1)
             (Fraction(3,2), Fraction(9,8)) # Pythagorean or Just intonation (3-limit)
             # EqualTemperament(5).generators
@@ -193,7 +193,7 @@ class PianoLayout(AbstractLayout):
     """
     Classical piano layout.
     """
-    def __init__(self, base=Frequency(config.BASE_FREQUENCY), origo=(1, 5)):
+    def __init__(self, base=Frequency(config.frequency.BASE), origo=(1, 5)):
         self.base = base
         self.origo = origo
         self.gen = 2 ** (1 / 12.0)
