@@ -15,7 +15,7 @@ import numpy as np
 
 from akasha.curves.circle import Circle
 from akasha.curves.curve import Curve
-from akasha.utils import issequence
+from akasha.utils.array import is_sequence
 from akasha.math import pi2, normalize
 
 
@@ -45,7 +45,7 @@ class Super(Curve):
         If b is missing, but a provided, it will be given the value of a.
         Arguments n, p and q are handled similarly. Missing values are filled from the left.
         """
-        if issequence(m):
+        if is_sequence(m):
             superness = np.repeat(None, 6)
             superness[:min(len(m), 6)] = np.array(m[:6], dtype=np.float64)
             # if len(superness) < 6:

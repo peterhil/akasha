@@ -16,7 +16,7 @@ import numpy as np
 from timeit import default_timer as timer
 
 from akasha.settings import config
-from akasha.utils import is_empty
+from akasha.utils.array import is_empty
 from akasha.utils.log import logger
 
 

@@ -17,7 +17,7 @@ import pylab
 from akasha.dsp.window import sliding_window
 from akasha.dsp.z_transform import czt
 from akasha.timing import sampler
-from akasha.utils import issequence
+from akasha.utils.array import is_sequence
 
 
 def stft(signal, n_fft=2048, frame_size=None, hop=None, window=np.hamming, roll=True, normalize=True, wargs=[]):
@@ -121,7 +121,7 @@ def windowed_frames(signal, n_fft=2048, frame_size=None, hop=None, window=np.ham
 
     if isinstance(window, types.FunctionType):
         window_array = window(frame_size, *wargs, sym=False)
-    elif issequence(window):
+    elif is_sequence(window):
         if len(window) == frame_size:
             window_array = np.asarray(window)
         else:

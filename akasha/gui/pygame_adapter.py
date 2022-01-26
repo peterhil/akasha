@@ -10,7 +10,7 @@ import pygame as pg
 from akasha.math import pcm
 from akasha.settings import config
 from akasha.timing import sampler
-from akasha.utils import issequence
+from akasha.utils.array import is_sequence
 from akasha.utils.log import logger
 
 
@@ -65,7 +65,7 @@ class PygameGui:
         pg.mixer.quit()
 
         # Set mixer defaults: sample rate, sample size, number of channels, buffer size
-        if issequence(args) and 0 < len(args) <= 3:
+        if is_sequence(args) and 0 < len(args) <= 3:
             pg.mixer.init(*args)
         else:
             pg.mixer.init(frequency=sampler.rate,

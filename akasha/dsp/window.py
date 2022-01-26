@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 #
 # E1101: Module 'x' has no 'y' member
-#
 # pylint: disable=E1101
 
 """
@@ -13,7 +12,7 @@ import numpy as np
 
 from numpy.lib.stride_tricks import as_strided
 
-from akasha.utils import norm_shape
+from akasha.utils.array import norm_shape
 
 
 __all__ = ['sliding_window']
