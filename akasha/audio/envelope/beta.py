@@ -6,7 +6,7 @@
 # pylint: disable=E1101
 
 """
-Adsr envelopes
+Beta envelopes
 """
 
 import numpy as np
