@@ -47,12 +47,3 @@ class Gamma(Generator):
 
     def __str__(self):
         return "<%s: shape=%s, scale=%s>" % (self.__class__.__name__, self.shape, self.scale)
-
-
-class Timbre(Generator):
-    """
-    Defines an envelope timbre for frequencies.
-    """
-
-    def __init__(self):
-        _super(self).__init__()
