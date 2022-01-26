@@ -18,6 +18,7 @@ from akasha.audio.oscillator import Osc
 
 from akasha.timing import sampler
 from akasha.utils.decorators import memoized
+from akasha.utils.python import _super
 from akasha.math import random_phasor, map_array, normalize, pi2
 
 
@@ -32,7 +33,7 @@ class Harmonics(FrequencyRatioMixin, Generator):
             func=lambda x: 1 + x,
             damping=None,
             rand_phase=False):
-        super(self.__class__, self).__init__()
+        _super(self).__init__()
         self.base = sndobj
         # TODO Setting ovt.frequency (ovt._hz) leaves ovt.base.frequency (ovt.base._hz)
         # where it was -- is this the desired behaviour?

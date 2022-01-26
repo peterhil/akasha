@@ -17,6 +17,7 @@ from akasha.audio.envelope.beta import Beta, InverseBeta
 from akasha.audio.envelope.exponential import Exponential
 from akasha.audio.generators import Generator
 from akasha.timing import sampler
+from akasha.utils.python import _super
 
 
 class Gamma(Generator):
@@ -25,7 +26,7 @@ class Gamma(Generator):
     """
 
     def __init__(self, shape=1.0, scale=1.0):
-        super(self.__class__, self).__init__()
+        _super(self).__init__()
 
         if isinstance(shape, tuple):
             self.shape, self.scale = shape
@@ -54,4 +55,4 @@ class Timbre(Generator):
     """
 
     def __init__(self):
-        super(self.__class__, self).__init__()
+        _super(self).__init__()

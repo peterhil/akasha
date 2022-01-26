@@ -15,6 +15,7 @@ else:
 
 from akasha.audio.generators import Generator
 from akasha.timing import sampler
+from akasha.utils.python import _super
 
 
 class DTMF(Generator):
@@ -92,7 +93,7 @@ class DTMF(Generator):
     )
 
     def __init__(self, sequence, pulselength=0.07, pause=0.05):
-        super(self.__class__, self).__init__()
+        _super(self).__init__()
 
         self.sequence = sequence.upper()
         self.pulselength = pulselength

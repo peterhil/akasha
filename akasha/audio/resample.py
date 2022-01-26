@@ -21,6 +21,7 @@ from akasha.audio.generators import Generator
 from akasha.funct import blockwise
 from akasha.timing import sampler
 from akasha.utils.log import logger
+from akasha.utils.python import _super
 
 
 # FIXME Make this work again at some point or remove
@@ -32,7 +33,7 @@ class Resample(FrequencyRatioMixin, Generator):
     PCM (pulse-code modulated aka sampled) sound sample that is resampled when played.
     """
     def __init__(self, snd, base = 441):
-        super(self.__class__, self).__init__()
+        _super(self).__init__()
         self._hz = Frequency(base)
         self.base_freq = Frequency(base)
         self.snd = snd

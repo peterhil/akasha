@@ -12,6 +12,7 @@ from numbers import Real
 from akasha.curves import Circle
 from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import PeriodicGenerator
+from akasha.utils.python import _super
 
 
 class Osc(FrequencyRatioMixin, PeriodicGenerator):
@@ -19,7 +20,7 @@ class Osc(FrequencyRatioMixin, PeriodicGenerator):
     Generic oscillator which has a closed curve and a frequency.
     """
     def __init__(self, freq, curve=Circle()):
-        super(self.__class__, self).__init__()
+        _super(self).__init__()
         if not isinstance(freq, Real):
             raise TypeError("Argument 'freq' must be a real number.")
         self._hz = Frequency(freq)

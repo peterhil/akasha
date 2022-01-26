@@ -20,7 +20,7 @@ from numbers import Number, Real
 from akasha.audio.generators import PeriodicGenerator
 from akasha.timing import sampler
 from akasha.types.numeric import RealUnit
-from akasha.utils import _super
+from akasha.utils.python import _super
 from akasha.utils.decorators import memoized
 from akasha.utils.log import logger
 from akasha.math import cents_diff
@@ -182,7 +182,7 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
     Frequency class
     """
     def __init__(self, hz, unwrapped=False):
-        super(self.__class__, self).__init__()
+        _super(self).__init__()
         if not isinstance(hz, Real):
             raise TypeError("Argument 'hz' must be a real number.")
         self._hz = float(hz)  # Original frequency, independent of sampling rate or optimizations

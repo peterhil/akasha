@@ -9,7 +9,7 @@ from __future__ import division
 
 import skimage.transform as skt
 
-from akasha.utils import _super
+from akasha.utils.python import _super
 from akasha.math import as_complex, complex_as_reals
 
 

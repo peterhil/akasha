@@ -14,7 +14,7 @@ import numpy as np
 from scipy import special
 from scipy import stats
 
-from akasha.utils import _super
+from akasha.utils.python import _super
 
 
 class Beta(object):

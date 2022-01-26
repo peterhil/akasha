@@ -15,6 +15,7 @@ else:
 from timeit import default_timer as clock
 
 from akasha.types.numeric import RealUnit
+from akasha.utils.python import _super
 
 
 getcontext().prec = 32
@@ -30,7 +31,7 @@ class Chrono(RealUnit):
     """
 
     def __init__(self, secs):
-        super(self.__class__, self).__init__()
+        _super(self).__init__()
         self._sec = Decimal(float(secs))
 
     @property

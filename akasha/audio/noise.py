@@ -23,6 +23,7 @@ from akasha.audio.frequency import Frequency
 from akasha.audio.generators import Generator
 from akasha.math import normalize, numberof, pi2, random_phasor
 from akasha.timing import sampler
+from akasha.utils.python import _super
 
 
 class Noise(Generator):
@@ -31,7 +32,7 @@ class Noise(Generator):
     """
 
     def __init__(self, domain_fn=None, random_fn=np.random.random):
-        super(self.__class__, self).__init__()
+        _super(self).__init__()
         self.function = domain_fn or self.unit_disc
         self.randomizer = random_fn
 
@@ -137,7 +138,7 @@ class Mandelbrot(Generator):
     The iterator is always kept inside the unit disc.
     """
     def __init__(self, z=None, c=None, random=False):
-        super(self.__class__, self).__init__()
+        _super(self).__init__()
 
         if random:
             self.z = random_phasor()[0]
@@ -184,7 +185,7 @@ class Chaos(Generator):
     # TODO: Make into generic iterator using Generator
 
     def __init__(self, gen=Mandelbrot(random=True), envelope=Exponential(0, amp=0.5)):
-        super(self.__class__, self).__init__()
+        _super(self).__init__()
         self.gen = gen
         self.envelope = envelope  # TODO: Leave out of sound objects, and compose when sampling?
 
