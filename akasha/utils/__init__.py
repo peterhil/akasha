@@ -71,14 +71,3 @@ def norm_shape(shape):
     except TypeError:
         pass  # shape was not iterable
     raise TypeError('shape must be an int, or a tuple of ints')
-
-
-def trace_c(frame, event, arg):
-    """
-    Trace C calls for debugging.
-
-    Usage: sys.settrace(trace_c)
-    """
-    if event == 'c_call' or arg is not None and 'IPython' not in frame.f_code.co_filename:
-        print("%s, %s: %d" % (event, frame.f_code.co_filename, frame.f_lineno))
-    return trace
