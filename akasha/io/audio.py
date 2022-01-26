@@ -14,7 +14,7 @@ from scipy.signal import hilbert
 from scikits.audiolab import Format, Sndfile, available_file_formats, available_encodings
 
 from akasha.timing import sampler, time_slice
-from akasha.io import file_extension, relative_path
+from akasha.io.path import file_extension, relative_path
 
 
 defaults = {
