@@ -246,9 +246,3 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
         if isinstance(other, Real):
             return self.ratio == Frequency(float(other)).ratio
         return NotImplemented
-
-    # TODO: Implement pickling
-    # http://docs.python.org/library/pickle.html#the-pickle-protocol
-
-    # __reduce__
-    # __copy__, __deepcopy__
