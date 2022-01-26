@@ -10,43 +10,11 @@ Functional programming utility functions.
 
 import collections
 import numpy as np
-import re
 
 from builtins import range, zip
 from itertools import count, islice, tee
 
 from akasha.utils.log import logger
-
-
-# function objects - or a kind of function composition?
-
-def _findvars(*function_sources):
-    """
-    Find variables from a function source code.
-    """
-    idents = re.compile(r'([a-zA-Z_]\w*)')  # (letter|"_") (letter | digit | "_")*
-    nfuncs = {}
-    for func in function_sources:
-        variables = tuple(set(idents.findall(func)))
-        if len(variables) == 1:
-            variables = variables[0]
-        nfuncs.update([[variables, func]])
-    return nfuncs
-
-
-class fn(object):
-    """
-    Functor, a function object.
-    """
-    def __init__(self, **kwargs):
-        self.__dict__ = kwargs
-
-    def __call__(self, *args, **kwargs):
-        for func in self.__dict__.values():
-            func(*args, **kwargs)
-
-    def __repr__(self):
-        return repr(self.__dict__)
 
 
 # itertools recipes -- http://docs.python.org/library/itertools.html#recipes
