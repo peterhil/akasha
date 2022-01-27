@@ -23,7 +23,8 @@ class AffineTransform(skt.AffineTransform):
     Adds complex_plane method to transform comples signals.
 
     References:
-    Postscript Language Reference Manual, 3rd edition, chapters "4.3.2 Transformations" and
+    Postscript Language Reference Manual, 3rd edition, chapters:
+    "4.3.2 Transformations" and
     "4.3.3 Matrix Representation and Manipulation"
     http://www.adobe.com/products/postscript/pdfs/PLRM.pdf
     """
@@ -35,16 +36,16 @@ class AffineTransform(skt.AffineTransform):
         return as_complex(_super(self).__call__(coords).T)
 
     def estimate(self, src, dst):
-        """
-        Estimate the required affine transformation on a complex plane from src to dst.
+        """Estimate the required affine transformation on a
+        complex plane from src to dst.
         """
         src = complex_as_reals(src).T
         dst = complex_as_reals(dst).T
         _super(self).estimate(src, dst)
 
     def inverse(self, signal):
-        """
-        Apply the inverse affine transformation onto a signal on the complex plane.
+        """Apply the inverse affine transformation onto a signal
+        on the complex plane.
         """
         coords = complex_as_reals(signal).T
         return as_complex(_super(self).inverse(coords).T)
