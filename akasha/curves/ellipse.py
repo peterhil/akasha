@@ -109,7 +109,7 @@ class Ellipse(Curve):
         """
         thetas = np.asanyarray(tau) * pi2
         b_cos = self.b * np.cos(thetas)
-        a_sin =(self.a * np.sin(thetas)
+        a_sin = self.a * np.sin(thetas)
 
         radius = self.a * self.b / np.sqrt(b_cos ** 2 + a_sin ** 2)
         angles = thetas + self.angle

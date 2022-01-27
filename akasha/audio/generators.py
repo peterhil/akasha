@@ -38,7 +38,7 @@ class Generator():
                     if res[i] is not None and np.sign(res[i]) == -1:
                         res[i] = max(-len(self) - 1, res[i])
                 item = slice(res[0], res[1], item.step)
-                stop = item.stop or (len(self) - 1))
+                stop = item.stop or (len(self) - 1)
                 item = np.arange(*(item.indices(stop)))
             else:
                 item = np.arange(*(item.indices(item.stop)))

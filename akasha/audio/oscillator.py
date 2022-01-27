@@ -40,7 +40,7 @@ class Osc(FrequencyRatioMixin, PeriodicGenerator):
         return self.curve.at(Frequency.angles(self.ratio))
 
     def __repr__(self):
-        return f'{class_name(self)}{(self.frequency._hz!r}, ' + \
+        return f'{class_name(self)}({self.frequency._hz!r}, ' + \
             f'curve={self.curve!r})'
 
     def __str__(self):

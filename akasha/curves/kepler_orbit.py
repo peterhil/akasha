@@ -107,7 +107,7 @@ class KeplerOrbit(Curve):
         ecc = self.eccentricity
         nu = np.arctan2(
             np.sqrt(1 - ecc ** 2) * np.sin(ea),
-            np.cos(ea) - ecc)
+            np.cos(ea) - ecc,
         )
         return nu
 
