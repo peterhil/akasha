@@ -9,7 +9,7 @@ from __future__ import division
 
 import skimage.transform as skt
 
-from akasha.utils.python import _super
+from akasha.utils.python import class_name, _super
 from akasha.math import as_complex, complex_as_reals
 
 
@@ -50,10 +50,8 @@ class AffineTransform(skt.AffineTransform):
         return as_complex(_super(self).inverse(coords).T)
 
     def __repr__(self):
-        return "{}(scale={}, rotation={}, shear={}, translation={})".format(
-            self.__class__.__name__,
-            tuple(self.scale),
-            float(self.rotation),
-            float(self.shear),
-            tuple(self.translation),
-        )
+        return f'{class_name(self)}(' + \
+            f'scale={self.scale!r}, ' + \
+            f'rotation={self.rotation!r}, ' + \
+            f'shear={self.shear!r}, ' + \
+            f'translation={self.translation!r})'

@@ -287,7 +287,7 @@ def map_array(func, arr, method='vec', dtype=None):
     elif method == 'map':
         res = np.array(map(func, arr.flat))  # pylint: disable=W0141
     else:
-        raise NotImplementedError("map_array(): method '{0}' missing.".format(method))
+        raise NotImplementedError(f"map_array(): method '{method}' missing.")
 
     if dtype is not None:
         res = res.astype(dtype)
@@ -376,8 +376,9 @@ def random_phasor(n=1, amp=1.0, random=np.random.random):
     elif callable(amp):
         return np.array(map(rect, *np.array([amp(n), pi2 * random(n) - np.pi])))
     else:
-        assert n == len(amp), "Arguments (n, amp) should have the same length, "
-        "got: ({0}, {1})".format(n, len(amp))
+        assert n == len(amp), \
+            'Arguments (n, amp) should have the same length, got:' + \
+            f'({n}, {len(amp)})'
         return np.array(map(rect, *np.array([amp, pi2 * random(n) - np.pi])))
 
 
@@ -500,7 +501,8 @@ def factors(n):
     """
     Return factors of integer n.
     """
-    assert np.all(np.equal(np.mod(n, 1), 0)), "Value %s is not an integer!" % n
+    assert np.all(np.equal(np.mod(n, 1), 0)), \
+        f'Value {n!s} is not an integer!'
     f = sq_factors(n)
     return np.unique(np.append(f, np.array(n, dtype=np.int) / f[::-1]))
 
@@ -550,12 +552,12 @@ def factor_supersets(factors_in, redundant=None, limit=None):
 
     for (j, fset) in [item for item in ess.items() if 0 <= item[0] < lim]:
         ind = (lim, j)
-        logger.debug("\t#%s" % (ind, ))
+        logger.debug("\t#%s", ind)
         if fset.issubset(factors_in[lim]):
             msg = "\t#%s:\tSet %s is subset of %s, will add missing factors of %s to redundant"
-            logger.info(msg % (ind, fset, factors_in[lim], j))
+            logger.info(msg, ind, fset, factors_in[lim], j)
             msg = "#%s:\tMoving %s from essential to redundant. (factors in %s)"
-            logger.warning(msg % (ind, j, factors_in[j]))
+            logger.warning(msg, ind, j, factors_in[j])
             if j in ess:
                 red[j] = ess.pop(j)
             for f in fset:
@@ -571,12 +573,10 @@ def factor_supersets(factors_in, redundant=None, limit=None):
                 #                 red[k] = ess.pop(k)  #es2[k]
     #logger.debug("\t#%s:\tEssential keys: %s redundant keys: %s" % (ind, ess.keys(), red.keys()))
 
-    assert set(ess).isdisjoint(red), "Redundant values {} contained in essential".format(
-        set(ess).intersection(red))
+    assert set(ess).isdisjoint(red), f'Redundant values {set(ess).intersection(red)} contained in essential'
     (ess, red) = factor_supersets(ess, red, limit=lim - 1)
-    assert set(ess).isdisjoint(red), "Redundant values {} contained in essential".format(
-        set(ess).intersection(red))
-    logger.debug("This should be empty set: %s" % set(ess).intersection(red))
+    assert set(ess).isdisjoint(red), f'Redundant values {set(ess).intersection(red)} contained in essential'
+    logger.debug("This should be empty set: %r". set(ess).intersection(red))
     return (ess, red)
 
 
@@ -650,12 +650,12 @@ def normalize(signal):
     sup = np.max(np.abs(signal))
 
     if not np.all(np.isfinite(signal)):
-        logger.debug("Normalize() substituting non-numeric max: %s" % sup)
+        logger.debug("Normalize() substituting non-numeric max: %s", sup)
         signal = np.ma.masked_invalid(signal).filled(0)
         sup = np.max(np.abs(signal))
-        logger.debug("Normalize() substituted max: %s" % sup)
+        logger.debug("Normalize() substituted max: %s", sup)
     if sup == 0:
-        logger.debug("Normalize() got silence!" % sup)
+        logger.debug("Normalize() got silence!", sup)
         return signal
 
     return signal / sup
@@ -855,8 +855,8 @@ def lambertw(z):
         branch = 0
     else:
         raise ValueError(
-            "Argument for lambertw %s should be below %s to get real values out." % \
-            (z, limit)
+            f'Argument for lambertw {z} should be below {limit!s} to '
+            'get real values out.'
         )
     return sc.special.lambertw(z, branch)
 
