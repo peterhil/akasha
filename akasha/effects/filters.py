@@ -18,27 +18,15 @@ from akasha.dsp import unit_step
 from akasha.dsp.z_transform import czt, iczt
 from akasha.timing import sampler
 from akasha.utils.log import logger
-from akasha.math import pi2, get_impulses, normalize, complex_as_reals, as_complex, pad
+from akasha.math import pi2, get_impulses, normalize, complex_as_reals, \
+     as_complex, pad
 
 
 def unosc(signal):
-    """
-    Return unwrapped log signal, that can be fed
+    """Return unwrapped log signal, that can be fed
     back to complex exponentiation after transformations.
     """
     s = np.log(signal)
-
-    #d = distances(s / pi2)
-    #impulses = np.round(d - d[0])
-    #impulses = np.fmax(np.sign(d-0.9999), 0)
-    #impulses = np.fmax(np.sign(d - 0.5), 0)
-
-    #impulses = distances(np.sign((distances(np.angle(s)) - np.angle(s[1:]))))/2
-    #impulses = (np.angle(signal) - (np.angle(signal) % np.pi)) / np.pi * -3 - 1
-
-    #unwrap = (-np.cumsum(pad(impulses, 0)))[:-2]
-    #unwrap = np.cumsum(distances((np.sign((distances(np.angle(s)) - np.angle(s[1:])))+1)/2))
-
     impulses = get_impulses(signal, tau=False)
     unwrap = np.cumsum(impulses)
 
@@ -46,15 +34,18 @@ def unosc(signal):
 
 
 def log_plane(freq, amp1=1, amp2=1):
-    """
-    Return the complex logarithm of a signal from given frequencies (at amplitude 1).
-    Result can be fed to back to np.exp to get the sum of oscillators (additive synthesis of frequencies).
+    """Return the complex logarithm of a signal from given
+    frequencies (at amplitude 1).
+
+    Result can be fed to back to np.exp to get the sum of
+    oscillators (additive synthesis of frequencies).
 
     To test:
     >>> o882 = Osc(882)
     >>> o1764 = Osc(1764)
     >>> s = (o882[:50] + o1764[:50]) / 2
     >>> unosc(s) - log_plane(882)
+
     # Should be almost all zero
     """
     # TODO Get (multiple) frequencies from arguments
@@ -77,26 +68,28 @@ def log_plane(freq, amp1=1, amp2=1):
 
 
 def freq_shift(signal, a=12.1, b=0.290147):
+    """Shift frequencies of a signal without affecting time.
     """
-    Shift frequencies of a signal without affecting time.
-    """
-    #f = 440
-    #scale = (1+f/sampler.rate)
+    # f = 440
+    # scale = (1 + f / sampler.rate)
     w = unosc(signal)
-    # remove - before exp and - np.pi?
-    out = -np.exp(w.real + (normalize((w.imag * a) % (pi2 / b)) * pi2 - np.pi) * 1j)
+    s_plane = (w.imag * a) % (pi2 / b)
+    # TODO remove - before exp and - np.pi?
+    out = -np.exp(w.real + (normalize(s_plane) * pi2 - np.pi) * 1j)
 
     return out
 
 
 def transform(signal, scale=np.array([1, 1]), translate=np.array([0, 0])):
+    """Transform a signal with scale and/or translate in the
+    frequency domain (complex plane).
     """
-    Transform a signal with scale and/or translate in the frequency domain (complex plane).
-    """
-    # E1103: Instance of 'list' has no 'T' member (but some types could not be inferred)
+    # E1103: Instance of 'list' has no 'T' member
+    # (but some types could not be inferred)
     # pylint: disable=E1103
 
-    # TODO: Affine transformations! http://en.wikipedia.org/wiki/Affine_transformation
+    # TODO: Affine transformations!
+    # http://en.wikipedia.org/wiki/Affine_transformation
 
     tr = complex_as_reals(unosc(signal))
     tr *= np.atleast_2d(scale).T
@@ -105,18 +98,26 @@ def transform(signal, scale=np.array([1, 1]), translate=np.array([0, 0])):
     return np.exp(as_complex(tr))
 
 
-def highpass(signal, freq, bins=256, pass_zero=True, scale=False, nyq=sampler.rate / 2.0):
-    """
-    Highpass filter.
+def highpass(
+    signal,
+    freq,
+    bins=256,
+    pass_zero=True,
+    scale=False,
+    nyq=sampler.rate / 2.0
+):
+    """Highpass filter.
     """
     a = 1
-    b = sc.signal.firwin(bins, cutoff=freq, pass_zero=pass_zero, scale=scale, nyq=nyq)
+    b = sc.signal.firwin(
+        bins, cutoff=freq,
+        pass_zero=pass_zero, scale=scale, nyq=nyq
+    )
     return sc.signal.lfilter(b, a, signal)
 
 
 def lowpass(signal, cutoff=sampler.rate / 2.0, bins=256):
-    """
-    Lowpass filter.
+    """Lowpass filter.
     """
     fs = float(sampler.rate)
     fc = cutoff / fs
@@ -126,18 +127,24 @@ def lowpass(signal, cutoff=sampler.rate / 2.0, bins=256):
 
 
 def resonate(signal, poles, zeros=np.array([]), gain=1.0, axis=-1, zi=None):
-    """
-    Resonate a signal with an IIR filter based on given poles and zeros.
+    """Resonate a signal with an IIR filter based on given poles and zeros.
 
     Usage example
     =============
 
     bjork = read('Bjork - Human Behaviour.aiff', dur=30)
-    poles = pole_frequency(np.array([30, 50, 238., 440., 1441]), [0.99, 0.999, 0.99, 0.87, 0.77])
+    poles = pole_frequency(
+        np.array([30, 50, 238., 440., 1441]),
+        [0.99, 0.999, 0.99, 0.87, 0.77]
+    )
     anim(normalize(resonate(bjork, poles, gain=1.0)))
     """
     b, a = sc.signal.filter_design.zpk2tf(zeros, poles, gain)
-    logger.debug("Resonate: order: {},\n\tb: {},\n\ta: {}", max(len(a), len(b)), b, a)
+    logger.debug(
+        "Resonate: order: {},\n\tb: {},\n\ta: {}",
+        max(len(a), len(b)), b, a
+    )
+
     if zi == 'auto':
         zi = sc.signal.lfilter_zi(b, a)
         return sc.signal.lfilter(b, a, signal, axis=axis, zi=zi)[0]
@@ -154,18 +161,30 @@ def resonator_comb(
         sp_dur=2,
         fx_dur=4,
         playtime=10):
-    """
-    Apply a resonating IIR filter comb to a signal.
+    """Apply a resonating IIR filter comb to a signal.
     """
     # Is dampen double the Q value?
     roots = Osc(1).cycle
     fs = sampler.rate
+    padded_signal = pad(
+        signal[:int(round(sp_dur * fs))],
+        -1,
+        int(round(playtime * fs - sp_dur * fs)),
+        0,
+    )
+    padded_fx = pad(
+        signal[:fx_dur * fs],
+        -1,
+        playtime * fs - fx_dur * fs,
+        0,
+    )
+    stop = a + b * step
     out = normalize(
-        pad(signal[:int(round(sp_dur * fs))], -1, int(round(playtime * fs - sp_dur * fs)), 0) +
+        padded_signal +
         normalize(
             resonate(
-                pad(signal[:fx_dur * fs], -1, playtime * fs - fx_dur * fs, 0),
-                roots[a:a + b * step:step] * dampen,
+                padded_fx,
+                roots[a : stop : step] * dampen,
                 [-1, 1j]
             )
         )
@@ -176,8 +195,7 @@ def resonator_comb(
 
 
 def resonator_p1(signal, pole, m=None, gain=1.0):
-    """
-    Complex one pole resonator
+    """Complex one pole resonator
     https://ccrma.stanford.edu/~jos/filters/Complex_Resonator.html
 
     Note: To get the results normalized to unit circle, set gain to:
@@ -205,4 +223,5 @@ def resonator_p1(signal, pole, m=None, gain=1.0):
     n = np.arange(m)
 
     response = unit_step(n) * gain * pole ** n
+
     return iczt(czt(signal, m=m) * czt(response, m=m))

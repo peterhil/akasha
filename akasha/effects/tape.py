@@ -24,11 +24,10 @@ from akasha.math import map_array, normalize, as_polar, as_rect
 
 
 class Magnet():
-    """
-    Model magnetization direction of particles.
+    """Model magnetization direction of particles.
 
-    Vary m between 0 and 1, and return signal (s) with value between -1 and 1
-    depending on the current magnetization (m) level.
+    Vary m between 0 and 1, and return signal (s) with value
+    between -1 and 1 depending on the current magnetization (m) level.
     """
     def __init__(self, m=0.5):
         self.m = np.clip(m, 0, 1)
@@ -43,7 +42,6 @@ class Magnet():
 
     def demagnetize(self, m=0.5):
         self.m = m
-
     def __call__(self, s):
         m = self.m = self.hysteresis(s)
         s = (m * 2 - 1)
@@ -58,26 +56,32 @@ def complex_magnet(signal, gain=1.0):
 
 
 def magnetize(x0, x1, m, norm_level=0.95):
-    """
-    Get previous magnetization (m) level and diff (x) in signal level in.
-    Return new magnetization level.
+    """Get previous magnetization (m) level and diff (x) in signal
+    level in. Return new magnetization level.
 
-    Should be: Get two input samples in and compare their level and difference to
-    the current magnetization level to get the change in output signal level.
+    Should be: Get two input samples in and compare their
+    level and difference to the current magnetization level
+    to get the change in output signal level.
     """
     # d_in = x1 - x0   # Can be at most (+-)2 (from -1 to +1)
-    d_out = x0 / norm_level  # / min((x0 / d_in), norm_level) # Prevent zero division
+    d_out = x0 / norm_level
+    # # Prevent zero division
+    # d_out /=  min((x0 / d_in), norm_level)
 
-    # Remaining polarisation suspectibility: From 0 to norm_level (if m <= norm_level)
+    # Remaining polarisation suspectibility:
+    # From 0 to norm_level (if m <= norm_level)
     perm = (np.sign(m) * 1.0) - m
 
-    #logger.log(logging.BORING, "Delta in: %s, out: %s, Permeability: %s" % (d_in, d_out, perm))
+    # logger.log(
+    #     logging.BORING, "Delta in: %s, out: %s, Permeability: %s",
+    #     d_in, d_out, perm
+    # )
+
     return m + perm * d_out
 
 
 def mag2(x0, x1, m, norm_level=0.95):
-    """
-    Get previous magnetization (m) level and diff (x) in signal level in.
+    """Get previous magnetization (m) level and diff (x) in signal level in.
     Return new magnetization level.
     """
     d_in = x1 - x0
@@ -95,24 +99,24 @@ def mag2(x0, x1, m, norm_level=0.95):
 
 
 def mag(x, m, norm_level=1.0):
-    """
-    Get previous magnetization (m) level and diff (x) in signal level in.
+    """Get previous magnetization (m) level and diff (x) in signal level in.
     Return new magnetization level.
     """
     r = m + (x * norm_level - x * abs(m))
-    r = min(np.abs(r), norm_level) * np.sign(r)  # normalize to prevent oscillation
+    # normalize to prevent oscillation
+    r = min(np.abs(r), norm_level) * np.sign(r)
+
     return r
 
 
 def tape_compress(signal, norm_level=0.95):
-    """
-    Model tape compression hysteresis.
+    """Model tape compression hysteresis.
     """
     if (signal[0] == complex):
         amp = np.abs(signal)
     else:
         amp = signal
-    #diff_in = np.abs(np.ediff1d(amp))
+    # diff_in = np.abs(np.ediff1d(amp))
     # Calculate result - could use np.ufunc.accumulate?
     out = np.empty(len(amp))
     out[0] = signal[0]
@@ -122,24 +126,22 @@ def tape_compress(signal, norm_level=0.95):
 
 
 def cx_tape_compress(signal, norm_level=0.95):
+    """Model tape compression hysteresis on a complex analytic signal.
     """
-    Model tape compression hysteresis on a complex analytic signal.
-    """
-    return tape_compress(np.abs(signal), norm_level) * np.exp(np.angle(signal) * 1j)
+    angles = np.exp(np.angle(signal) * 1j)
+    compressed = tape_compress(np.abs(signal), norm_level)
 
+    return compressed * angles
 
-# 10.9.2012
 
 def gamma(g, amp, signal):
-    """
-    Calculate the gamma curve.
+    """Calculate the gamma curve.
     """
     return signal ** g * amp
 
 
 def gamma_compress(signal, g, amp=1.0, normal=True):
-    """
-    Apply gamma compression on the amplitude of a complex signal.
+    """Apply gamma compression on the amplitude of a complex signal.
 
     Example usage
     -------------
@@ -148,12 +150,12 @@ def gamma_compress(signal, g, amp=1.0, normal=True):
     compressed = gamma_compress(eine[:dur * 44100], 0.487, 105)
     anim(Pcm(normalize(compressed[:dur * 44100]) * 0.5, 1), antialias=True)
     """
+    assert amp != 0, "Amplitude can not be zero!"
     phi = as_polar(signal)
-
     if normal:
         phi[:, 0] = normalize(phi[:, 0])
 
     vgamma = np.vectorize(funcy.curry(gamma, 3)(g)(amp))
-    phi[:, 0] = np.apply_along_axis(vgamma, 0, phi[:, 0]) * (1.0 / amp)  # @TODO amp can't be zero
+    phi[:, 0] = np.apply_along_axis(vgamma, 0, phi[:, 0]) * (1.0 / amp)
 
     return as_rect(phi).T
