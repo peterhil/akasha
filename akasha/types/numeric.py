@@ -14,6 +14,8 @@ import six
 from abc import ABCMeta, abstractproperty
 from fractions import Fraction
 
+from akasha.utils.python import class_name
+
 
 def ops(op):
     """
@@ -98,10 +100,10 @@ class NumericUnit():
         return hash(self) == hash(other)
 
     def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__, self.value)
+        return f'{class_name(self)}({self.value!r})'
 
     def __str__(self):
-        return "<%s: %s %s>" % (self.__class__.__name__, self.value, self._unit.strip('_'))
+        return "<{class_name(self)}: {self.value!s}, {self._unit.strip('_')}>"
 
 
 class ComplexUnit(NumericUnit):
