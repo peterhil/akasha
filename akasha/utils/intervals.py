@@ -9,6 +9,8 @@ from __future__ import absolute_import
 
 from builtins import range
 
+from akasha.utils.python import class_name
+
 
 class Interval():
     """
@@ -33,7 +35,7 @@ class Interval():
         return self._sup
 
     def __repr__(self):
-        return "%s(%s, %s)" % (self.__class__.__name__, self.inf, self.sup)
+        return f'{class_name(self)}({self.inf}, {self.sup})'
 
 
 class IntervalTree():
