@@ -1,11 +1,19 @@
-from akasha.graphic.drawing import draw_blank, get_canvas, blit, draw, video_transfer
+from akasha.graphic.drawing import draw_blank, get_canvas, blit, draw, \
+     video_transfer
 
 
 class ComplexView():
     """
     Show a sound signal on screen.
     """
-    def __init__(self, screen, size=800, antialias=True, lines=False, colours=True):
+    def __init__(
+        self,
+        screen,
+        size=800,
+        antialias=True,
+        lines=False,
+        colours=True
+    ):
         self.surface = screen
         self.size = size
         self.antialias = antialias
@@ -53,6 +61,7 @@ class VideoTransferView():
         )
 
         black = int(round((size - tfer.shape[0]) / 2.0))
-        img[:, black:-black, :] = tfer[:, :img.shape[1], :].transpose(1, 0, 2)
+        pixels = tfer[:, :img.shape[1], :].transpose(1, 0, 2)
+        img[:, black:-black, :] = pixels
 
         blit(self.surface, img)

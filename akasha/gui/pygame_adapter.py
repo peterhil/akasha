@@ -32,7 +32,11 @@ class PygameGui:
         )
 
         screen = self.init_display(name, size)
-        logger.info("Inited display %s with flags: %s", screen, screen.get_flags())
+        logger.info(
+            'Inited display %s with flags: %s',
+            screen,
+            screen.get_flags(),
+        )
 
         return screen
 
@@ -54,8 +58,8 @@ class PygameGui:
         else:
             raise ImportError('Numpy array package is not installed')
 
-        # FIXME get resolution some other way.
-        mode = pg.display.set_mode((size, size), flags, 32 if flags & pg.SRCALPHA else 24)
+        bitdepth = 32 if flags & pg.SRCALPHA else 24
+        mode = pg.display.set_mode((size, size), flags, bitdepth)
         pg.display.set_caption(name)
         pg.display.init()
 
@@ -67,7 +71,8 @@ class PygameGui:
         """
         pg.mixer.quit()
 
-        # Set mixer defaults: sample rate, sample size, number of channels, buffer size
+        # Set mixer defaults: sample rate, sample size,
+        # number of channels, buffer size
         if is_sequence(args) and 0 < len(args) <= 3:
             pg.mixer.init(*args)
         else:
@@ -78,7 +83,8 @@ class PygameGui:
 
         fs, size, channels = pg.mixer.get_init()
         logger.info(
-            "Mixer has %s Hz sample rate with %s size samples and %s channels.",
+            "Mixer has %s Hz sample rate with %s size samples and "
+            "%s channels.",
             fs, size, channels
         )
 
@@ -113,7 +119,8 @@ class PygameGui:
         """
         Queue samples into a mixer channel.
         """
-        return channel.queue(pg.sndarray.make_sound(pcm(samples, bits=config.audio.SAMPLETYPE)))
+        waveform = pcm(samples, bits=config.audio.SAMPLETYPE)
+        return channel.queue(pg.sndarray.make_sound(waveform))
 
     @staticmethod
     def key_pause(event):
@@ -122,7 +129,8 @@ class PygameGui:
 
     @staticmethod
     def key_escape(event):
-        return event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE)
+        return event.type == pg.QUIT \
+          or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE)
 
     @staticmethod
     def keydown(event):
