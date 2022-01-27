@@ -60,7 +60,8 @@ def limit_negative(f):
 
 def nyquist(ratio):
     """
-    Limit ratio on the normalized Nyquist Frequency band: Fraction(-1, 2)..Fraction(1, 2)
+    Limit ratio on the normalized Nyquist Frequency band:
+    Fraction(-1, 2)..Fraction(1, 2)
 
     >>> nyquist(Fraction(22050, 44100))
     Fraction(1, 2)
@@ -73,7 +74,11 @@ def nyquist(ratio):
     """
     assert isinstance(ratio, Fraction), \
         f'Ratio should be a Fraction, got {type(ratio).__name__}'
-    fn = step_function(operator.le, limit=Fraction(1, 2), default=Fraction(0, 1))
+    fn = step_function(
+        operator.le,
+        limit=Fraction(1, 2),
+        default=Fraction(0, 1)
+    )
     return fn(np.abs(ratio))
 
 

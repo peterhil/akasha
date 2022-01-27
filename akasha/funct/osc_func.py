@@ -47,8 +47,11 @@ def timeslice(iterable, unit=sec):
     """
     Convert frame numbers to time.
 
-    In [10]: timeslice([0, 8125, 44100, 44100*500.12])
-    Out[10]: array([0:00:00, 0:00:00.184240, 0:00:01, 0:08:20.120000], dtype=timedelta64[us])
+    >>> timeslice([0, 8125, 44100, 44100*500.12])
+    array([
+        0:00:00, 0:00:00.184240, 0:00:01, 0:08:20.120000],
+        dtype=timedelta64[us]
+    )
     """
     result = np.divide(np.array(iterable), float(sampler.rate))
     return np.fromiter(imap(unit, result), dtype=td)
@@ -70,14 +73,15 @@ def sample(iterable, *times):
     """
     Sample iterable at times.
     """
-    return np.fromiter(islice(iterable, *(frames(times))), dtype=np.complex64)
+    return np.fromiter(
+        islice(iterable, *(frames(times))),
+        dtype=np.complex64
+    )
 
 ### Generating functions ###
 
 # In [69]: v_root = np.frompyfunc(nth_root, 1,1)
-#
 # In [70]: l = nth_root(np.arange(1,20))
-#
 # In [71]: l
 # Out[71]:
 # array([  1.00000000e+00 -2.44929360e-16j,
@@ -97,9 +101,11 @@ def sample(iterable, *times):
 #          9.13545458e-01 +4.06736643e-01j,
 #          9.23879533e-01 +3.82683432e-01j,
 #          9.32472229e-01 +3.61241666e-01j,
-#          9.39692621e-01 +3.42020143e-01j,   9.45817242e-01 +3.24699469e-01j])
+#          9.39692621e-01 +3.42020143e-01j,
+#          9.45817242e-01 +3.24699469e-01j])
 #
-# In [72]: %timeit l = np.fromiter(imap(v_root, np.arange(1,1000)), dtype=np.complex)
+# In [72]: %timeit l = np.fromiter(imap(v_root, np.arange(1,1000)),
+#     dtype=np.complex)
 # 10 loops, best of 3: 52.8 ms per loop
 
 
@@ -162,7 +168,9 @@ def freq(fl):
     """
     Calculate ratio for a frequency.
     """
-    ratio = Fraction.from_float(float(fl) / sampler.rate).limit_denominator(sampler.rate)
+    ratio = Fraction.from_float(float(fl) / sampler.rate)
+    ratio = ratio.limit_denominator(sampler.rate)
+
     return ratio
 
 
@@ -170,7 +178,9 @@ def freq2(fl):
     """
     Calculate ratio for a frequency.
     """
-    ratio = Fraction(*(fl / sampler.rate).as_integer_ratio()).limit_denominator(sampler.rate)
+    ratio = Fraction(*(fl / sampler.rate).as_integer_ratio())
+    ratio = ratio.limit_denominator(sampler.rate)
+
     return ratio
 
 
