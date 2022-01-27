@@ -48,7 +48,11 @@ def get_layout(path='settings/keymaps/fi.json'):
         return json.load(keymap, encoding='utf-8')
 
 
-def get_mapping(layout, section='main', mapping=np.empty([6, 25], dtype=object)):
+def get_mapping(
+    layout,
+    section='main',
+    mapping=np.empty([6, 25], dtype=object)
+):
     if section == 'main':
         basecol = 0
     elif section == 'arrows':

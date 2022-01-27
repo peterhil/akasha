@@ -11,7 +11,8 @@ import scikits.audiolab as audiolab
 
 from builtins import range
 from scipy.signal import hilbert
-from scikits.audiolab import Format, Sndfile, available_file_formats, available_encodings
+from scikits.audiolab import Format, Sndfile, \
+     available_file_formats, available_encodings
 
 from akasha.timing import sampler, time_slice
 from akasha.io.path import file_extension, relative_path

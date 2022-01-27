@@ -33,8 +33,11 @@ def play(
 
     n_channels = num_channels(data)
     if n_channels > 2:
-        # TODO Use mapping argument with python-sounddevice library to overcome this or DIY?
-        raise NotImplementedError("Only mono and stereo sounds are supported for now")
+        # TODO Use mapping argument with python-sounddevice library
+        # to overcome this or DIY?
+        raise NotImplementedError(
+            'Only mono and stereo sounds are supported for now'
+        )
 
     stream = pa.open(
         format=pyaudio.paFloat32,
