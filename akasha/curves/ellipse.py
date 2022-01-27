@@ -18,7 +18,9 @@ import scipy as sc
 from cmath import rect
 
 from akasha.curves.curve import Curve
-from akasha.curves.ellipse_fit import ellipse_fit_fitzgibbon, ellipse_fit_halir
+from akasha.curves.ellipse_fit import \
+     ellipse_fit_fitzgibbon, \
+     ellipse_fit_halir
 from akasha.math import complex_as_reals
 from akasha.math.geometry import is_orthogonal, midpoint, rotate_towards
 from akasha.math.geometry.affine_transform import AffineTransform
@@ -43,14 +45,17 @@ class Ellipse(Curve):
     Ellipse curve
 
     Parameters are normalised so that:
-    - Parameter `a` always determines the direction (given by the `angle` parameter)
+    - Parameter `a` always determines the direction
+      (given by the `angle` parameter)
     - Both `a` and `b` are >= 0
-    - Parameter `b` can be greater than `a`, so use Ellipse#major if you need the major axis length
+    - Parameter `b` can be greater than `a`, so use Ellipse#major
+      if you need the major axis length
     """
     def __init__(self, a, b, angle=0, origin=0):
         # Note! If thinking of making a always the semi-major axis,
         # the angle needs to be rotated plus or minus 90 degrees or so.
-        # It is not as easy as it sounds, and care needs to be taken to make it correct!
+        # It is not as easy as it sounds, and care needs to be taken
+        # to make it correct!
         (a, b, angle) = ellipse_axes_normalised(a, b, angle)
         self.a = a
         self.b = b
@@ -87,39 +92,50 @@ class Ellipse(Curve):
         """
         cos = self.a * np.cos(points)
         sin = self.b * np.sin(points)
-        x = self.origin.real + cos * np.cos(self.angle) - sin * np.sin(self.angle)
-        y = self.origin.imag + cos * np.sin(self.angle) + sin * np.cos(self.angle)
-        return as_complex(np.array([np.asanyarray(x), np.asanyarray(y)]))
+        cos_angle = np.cos(self.angle)
+        sin_angle = np.sin(self.angle)
+        x = self.origin.real + cos * cos_angle - sin * sin_angle
+        y = self.origin.imag + cos * sin_angle + sin * cos_angle
+
+        return as_complex(np.array([
+            np.asanyarray(x),
+            np.asanyarray(y)
+        ]))
 
     def at(self, tau):
-        """
-        Polar form of ellipse relative to center, translated and rotated to origin and angle.
+        """Polar form of ellipse relative to center, translated
+        and rotated to origin and angle.
         https://en.wikipedia.org/wiki/Ellipse#Polar_form_relative_to_center
         """
         thetas = np.asanyarray(tau) * pi2
-        radius = self.a * self.b / np.sqrt((self.b * np.cos(thetas)) ** 2 + (self.a * np.sin(thetas)) ** 2)
-        return radius * np.exp((thetas + self.angle) * 1j) + self.origin
+        b_cos = self.b * np.cos(thetas)
+        a_sin =(self.a * np.sin(thetas)
+
+        radius = self.a * self.b / np.sqrt(b_cos ** 2 + a_sin ** 2)
+        angles = thetas + self.angle
+        signal = radius * np.exp(angles * 1j) + self.origin
+
+        return signal
 
     def curvature(self, tau):
-        """
-        Curvature of an ellipse.
+        """Curvature of an ellipse.
         http://mathworld.wolfram.com/Ellipse.html formula 59
         """
         t = np.asanyarray(tau) * pi2 + self.angle
         return (self.a * self.b) / (self.b ** 2 * np.cos(t) ** 2 + self.a ** 2 * np.sin(t) ** 2) ** (3 / 2)
 
     def roc(self, tau):
-        """
-        Radius of curvature.
+        """Radius of curvature.
         """
         return 1.0 / self.curvature(tau)
 
     def arc_length(self, tau):
+        """Arc length of the ellipse.
+        Formula (4) from:
+        http://paulbourke.net/geometry/ellipsecirc/Abbott.pdf
         """
-        Arc length of the ellipse.
-        Formula (4) from: http://paulbourke.net/geometry/ellipsecirc/Abbott.pdf
-        """
-        rad = np.fmod(np.asarray(tau) * pi2 - self.angle, np.pi)  # TODO is substracting self.angle necessary?
+        # TODO is substracting self.angle necessary?
+        rad = np.fmod(np.asarray(tau) * pi2 - self.angle, np.pi)
         return self.a * sc.special.ellipeinc(rad, self.eccentricity ** 2)
 
     @property
@@ -128,8 +144,8 @@ class Ellipse(Curve):
 
     @property
     def eccentricity(self):
-        """
-        Eccentricity of the ellipse: https://en.wikipedia.org/wiki/Ellipse#Eccentricity
+        """Eccentricity of the ellipse:
+        https://en.wikipedia.org/wiki/Ellipse#Eccentricity
         """
         return np.sqrt(1.0 - (self.minor / self.major) ** 2)
 
@@ -150,7 +166,11 @@ class Ellipse(Curve):
         tr = AffineTransform()
         tr.estimate(dia, para_at_origin)
 
-        u, s, v = np.linalg.svd(tr.params[:2, :2], full_matrices=False, compute_uv=True)
+        u, s, v = np.linalg.svd(
+            tr.params[:2, :2],
+            full_matrices=False,
+            compute_uv=True
+        )
         a, b = s[:2]
 
         uv = np.eye(3); uv[:2, :2] = u * np.diag(s) * v
@@ -165,8 +185,8 @@ class Ellipse(Curve):
 
     @classmethod
     def from_conjugate_diameters(cls, para):
-        """
-        Find the major and minor axes of an ellipse from a parallelogram determining the conjugate diameters.
+        """Find the major and minor axes of an ellipse from a parallelogram
+        determining the conjugate diameters.
 
         Uses Rytz's construction for algorithm:
         http://de.wikipedia.org/wiki/Rytzsche_Achsenkonstruktion#Konstruktion

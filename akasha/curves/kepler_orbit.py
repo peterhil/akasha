@@ -35,9 +35,19 @@ class KeplerOrbit(Curve):
       between 0 and 1 form an elliptic orbit, 1 is a parabolic escape
       orbit, and greater than 1 is a hyperbola.
     """
-    def __init__(self, perihelion, semimajor, eccentricity=0.85, period=1, newton=True, name='', ph=0):
+    def __init__(
+        self,
+        perihelion,
+        semimajor,
+        eccentricity=0.85,
+        period=1,
+        newton=True,
+        name='',
+        ph=0
+    ):
         self.name = name
-        self.perihelion = perihelion  # Distance from sun (origin) to perihelion (closest) point
+        # Distance from sun (origin) to perihelion (closest) point
+        self.perihelion = perihelion
         self.a = semimajor
         self.period = period
         self.eccentricity = eccentricity
@@ -45,8 +55,11 @@ class KeplerOrbit(Curve):
         self.ph = 0  # Time of perihelion passage
 
     def __repr__(self):
-        return f'{class_name(self)}({self.perihelion!r}, {self.a!r}, ' + \
-            f'eccentricity={self.eccentricity!r}, period={self.period!r}, ' + \
+        return f'{class_name(self)}(' + \
+            f'{self.perihelion!r}, ' + \
+            f'{self.a!r}, ' + \
+            f'eccentricity={self.eccentricity!r}, ' + \
+            f'period={self.period!r}, ' + \
             f'name={self.name!r})'
 
     @property
@@ -80,7 +93,10 @@ class KeplerOrbit(Curve):
         def ke_prime(e):
             return 1 - ecc * np.cos(e)
 
-        return newton(kepler_equation, ma, ke_prime, tol=1.48e-08, maxiter=50)
+        return newton(
+            kepler_equation, ma, ke_prime,
+            tol=1.48e-08, maxiter=50
+        )
 
     def true_anomaly(self, t):
         """
@@ -89,8 +105,10 @@ class KeplerOrbit(Curve):
         """
         ea = self.eccentric_anomaly(t)
         ecc = self.eccentricity
-        nu = np.arctan2(np.sqrt(1 - ecc ** 2) * np.sin(ea), np.cos(ea) - ecc)
-
+        nu = np.arctan2(
+            np.sqrt(1 - ecc ** 2) * np.sin(ea),
+            np.cos(ea) - ecc)
+        )
         return nu
 
     def true_anomaly_fourier(self, t):
