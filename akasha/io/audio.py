@@ -70,8 +70,8 @@ def write(
         fs=sampler.rate,
         sdir=relative_path('../../Sounds/Out/'),
     ):
-    """
-    Write a sound file.
+    f"""Write a sound file.
+    Available file formats are: {available_file_formats()}.
     """
     fmt = get_format(fmt)
 
@@ -105,8 +105,8 @@ def read(
         complex=True,
         sdir=relative_path('../../Sounds/_Music samples/'),
     ):
-    """
-    Read a sound file in.
+    f"""Read a sound file in.
+    Available file formats are: {available_file_formats()}.
     """
     # TODO:
     # - Factor out the real->complex conversion out.
@@ -134,23 +134,20 @@ def read(
         return data
 
 
-write.__doc__ += "Available file formats are: {0}.".format(', '.join(
-    [f for f in available_file_formats()]
-))
-
-read.__doc__ += "Available file formats are: {0}.".format(', '.join(
-    [f for f in available_file_formats()]
-))
-
-
 def check_format(format):
     """Checks that a requested format is available (in libsndfile)."""
     available = available_file_formats()
     if format not in available:
-        raise ValueError("File format '%s' not available. Try one of: %s" % (format, available))
+        raise ValueError(
+            f"File format '{format!s}' not available. "
+            f"Try one of: {available}"
+        )
 
 
 def check_encoding(encoding):
     available = available_encodings()
     if encoding not in available:
-        raise ValueError("Encoding '%s' not available. Try one of: %s" % (encoding, available))
+        raise ValueError(
+            f"Encoding '{encoding}' not available. "
+            f"Try one of: {available}"
+        )

@@ -139,4 +139,6 @@ def check_format(format):
     """Checks that a requested format is available (in libsndfile)."""
     available = sf.available_formats().keys()
     if format.upper() not in available:
-        raise ValueError("File format '%s' not available. Try one of: %s" % (format, available))
+        raise ValueError(
+            f"File format '{format!s}' not available. Try one of: {available}"
+        )
