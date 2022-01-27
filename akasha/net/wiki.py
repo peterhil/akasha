@@ -87,7 +87,9 @@ def filter_tags(string, tag, template=u'', func=identity):
     Filter out html tags and change their values by calling replacement()
     with a function and a template.
     """
-    wiki_tag = re.compile(r"<{0}( name=\"[^\"]+\")?(/>|>([^<]*?)</{0}>)".format(tag))
+    wiki_tag = re.compile(
+        r"<{0}( name=\"[^\"]+\")?(/>|>([^<]*?)</{0}>)".format(tag)  # pylint: disable=C0209
+    )
     return re.sub(wiki_tag, replacement(3, template, func), string)
 
 
@@ -139,7 +141,7 @@ def parse_interval_name(string, only_first=False):
             pass
         return (name, funcy.first(audio))
     except KeyError:
-        logger.error("KeyError for string: %s" % string)
+        logger.error("KeyError for string: %s", string)
         return (name, "")
 
 
@@ -189,15 +191,15 @@ def parse_wiki(res, loglevel=logging.ANIMA):
             rec[2] = parse_freq_ratio(rec[2])
             cts = float(cents(eval(compile(rec[2], __name__, 'eval'))))
             if cts != 0 or rec[0] == 0:
-                logger.log(loglevel, "Parsed cents: %s" % cts)
+                logger.log(loglevel, "Parsed cents: %s", cts)
                 rec[0] = cts
                 err = (cts - rec[0])
                 if np.abs(err) >= 0.005:
                     logger.warning(
-                        "%s '%s' has a too big error %.5f with it's cents %.5f != %.5f" %
-                        (rec[2], rec[1], err, rec[0], cts)
+                        "%s '%s' has a too big error %.5f with it's cents %.5f != %.5f",
+                        rec[2], rec[1], err, rec[0], cts
                     )
             else:
-                logger.warning("Parsed cents is %s for record:\n\t\t%s" % (cts, rec))
+                logger.warning("Parsed cents is %s for record:\n\t\t%s", cts, rec)
         out.append(rec)
     return (out, legend)
