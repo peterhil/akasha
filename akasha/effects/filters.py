@@ -137,7 +137,7 @@ def resonate(signal, poles, zeros=np.array([]), gain=1.0, axis=-1, zi=None):
     anim(normalize(resonate(bjork, poles, gain=1.0)))
     """
     b, a = sc.signal.filter_design.zpk2tf(zeros, poles, gain)
-    logger.debug("Resonate: order: {},\n\tb: {},\n\ta: {}".format(max(len(a), len(b)), b, a))
+    logger.debug("Resonate: order: {},\n\tb: {},\n\ta: {}", max(len(a), len(b)), b, a)
     if zi == 'auto':
         zi = sc.signal.lfilter_zi(b, a)
         return sc.signal.lfilter(b, a, signal, axis=axis, zi=zi)[0]

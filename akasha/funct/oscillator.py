@@ -72,7 +72,7 @@ def nyquist(ratio):
     Fraction(0, 1)
     """
     assert isinstance(ratio, Fraction), \
-        'Ratio should be a Fraction, got {0}'.format(type(ratio).__name__)
+        f'Ratio should be a Fraction, got {type(ratio).__name__}'
     fn = step_function(operator.le, limit=Fraction(1, 2), default=Fraction(0, 1))
     return fn(np.abs(ratio))
 

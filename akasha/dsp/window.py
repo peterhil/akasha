@@ -57,14 +57,16 @@ def sliding_window(a, ws, ss=None, flatten=True):
     # ensure that ws, ss, and a.shape all have the same number of dimensions
     ls = [len(shape), len(ws), len(ss)]
     if 1 != len(set(ls)):
-        raise ValueError(\
-        'a.shape, ws and ss must all have the same length. They were %s' % str(ls))
+        raise ValueError(
+            f'a.shape, ws and ss must have the same lengths. They were {ls!s}'
+            )
 
     # ensure that ws is smaller than a in every dimension
     if np.any(ws > shape):
-        raise ValueError(\
-        'ws cannot be larger than a in any dimension.\
- a.shape was %s and ws was %s' % (str(a.shape), str(ws)))
+        raise ValueError(
+            'ws cannot be larger than a in any dimension. '
+            f'a.shape was {a.shape!s} and ws was {ws!s}'
+            )
 
     # how many slices will there be in each dimension?
     newshape = norm_shape(np.ceil((shape - (ws - ss)) / ss.astype(np.float)))
