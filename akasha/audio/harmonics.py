@@ -22,7 +22,8 @@ from akasha.utils.python import class_name, _super
 from akasha.math import random_phasor, map_array, normalize, pi2
 
 
-# TODO Eventually compose overtones of Mix objects and use Playable, and drop FrequencyRatioMixin
+# TODO Eventually compose overtones of Mix objects and use Playable,
+# and drop FrequencyRatioMixin
 class Harmonics(FrequencyRatioMixin, Generator):
     """Harmonical overtones for a sound object having a frequency"""
 
@@ -35,8 +36,8 @@ class Harmonics(FrequencyRatioMixin, Generator):
             rand_phase=False):
         _super(self).__init__()
         self.base = sndobj
-        # TODO Setting ovt.frequency (ovt._hz) leaves ovt.base.frequency (ovt.base._hz)
-        # where it was -- is this the desired behaviour?
+        # TODO Setting ovt.frequency (ovt._hz) leaves ovt.base.frequency
+        # (ovt.base._hz) where it was -- is this the desired behaviour?
         self._hz = self.base.frequency
         self.n = n
         self.func = func
@@ -76,23 +77,26 @@ class Harmonics(FrequencyRatioMixin, Generator):
         """
         partials = []
         oscs = np.array([Osc(f, self.base.curve) for f in self.frequencies])
+        freq = self.frequency
 
         for o in oscs:
             out = o.at(t)
 
+            # TODO: Move phases to Osc/Frequency?
             if self.rand_phase:
-                out *= np.array(random_phasor(1))  # TODO: Move phases to Osc/Frequency?
+                out *= np.array(random_phasor(1))
 
             if self.damping:
                 e = Exponential(self.damping(o.frequency))
-                # e = Gamma(-self.damping(o.frequency)[0], 1.0 / max(float(o.frequency) / 100.0, 1.0))
+                # scale = 1.0 / max(float(o.frequency) / 100.0, 1.0)
+                # e = Gamma(-self.damping(o.frequency)[0], scale)
 
                 # square waves
-                # amplitude = float(self.frequency / o.frequency * float(self.frequency))
+                # amplitude = float(freq / o.frequency * freq)
                 # e = Exponential(0, amp=amplitude)
 
                 # triangle waves
-                # amplitude = float(self.frequency ** 2 / o.frequency ** 2 * float(self.frequency))
+                # amplitude = float(freq ** 2 / o.frequency ** 2 * freq)
                 # e = Exponential(0, amp=amplitude)
 
                 # sine waves
@@ -106,11 +110,16 @@ class Harmonics(FrequencyRatioMixin, Generator):
         return np.sum(partials, axis=0, dtype=np.complex128) / len(partials)
 
     def __repr__(self):
-        return f'{class_name(self)}(sndobj={self.base!r}, n={self.n!r}, ' + \
-            f'func={self.func!r}, damping={self.damping!r}, ' + \
+        return f'{class_name(self)}(sndobj={self.base!r}, ' + \
+            f'n={self.n!r}, ' + \
+            f'func={self.func!r}, ' + \
+            f'damping={self.damping!r}, ' + \
             f'rand_phase={self.rand_phase!r}>'
 
     def __str__(self):
-        return f'{class_name(self)}: sndobj={self.base!s}, n={self.n!s}, ' + \
-            f'frequency={self.frequency!s}, frequencies={self.frequencies!s}, ' + \
-            f'func={self.func!s}, damping={self.damping!s}>'
+        return f'{class_name(self)}: sndobj={self.base!s}, ' + \
+            f'n={self.n!s}, ' + \
+            f'frequency={self.frequency!s}, ' + \
+            f'frequencies={self.frequencies!s}, ' + \
+            f'func={self.func!s}, ' + \
+            f'damping={self.damping!s}>'

@@ -40,8 +40,8 @@ class Overtones(FrequencyRatioMixin, Generator):
             rand_phase=False):
         _super(self).__init__()
         self.base = sndobj
-        # TODO Setting ovt.frequency (ovt._hz) leaves ovt.base.frequency (ovt.base._hz)
-        # where it was -- is this the desired behaviour?
+        # TODO Setting ovt.frequency (ovt._hz) leaves ovt.base.frequency
+        # (ovt.base._hz) where it was -- is this the desired behaviour?
         self._hz = self.base.frequency
         self.n = n
         self.func = func

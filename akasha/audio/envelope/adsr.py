@@ -28,7 +28,15 @@ class Adsr(Generator):
     """
     Adsr envelopes with beta distrubution cdf curves.
     """
-    def __init__(self, attack=(0.15,), decay=(0.25,), sustain=0.5, release=(0.2,), released_at=None, decay_overlap=0):
+    def __init__(
+        self,
+        attack=(0.15,),
+        decay=(0.25,),
+        sustain=0.5,
+        release=(0.2,),
+        released_at=None,
+        decay_overlap=0
+    ):
         self.released_at = released_at
         self.sustain = Scalar(float(sustain), dtype=np.float64)
         self.decay_overlap = decay_overlap
@@ -41,7 +49,10 @@ class Adsr(Generator):
     def decay(self):
         return Delay(
             self.attack.time - self.decay_overlap,
-            InverseBeta(*iter_param(self.decay_params), amp=1.0 - self.sustain_level)
+            InverseBeta(
+                *iter_param(self.decay_params),
+                amp=1.0 - self.sustain_level
+            )
         )
 
     @property

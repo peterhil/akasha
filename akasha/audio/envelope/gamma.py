@@ -43,4 +43,5 @@ class Gamma(Generator):
         return f'{class_name(self)}({self.shape!r}, {self.scale!r})'
 
     def __str__(self):
-        return f'<{class_name(self)}: shape={self.shape!s}, scale={self.scale!s}>'
+        return f'<{class_name(self)}: shape={self.shape!s}, ' + \
+            f'scale={self.scale!s}>'

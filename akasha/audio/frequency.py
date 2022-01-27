@@ -146,9 +146,9 @@ class FrequencyRatioMixin():
 
     @staticmethod
     def wrap(ratio):
-        """Wrap ratio modulo one.
+        """Wrap ratio modulo one, so Frequency.ratio of 9/8
+        becomes 1/8 in Osc. This helps with numeric accuracy.
         """
-        # Wrap roots: 9/8 == 1/8 in Osc! This also helps with numeric accuracy.
         return ratio % 1
 
     def __nonzero__(self):

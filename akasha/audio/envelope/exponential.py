@@ -31,7 +31,8 @@ class Exponential(Generator):
 
     @property
     def half_life(self):
-        """Returns the time required to reach half-life from a starting amplitude."""
+        """Returns the time required to reach half-life from a
+        starting amplitude."""
         return np.inf if self.rate == 0 else np.log(2.0) / -self.rate
 
     @classmethod
@@ -47,8 +48,8 @@ class Exponential(Generator):
 
     @property
     def scale(self):
-        """
-        Returns the time required to reach a (discrete) zero from a starting amplitude.
+        """Returns the time required to reach a (discrete) zero
+        from a starting amplitude.
         """
         return self.half_life * (minfloat(np.max(self.amp))[1] + 1)
 
@@ -64,15 +65,23 @@ class Exponential(Generator):
         Sample the exponential at sampler frames.
         Converts frame numbers to time (ie. 44100 => 1.0).
         """
-        frames = np.array(frames, dtype=np.float64) if np.isscalar(frames) else np.fromiter(frames, dtype=np.float64)
+        if np.isscalar(frames):
+            frames = np.array(frames, dtype=np.float64)
+        else:
+            frames = np.fromiter(frames, dtype=np.float64)
         times = frames / float(sampler.rate)
+
         return self.at(times)
 
     def at(self, times):
         """
         Sample the exponential at sample times.
         """
-        return np.clip(self.amp * np.exp(self.rate * times), a_min=0.0, a_max=1.0)
+        return np.clip(
+            self.amp * np.exp(self.rate * times),
+            a_min=0.0,
+            a_max=1.0,
+        )
 
     # def __len__(self):
     #     return int(np.ceil(np.abs(self.scale)))

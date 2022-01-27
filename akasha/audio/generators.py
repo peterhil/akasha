@@ -29,12 +29,17 @@ class Generator():
         if isinstance(item, slice):
             if hasattr(self, '__len__'):
                 # Mimick ndarray slicing, ie. clip the slice indices
-                res = np.clip(np.array([item.start, item.stop]), a_min=None, a_max=len(self))
+                res = np.clip(
+                    np.array([item.start, item.stop]),
+                    a_min=None,
+                    a_max=len(self),
+                )
                 for i in range(len(res)):
                     if res[i] is not None and np.sign(res[i]) == -1:
                         res[i] = max(-len(self) - 1, res[i])
                 item = slice(res[0], res[1], item.step)
-                item = np.arange(*(item.indices(item.stop or (len(self) - 1))))
+                stop = item.stop or (len(self) - 1))
+                item = np.arange(*(item.indices(stop)))
             else:
                 item = np.arange(*(item.indices(item.stop)))
         return self.sample(item)
@@ -43,7 +48,9 @@ class Generator():
         """
         Sample sound generator at times (t).
         """
-        raise NotImplementedError("Please implement method at() in a subclass.")
+        raise NotImplementedError(
+            "Please implement method at() in a subclass."
+        )
 
     def sample(self, frames):
         """

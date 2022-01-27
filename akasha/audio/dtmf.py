@@ -87,10 +87,13 @@ class DTMF(Generator):
         l, h = divmod(i, 4)
         table[nkeys[i]] = (lo[l], hi[h])
 
-    alphabet_trans = maketrans(
-        ''.join(['ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PQRS', 'TUV', 'WXYZ', ' ', '-']),
-        ''.join(['222', '333', '444', '555', '666', '7777', '888', '9999', '0', '-'])
-    )
+    keys = ''.join([
+        'ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PQRS', 'TUV', 'WXYZ', ' ', '-'
+    ]),
+    digits = ''.join([
+        '222', '333', '444', '555', '666', '7777', '888', '9999', '0', '-'
+    ])
+    alphabet_trans = maketrans(keys, digits)
 
     def __init__(self, sequence, pulselength=0.07, pause=0.05):
         _super(self).__init__()
@@ -111,4 +114,6 @@ class DTMF(Generator):
         pass
 
     def __len__(self):
-        int(round(len(self.number) * (self.pulselength + self.pause) * sampler.rate - self.pause))
+        pulselength = len(self.number) * (self.pulselength + self.pause)
+        length = pulselengths * sampler.rate - self.pause
+        return int(round(length))

@@ -5,9 +5,7 @@
 #
 # pylint: disable=E1101
 
-"""
-Releasable mixin module
-"""
+"""Releasable mixin module"""
 
 import numpy as np
 
@@ -15,8 +13,8 @@ from akasha.audio.mixins.composite import Composite
 
 
 class Releasable(Composite):
-    """
-    Mixin to create playable composite sound object that can be released on key up.
+    """Mixin to create playable composite sound object that can be
+    released on key up.
     """
 
     def _releasable_components(self):
@@ -30,6 +28,6 @@ class Releasable(Composite):
         Set release time for components.
         """
         if np.isreal(time):
-            return [component.release_at(time) for component in self._releasable_components()]
+            return [c.release_at(time) for c in self._releasable_components()]
         else:
             raise ValueError("Release time should be a real number!")

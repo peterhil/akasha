@@ -12,7 +12,7 @@ from numbers import Real
 from akasha.curves import Circle
 from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import PeriodicGenerator
-from akasha.utils.python import _super
+from akasha.utils.python import class_name, _super
 
 
 class Osc(FrequencyRatioMixin, PeriodicGenerator):
@@ -40,9 +40,9 @@ class Osc(FrequencyRatioMixin, PeriodicGenerator):
         return self.curve.at(Frequency.angles(self.ratio))
 
     def __repr__(self):
-        tpl = "{0}({1}, curve={2})"
-        return tpl.format(self.__class__.__name__, self.frequency._hz, repr(self.curve))
+        return f'{class_name(self)}{(self.frequency._hz!r}, ' + \
+            f'curve={self.curve!r})'
 
     def __str__(self):
-        tpl = "<{0}: {1}, curve={2}>"
-        return tpl.format(self.__class__.__name__, self.frequency, str(self.curve))
+        return f'<{class_name(self)}: {self.frequency!s}, ' + \
+           f'curve={self.curve!s}>'

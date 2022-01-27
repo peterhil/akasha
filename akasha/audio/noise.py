@@ -65,16 +65,17 @@ class Noise(Generator):
 
 
 class ColouredNoise(Generator):
-    """
-    Generate coloured noise, with instantaneous frequency differences having some distribution.
-    By default uses standard normal distribution, also known as the Gaussian distribution.
+    """Generate coloured noise, with instantaneous frequency
+    differences having some distribution.
+
+    By default uses standard normal distribution, also known as
+    the Gaussian distribution.
     """
     # TODO Make this into a filter for jittering a frequency
     # TODO Examine using other distributions
 
     def __init__(self, frequency, deviation=0.1, step=1, log=True):
-        """
-        == Parameters ==
+        """== Parameters ==
         frequency: The center of the distribution (mu).
         deviation: The standard deviation (sigma).
 
@@ -92,10 +93,17 @@ class ColouredNoise(Generator):
 
     def sample(self, iterable):
         length = len(iterable)
-        s = self.randomizer(self.mu, self.sigma, np.ceil(length / float(self.step)))
+        num = np.ceil(length / float(self.step))
+        signal = self.randomizer(self.mu, self.sigma, num)
+
         if self.step != 1:
-            s = np.interp(np.arange(length), np.arange(0, length, self.step), s[:length])
-        return c.at(np.cumsum(s))
+            signal = np.interp(
+                np.arange(length),
+                np.arange(0, length, self.step),
+                signal[:length]
+            )
+
+        return c.at(np.cumsum(signal))
 
 
 class Rustle(Generator):
@@ -156,7 +164,10 @@ class Mandelbrot(Generator):
         """
         self.z = self.poly(self.z)
         if np.abs(self.z) > 1.0:
-            self.z = np.array(rect(1.0 / np.abs(self.z), np.angle(self.z)), dtype=complex)
+            self.z = np.array(
+                rect(1.0 / np.abs(self.z), np.angle(self.z)),
+                dtype=complex
+            )
         return self.z
 
     def poly(self, z):
@@ -184,10 +195,15 @@ class Chaos(Generator):
     """
     # TODO: Make into generic iterator using Generator
 
-    def __init__(self, gen=Mandelbrot(random=True), envelope=Exponential(0, amp=0.5)):
+    def __init__(
+        self,
+        gen=Mandelbrot(random=True),
+        envelope=Exponential(0, amp=0.5),
+    ):
         _super(self).__init__()
         self.gen = gen
-        self.envelope = envelope  # TODO: Leave out of sound objects, and compose when sampling?
+        # TODO: Leave envelope out of sound objects & compose when sampling?
+        self.envelope = envelope
 
     def sample(self, iterable):
         """
@@ -201,7 +217,14 @@ class Chaos(Generator):
         return f'{class_name(self)}(gen={self.gen!r})'
 
 
-def random_frequencies(n, low=20, high=sampler.rate/2.0, t=4, window=2, smoothing='exponential'):
+def random_frequencies(
+    n,
+    low=20,
+    high=sampler.rate/2.0,
+    t=4,
+    window=2,
+    smoothing='exponential',
+):
     signal = np.repeat(
         np.random.random_integers(
             low, high, np.ceil(float(n) / float(t))) / float(sampler.rate),

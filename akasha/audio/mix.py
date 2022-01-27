@@ -32,10 +32,12 @@ class Mix(Playable, Generator):
         """
         Sample mix at sample times (t).
         """
-        return reduce(np.multiply, [component.at(t) for component in self.components])
+        sampled = [component.at(t) for component in self.components]
+        return reduce(np.multiply, sampled)
 
     def sample(self, frames):
         """
         Sample mix at frames.
         """
-        return reduce(np.multiply, [component[frames] for component in self.components])
+        sampled = [component[frames] for component in self.components]
+        return reduce(np.multiply, sampled)

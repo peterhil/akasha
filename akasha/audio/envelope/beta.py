@@ -18,11 +18,11 @@ from akasha.utils.python import _super
 
 
 class Beta():
-    """
-    Envelope curves using beta distribution's cumulative distribution functions,
-    that are stretched to some time scale.
+    """Envelope curves using beta distribution's cumulative
+    distribution functions, that are stretched to some time scale.
 
     https://en.wikipedia.org/wiki/Beta_distribution
+
     https://en.wikipedia.org/wiki/Beta_function#Incomplete_beta_function
     """
     def __init__(self, time=1.0, a=1.0, b=5.0, amp=1.0):
@@ -37,18 +37,19 @@ class Beta():
         Sample beta cdf at times.
         """
         times = times / self.time
-        times = np.where(times < 0, 0, times)  # Fix NaNs for negative time values
+        # Fix NaNs for negative time values
+        times = np.where(times < 0, 0, times)
 
-        beta = special.beta(self.a, self.b) * stats.beta.cdf(times, self.a, self.b)
+        beta = special.beta(self.a, self.b) * \
+            stats.beta.cdf(times, self.a, self.b)
         clipped = np.clip(self.amp * beta, a_min=0, a_max=1)
 
         return clipped
 
 
 class InverseBeta(Beta):
-    """
-    Inverse (1.0 - Beta.at(t)) of Beta. See their documentation below.
-
+    """Inverse (1.0 - Beta.at(t)) of Beta. See their documentation
+    below.
     """ + Beta.__doc__
     def at(self, times):
         return 1.0 - _super(self).at(times)
