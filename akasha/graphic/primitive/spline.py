@@ -19,20 +19,23 @@ from akasha.funct.itertools import consecutive
 from akasha.math.geometry import orient, turtle_turns, vectors, wrap_ends
 from akasha.math.geometry.curvature import estimate_curvature
 from akasha.utils.log import logger
-from akasha.math import abslogsign, abspowersign, as_complex, cartesian, distances, lambertw, map_array, overlap, pi2, rect, repeat
+from akasha.math import abslogsign, abspowersign, as_complex, cartesian, \
+     distances, lambertw, map_array, overlap, pi2, rect, repeat
 
 
 def clothoid_erf(t):
     """Euler spiral defined using the error function:
     http://en.wikipedia.org/wiki/Fresnel_integral#Properties"""
-    return np.sqrt(np.pi / 2) * ((1 - 1j) / 2) * sc.special.erfi(t * (1 + 1j) / np.sqrt(2))
+    erfi = sc.special.erfi(t * (1 + 1j) / np.sqrt(2))
+    return np.sqrt(np.pi / 2) * ((1 - 1j) / 2) * erfi
 
 
 def clothoid_gray_hg(t, exponent=2, norm=1):
     """
-    Generalization by Gray (1997): http://mathworld.wolfram.com/CornuSpiral.html
-    Defined by generalized hypergeometric functions.
+    Generalization by Gray (1997):
+    http://mathworld.wolfram.com/CornuSpiral.html
 
+    Defined by generalized hypergeometric functions.
     Curvature is t**n.
 
     TODO: Something is not right here...
@@ -55,7 +58,10 @@ def clothoid_gray_hg(t, exponent=2, norm=1):
         c = 1 + 1 / n2p1
         z = -(t ** n2p1 / (4 * (n + 1) ** 2))
         return coeff * sc.special.hyp2f1(a, b, c, z)
-    # return as_complex(np.array([sf(t, exponent, norm), cf(t, exponent, norm)]))
+    # return as_complex(np.array([
+    #     sf(t, exponent, norm),
+    #     cf(t, exponent, norm)
+    # ]))
     return sf(t, exponent, norm) + 1j * cf(t, exponent, norm)
 
 
@@ -65,8 +71,8 @@ def fresnel(t, exponent):
 
 def clothoid_gray(t, exponent=2, scale=1):
     """
-    Gray (1997) defines a generalization of the Cornu spiral given by parametric equations:
-    http://mathworld.wolfram.com/CornuSpiral.html
+    Gray (1997) defines a generalization of the Cornu spiral given
+    by parametric equations: http://mathworld.wolfram.com/CornuSpiral.html
     http://books.google.fi/books?id=-LRumtTimYgC&lpg=PA49&hl=fi&pg=PA64#v=onepage&q&f=false
 
     In the equations below:
@@ -88,11 +94,12 @@ def clothoid_gray(t, exponent=2, scale=1):
 
 
 def clothoid_scaled(k, phi, s, start=0, distance=1):
-    points = 1000  # TODO Maybe control the number of points by multiplying with s, but beware of huge values of s!
+    # TODO Maybe control the number of points by multiplying with s,
+    # but beware of huge values of s!
+    points = 1000
 
     n, a, t = nat(k, phi, s)
     end = clothoid_gray(np.arange(start * t, t, 1/points), n, a/points)[-1]
-
     scale = distance / np.abs(end)
     # s *= scale; k /= scale
     a *= scale
@@ -102,7 +109,9 @@ def clothoid_scaled(k, phi, s, start=0, distance=1):
 
 
 def clothoid_scaleto(k, phi, s, start=0, target=1+0j):
-    points = 1000  # TODO Maybe control the number of points by multiplying with s, but beware of huge values of s!
+    # TODO Maybe control the number of points by multiplying with s,
+    # but beware of huge values of s!
+    points = 1000
 
     n, a, t = nat(k, phi, s)
     sig = clothoid_gray(np.linspace(start * t, t, points), n, a/points)
@@ -113,16 +122,22 @@ def clothoid_scaleto(k, phi, s, start=0, target=1+0j):
     s *= np.abs(vector); k /= np.abs(vector)
 
     n, a, t = nat(k, phi, s)
-    return clothoid_gray(np.linspace(start * t, t, points), n, a/points) * vector
+
+    return clothoid_gray(
+        np.linspace(start * t, t, points),
+        n,
+        a / points
+    ) * vector
 
 
 def clothoid_gray_negative(t, exponent=2, scale=1):
-    """
-    Rotate 0..n values to handle negative values and fractional exponentation.
+    """Rotate 0..n values to handle negative values and fractional
+    exponentation.
     """
     if (t < 0).any():
         raise ValueError("Only positive values for t accepted!")
     s = clothoid_gray(t, exponent, scale)
+
     return np.append(s[1:][::-1] * 1j * 1j, s)
 
 
@@ -161,11 +176,12 @@ def n_from_k_s_t(k, s, t):
 
 
 def n_a_phi(k, s, t):
+    exponent = (1 + np.log(-k * s / t) / np.log(t))
     return (
         np.log(-k * s / t) / np.log(t),
         s / t,
-        t ** (1 + np.log(-k * s / t) / np.log(t)) * np.log(t) / (-np.log(t) - np.log(-k * s / t)),
-        )
+        t ** exponent * np.log(t) / (-np.log(t) - np.log(-k * s / t)),
+    )
 
 
 def nat_pos(k, phi, s):
@@ -182,7 +198,7 @@ def nat_pos(k, phi, s):
         np.log(-ks * u) / np.log(t),
         s * u,
         t
-        )
+    )
 
 
 def nat(k, phi, s):
@@ -192,11 +208,14 @@ def nat(k, phi, s):
     """
     b = abspowersign(-k * s, phi)
     e = 1 / (k * s)
+    num = abslogsign(-k * s * abspowersign(b, -e))
+    den = abslogsign(abspowersign(b, e))
+
     return (
-        abslogsign(-k * s * abspowersign(b, -e)) / abslogsign(abspowersign(b, e)),
+        num / den,
         s * abspowersign(b, -e),
         abspowersign(b, e)
-        )
+    )
 
 
 def t_for_curvature(n, a, k):
@@ -229,7 +248,9 @@ def clothoid_segment(k, k2, phi, phi2, s, s2):
 def clothoid_tangents(points, ends=None):
     """
     Find suitable tangent angles for a set of points.
-    Angles are found by halving the angle of "turns" on the "turtle path" formed by the points.
+
+    Angles are found by halving the angle of "turns" on the "turtle path"
+    formed by the points.
 
     Parameters:
     ===========
@@ -246,15 +267,20 @@ def clothoid_tangents(points, ends=None):
     turns = turtle_turns(points)
     logger.debug("Turns:\n%r\nSigns:\n%r", turns, np.sign(turns))
     current = 0
-    tangents = map_array(lambda angle: np.fmod(current + angle, np.pi), turns / 2) + directions[:-1]
+
+    def mod_angle(angle):
+        # TODO Current is not changed?
+        return np.fmod(current + angle, np.pi)
+
+    tangents = map_array(mod_angle, turns / 2) + directions[:-1]
     if 'open' == ends:
         return np.concatenate(([directions[0]], tangents, [directions[-1]]))
     return tangents
 
 
 def clothoid_tangents_simple(points, turns=False):
-    """
-    Find suitable tangent angles by angles between previous and next point on path.
+    """Find suitable tangent angles by angles between previous and
+    next point on path.
     """
     points = pad(points, value=points[0], count=2, index=0)
     points = pad(points, value=points[-1], count=2, index=-1)
@@ -276,11 +302,13 @@ def snk(a, t, phi):
     """
     log = np.log
     exp = np.exp
+    lambert = lambertw(log(t ** (1 / phi)))
+    log_t_phi = log(t ** (-phi))
     return (
         a * t,
-        (-phi * lambertw(log(t ** (1 / phi))) + log(t ** (-phi))) / (phi * log(t)),
-        -exp(-lambertw(log(t ** (1 / phi))) + log(t ** (-phi)) / phi) / a
-        )
+        (-phi * lambert + log_t_phi) / (phi * log(t)),
+        -exp(-lambert + log_t_phi / phi) / a,
+    )
 
 
 def nas(k, phi, t):
@@ -290,12 +318,13 @@ def nas(k, phi, t):
         -exp(-lambertw(log(t) / phi)) / k,
         log(exp(-lambertw(log(t) / phi)) / t) / log(t),
         -exp(-lambertw(log(t) / phi)) / (k * t)
-        )
+    )
 
 
 def clothoid_exp(t, exponent=2):
     """Function (1) at Rational Approximations for the Fresnel Integrals
-    By Mark A. Heald -- http://www.ams.org/journals/mcom/1985-44-170/S0025-5718-1985-0777277-6/S0025-5718-1985-0777277-6.pdf
+    By Mark A. Heald:
+    http://www.ams.org/journals/mcom/1985-44-170/S0025-5718-1985-0777277-6/S0025-5718-1985-0777277-6.pdf
 
     Useful values for t parameter seem to be between -pi and pi."""
     @np.vectorize
@@ -341,44 +370,49 @@ def clothoid_pow(points, limit=50):
     See: http://en.wikipedia.org/wiki/Euler_spiral
     """
     points = np.atleast_1d(points)
+    kwargs = {
+        epsrel=1e-6,
+        epsabs=0,
+        limit=limit,
+    }
     @np.vectorize
     def s(x):
         def st(t):
             return np.sin(t**2)
-        return sc.integrate.quad(st, 0, x, epsrel=1e-6, epsabs=0, limit=limit)[0]
+        return sc.integrate.quad(st, 0, x, **kwargs)[0]
+
     @np.vectorize
     def c(x):
         def ct(t):
             return np.cos(t**2)
-        return sc.integrate.quad(ct, 0, x, epsrel=1e-6, epsabs=0, limit=limit)[0]
+        return sc.integrate.quad(ct, 0, x, **kwargs)[0]
+
     return as_complex(np.array([c(points), s(points)]))
 
 
 def clothoid_slice(start, stop, n, endpoint=False):
-    """
-    A slice of clothoid spiral.
+    """A slice of clothoid spiral.
     """
     return clothoid(np.linspace(start, stop, n, endpoint))
 
 
 def clothoid_windings(start, stop, n, endpoint=False):
+    """A piece of clothoid with start and stop being winding values.
     """
-    A piece of clothoid with start and stop being winding values.
-    """
-    return clothoid(np.linspace(wind(start), wind(stop), n, endpoint), scaled=False)
+    winds = np.linspace(wind(start), wind(stop), n, endpoint)
+    return clothoid(winds, scaled=False)
 
 
 def clothoid_length(turn, diff=0.5, n=1000, endpoint=True):
-    """
-    A piece of clothoid with starting point at turn windings (positive or negative)
-    and going there to diff windings point.
+    """A piece of clothoid with starting point at turn windings
+    (positive or negative) and going there to diff windings point.
     """
     return clothoid_windings(turn, turn + diff, n, endpoint)
 
 
 def wind(x):
-    """
-    Normalizes points on clothoid to have x number of turns (windings) wrt. to origo
+    """Normalizes points on clothoid to have x number of turns
+    (windings) wrt. to origo
     """
     return np.sign(x) * np.sqrt(np.abs(x) * 4)
 
@@ -412,16 +446,24 @@ def cl_piece(start, stop, n, endpoint=False, scale=1, norm=False, fn=clothoid_wi
 
 def clothoid_arc_length(para):
     ell = Ellipse.from_conjugate_diameters(para[:3])
-    return np.ediff1d(ell.arc_length((np.angle(para[:3][::-1] - ell.origin) / pi2))[::-1])
+    arc_length = ell.arc_length(np.angle(para[:3][::-1] - ell.origin) / pi2)
+    return np.ediff1d(arc_length[::-1])
 
 
 def estimate_arc_length(signal, mean=sc.stats.hmean):
-    arr = np.array([clothoid_arc_length(points) for points in consecutive(signal, 3)])
+    arr = np.array([
+        clothoid_arc_length(points) for points in consecutive(signal, 3)
+    ])
     fst, snd = np.append(arr, [[arr[-1, -1], arr[0, 0]]], axis=0).T
     snd = np.roll(snd, 1)
-    # TODO try other means (pun intended) also. See https://en.wikipedia.org/wiki/Pythagorean_means
-    # Harmonic mean always gives the smallest value (for positive numbers), then geometric, then arithmetic mean (average).
-    # Harmonic mean is the same as 1/np.mean(1/arr), but doesn't make sense for negative values (results will be +/-inf).
+    # TODO try other means (pun intended) also, see:
+    # https://en.wikipedia.org/wiki/Pythagorean_means
+    #
+    # Harmonic mean always gives the smallest value (for positive numbers),
+    # then geometric, then arithmetic mean (average).
+    #
+    # Harmonic mean is the same as 1/np.mean(1/arr), but doesn't
+    # make sense for negative values (results will be +/-inf).
     return mean(np.abs(np.array([fst, snd])), axis=0)
 
 
@@ -463,19 +505,31 @@ def clothoid_segments(signal, ends='open', mean=np.mean):
 
     ks = overlap(k, 2).T
     phis = overlap(phi, 2).T
-    # ss = repeat(s / 2, 2).reshape(2, len(s)).T  # TODO find out correct lengths of the parts of clothoid segment!!!
+    # TODO find out correct lengths of the parts of clothoid segment!!!
+    # ss = repeat(s / 2, 2).reshape(2, len(s)).T
     ss = np.concatenate((s / 2, s)).reshape(2, len(s)).T
 
     segments = np.hstack((ks, phis, ss))
     logger.debug( "Segments (k, k2, phi, phi2, s, s2):\n%r", segments)
 
-    params = np.apply_along_axis(lambda p: clothoid_segment(*p), 1, segments)
+    params = np.apply_along_axis(
+        lambda p: clothoid_segment(*p),
+        1,
+        segments
+    )
     logger.debug( "Params (n, a, t, t2):\n%r", params)
 
 
     straighten = lambda s: s / rect(1, np.angle(s[-1] - s[0]))
-    # clothoids = map(lambda n, a, t, t2: orient(clothoid_curve(n, a, t, t2)), *params.T)
-    clothoids = np.apply_along_axis(lambda p: orient(clothoid_curve(*p)), 1, params)  # Works only if clothoid_curve always gives the same number of points!
+    # clothoids = map(
+    #     lambda n, a, t, t2: orient(clothoid_curve(n, a, t, t2)),
+    #     *params.T
+    # )
+    # Works only if clothoid_curve always gives the same number of points!
+    clothoids = np.apply_along_axis(
+        lambda p: orient(clothoid_curve(*p)), 1,
+        params
+    )
 
     path = cartesian(distances(signal), directions)
     add_dim = lambda arr: np.resize(arr, (len(arr), 1))
@@ -494,7 +548,10 @@ def ellipse(t):
 
 
 def ellipses(signal):
-    return np.array([ellipse(points) for points in consecutive(signal, 3)]).flatten()
+    return np.array([
+        ellipse(points) for points in
+        consecutive(signal, 3)
+    ]).flatten()
 
 
 # Circular arcs
