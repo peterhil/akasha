@@ -32,8 +32,10 @@ def czt(signal, m=None, w=None, a=1.0, normalize=False):
 
     Transforms the time domain signal into complex frequency domain.
 
-    The chirp Z-transform is implemented as described in "The Chirp z-Transform Algorithm" by
-    L.R. Rabiner, R.W. Schafer and C.M. Rader in the Bell System Technical Journal, May 1969.
+    The chirp Z-transform is implemented as described in
+    "The Chirp z-Transform Algorithm" by L.R. Rabiner, R.W. Schafer and
+    C.M. Rader in the Bell System Technical Journal, May 1969.
+
     http://cronos.rutgers.edu/~lrr/Reprints/015_czt.pdf
     """
     signal = np.atleast_1d(signal).astype(np.complex)
@@ -57,7 +59,9 @@ def iczt(signal, m=None, w=None, a=1.0, normalize=False):
     """
     The inverse chirp Z-transform
 
-    Transforms the complex frequency domain signal back to time domain signal.
+    Transforms the complex frequency domain signal back to
+    time domain signal.
+
     Uses the conjugation property of Z-transforms to get the inverse.
     """
     signal = np.atleast_1d(signal).astype(np.complex)
@@ -78,8 +82,8 @@ def ichirp(w, n):
 
 
 def czt_naive(signal, m=None, w=None, a=1.0):
-    """
-    Naive and slow O(n**2) implementation of Rader's chirp z-transform. For testing, do not use!
+    """Naive and slow O(n**2) implementation of Rader's chirp
+    z-transform. For testing, do not use!
     """
     signal = np.atleast_1d(signal).astype(np.complex)
     l = len(signal)

@@ -63,7 +63,7 @@ def incenter_smoothing(signal, angle_limit=quarter):
         else:
             return b
 
-    smoothed = [ smooth(a, b, c) for a, b, c in consecutive(signal, 3) ]
+    smoothed = [smooth(a, b, c) for a, b, c in consecutive(signal, 3)]
     return pad_ends(smoothed, signal[0], signal[-1])
 
 
@@ -72,8 +72,8 @@ def exponential_smoothing(signal):
 
 
 def straight_edge_smoothing(signal, angle_limit=quarter):
-    """
-    Smoothes a signal so that consecutive signal points do not form angles smaller than 90 degrees.
+    """Smoothes a signal so that consecutive signal points do not
+    form angles smaller than 90 degrees.
     """
     def smooth(a, b, c):
         # Calculate new position that makes at most 90 degree angle
@@ -83,5 +83,5 @@ def straight_edge_smoothing(signal, angle_limit=quarter):
         else:
             return b
 
-    smoothed = [ smooth(a, b, c) for a, b, c in consecutive(signal, 3) ]
+    smoothed = [smooth(a, b, c) for a, b, c in consecutive(signal, 3)]
     return pad_ends(smoothed, signal[0], signal[-1])
