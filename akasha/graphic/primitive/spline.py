@@ -370,11 +370,11 @@ def clothoid_pow(points, limit=50):
     See: http://en.wikipedia.org/wiki/Euler_spiral
     """
     points = np.atleast_1d(points)
-    kwargs = {
+    kwargs = dict(
         epsrel=1e-6,
         epsabs=0,
         limit=limit,
-    }
+    )
     @np.vectorize
     def s(x):
         def st(t):
