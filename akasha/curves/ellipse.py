@@ -68,7 +68,8 @@ class Ellipse(Curve):
         return b if a > b else a
 
     def __repr__(self):
-        return "%s(%r, %r, %r, %r)" % (self.__class__.__name__, self.a, self.b, self.angle, self.origin)
+        return f'{class_name(self)}({self.a}, {self.b}, ' + \
+            f'{self.angle}, {self.origin})'
 
     def __hash__(self):
         return hash((self.a, self.b, self.angle, self.origin))
@@ -205,7 +206,7 @@ class Ellipse(Curve):
         elif method == 'fitzgibbon':
             fit_method = ellipse_fit_halir
         else:
-            raise NotImplementedError("Method '{}' not implemented.".format(method))
+            raise NotImplementedError(f"Method '{method}' not implemented.")
         return cls.from_general_coefficients(*fit_method(points))
 
     @property

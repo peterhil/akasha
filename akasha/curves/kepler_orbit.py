@@ -16,6 +16,7 @@ from scipy.optimize import newton
 
 from akasha.curves.curve import Curve
 from akasha.math import pi2
+from akasha.utils.python import class_name
 
 
 class KeplerOrbit(Curve):
@@ -44,9 +45,9 @@ class KeplerOrbit(Curve):
         self.ph = 0  # Time of perihelion passage
 
     def __repr__(self):
-        return "%s(%r, %r, eccentricity=%r, period=%r, name=%r)" % (
-            self.__class__.__name__, self.perihelion, self.a, self.eccentricity, self.period, self.name
-        )
+        return f'{class_name(self)}({self.perihelion!r}, {self.a!r}, ' + \
+            f'eccentricity={self.eccentricity!r}, period={self.period!r}, ' + \
+            f'name={self.name!r})'
 
     @property
     def mean_motion(self):

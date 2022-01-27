@@ -16,6 +16,7 @@ import numpy as np
 from akasha.curves.circle import Circle
 from akasha.curves.curve import Curve
 from akasha.utils.array import is_sequence
+from akasha.utils.python import class_name
 from akasha.math import pi2, normalize
 
 
@@ -84,7 +85,7 @@ class Super(Curve):
         http://en.wikipedia.org/wiki/Superformula
         """
         (m, n, p, q, a, b) = list(superness)
-        assert np.isscalar(m), "%s in superformula is not scalar." % m
+        assert np.isscalar(m), f'{m!s} in superformula is not scalar.'
         coeff = pi2 * at * (m / 4.0)
         return (np.abs(np.cos(coeff) / a) ** p + np.abs(np.sin(coeff) / b) ** q) ** (-1.0 / n)
 
@@ -95,4 +96,4 @@ class Super(Curve):
         return hash(tuple(self.superness))
 
     def __repr__(self):
-        return "%s%s" % (self.__class__.__name__, tuple(self.superness))
+        return f'{class_name(self)}{tuple(self.superness)}'

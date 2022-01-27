@@ -8,6 +8,7 @@ Base periodic curve module
 from __future__ import division
 
 from akasha.audio.generators import PeriodicGenerator
+from akasha.utils.python import class_name
 
 
 class Curve(PeriodicGenerator):
@@ -22,9 +23,4 @@ class Curve(PeriodicGenerator):
         return self.at(points)
 
     def __repr__(self):
-        return "%s()" % (self.__class__.__name__,)
-
-    def __str__(self):
-        return repr(self)
-
-
+        return f'{class_name(self)}()'
