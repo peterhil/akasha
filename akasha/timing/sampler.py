@@ -66,7 +66,7 @@ class Sampler():
         if ms is None:
             ms = self.frametime
         ms = max(int(round(ms + rel)), mintime)  # Limit to mintime (1000 / 16 = 62.5 Hz)
-        logger.info("Changing video FRAME TIME to {0} ms ({1:.3f} FPS)".format(ms, 1000 / ms))
+        logger.info("Changing video FRAME TIME to %d ms (%1:.3f FPS)", ms, 1000 / ms)
         self.frametime = ms
         return ms
 
