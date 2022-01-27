@@ -23,9 +23,12 @@ class PygameGui:
         Initialize Pygame and return a surface.
         """
         pg.quit()
-
+        loaded, failed = pg.init()
         logger.info(
-            "Pygame initialized with %s loaded modules (%s failed)." % pg.init()
+            'Pygame initialized with %s loaded modules '
+            '(%s failed).',
+            loaded,
+            failed,
         )
 
         screen = self.init_display(name, size)
@@ -73,9 +76,10 @@ class PygameGui:
                           channels=config.audio.CHANNELS,
                           buffer=config.audio.BUFFERSIZE)
 
+        fs, size, channels = pg.mixer.get_init()
         logger.info(
-            "Mixer has %s Hz sample rate with %s size samples and %s channels." %
-            pg.mixer.get_init()
+            "Mixer has %s Hz sample rate with %s size samples and %s channels.",
+            fs, size, channels
         )
 
         return pg.mixer.find_channel(force=True)

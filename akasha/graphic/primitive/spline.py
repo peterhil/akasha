@@ -220,8 +220,8 @@ def clothoid_segment(k, k2, phi, phi2, s, s2):
 
     n2 = abslogsign(k / k2) / abslogsign(t / t2)
     a2 = abspowersign(-t, n2) / k2 if k2 != 0 else abspowersign(-t2, n2) / k
-    logger.debug("n1: %s, a1: %s" % (n, a))
-    logger.debug("n2: %s, a2: %s" % (n2, a2))
+    logger.debug("n1: %s, a1: %s", n, a)
+    logger.debug("n2: %s, a2: %s", n2, a2)
 
     return ((n, a, t, t2), (n2, a2, t, t2))
 
@@ -244,7 +244,7 @@ def clothoid_tangents(points, ends=None):
         return clothoid_tangents(wrap_ends(points), ends=None)
     directions = np.angle(vectors(points))
     turns = turtle_turns(points)
-    logger.debug("Turns:\n%r\nSigns:\n%r" % (turns, np.sign(turns)))
+    logger.debug("Turns:\n%r\nSigns:\n%r", turns, np.sign(turns))
     current = 0
     tangents = map_array(lambda angle: np.fmod(current + angle, np.pi), turns / 2) + directions[:-1]
     if 'open' == ends:
@@ -433,7 +433,7 @@ def clothoid_curve(n, a, t, t2, use_range=True):
     # if not np.isnan(s):
     #     points = np.min((500, points * s))
     # logger.debug("Clothoid curve() -- Arc length: %r" % s)
-    logger.debug("Using %i points." % points)
+    logger.debug("Using %i points.", points)
     direction = -1 if np.sign(t2 - t) == -1 else 1
     step = direction * a / points
 
@@ -467,10 +467,10 @@ def clothoid_segments(signal, ends='open', mean=np.mean):
     ss = np.concatenate((s / 2, s)).reshape(2, len(s)).T
 
     segments = np.hstack((ks, phis, ss))
-    logger.debug( "Segments (k, k2, phi, phi2, s, s2):\n%r" % segments )
+    logger.debug( "Segments (k, k2, phi, phi2, s, s2):\n%r", segments)
 
     params = np.apply_along_axis(lambda p: clothoid_segment(*p), 1, segments)
-    logger.debug( "Params (n, a, t, t2):\n%r" % params )
+    logger.debug( "Params (n, a, t, t2):\n%r", params)
 
 
     straighten = lambda s: s / rect(1, np.angle(s[-1] - s[0]))
