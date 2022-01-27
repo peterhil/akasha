@@ -3,6 +3,8 @@
 
 import numpy as np
 
+from timeit import default_timer as timer
+
 from akasha.utils.array import is_empty
 
 

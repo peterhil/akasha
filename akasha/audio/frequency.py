@@ -31,11 +31,10 @@ from akasha.settings import config
 def is_audible(frequency):
     """Is the frequency audible?
     """
-    audible = {
-        'min': config.frequency.AUDIBLE_MIN,
-        'max': config.frequency.AUDIBLE_MAX,
-    }
-    return audible.min < frequency < audible.max
+    audible_min = config.frequency.AUDIBLE_MIN
+    audible_max = config.frequency.AUDIBLE_MAX
+
+    return audible_min < frequency < audible_max
 
 
 def octaves():

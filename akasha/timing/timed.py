@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from timeit import default_timer as timer
+
 
 class Timed():
     """
