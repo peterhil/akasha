@@ -18,4 +18,4 @@ np_setup()
 
 if not hasattr(config, 'basedir'):
     config.basedir = os.path.abspath(os.path.dirname(__file__))
-    logger.info("Started from: {0}".format(config.basedir))
+    logger.info('Started from: %s', config.basedir)

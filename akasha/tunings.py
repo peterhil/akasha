@@ -23,6 +23,7 @@ from akasha.audio.oscillator import Frequency
 from akasha.io.keyboard import kb, pos
 from akasha.settings import config
 from akasha.utils.log import logger
+from akasha.utils.python import class_name
 from akasha.math import pi2, find_closest_index, map_array
 
 
@@ -71,10 +72,10 @@ class EqualTemperament():
         return scale ** (np.arange(n + 1.0, dtype=np.float64) / n)
 
     def __repr__(self):
-        return "%s(%s, %s)" % (self.__class__.__name__, self.n, self.__scale)
+        return f'{class_name(self)}({self.n}, {self.__scale})'
 
     def __str__(self):
-        return "<%s: %s>" % (self.__class__.__name__, self.n)
+        return f'<{class_name(self)}: {self.n}>'
 
 
 class LucyTuning():
@@ -175,7 +176,8 @@ class WickiLayout(AbstractLayout):
             self.origo = origo
         else:
             raise AttributeError(
-                "Expected two generators, got: {0!r}".format(generators))
+                f'Expected two generators, got: {generators!r}'
+            )
 
     def get(self, *pos):
         """
@@ -238,13 +240,14 @@ class PianoLayout(AbstractLayout):
             freq = self.base * 2 ** ((octave * 12.0 + self.halftones[key]) / 12.0)
 
         logger.debug(
-            "Playing key '%s%s' (%s) with %s. Got %s with octave block distance %s." % (
-                key,
-                octave,
-                self.halftones[key],
-                freq,
-                tuple(pos),
-                octave_block,
-                ))
+            "Playing key '%s%s' (%s) with %s. "
+            "Got %s with octave block distance %s.",
+            key,
+            octave,
+            self.halftones[key],
+            freq,
+            tuple(pos),
+            octave_block,
+            )
 
         return freq

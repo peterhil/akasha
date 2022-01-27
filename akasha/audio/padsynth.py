@@ -21,6 +21,7 @@ from builtins import zip
 
 from akasha.audio.frequency import Frequency
 from akasha.math import normalize, random_phasor
+from akasha.utils.python import class_name
 
 
 class GaussianCurve():
@@ -35,7 +36,8 @@ class GaussianCurve():
         return self.scale * np.exp(-((x - self.frequency) ** 2.0) / (2.0 * self.sigma ** 2.0)) + self.base
 
     def __repr__(self):
-        return "{0}({1}, {2}, {3}, {4})".format(self.__class__.__name__, self.frequency, self.sigma, self.scale, self.base)
+        return f'{class_name(self)}({self.frequency!r}, {self.sigma!r}, ' + \
+            f'{self.scale!r}, {self.base!r})'
 
 
 class GaussianFrequencyCurve():
@@ -47,7 +49,7 @@ class GaussianFrequencyCurve():
         return np.apply_along_axis(np.sum, 0, [g(np.asanyarray(at)) for g in self.gaussians])
 
     def __repr__(self):
-        return "{0}({1})".format(self.__class__.__name__, self.gaussians)
+        return f'{class_name(self)}({self.gaussians!r})'
 
 
 def random_phases(reals):

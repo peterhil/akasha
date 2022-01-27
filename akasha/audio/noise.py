@@ -23,7 +23,7 @@ from akasha.audio.frequency import Frequency
 from akasha.audio.generators import Generator
 from akasha.math import normalize, numberof, pi2, random_phasor
 from akasha.timing import sampler
-from akasha.utils.python import _super
+from akasha.utils.python import class_name, _super
 
 
 class Noise(Generator):
@@ -175,7 +175,7 @@ class Mandelbrot(Generator):
         return np.fromiter(self, count=numberof(items), dtype=complex)
 
     def __repr__(self):
-        return "%s(z=%s, c=%s)" % (self.__class__.__name__, self.c, self.z)
+        return f'{class_name(self)}(z={self.z!r}, z={self.c!r})'
 
 
 class Chaos(Generator):
@@ -198,7 +198,7 @@ class Chaos(Generator):
         return chaos[iterable] * self.envelope[iterable]
 
     def __repr__(self):
-        return "%s(gen=%s)" % (self.__class__.__name__, repr(self.gen))
+        return f'{class_name(self)}(gen={self.gen!r})'
 
 
 def random_frequencies(n, low=20, high=sampler.rate/2.0, t=4, window=2, smoothing='exponential'):

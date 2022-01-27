@@ -18,7 +18,7 @@ from akasha.audio.oscillator import Osc
 
 from akasha.timing import sampler
 from akasha.utils.decorators import memoized
-from akasha.utils.python import _super
+from akasha.utils.python import class_name, _super
 from akasha.math import random_phasor, map_array, normalize, pi2
 
 
@@ -106,10 +106,11 @@ class Harmonics(FrequencyRatioMixin, Generator):
         return np.sum(partials, axis=0, dtype=np.complex128) / len(partials)
 
     def __repr__(self):
-        return "%s(sndobj=%r, n=%r, func=%r, damping=%r, rand_phase=%r>" % \
-            (self.__class__.__name__, self.base, self.n, self.func, self.damping, self.rand_phase)
+        return f'{class_name(self)}(sndobj={self.base!r}, n={self.n!r}, ' + \
+            f'func={self.func!r}, damping={self.damping!r}, ' + \
+            f'rand_phase={self.rand_phase!r}>'
 
     def __str__(self):
-        return "<%s: sndobj=%s, n=%s, frequency=%s, frequencies=%s, func=%s, damping=%s>" % \
-            (self.__class__.__name__, self.base, self.n, self.frequency,
-             self.frequencies, self.func, self.damping)
+        return f'{class_name(self)}: sndobj={self.base!s}, n={self.n!s}, ' + \
+            f'frequency={self.frequency!s}, frequencies={self.frequencies!s}, ' + \
+            f'func={self.func!s}, damping={self.damping!s}>'

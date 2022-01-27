@@ -14,7 +14,7 @@ import scipy.special as sc
 
 from akasha.audio.generators import Generator
 from akasha.timing import sampler
-from akasha.utils.python import _super
+from akasha.utils.python import class_name, _super
 
 
 class Gamma(Generator):
@@ -40,7 +40,7 @@ class Gamma(Generator):
         return sc.gammaincc(self.shape, frames)
 
     def __repr__(self):
-        return "%s(%s, %s)" % (self.__class__.__name__, self.shape, self.scale)
+        return f'{class_name(self)}({self.shape!r}, {self.scale!r})'
 
     def __str__(self):
-        return "<%s: shape=%s, scale=%s>" % (self.__class__.__name__, self.shape, self.scale)
+        return f'<{class_name(self)}: shape={self.shape!s}, scale={self.scale!s}>'

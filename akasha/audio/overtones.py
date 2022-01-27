@@ -23,7 +23,7 @@ from akasha.audio.sum import Sum
 from akasha.math import random_phasor, map_array, normalize, pi2
 from akasha.timing import sampler
 from akasha.utils.decorators import memoized
-from akasha.utils.python import _super
+from akasha.utils.python import class_name, _super
 
 
 # TODO use Playable and drop FrequencyRatioMixin
@@ -113,10 +113,14 @@ class Overtones(FrequencyRatioMixin, Generator):
         return self.partials.at(t)
 
     def __repr__(self):
-        return "%s(sndobj=%r, n=%r, func=%r, damping=%r, rand_phase=%r>" % \
-            (self.__class__.__name__, self.base, self.n, self.func, self.damping, self.rand_phase)
+        return f'{class_name(self)}(sndobj={self.base!r}, ' +\
+            f'n={self.n!r}, ' + \
+            f'func={self.func!r}, damping={self.damping!r}, ' + \
+            f'rand_phase={self.rand_phase!r})'
 
     def __str__(self):
-        return "<%s: sndobj=%s, n=%s, frequency=%s, frequencies=%s, func=%s, damping=%s>" % \
-            (self.__class__.__name__, self.base, self.n, self.frequency,
-             self.frequencies, self.func, self.damping)
+        return f'<{class_name(self)}: sndobj={self.base!r}, ' + \
+            f'n={self.n!r}, ' + \
+            f'frequency={self.frequency!r}, ' + \
+            f'frequencies={self.frequencies!r}, ' + \
+            f'func={self.func!r}, damping={self.damping!r}>'

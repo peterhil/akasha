@@ -230,10 +230,10 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
         return self._hz * t
 
     def __repr__(self):
-        return "Frequency(%s)" % self._hz
+        return f'Frequency({self._hz})'
 
     def __str__(self):
-        return "<Frequency: %s hz>" % self.hz
+        return f'<Frequency: {self._hz} hz>'
 
     def __hash__(self):
         """hash(self), takes into account any rounding done on

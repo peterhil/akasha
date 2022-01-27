@@ -56,7 +56,7 @@ class Chrono(RealUnit):
         def derived(secs):
             # pylint: disable=C0111
             return cls(secs * factor)
-        derived.__doc__ = "Chrono time as {0}.".format(name)
+        derived.__doc__ = f'Chrono time as {name}.'
         derived.__name__ = name
         setattr(cls, name, staticmethod(derived))
         if symbol:

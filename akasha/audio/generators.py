@@ -15,6 +15,7 @@ from builtins import range
 
 from akasha.funct.itertools import blockwise
 from akasha.timing import sampler
+from akasha.utils.python import class_name
 
 
 class Generator():
@@ -59,7 +60,8 @@ class Generator():
             return self.at(frames / float(sampler.rate))
         else:
             raise NotImplementedError(
-                "Sampling generators with objects of type %s not implemented yet." % type(frames)
+                f"Sampling generators with type '{type(frames)}' "
+                "not implemented yet."
             )
 
     def __iter__(self):
@@ -96,9 +98,8 @@ class PeriodicGenerator(Generator):
             return self.cycle[np.fromiter(item, dtype=np.int64) % self.period]
 
     def at(self, t):
+        f"""Sample {class_name(self)} at times (t).
         """
-        Sample {} at times (t).
-        """.format(self.__class__.__name__)
         return self.sample(t % self.period)
 
     # Disabled because Numpy gets clever (and slow) when a sound objects have length and

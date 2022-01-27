@@ -14,6 +14,7 @@ import numpy as np
 from akasha.audio.generators import Generator
 from akasha.math import minfloat
 from akasha.timing import sampler
+from akasha.utils.python import class_name
 
 
 class Exponential(Generator):
@@ -77,7 +78,7 @@ class Exponential(Generator):
     #     return int(np.ceil(np.abs(self.scale)))
 
     def __repr__(self):
-        return "%s(%s, %s)" % (self.__class__.__name__, self.rate, self.amp)
+        return f'{class_name(self)}({self.rate!r}, {self.amp!r})'
 
     def __str__(self):
-        return "<%s: rate=%s, amp=%s>" % (self.__class__.__name__, self.rate, self.amp)
+        return f'<{class_name(self)}: rate={self.rate!s}, amp={self.amp!s}>'
