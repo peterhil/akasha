@@ -108,7 +108,8 @@ class TestExponential():
             msg = "too short: Not all zero after end."
 
         assert (all_zero_after_end or non_zero_before_end), \
-            "%s\nLength %d %s\nBefore:\n%s\nAfter:\n%s" % (ex, index, msg, end, after_end)
+            f"{ex}\nLength {index} {msg}\n" + \
+            f"Before:\n{end}\nAfter:\n{after_end}"
 
     def test_from_scale(self):
         expected = Exponential(-0.5)

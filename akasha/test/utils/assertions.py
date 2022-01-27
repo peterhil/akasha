@@ -16,9 +16,8 @@ def assert_equal_image(expected, actual):
         assert_array_equal(
             pixels_actual.T,
             pixels_expected.T,
-            "=== Row %s is not equal ===\n\n"
-            "Expected:\n%s\n\n"
-            "Actual:\n%s"
-            % (row, expected.T, actual.T),
+            f"=== Row {row} is not equal ===\n\n"
+            f"Expected:\n{expected.T}\n\n"
+            f"Actual:\n{actual.T}",
             verbose=True
         )

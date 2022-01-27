@@ -91,9 +91,9 @@ class TestOscRoots():
         ], dtype=np.complex128)
 
         assert np.allclose(a.real, b.real, atol=1e-13), \
-            "real \n%s\nis not close to\n%s" % (a, b)
+            f"real {a!r}n\nis not close to\n{b!r}"
         assert np.allclose(a.imag, b.imag, atol=1e-13), \
-            "imag \n%s\nis not close to\n%s" % (a, b)
+            f"imag n{a!r}\nis not close to\n{b!r}"
 
         assert_nulp_diff(a, b, nulp=1)
 
