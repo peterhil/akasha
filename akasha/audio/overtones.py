@@ -13,16 +13,14 @@ import numpy as np
 
 from builtins import zip
 
-from akasha.audio.envelope import Exponential, Gamma
-from akasha.audio.frequency import Frequency, FrequencyRatioMixin
+from akasha.audio.envelope import Exponential
+from akasha.audio.frequency import FrequencyRatioMixin
 from akasha.audio.generators import Generator
 from akasha.audio.mix import Mix
 from akasha.audio.oscillator import Osc
 from akasha.audio.scalar import Scalar
 from akasha.audio.sum import Sum
-from akasha.math import random_phasor, map_array, normalize, pi2
-from akasha.timing import sampler
-from akasha.utils.decorators import memoized
+from akasha.math import random_phasor, map_array
 from akasha.utils.python import class_name, _super
 
 

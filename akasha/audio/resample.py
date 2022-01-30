@@ -11,7 +11,6 @@ Pcm sound sample module
 
 import numpy as np
 
-from numbers import Number
 from scikits import samplerate as src
 
 from akasha import dsp

@@ -11,15 +11,13 @@ Harmonics module
 
 import numpy as np
 
-from akasha.audio.envelope import Exponential, Gamma
-from akasha.audio.frequency import Frequency, FrequencyRatioMixin
+from akasha.audio.envelope import Exponential
+from akasha.audio.frequency import FrequencyRatioMixin
 from akasha.audio.generators import Generator
 from akasha.audio.oscillator import Osc
 
-from akasha.timing import sampler
-from akasha.utils.decorators import memoized
 from akasha.utils.python import class_name, _super
-from akasha.math import random_phasor, map_array, normalize, pi2
+from akasha.math import random_phasor, map_array
 
 
 # TODO Eventually compose overtones of Mix objects and use Playable,
@@ -78,7 +76,7 @@ class Harmonics(FrequencyRatioMixin, Generator):
         """
         partials = []
         oscs = np.array([Osc(f, self.base.curve) for f in self.frequencies])
-        freq = self.frequency
+        # freq = self.frequency
 
         for o in oscs:
             out = o.at(t)
