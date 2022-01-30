@@ -25,6 +25,7 @@ from akasha.math import complex_as_reals
 from akasha.math.geometry import is_orthogonal, midpoint, rotate_towards
 from akasha.math.geometry.affine_transform import AffineTransform
 from akasha.math import pi2
+from akasha.utils.python import class_name
 
 
 __all__ = ['Ellipse']

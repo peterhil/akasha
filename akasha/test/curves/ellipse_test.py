@@ -155,26 +155,33 @@ class TestEllipse():
             np.array([ell.a, ell.b, ell.angle, ell.origin])
         )
 
-    @pytest.mark.xfail()
     @pytest.mark.parametrize(('ellipse', 'coefficients'), [
         # https://math.stackexchange.com/questions/993625/ellipse-3x2-x6xy-3y5y2-0-what-are-the-semi-major-and-semi-minor-axes-dis
         (
-            Ellipse(0.514256, 0.375, angle=-1.353736, origin=-0.207206-0.156022j),
-            np.array([0.258716, 0.052086, 0.146368, 0.115342, 0.056466, -0.020835])
+            Ellipse(
+                0.514256, 0.375,
+                angle=-1.353736, origin=-0.207206-0.156022j
+            ),
+            np.array([
+                0.258716, 0.052086,
+                0.146368, 0.115342,
+                0.056466, -0.020835,
+            ])
         ),
         (
             Ellipse(
-                np.sqrt(7.0 / (12.0 * (4.0 + np.sqrt(10)))),
-                np.sqrt(7.0 / (12.0 * (4.0 - np.sqrt(10)))),
+                np.sqrt((7.0 / 12.0) * (4.0 + np.sqrt(10))),
+                np.sqrt((7.0 / 12.0) * (4.0 - np.sqrt(10))),
                 angle=-np.arctan((np.sqrt(10.0) - 1.0) / 3.0),
                 origin= (-1.0 / 3.0) + 0.5j
             ),
-            np.array([3, 6, 5, -1, -3, 0], dtype=np.float64)
+            np.array([
+                1.75,  3.5 ,  2.916666,
+                -0.583333, -1.75, -1.70138888,
+            ])
         ),
-        ])
+    ])
     def test_general_coefficients(self, ellipse, coefficients):
-        # coefficients = np.array([ 0.258716,  0.052086,  0.146368,  0.115342,  0.056466, -0.020835])
-        # ellipse = Ellipse(0.514256, 0.375, angle=-1.353736, origin=-0.207206-0.156022j)
         assert_array_almost_equal(
             ellipse.general_coefficients,
             coefficients
@@ -182,15 +189,14 @@ class TestEllipse():
 
     @pytest.mark.xfail()
     def test_ellipse_from_general_coefficients(self):
-        coefficients = np.array([ 0.445 , -0.39  ,  0.445 ,  0.036 ,  0.164 , -0.1368])
+        coefficients = np.array([
+            0.445 , -0.39,
+            0.445 ,  0.036,
+            0.164 , -0.1368,
+        ])
         ellipse = Ellipse.from_general_coefficients(*coefficients)
         original = Ellipse(0.8, 0.5, -0.375*pi2, -0.15-0.25j)
 
-        # assert_array_almost_equal(
-        #     ellipse.general_coefficients,
-        #     coefficients,
-        #     err_msg='Ellipse from coefficients do not match the coefficients'
-        # )
         assert_array_almost_equal(
             ellipse_parameters(ellipse),
             ellipse_parameters(original),
