@@ -14,8 +14,15 @@ import numpy as np
 from akasha.timing import sampler
 from akasha.utils.decorators import memoized
 from akasha.utils.log import logger
-from akasha.math import fixnans, distances, minfloat, pad, pi2, \
-     rad_to_deg, rad_to_tau
+from akasha.math import (
+    fixnans,
+    distances,
+    minfloat,
+    pad,
+    pi2,
+    rad_to_deg,
+    rad_to_tau,
+)
 
 
 colour_result = np.uint8
@@ -45,11 +52,11 @@ def hsv2rgb(hsv, alpha=None, dtype=colour_result):
 
     hsv[0] = hsv[0] % 360
 
-    if (hsv[0] < 120):
+    if hsv[0] < 120:
         sat[0] = (120 - hsv[0]) / 60.0
         sat[1] = hsv[0] / 60.0
         sat[2] = 0
-    elif (hsv[0] < 240):
+    elif hsv[0] < 240:
         sat[0] = 0
         sat[1] = (240 - hsv[0]) / 60.0
         sat[2] = (hsv[0] - 120) / 60.0
@@ -67,7 +74,7 @@ def hsv2rgb(hsv, alpha=None, dtype=colour_result):
     rgb[2] = (1 - hsv[1] + hsv[1] * sat[2]) * hsv[2]
 
     # Alpha
-    if (len(hsv) == 4):
+    if len(hsv) == 4:
         np.append(rgb, hsv[3])
     elif alpha:
         np.append(rgb, alpha)
@@ -89,11 +96,11 @@ def hsv_to_rgb(hsv, alpha=None, dtype=colour_result):
 
     hsv[0] = hsv[0] % 360
 
-    sp = hsv[0] // 120   # 0..360 -> 0, 1 or 2
+    sp = hsv[0] // 120  # 0..360 -> 0, 1 or 2
 
-    sat[0] = ((sp + 1) * 120 - hsv[0])
-    sat[1] = (hsv[0] - sp * 120)
-    #sat[2] = 0.0
+    sat[0] = (sp + 1) * 120 - hsv[0]
+    sat[1] = hsv[0] - sp * 120
+    # sat[2] = 0.0
 
     sat /= 60.0
     sat = np.fmin(sat, 1)
@@ -104,7 +111,7 @@ def hsv_to_rgb(hsv, alpha=None, dtype=colour_result):
     rgb = (1 - hsv[1] + hsv[1] * sat) * hsv[2]
 
     # Alpha
-    if (len(hsv) == 4):
+    if len(hsv) == 4:
         np.append(rgb, hsv[3])
     elif alpha:
         np.append(rgb, alpha)
@@ -127,22 +134,22 @@ def rgb2hsv(rgb, dtype=colour_result):
     themax = np.max(rgb)
     delta = float(themax - themin)
     hsv[2] = themax  # value
-    hsv[1] = 0       # saturation
-    if (themax > 0):
+    hsv[1] = 0  # saturation
+    if themax > 0:
         hsv[1] = delta / themax
 
-    hsv[0] = 0       # hue
-    if (delta > 0):
-        if (themax == rgb[0] and themax != rgb[1]):
+    hsv[0] = 0  # hue
+    if delta > 0:
+        if themax == rgb[0] and themax != rgb[1]:
             hsv[0] += (rgb[1] - rgb[0]) / delta
-        if (themax == rgb[1] and themax != rgb[2]):
-            hsv[0] += (2.0 + (rgb[2] - rgb[0]) / delta)
-        if (themax == rgb[2] and themax != rgb[0]):
-            hsv[0] += (4.0 + (rgb[0] - rgb[1]) / delta)
+        if themax == rgb[1] and themax != rgb[2]:
+            hsv[0] += 2.0 + (rgb[2] - rgb[0]) / delta
+        if themax == rgb[2] and themax != rgb[0]:
+            hsv[0] += 4.0 + (rgb[0] - rgb[1]) / delta
         hsv[0] *= 60.0
 
     # Alpha
-    if (len(rgb) == 4):
+    if len(rgb) == 4:
         hsv.append(rgb[3])
 
     return hsv.astype(dtype)
@@ -156,7 +163,7 @@ def angle2hsv(angles, dtype=colour_result):
     # It gets over a problem with hsv_to_rgb.
     return np.append(
         np.atleast_1d(angles % 360),
-        np.array([1, 255, 255], dtype=colour_values)
+        np.array([1, 255, 255], dtype=colour_values),
     ).astype(dtype)
 
 
@@ -216,7 +223,7 @@ def tau_to_hue(tau_angles):
     Return hue angles (in degrees) from tau angles.
     """
     # Hue 240 is violet, and 8.96 is a factor for scaling back to 1.0
-    #return (np.log2(np.abs(chord_to_tau(tau_angles))+1)) * 8.96 * 240
+    # return (np.log2(np.abs(chord_to_tau(tau_angles))+1)) * 8.96 * 240
     low = np.log2(lowest_audible_hz)
     # 10 octaves mapped to red..violet
     return ((np.log2(np.abs(tau_angles) + 1) - low) / 8.96 * 240) % 360

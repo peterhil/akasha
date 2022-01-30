@@ -36,8 +36,7 @@ from akasha.math import (
 
 
 def draw_axis(img, colour=None):
-    """Draw axis on the image with the colour.
-    """
+    """Draw axis on the image with the colour."""
     if colour is None:
         colour = [42, 42, 42, 127]
     height, width, channels = img.shape
@@ -47,8 +46,7 @@ def draw_axis(img, colour=None):
 
 
 def get_canvas(width=1000, height=None, channels=4):
-    """Get a Numpy array suitable for use as a drawing canvas.
-    """
+    """Get a Numpy array suitable for use as a drawing canvas."""
     if height is None:
         height = width
 
@@ -58,8 +56,7 @@ def get_canvas(width=1000, height=None, channels=4):
 
 
 def draw_blank(img):
-    """Draw blank image.
-    """
+    """Draw blank image."""
     black = [0, 0, 0, 255]
     height, width, channels = img.shape
     img[::] = black[:channels]
@@ -68,8 +65,7 @@ def draw_blank(img):
 
 
 def blit(screen, img):
-    """Blit the screen.
-    """
+    """Blit the screen."""
     if screen and img is not None:
         pygame.surfarray.blit_array(screen, img[..., :3])  # Drop alpha
 
@@ -84,8 +80,7 @@ def draw(
     img=None,
     screen=None,
 ):
-    """Draw the complex sound signal into specified size image.
-    """
+    """Draw the complex sound signal into specified size image."""
     # See: http://jehiah.cz/archive/creating-images-with-numpy
 
     # TODO: Buffering with frame rate for animations or
@@ -130,8 +125,7 @@ def draw(
 
 
 def clip_samples(signal):
-    """Clip a signal into unit rectangle area.
-    """
+    """Clip a signal into unit rectangle area."""
     clip_max = np.max(np.fmax(np.abs(signal.real), np.abs(signal.imag)))
     if clip_max > 1.0:
         logger.warning(
@@ -142,8 +136,7 @@ def clip_samples(signal):
 
 
 def add_alpha(rgb, opacity=255):
-    """Add alpha channel with specified opacity to the rgb signal.
-    """
+    """Add alpha channel with specified opacity to the rgb signal."""
     alpha = np.array([opacity] * len(rgb), dtype=np.uint8).reshape(
         len(rgb), 1
     )
@@ -154,8 +147,7 @@ def add_alpha(rgb, opacity=255):
 def draw_lines_pg(
     signal, screen, img, size=1000, colours=True, antialias=False
 ):
-    """Draw (antialiased) lines with Pygame.
-    """
+    """Draw (antialiased) lines with Pygame."""
     draw_blank(img)
     img = draw_axis(img)
     blit(screen, img)
@@ -175,8 +167,7 @@ def draw_lines_pg(
 
 
 def draw_lines(signal, img, size=1000, colours=True, antialias=False):
-    """Draw antialiased lines with Numpy.
-    """
+    """Draw antialiased lines with Numpy."""
     if len(signal) < 2:
         signal = pad(signal, -1)
     if colours:
@@ -215,8 +206,7 @@ def draw_lines(signal, img, size=1000, colours=True, antialias=False):
 
 
 def draw_points_np_aa(signal, img, size=1000, colours=True):
-    """Draw colourized antialiased points from signal.
-    """
+    """Draw colourized antialiased points from signal."""
     points = (clip(signal) + 1 + 1j) / 2.0 * (size - 1) + (0.5 + 0.5j)
     deltas = points - np.round(points)
 
@@ -234,8 +224,7 @@ def draw_points_np_aa(signal, img, size=1000, colours=True):
 
 
 def draw_points_aa(signal, img, size=1000, colours=True):
-    """Draw colourized antialiased points from signal.
-    """
+    """Draw colourized antialiased points from signal."""
     # Fixme: Ignores size argument as it is now
     width, height, _ = img.shape
 
@@ -259,8 +248,7 @@ def draw_points_aa(signal, img, size=1000, colours=True):
 
 
 def draw_points_aa_old(signal, img, size=1000, colours=True):
-    """Draw colourized antialiased points from signal.
-    """
+    """Draw colourized antialiased points from signal."""
     size -= 1
     bases, deltas = get_pixels(signal, size)
 
@@ -290,8 +278,7 @@ def draw_points_aa_old(signal, img, size=1000, colours=True):
 
 
 def draw_points(signal, img, size=1000, colours=True):
-    """Draw colourized points from signal
-    """
+    """Draw colourized points from signal"""
     points = get_points(flip_vertical(signal), size) - 0.5
     points = np.rint(points).astype(np.uint32)
 

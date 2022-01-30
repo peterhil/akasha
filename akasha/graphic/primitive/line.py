@@ -28,6 +28,7 @@ def bresenham(coords):
     """
     return np.array(skdraw.bresenham(*coords), dtype=np.uint32)
 
+
 def line_bresenham(x0, y0, x1, y1, colour=1.0, indices=False):
     """
     Bresenham line drawing algorithm.
@@ -54,23 +55,22 @@ def line_bresenham(x0, y0, x1, y1, colour=1.0, indices=False):
         else:
             out[y0 - by, x0 - bx] = colour
 
-        if (x0 == x1 and y0 == y1):
+        if x0 == x1 and y0 == y1:
             return np.array(out).T
 
         e2 = 2 * err
 
-        if (e2 >= dy):
+        if e2 >= dy:
             err += dy  # e_xy + e_x > 0
             x0 += sx
 
-        if (e2 <= dx):
+        if e2 <= dx:
             err += dx  # e_xy + e_y < 0
             y0 += sy
 
 
 def line_linspace(x0, y0, x1, y1, endpoint=True):
-    """Draw a line using np.linspace using real x and y coordinates.
-    """
+    """Draw a line using np.linspace using real x and y coordinates."""
     assert_type(signed, x0, y0, x1, y1)
 
     size = np.max([np.abs(x1 - x0), np.abs(y1 - y0)]) + int(bool(endpoint))
