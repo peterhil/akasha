@@ -6,7 +6,6 @@
 # pylint: disable=E1101
 
 import numpy as np
-import os
 import scikits.audiolab as audiolab
 
 from builtins import range

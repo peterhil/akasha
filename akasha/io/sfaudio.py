@@ -11,7 +11,6 @@ from akasha.audio.channels import num_channels
 from akasha.funct.itertools import blockwise
 from akasha.io.path import file_extension, relative_path
 from akasha.timing import sampler, time_slice
-from akasha.utils.log import logger
 
 
 def play(
@@ -67,7 +66,7 @@ def read(
     extension = file_extension(filename)
     check_format(extension)
 
-    time = time_slice(dur, start)
+    # time = time_slice(dur, start)
 
     # Read data
     data, samplerate = sf.read(

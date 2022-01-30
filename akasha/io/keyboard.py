@@ -19,7 +19,6 @@ import numpy as np
 
 from builtins import range
 
-from akasha import settings
 from akasha.io.path import relative_path
 
 
