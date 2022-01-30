@@ -15,7 +15,6 @@ http://www.youtube.com/watch?v=0j-YXgXTpoA
 from __future__ import division
 
 import numpy as np
-import operator as op
 
 from fractions import Fraction
 
@@ -24,7 +23,7 @@ from akasha.io.keyboard import kb, pos
 from akasha.settings import config
 from akasha.utils.log import logger
 from akasha.utils.python import class_name
-from akasha.math import pi2, find_closest_index, map_array
+from akasha.math import pi2, find_closest_index
 
 
 class EqualTemperament:
