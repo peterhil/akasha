@@ -157,8 +157,8 @@ class Ellipse(Curve):
     def from_rhombus(cls, para):
         a, b, c, d = para
         para_origin = para - midpoint(a, c)
-        k, l = np.abs(para_origin)[:2]
-        return cls(l, k, np.angle(para_origin)[3], midpoint(a, c))
+        k, m = np.abs(para_origin)[:2]
+        return cls(m, k, np.angle(para_origin)[3], midpoint(a, c))
 
     @classmethod
     def from_parallelogram(cls, para):
@@ -210,17 +210,17 @@ class Ellipse(Curve):
 
         # Step 2
         r = rect(np.abs(s), np.angle(ur - s)) + s
-        l = rect(np.abs(s), np.angle(v - s)) + s
+        m = rect(np.abs(s), np.angle(v - s)) + s
 
         a = np.abs(v - r)
-        b = np.abs(v - l)
+        b = np.abs(v - m)
 
         # graph(np.concatenate([
         #     closed(para + c),
-        #     np.array([u, c, v, ur, 0, s, r, c, l]),
+        #     np.array([u, c, v, ur, 0, s, r, c, m]),
         #     Circle.at(np.linspace(0, 1, 500)) * np.abs(s) + s
         #     ]), lines=True)
-        return cls(a, b, np.angle(l), c)
+        return cls(a, b, np.angle(m), c)
 
     @classmethod
     def fit_points(cls, points, method='halir'):

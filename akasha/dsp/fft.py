@@ -59,7 +59,7 @@ def stft_tjoa(x, fs, framesz, hop):
     w = np.hamming(framesamp)
     X = sc.array(
         [
-            sc.fft(w * x[i : i + framesamp])
+            sc.fft(w * x[i:i + framesamp])
             for i in range(0, len(x) - framesamp, hopsamp)
         ]
     )
@@ -77,7 +77,7 @@ def istft_tjoa(X, fs, T, hop):
     framesamp = X.shape[1]
     hopsamp = int(hop * fs)
     for n, i in enumerate(range(0, len(x) - framesamp, hopsamp)):
-        x[i : i + framesamp] += sc.real(sc.ifft(X[n]))
+        x[i:i + framesamp] += sc.real(sc.ifft(X[n]))
     return x
 
 

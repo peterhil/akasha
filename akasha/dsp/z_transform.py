@@ -39,21 +39,21 @@ def czt(signal, m=None, w=None, a=1.0, normalize=False):
     http://cronos.rutgers.edu/~lrr/Reprints/015_czt.pdf
     """
     signal = np.atleast_1d(signal).astype(np.complex)
-    l = len(signal)
+    length = len(signal)
     if m is None:
-        m = l
+        m = length
     if w is None:
         w = np.exp(-1j * pi2 / m)
-    n = np.arange(l)
+    n = np.arange(length)
     k = np.arange(m)
-    lp2 = int(power_limit(m + l - 1, 2, np.ceil))
+    lp2 = int(power_limit(m + length - 1, 2, np.ceil))
 
     y = signal * (a ** -n) * chirp(w, n)
-    y_pad = np.append(y, np.zeros(lp2 - l))  # zero pad
-    vn = np.roll(ichirp(w, np.arange(lp2) - l), -l)
+    y_pad = np.append(y, np.zeros(lp2 - length))  # zero pad
+    vn = np.roll(ichirp(w, np.arange(lp2) - length), -length)
 
     g = ifft(fft(y_pad) * fft(vn))[:m]
-    scale = 1.0 / l if normalize else 1.0
+    scale = 1.0 / length if normalize else 1.0
     return scale * (g * chirp(w, k))
 
 
@@ -67,11 +67,11 @@ def iczt(signal, m=None, w=None, a=1.0, normalize=False):
     Uses the conjugation property of Z-transforms to get the inverse.
     """
     signal = np.atleast_1d(signal).astype(np.complex)
-    l = len(signal)
+    length = len(signal)
     if normalize:
-        signal *= l ** 2
+        signal *= length ** 2
     if m is None:
-        m = l
+        m = length
     if w is None:
         w = np.exp(-1j * pi2 / m)
 
@@ -91,14 +91,14 @@ def czt_naive(signal, m=None, w=None, a=1.0):
     z-transform. For testing, do not use!
     """
     signal = np.atleast_1d(signal).astype(np.complex)
-    l = len(signal)
+    length = len(signal)
     if m is None:
-        m = l
+        m = length
     if w is None:
         w = np.exp(-1j * pi2 / m)
     z = np.zeros(m, dtype=np.complex)
 
     for k in range(m):
-        for n in range(l):
+        for n in range(length):
             z[k] += signal[n] * a ** -n * w ** (k * n)
     return z
