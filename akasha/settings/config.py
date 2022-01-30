@@ -16,20 +16,20 @@ from fractions import Fraction
 __all__ = ['config']
 
 
-class sampling():
+class sampling:
     FRAMETIME = 40  # 1000 / 25 fps
     RATE = 44100
     ANTIALIAS = False
     NEGATIVE = False
 
 
-class audio():
+class audio:
     BUFFERSIZE = 512
     CHANNELS = 1
     SAMPLETYPE = -16
 
 
-class frequency():
+class frequency:
     BASE = 54.0  # 432 Hz / 8
     AUDIBLE_MIN = 1.0
     AUDIBLE_MAX = 22_000.0
@@ -37,19 +37,21 @@ class frequency():
     RATIO_MAX = Fraction(1, 2)
 
 
-class logging_limits():
+class logging_limits:
     """
     Various limits for logging
     """
+
     LOGLEVEL = logging.INFO
     FREQUENCY_DEVIATION_CENTS = 0.1
     LOOP_THRESHOLD_PERCENT = 90
 
 
-class config():
+class config:
     """
     Configuration class.
     """
+
     audio = audio
     frequency = frequency
     sampling = sampling

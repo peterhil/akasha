@@ -31,10 +31,12 @@ def np_setup():
     locale.setlocale(locale.LC_ALL, 'fi_FI.UTF-8')
 
     current_locale = '.'.join(locale.getlocale())
-    assert locale.getlocale()[1] in ('UTF8', 'UTF-8'), \
+    assert locale.getlocale()[1] in ('UTF8', 'UTF-8'), (
         'Unicode not enabled! Current locale is: ' + current_locale
+    )
 
     if six.PY2 and isinstance(sys.stdin, file):
-        assert sys.stdin.encoding == 'UTF-8', \
-            'Unicode input not enabled! Current input encoding is: ' + \
-            sys.stdin.encoding
+        assert sys.stdin.encoding == 'UTF-8', (
+            'Unicode input not enabled! Current input encoding is: '
+            + sys.stdin.encoding
+        )
