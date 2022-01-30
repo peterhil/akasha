@@ -135,6 +135,6 @@ class DTMF(Generator):
         pass
 
     def __len__(self):
-        pulselength = len(self.number) * (self.pulselength + self.pause)
+        pulselengths = len(self.number) * (self.pulselength + self.pause)
         length = pulselengths * sampler.rate - self.pause
         return int(round(length))
