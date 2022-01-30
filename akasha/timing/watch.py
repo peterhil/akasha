@@ -34,7 +34,7 @@ class Watch:
         if not self.paused:
             self.lasttime = self.time()
             self.timings.append(self.lasttime)
-            self.timings = self.timings[-self.maxstops :]
+            self.timings = self.timings[-self.maxstops:]
         return self.lasttime
 
     def pause(self):
