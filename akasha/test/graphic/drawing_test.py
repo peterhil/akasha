@@ -152,11 +152,11 @@ class TestDrawing():
     def test_draw_points_np_aa(self):
         pass
 
-    ### Test for point drawing functions
+    # Test for point drawing functions
 
     @pytest.mark.parametrize(('palette'), [
         [[255], [0], [42]],
-        [[255, 255, 255, 255], [  0,   0,   0,   0], [ 40,  41,  42, 127]],
+        [[255, 255, 255, 255], [0, 0, 0, 0], [40, 41, 42, 127]],
     ])
     @pytest.mark.parametrize(('draw_func'), [
         draw_points,
@@ -206,15 +206,15 @@ class TestDrawing():
 
         assert_equal_image(
             np.array([
-                [ _, _, _, _, _, _, _, _, x,],
-                [ _, _, _, _, _, _, _, x, _,],
-                [ _, _, _, _, _, _, x, _, _,],
-                [ _, _, _, _, _, x, _, _, _,],
-                [ _, _, _, _, x, _, _, _, _,],
-                [ _, _, _, _, _, _, _, _, _,],
-                [ _, _, _, _, _, _, _, _, _,],
-                [ _, _, _, _, _, _, _, _, _,],
-                [ _, _, _, _, _, _, _, _, _,],
+                [_, _, _, _, _, _, _, _, x],
+                [_, _, _, _, _, _, _, x, _],
+                [_, _, _, _, _, _, x, _, _],
+                [_, _, _, _, _, x, _, _, _],
+                [_, _, _, _, x, _, _, _, _],
+                [_, _, _, _, _, _, _, _, _],
+                [_, _, _, _, _, _, _, _, _],
+                [_, _, _, _, _, _, _, _, _],
+                [_, _, _, _, _, _, _, _, _],
             ], dtype=np.uint8).transpose(1, 0, 2),
             draw_func(
                 np.linspace(0, 1+1j, 5, endpoint=True),
@@ -227,8 +227,8 @@ class TestDrawing():
     @pytest.mark.parametrize(('palette'), [
         # [[255], [0], [42]],
         [[255, 255, 255, 255],
-         [  0,   0,   0,   0],
-         [ 127,  127,  127, 127]],
+         [0,   0,   0,   0],
+         [127, 127, 127, 127]],
     ])
     @pytest.mark.parametrize(('draw_func'), [
         draw_points_aa,
@@ -241,11 +241,16 @@ class TestDrawing():
         """
         size = 9
         x, _, a = palette
-        l = np.repeat(np.arange(256)[..., np.newaxis], len(palette[2]), 1)
+        colours = np.repeat(
+            np.arange(256)[..., np.newaxis],
+            len(palette[2]),
+            1,
+        )
+
         [
             p0, p1, p2, p3, p4, p5, p6, p7,
             p8, p9, pa, pb, pc, pd, pe, pf
-        ] = l[
+        ] = colours[
             [
              16, 23, 25, 31, 46, 48, 54, 71,
              102, 107, 125, 128, 143, 152, 229, 255
@@ -255,15 +260,15 @@ class TestDrawing():
 
         assert_equal_image(
             np.transpose(np.array([
-                [ p1, p6,  _,  _,  a,  _,  _,  _,  _],
-                [ p6, pa,  _,  _,  a, p5, p0,  _,  _],
-                [  _,  _,  _, p2, pd, pc, p5,  _,  _],
-                [  _,  _,  _, p8, pe,  _,  _, pb,  _],
-                [  a,  a,  a,  a,  a,  a,  a, pf,  a],
-                [  _,  _,  _,  _,  a,  _,  _,  _,  _],
-                [  _, p9, p7,  _,  a,  _,  _,  _,  _],
-                [  _, p4, p3,  _,  a,  _,  _,  _,  _],
-                [  _,  _,  _,  _,  a,  _,  _,  _,  _],
+                [p1, p6,  _,  _,  a,  _,  _,  _,  _],
+                [p6, pa,  _,  _,  a, p5, p0,  _,  _],
+                [_,  _,  _, p2, pd, pc, p5,  _,  _],
+                [_,  _,  _, p8, pe,  _,  _, pb,  _],
+                [a,  a,  a,  a,  a,  a,  a, pf,  a],
+                [_,  _,  _,  _,  a,  _,  _,  _,  _],
+                [_, p9, p7,  _,  a,  _,  _,  _,  _],
+                [_, p4, p3,  _,  a,  _,  _,  _,  _],
+                [_,  _,  _,  _,  a,  _,  _,  _,  _],
                 ], dtype=np.uint8), (1, 0, 2)),
             draw_func(
                 np.array([1, 0.5+0.5j, 0.2j, -0.8+0.8j, -0.6-0.8j]),

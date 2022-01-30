@@ -26,7 +26,7 @@ from akasha.timing import sampler
 
 
 class TestEllipseFit():
-    para = np.array([ 0.375+0.125j,  0.000+0.5j,  -0.750-0.25j ])
+    para = np.array([0.375+0.125j,  0.000+0.5j,  -0.750-0.25j])
     ell = Ellipse.from_conjugate_diameters(para)
     times = sampler.slice(0, sampler.rate, 4410)
     points = ell.at(times)
@@ -64,10 +64,10 @@ class TestEllipseFit():
 
     samples = np.linspace(0, 1, 17, endpoint=False)
     ellipse_params = [
-        [ 0.75, 0.125, {'angle': -0.375 * pi2, 'origin': -0.15-0.25j }],
+        [0.75, 0.125, {'angle': -0.375 * pi2, 'origin': -0.15-0.25j}],
         # Failure of the Fitzgibbon algorithm - degenerate cases?:
-        [ 0.75,  0.25, {'angle': -0.375 * pi2, 'origin': -0.15-0.25j }],
-        [ 0.75,  0.35, {'angle':  0.375 * pi2, 'origin': -0.15-0.25j }],
+        [0.75,  0.25, {'angle': -0.375 * pi2, 'origin': -0.15-0.25j}],
+        [0.75,  0.35, {'angle':  0.375 * pi2, 'origin': -0.15-0.25j}],
     ]
 
     @pytest.mark.xfail()

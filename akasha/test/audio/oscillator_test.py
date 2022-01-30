@@ -108,9 +108,9 @@ class TestOscRoots():
         for period in (5, 7, 8, 23):
             o = Osc.from_ratio(1, period)
 
-            fractional_angle = lambda n: 360 * float(
-                Fraction(n, period) % 1
-            )
+            def fractional_angle(n):
+                return 360 * float(Fraction(n, period) % 1)
+
             angles = map_array(
                 fractional_angle,
                 np.arange(0, period),

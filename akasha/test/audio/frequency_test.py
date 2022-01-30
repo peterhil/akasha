@@ -95,7 +95,7 @@ class TestFrequencyRatioMixin():
 
     def test_nonzero(self):
         assert Frequency(self.a4)
-        assert Frequency(self.silence) == False
+        assert Frequency(self.silence) == False  # noqa: E712
 
     def test_cmp(self):
         """It should compare correctly."""
@@ -186,7 +186,7 @@ class TestFrequency():
 
     def test_meta(self):
         assert issubclass(Frequency, numbers.Real)
-        assert Frequency.__metaclass__ ==  abc.ABCMeta
+        assert Frequency.__metaclass__ == abc.ABCMeta
 
     def test_class(self):
         assert issubclass(Frequency, RealUnit)

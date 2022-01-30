@@ -40,10 +40,21 @@ class Numeric(NumericUnit):
     def _unit(self):
         return '_value'
 
-class Complex(ComplexUnit, Numeric): pass
-class Real(RealUnit, Complex): pass
-class Rational(RationalUnit, Real): pass
-class Integral(IntegralUnit, Rational): pass
+
+class Complex(ComplexUnit, Numeric):
+    pass
+
+
+class Real(RealUnit, Complex):
+    pass
+
+
+class Rational(RationalUnit, Real):
+    pass
+
+
+class Integral(IntegralUnit, Rational):
+    pass
 
 
 complex_operations = [
@@ -93,7 +104,7 @@ class TestComplexUnit():
     def test_ops_self(self, operation, field):
         a, b, op, cls = self.op_params(operation, field)
         assert op(cls(a), cls(b)) == \
-          op(self.unit(cls(a)), self.unit(cls(b)))  # Self
+            op(self.unit(cls(a)), self.unit(cls(b)))  # Self
 
     @pytest.mark.parametrize(
         ['operation', 'field'],
@@ -101,7 +112,7 @@ class TestComplexUnit():
     def test_ops_forward(self, operation, field):
         a, b, op, cls = self.op_params(operation, field)
         assert op(cls(a), cls(b)) == \
-          op(self.unit(cls(a)), cls(b))  # Forward
+            op(self.unit(cls(a)), cls(b))  # Forward
 
     @pytest.mark.parametrize(
         ['operation', 'field'],

@@ -37,7 +37,7 @@ class TestZTransform():
     def test_float(self, Z):
         assert_array_almost_equal(
             Z([1.5, 4, 5], w=0.25),
-            np.array([ 10.5, 2.8125, 1.76953125])
+            np.array([10.5, 2.8125, 1.76953125])
         )
 
     @pytest.mark.parametrize(('Z',), z_transforms)

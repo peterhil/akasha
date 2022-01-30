@@ -94,14 +94,14 @@ class TestExponential():
 
         # There should be at least one non-zero item
         non_zero_before_end = False
-        end = ex[index - window : index - 1]
+        end = ex[index - window: index - 1]
         if np.not_equal(0, end).any():
             non_zero_before_end = True
             msg = "too long: Only zeroes found before end."
 
         # Every item after end should be zero
         all_zero_after_end = False
-        after_end = ex[index : index + window]
+        after_end = ex[index: index + window]
 
         if np.equal(0, after_end).all():
             all_zero_after_end = True

@@ -63,7 +63,7 @@ class TestChrono():
     def test_prefix(self, prefix, factor):
         value = 500
         assert (value * factor) == prefix(value) == \
-          getattr(Chrono, prefix.__name__)(value)
+            getattr(Chrono, prefix.__name__)(value)
 
     def test_now(self):
         latency = timeit.timeit(Chrono.now, number=3)

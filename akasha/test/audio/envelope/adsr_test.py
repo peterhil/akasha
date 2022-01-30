@@ -74,5 +74,5 @@ class TestAdsr():
         times = np.linspace(-0.5, 3, 8, endpoint=True)
         assert_array_almost_equal(
             adsr.at(times),
-            np.array([ 0. ,  0. ,  1. ,  1. ,  0.5,  0.5,  0. ,  0. ])
+            np.array([0, 0, 1, 1, 0.5, 0.5, 0, 0])
         )
