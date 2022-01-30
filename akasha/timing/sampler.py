@@ -38,7 +38,8 @@ class Sampler():
             The time interval in milliseconds between video frames.
             The default is 40 ms which corresponds to 25 Hz (1000/40).
         antialias : bool
-            Whether to force frequencies below Nyquist frequency, which is sampling rate / 2.
+            Whether to force frequencies below Nyquist frequency, which
+            is sampling rate / 2.
         allow_negative : bool
             Whether to allow negative frequencies to occur.
         """
@@ -65,8 +66,12 @@ class Sampler():
         """
         if ms is None:
             ms = self.frametime
-        ms = max(int(round(ms + rel)), mintime)  # Limit to mintime (1000 / 16 = 62.5 Hz)
-        logger.info("Changing video FRAME TIME to %d ms (%1:.3f FPS)", ms, 1000 / ms)
+        # Limit to mintime (1000 / 16 = 62.5 Hz)
+        ms = max(int(round(ms + rel)), mintime)
+        logger.info(
+            "Changing video FRAME TIME to %d ms (%1:.3f FPS)",
+            ms, 1000 / ms
+        )
         self.frametime = ms
         return ms
 
