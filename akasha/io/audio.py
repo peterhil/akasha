@@ -11,18 +11,18 @@ import scikits.audiolab as audiolab
 
 from builtins import range
 from scipy.signal import hilbert
-from scikits.audiolab import Format, Sndfile, \
-     available_file_formats, available_encodings
+from scikits.audiolab import (
+    Format,
+    Sndfile,
+    available_file_formats,
+    available_encodings,
+)
 
 from akasha.timing import sampler, time_slice
 from akasha.io.path import file_extension, relative_path
 
 
-defaults = {
-    'type': 'aiff',
-    'encoding': 'pcm16',
-    'endianness': 'file'
-}
+defaults = {'type': 'aiff', 'encoding': 'pcm16', 'endianness': 'file'}
 
 default_format = Format(**defaults)
 
@@ -32,7 +32,7 @@ def get_format(*args, **kwargs):
     Get a audiolab.Format object from a string, or from the parameters
     accepted by Format(type=wav, encoding=pcm16, endianness=file)
     """
-    if (args and isinstance(args[0], Format)):
+    if args and isinstance(args[0], Format):
         res = args[0]
     else:
         params = defaults.copy()
@@ -45,13 +45,8 @@ def get_format(*args, **kwargs):
 
 # Audiolab read, write and play
 
-def play(
-        sndobj,
-        dur=5.0,
-        start=0,
-        axis='imag',
-        fs=sampler.rate
-    ):
+
+def play(sndobj, dur=5.0, start=0, axis='imag', fs=sampler.rate):
     """
     Play out a sound.
     """
@@ -62,15 +57,15 @@ def play(
 
 
 def write(
-        sndobj,
-        filename='test_sound',
-        fmt=default_format,
-        dur=5.0,
-        start=0,
-        axis='imag',
-        fs=sampler.rate,
-        sdir=relative_path('../../Sounds/Out/'),
-    ):
+    sndobj,
+    filename='test_sound',
+    fmt=default_format,
+    dur=5.0,
+    start=0,
+    axis='imag',
+    fs=sampler.rate,
+    sdir=relative_path('../../Sounds/Out/'),
+):
     f"""Write a sound file.
     Available file formats are: {available_file_formats()}.
     """
@@ -99,13 +94,13 @@ def write(
 
 
 def read(
-        filename,
-        dur=5.0,
-        start=0,
-        fs=sampler.rate,
-        complex=True,
-        sdir=relative_path('../../Sounds/_Music samples/'),
-    ):
+    filename,
+    dur=5.0,
+    start=0,
+    fs=sampler.rate,
+    complex=True,
+    sdir=relative_path('../../Sounds/_Music samples/'),
+):
     f"""Read a sound file in.
     Available file formats are: {available_file_formats()}.
     """

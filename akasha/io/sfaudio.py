@@ -15,13 +15,8 @@ from akasha.utils.log import logger
 
 
 def play(
-        sndobj,
-        dur=5.0,
-        start=0,
-        axis='real',
-        fs=sampler.rate,
-        buffer_size=512
-    ):
+    sndobj, dur=5.0, start=0, axis='real', fs=sampler.rate, buffer_size=512
+):
     """
     Play a sound using PyAudio bindings for portaudio.
     """
@@ -54,13 +49,13 @@ def play(
 
 
 def read(
-        filename,
-        dur=5.0,
-        start=0,
-        fs=sampler.rate,
-        complex=True,
-        sdir=relative_path('../../Sounds/_Music samples/'),
-    ):
+    filename,
+    dur=5.0,
+    start=0,
+    fs=sampler.rate,
+    complex=True,
+    sdir=relative_path('../../Sounds/_Music samples/'),
+):
     """
     Read a sound file.
     """
@@ -89,17 +84,17 @@ def read(
 
 
 def write(
-        sndobj,
-        filename='test_sound',
-        dur=5.0,
-        start=0,
-        axis='real',
-        fs=sampler.rate,
-        fmt='WAV',
-        subtype=None,
-        endian=None,
-        sdir=relative_path('../../Sounds/Out/'),
-    ):
+    sndobj,
+    filename='test_sound',
+    dur=5.0,
+    start=0,
+    axis='real',
+    fs=sampler.rate,
+    fmt='WAV',
+    subtype=None,
+    endian=None,
+    sdir=relative_path('../../Sounds/Out/'),
+):
     """
     Write a sound file.
 

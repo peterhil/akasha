@@ -49,9 +49,7 @@ def get_layout(path='settings/keymaps/fi.json'):
 
 
 def get_mapping(
-    layout,
-    section='main',
-    mapping=np.empty([6, 25], dtype=object)
+    layout, section='main', mapping=np.empty([6, 25], dtype=object)
 ):
     if section == 'main':
         basecol = 0
@@ -66,7 +64,7 @@ def get_mapping(
         for col in range(len(kbsect[row])):
             key = kbsect[row][col]
             mapping[row, col + basecol] = key
-            #print("({0:d}, {1:d}) = {2!s}".format(row, col+basecol, key))
+            # print("({0:d}, {1:d}) = {2!s}".format(row, col+basecol, key))
     return mapping
 
 
@@ -89,6 +87,7 @@ def get_map(kb, key='key'):
         else:
             mp[code] = kb.shape  # Key disabled
     return mp
+
 
 kb = get_keyboard()
 pos = get_map(kb, 'key')
