@@ -27,9 +27,17 @@ keyboard = WickiLayout()
 # keyboard = PianoLayout()
 
 
-def anim(snd, size=800, name='Resonance', gui=PygameGui,
-         antialias=False, lines=True, colours=True,
-         mixer_options=(), style='complex'):
+def anim(
+    snd,
+    size=800,
+    name='Resonance',
+    gui=PygameGui,
+    antialias=False,
+    lines=True,
+    colours=True,
+    mixer_options=(),
+    style='complex',
+):
     """
     Animate complex sound signal
     """
@@ -54,10 +62,7 @@ def anim(snd, size=800, name='Resonance', gui=PygameGui,
         )
     elif style == 'transfer':
         widget = VideoTransferView(
-            screen,
-            size=size,
-            standard='PAL',
-            axis='real'
+            screen, size=size, standard='PAL', axis='real'
         )
     else:
         logger.error("Unknown animation style: '%s'", style)
@@ -85,21 +90,25 @@ def loop(gui, snd, channel, widget):
                 with Timed() as input_time:
                     for event in gui.get_event():
                         if handle_input(gui, snd, watch, event):
-                            if first_time and hasattr(snd, 'frequency') \
-                              and sampler.paused:
+                            if (
+                                first_time
+                                and hasattr(snd, 'frequency')
+                                and sampler.paused
+                            ):
                                 sampler.pause()
                             watch.reset()
                             last = 0
                 if not sampler.paused:
                     current = watch.next()
                     current_slice = slice(
-                        sampler.at(last, np.int),
-                        sampler.at(current, np.int)
+                        sampler.at(last, np.int), sampler.at(current, np.int)
                     )
                     samples = snd[current_slice]
 
-                    if len(samples) == 0 \
-                      and current_slice.start != current_slice.stop:
+                    if (
+                        len(samples) == 0
+                        and current_slice.start != current_slice.stop
+                    ):
                         raise SystemExit('Sound ended!')
                     if len(samples) > 0:
                         with Timed() as audio_time:
@@ -156,7 +165,7 @@ def handle_input(gui, snd, watch, event):
     # Key down
     elif gui.keydown(event):
         # logger.debug("Key '%s' (%s) down.", gui.keyname(event), event.key)
-        step_size = (5 if gui.key_shift(event) else 1)
+        step_size = 5 if gui.key_shift(event) else 1
         # Rewind
         if gui.key_f7(event):
             if isinstance(snd, Releasable):
@@ -194,7 +203,7 @@ def handle_input(gui, snd, watch, event):
             return True  # reset
         logger.debug('Keyboard base: %s', keyboard.base)
     # Key up
-    elif (gui.keyup(event) and hasattr(snd, 'frequency')):
+    elif gui.keyup(event) and hasattr(snd, 'frequency'):
         if gui.key_caps_lock(event):
             change_frequency(snd, event.key)
             return True  # reset
@@ -218,8 +227,10 @@ def handle_input(gui, snd, watch, event):
             snd.pitch_bend = 0
         elif gui.mouse_up(event):
             snd.pitch_bend = None
-        elif gui.mouse_motion(event) \
-          and getattr(snd, 'pitch_bend', None) is not None:
+        elif (
+            gui.mouse_motion(event)
+            and getattr(snd, 'pitch_bend', None) is not None
+        ):
             size = gui.get_size()[1] or 0
             snd.pitch_bend = event.pos[1]
 
@@ -228,22 +239,26 @@ def handle_input(gui, snd, watch, event):
             odd = (size + 1) % 2
             norm_size = (size // 2) * 2 + odd
             scale = np.logspace(
-                -1 / 4, 1 / 4,
-                norm_size, endpoint=True, base=2
+                -1 / 4, 1 / 4, norm_size, endpoint=True, base=2
             )
             ratio = scale[snd.pitch_bend]
 
             new_freq = np.clip(
                 snd.frequency * ratio,
                 a_min=-minfloat()[0],
-                a_max=sampler.nyquist
+                a_max=sampler.nyquist,
             )
             snd.frequency = new_freq
             logger.info(
                 "Pitched frequency to %s (with ratio %.04f) position %s, "
                 "bend %s. [%s, %s, %s]",
-                snd.frequency, ratio, event.pos[1], snd.pitch_bend,
-                scale[0], scale[len(scale)//2], scale[-1]
+                snd.frequency,
+                ratio,
+                event.pos[1],
+                snd.pitch_bend,
+                scale[0],
+                scale[len(scale) // 2],
+                scale[-1],
             )
     # else:
     #     logger.debug("Other: %s", event)
@@ -264,7 +279,7 @@ def change_frequency(snd, key):
         snd.release_at(None)
     logger.debug(
         "Changed frequency: %s.",
-        snd.frequency if hasattr(snd, 'frequency') else snd
+        snd.frequency if hasattr(snd, 'frequency') else snd,
     )
 
     return snd.frequency

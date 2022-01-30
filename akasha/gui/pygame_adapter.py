@@ -25,8 +25,7 @@ class PygameGui:
         pg.quit()
         loaded, failed = pg.init()
         logger.info(
-            'Pygame initialized with %s loaded modules '
-            '(%s failed).',
+            'Pygame initialized with %s loaded modules ' '(%s failed).',
             loaded,
             failed,
         )
@@ -76,16 +75,20 @@ class PygameGui:
         if is_sequence(args) and 0 < len(args) <= 3:
             pg.mixer.init(*args)
         else:
-            pg.mixer.init(frequency=sampler.rate,
-                          size=config.audio.SAMPLETYPE,
-                          channels=config.audio.CHANNELS,
-                          buffer=config.audio.BUFFERSIZE)
+            pg.mixer.init(
+                frequency=sampler.rate,
+                size=config.audio.SAMPLETYPE,
+                channels=config.audio.CHANNELS,
+                buffer=config.audio.BUFFERSIZE,
+            )
 
         fs, size, channels = pg.mixer.get_init()
         logger.info(
             "Mixer has %s Hz sample rate with %s size samples and "
             "%s channels.",
-            fs, size, channels
+            fs,
+            size,
+            channels,
         )
 
         return pg.mixer.find_channel(force=True)
@@ -124,13 +127,15 @@ class PygameGui:
 
     @staticmethod
     def key_pause(event):
-        return (event.type == pg.KEYDOWN and event.key == pg.K_F8) \
-          or (event.type == pg.ACTIVEEVENT and event.state == 3)
+        return (event.type == pg.KEYDOWN and event.key == pg.K_F8) or (
+            event.type == pg.ACTIVEEVENT and event.state == 3
+        )
 
     @staticmethod
     def key_escape(event):
-        return event.type == pg.QUIT \
-          or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE)
+        return event.type == pg.QUIT or (
+            event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE
+        )
 
     @staticmethod
     def keydown(event):
@@ -164,7 +169,6 @@ class PygameGui:
     def key_down(event):
         return pg.K_DOWN == event.key
 
-
     @staticmethod
     def key_left(event):
         return pg.K_LEFT == event.key
@@ -182,7 +186,7 @@ class PygameGui:
         return event.type in (
             pg.MOUSEBUTTONDOWN,
             pg.MOUSEBUTTONUP,
-            pg.MOUSEMOTION
+            pg.MOUSEMOTION,
         )
 
     @staticmethod
