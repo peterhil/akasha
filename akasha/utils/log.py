@@ -15,10 +15,11 @@ import logging
 from akasha.settings import config
 
 
-class ansi():
+class ansi:
     """
     ANSI colour codes
     """
+
     # pylint: disable=W1401
 
     # TODO refactor using code() like in Prism...
@@ -84,9 +85,11 @@ class ColorFormatter(logging.Formatter):
     """
     Color log formatter, that maps log levels to colors.
     """
+
     def format(self, record):
         record.color = ansi.color(record.__dict__['levelname'])
         return super(ColorFormatter, self).format(record)
+
 
 logging.ANIMA = 4
 logging.addLevelName(logging.ANIMA, 'ANIMA')
@@ -97,8 +100,7 @@ logging.addLevelName(logging.BORING, 'BORING')
 logger = logging.getLogger('Akasha')
 
 absformatter = ColorFormatter(
-    "%(color)s%(asctime)s %(name)s: [%(levelname)s]\t%(message)s" + \
-    ansi.END
+    "%(color)s%(asctime)s %(name)s: [%(levelname)s]\t%(message)s" + ansi.END
 )
 
 relformatter = ColorFormatter(
@@ -107,7 +109,7 @@ relformatter = ColorFormatter(
 )
 
 handler = logging.StreamHandler(sys.stderr)
-#handler = logging.FileHandler('/var/log/akasha.log')
+# handler = logging.FileHandler('/var/log/akasha.log')
 
 handler.setFormatter(relformatter)
 logger.addHandler(handler)

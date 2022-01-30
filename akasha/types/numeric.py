@@ -49,6 +49,7 @@ def ops(op):
             return calc(complex(self), complex(other), cls)
         else:
             return NotImplemented
+
     forward.__name__ = '__' + op.__name__ + '__'
     forward.__doc__ = op.__doc__
 
@@ -62,16 +63,18 @@ def ops(op):
             return calc(other, self.value, cls)
         else:
             return NotImplemented
+
     reverse.__name__ = '__r' + op.__name__ + '__'
     reverse.__doc__ = op.__doc__
 
     return forward, reverse
 
 
-class NumericUnit():
+class NumericUnit:
     """
     Base numeric unit mixin for automatic arithmetic operations.
     """
+
     # References
     # ----------
     # PEP 3141 -- A Type Hierarchy for Numbers:
@@ -107,14 +110,17 @@ class NumericUnit():
         return f'{class_name(self)}({self.value!r})'
 
     def __str__(self):
-        return f'<{class_name(self)}: ' + \
-          f'{self.value!s}, {self._unit.strip("_")}>'
+        return (
+            f'<{class_name(self)}: '
+            + f'{self.value!s}, {self._unit.strip("_")}>'
+        )
 
 
 class ComplexUnit(NumericUnit):
     """
     Complex valued unit mixin for automatic arithmetic operations.
     """
+
     def __complex__(self):
         return complex(self.value)
 
@@ -155,6 +161,7 @@ class RealUnit(ComplexUnit):
     """
     Real valued unit mixin for automatic arithmetic operations.
     """
+
     def __float__(self):
         return float(self.value)
 
@@ -174,6 +181,7 @@ class RationalUnit(RealUnit):
     """
     Rational valued unit mixin for automatic arithmetic operations.
     """
+
     @property
     def numerator(self):
         """Numerator property."""
@@ -189,6 +197,7 @@ class IntegralUnit(RationalUnit):
     """
     Integral valued unit mixin for automatic arithmetic operations.
     """
+
     def __long__(self):
         return long(self.value)
 

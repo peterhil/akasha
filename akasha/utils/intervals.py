@@ -12,10 +12,11 @@ from builtins import range
 from akasha.utils.python import class_name
 
 
-class Interval():
+class Interval:
     """
     Interval.
     """
+
     def __init__(self, inf, sup):
         self._inf = inf
         self._sup = sup
@@ -38,7 +39,7 @@ class Interval():
         return f'{class_name(self)}({self.inf}, {self.sup})'
 
 
-class IntervalTree():
+class IntervalTree:
     """
     Interval tree.
 
@@ -49,6 +50,7 @@ class IntervalTree():
     The code this is modified from a Python port by Tyler Kahn:
     http://forrst.com/posts/Interval_Tree_implementation_in_python-e0K
     """
+
     def __init__(self, intervals):
         self.top_node = self.divide_intervals(intervals)
 
@@ -74,24 +76,24 @@ class IntervalTree():
                 s_center.append(k)
 
         return Node(
-            x_center, s_center,
-            self.divide_intervals(s_left), self.divide_intervals(s_right)
+            x_center,
+            s_center,
+            self.divide_intervals(s_left),
+            self.divide_intervals(s_right),
         )
 
     def center(self, intervals):
-        """
-        """
+        """ """
         fs = self.sort_by_inf(intervals)
 
-        return fs[int(len(fs)/2)].inf
+        return fs[int(len(fs) / 2)].inf
 
     def search(self, begin, end=None):
-        """
-        """
+        """ """
         if end:
             result = []
 
-            for j in range(begin, end+1):
+            for j in range(begin, end + 1):
                 for k in self.search(j):
                     result.append(k)
                 result = list(set(result))
@@ -100,8 +102,7 @@ class IntervalTree():
             return self._search(self.top_node, begin, [])
 
     def _search(self, node, point, result):
-        """
-        """
+        """ """
         for k in node.s_center:
             if k.inf <= point <= k.sup:
                 result.append(k)
@@ -122,10 +123,11 @@ class IntervalTree():
         return sorted(intervals, key=lambda x: x.inf)
 
 
-class Node():
+class Node:
     """
     Interval tree node.
     """
+
     def __init__(self, x_center, s_center, left_node, right_node):
         self.x_center = x_center
         self.s_center = IntervalTree.sort_by_inf(s_center)

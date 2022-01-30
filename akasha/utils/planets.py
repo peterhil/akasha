@@ -6,9 +6,9 @@ from akasha.curves.kepler_orbit import KeplerOrbit
 
 planet_data = {
     'mercury': {
-        'perihelion': 0.307499, # AU
-        'semimajor': 0.387098,   # AU
-        'period': 0.240846, # years
+        'perihelion': 0.307499,  # AU
+        'semimajor': 0.387098,  # AU
+        'period': 0.240846,  # years
         'eccentricity': 0.205630,
     },
     'venus': {
@@ -18,16 +18,16 @@ planet_data = {
         'eccentricity': 0.006772,
     },
     'earth': {
-        'perihelion': 0.98329, # AU
-        'semimajor': 1.000001018,   # AU
-        'period': 1, # years
+        'perihelion': 0.98329,  # AU
+        'semimajor': 1.000001018,  # AU
+        'period': 1,  # years
         'eccentricity': 0.0167086,
     },
     'moon': {
         'perihelion': 0.002424257,
         'semimajor': 0.00257,
         'period': 0.0748013,
-        'eccentricity':	0.0549,
+        'eccentricity': 0.0549,
     },
     'mars': {
         'perihelion': 1.382,

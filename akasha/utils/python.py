@@ -5,6 +5,7 @@
 Python utilities
 """
 
+
 def class_name(self):
     return self.__class__.__name__
 
