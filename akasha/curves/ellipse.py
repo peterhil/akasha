@@ -22,7 +22,7 @@ from akasha.curves.ellipse_fit import (
     ellipse_fit_fitzgibbon,
     ellipse_fit_halir,
 )
-from akasha.math import complex_as_reals
+from akasha.math import as_complex
 from akasha.math.geometry import is_orthogonal, midpoint, rotate_towards
 from akasha.math.geometry.affine_transform import AffineTransform
 from akasha.math import pi2
