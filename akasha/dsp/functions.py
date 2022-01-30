@@ -14,6 +14,7 @@ import numpy as np
 
 # Step functions
 
+
 @np.vectorize
 def unit_step(x):
     """

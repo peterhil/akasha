@@ -24,7 +24,8 @@ def tcif(signal, window_size=1901, hop=None, method='kodera'):
     """
     TCIF algorithm using the finite difference approximations by Kodera et al.
     """
-    if hop is None: hop = window_size // 2
+    if hop is None:
+        hop = window_size // 2
     # Find the next power of two for n_fft
     n_fft = int(power_limit(window_size, base=2, rounding=np.ceil))
 

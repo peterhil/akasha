@@ -40,8 +40,10 @@ def czt(signal, m=None, w=None, a=1.0, normalize=False):
     """
     signal = np.atleast_1d(signal).astype(np.complex)
     l = len(signal)
-    if m is None: m = l
-    if w is None: w = np.exp(-1j * pi2 / m)
+    if m is None:
+        m = l
+    if w is None:
+        w = np.exp(-1j * pi2 / m)
     n = np.arange(l)
     k = np.arange(m)
     lp2 = int(power_limit(m + l - 1, 2, np.ceil))
@@ -66,9 +68,12 @@ def iczt(signal, m=None, w=None, a=1.0, normalize=False):
     """
     signal = np.atleast_1d(signal).astype(np.complex)
     l = len(signal)
-    if normalize: signal *= l**2
-    if m is None: m = l
-    if w is None: w = np.exp(-1j * pi2 / m)
+    if normalize:
+        signal *= l ** 2
+    if m is None:
+        m = l
+    if w is None:
+        w = np.exp(-1j * pi2 / m)
 
     return np.conjugate(czt(np.conjugate(signal), m, w, a)) / m
 
@@ -78,7 +83,7 @@ def chirp(w, n):
 
 
 def ichirp(w, n):
-    return w ** ((-n ** 2) / 2.0)
+    return w ** ((-(n ** 2)) / 2.0)
 
 
 def czt_naive(signal, m=None, w=None, a=1.0):
@@ -87,8 +92,10 @@ def czt_naive(signal, m=None, w=None, a=1.0):
     """
     signal = np.atleast_1d(signal).astype(np.complex)
     l = len(signal)
-    if m is None: m = l
-    if w is None: w = np.exp(-1j * pi2 / m)
+    if m is None:
+        m = l
+    if w is None:
+        w = np.exp(-1j * pi2 / m)
     z = np.zeros(m, dtype=np.complex)
 
     for k in range(m):

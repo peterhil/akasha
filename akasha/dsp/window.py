@@ -43,10 +43,12 @@ def sliding_window(a, ws, ss=None, flatten=True):
     if None is ss:
         # ss was not provided. the windows will not overlap in any direction.
         ss = ws
-    assert np.all(np.zeros(a.ndim) < np.asarray(ss)) and \
-        np.all(np.asarray(ss) <= np.asarray(ws)), \
-        "Step size must be greater than zero and " + \
-        "less than or equal to window size."
+    assert np.all(np.zeros(a.ndim) < np.asarray(ss)) and np.all(
+        np.asarray(ss) <= np.asarray(ws)
+    ), (
+        "Step size must be greater than zero and "
+        + "less than or equal to window size."
+    )
     ws = norm_shape(ws)
     ss = norm_shape(ss)
 
@@ -55,7 +57,6 @@ def sliding_window(a, ws, ss=None, flatten=True):
     ws = np.array(ws)
     ss = np.array(ss)
     shape = np.array(a.shape)
-
 
     # ensure that ws, ss, and a.shape all have the same number of dimensions
     ls = [len(shape), len(ws), len(ss)]
@@ -86,7 +87,7 @@ def sliding_window(a, ws, ss=None, flatten=True):
     # plus the array's strides (tuple addition)
     newstrides = norm_shape(np.array(na.strides) * ss) + na.strides
 
-    strided = as_strided(na, shape = newshape, strides = newstrides)
+    strided = as_strided(na, shape=newshape, strides=newstrides)
     if not flatten:
         return strided
 
@@ -96,6 +97,6 @@ def sliding_window(a, ws, ss=None, flatten=True):
     firstdim = (np.product(newshape[:-meat]),) if ws.shape else ()
     dim = firstdim + (newshape[-meat:])
     # remove any dimensions with size 1
-    dim = filter(lambda i : i != 1, dim)
+    dim = filter(lambda i: i != 1, dim)
 
     return strided.reshape(dim)
