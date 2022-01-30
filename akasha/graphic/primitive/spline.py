@@ -528,7 +528,12 @@ def clothoid_segments(signal, ends='open', mean=np.mean):
     params = np.apply_along_axis(lambda p: clothoid_segment(*p), 1, segments)
     logger.debug("Params (n, a, t, t2):\n%r", params)
 
-    straighten = lambda s: s / rect(1, np.angle(s[-1] - s[0]))
+    def add_dim(arr):
+        return np.resize(arr, (len(arr), 1))
+
+    def straighten(s):
+        return s / rect(1, np.angle(s[-1] - s[0]))
+
     # clothoids = map(
     #     lambda n, a, t, t2: orient(clothoid_curve(n, a, t, t2)),
     #     *params.T
@@ -537,10 +542,9 @@ def clothoid_segments(signal, ends='open', mean=np.mean):
     clothoids = np.apply_along_axis(
         lambda p: orient(clothoid_curve(*p)), 1, params
     )
-
     path = cartesian(distances(signal), directions)
-    add_dim = lambda arr: np.resize(arr, (len(arr), 1))
     clothoids = add_dim(path) * clothoids + add_dim(signal[:-1])
+
     return (clothoids, segments, params)
 
 

@@ -228,14 +228,19 @@ def draw_points_aa(signal, img, size=1000, colours=True):
     # Fixme: Ignores size argument as it is now
     width, height, _ = img.shape
 
-    iw = lambda a: inside(a, 0, width)
-    ih = lambda a: inside(a, 0, height)
+    def iw(a):
+        return inside(a, 0, width)
+
+    def ih(a):
+        return inside(a, 0, height)
+
+    def pixels(values):
+        return roundcast(
+            colors * as_pixels(values), dtype=np.uint8
+        )
 
     px, value = get_pixels(signal, width - 1)
     colors = add_alpha(colorize(signal)) if colours else white
-    pixels = lambda values: roundcast(
-        colors * as_pixels(values), dtype=np.uint8
-    )
 
     img[px[0], px[1], :] += pixels(value[0] * value[1])
     img[px[0], iw(px[1] + 1), :] += pixels(value[0] * (1 - value[1]))
@@ -293,7 +298,7 @@ def hist_graph(signal, size=1000):
     the complex signal.
     """
     # See Numpy docs on numpy.histogram2d:
-    # https://docs.scipy.org/doc/numpy/reference/generated/numpy.histogram2d.html  # pylint: disable=C0301
+    # https://docs.scipy.org/doc/numpy/reference/generated/numpy.histogram2d.html
     #
     # TODO: see np.bincount and Numpy histogram with 3x3d arrays as indices
     # https://stackoverflow.com/questions/7422713/numpy-histogram-with-3x3d-arrays-as-indices
