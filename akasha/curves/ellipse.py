@@ -18,9 +18,10 @@ import scipy as sc
 from cmath import rect
 
 from akasha.curves.curve import Curve
-from akasha.curves.ellipse_fit import \
-     ellipse_fit_fitzgibbon, \
-     ellipse_fit_halir
+from akasha.curves.ellipse_fit import (
+    ellipse_fit_fitzgibbon,
+    ellipse_fit_halir,
+)
 from akasha.math import complex_as_reals
 from akasha.math.geometry import is_orthogonal, midpoint, rotate_towards
 from akasha.math.geometry.affine_transform import AffineTransform
@@ -52,6 +53,7 @@ class Ellipse(Curve):
     - Parameter `b` can be greater than `a`, so use Ellipse#major
       if you need the major axis length
     """
+
     def __init__(self, a, b, angle=0, origin=0):
         # Note! If thinking of making a always the semi-major axis,
         # the angle needs to be rotated plus or minus 90 degrees or so.
@@ -74,8 +76,10 @@ class Ellipse(Curve):
         return b if a > b else a
 
     def __repr__(self):
-        return f'{class_name(self)}({self.a}, {self.b}, ' + \
-            f'{self.angle}, {self.origin})'
+        return (
+            f'{class_name(self)}({self.a}, {self.b}, '
+            + f'{self.angle}, {self.origin})'
+        )
 
     def __hash__(self):
         return hash((self.a, self.b, self.angle, self.origin))
@@ -98,10 +102,7 @@ class Ellipse(Curve):
         x = self.origin.real + cos * cos_angle - sin * sin_angle
         y = self.origin.imag + cos * sin_angle + sin * cos_angle
 
-        return as_complex(np.array([
-            np.asanyarray(x),
-            np.asanyarray(y)
-        ]))
+        return as_complex(np.array([np.asanyarray(x), np.asanyarray(y)]))
 
     def at(self, tau):
         """Polar form of ellipse relative to center, translated
@@ -129,8 +130,7 @@ class Ellipse(Curve):
         return (self.a * self.b) / (b_cos + a_sin) ** (3 / 2)
 
     def roc(self, tau):
-        """Radius of curvature.
-        """
+        """Radius of curvature."""
         return 1.0 / self.curvature(tau)
 
     def arc_length(self, tau):
@@ -156,14 +156,14 @@ class Ellipse(Curve):
     @classmethod
     def from_rhombus(cls, para):
         a, b, c, d = para
-        para_origin =  para - midpoint(a, c)
+        para_origin = para - midpoint(a, c)
         k, l = np.abs(para_origin)[:2]
         return cls(l, k, np.angle(para_origin)[3], midpoint(a, c))
 
     @classmethod
     def from_parallelogram(cls, para):
         dia = np.array([1, 1j, -1, -1j])
-        sq = np.array([1+1j, -1+1j, -1-1j, 1-1j])
+        sq = np.array([1 + 1j, -1 + 1j, -1 - 1j, 1 - 1j])
         center = midpoint(para[0], para[2])
         para_at_origin = para - center
 
@@ -171,21 +171,23 @@ class Ellipse(Curve):
         tr.estimate(dia, para_at_origin)
 
         u, s, v = np.linalg.svd(
-            tr.params[:2, :2],
-            full_matrices=False,
-            compute_uv=True
+            tr.params[:2, :2], full_matrices=False, compute_uv=True
         )
         a, b = s[:2]
 
-        uv = np.eye(3); uv[:2, :2] = u * np.diag(s) * v
+        uv = np.eye(3)
+        uv[:2, :2] = u * np.diag(s) * v
         uv = AffineTransform(uv)
 
-        return cls(a, b,
-                   # np.angle(uv(dia[0])),
-                   # np.angle(tr.inverse(dia))[0],
-                   # pi2 / 4 + tr.rotation + np.tan(tr.shear),
-                   np.angle(tr(sq)[1]),
-                   center)
+        return cls(
+            a,
+            b,
+            # np.angle(uv(dia[0])),
+            # np.angle(tr.inverse(dia))[0],
+            # pi2 / 4 + tr.rotation + np.tan(tr.shear),
+            np.angle(tr(sq)[1]),
+            center,
+        )
 
     @classmethod
     def from_conjugate_diameters(cls, para):
@@ -264,9 +266,9 @@ class Ellipse(Curve):
         """
         # TODO Check for degenerate cases described here:
         # https://en.wikipedia.org/wiki/Ellipse#General_ellipse
-        den = (b ** 2 - 4.0 * a * c)
+        den = b ** 2 - 4.0 * a * c
         acb_pythagorean = np.sqrt(((a - c) ** 2) + b ** 2)
-        ab_common = (a * (e ** 2) + c * (d ** 2) - b * d * e + den * f)
+        ab_common = a * (e ** 2) + c * (d ** 2) - b * d * e + den * f
 
         a = -np.sqrt(2.0 * ab_common * (a + c + acb_pythagorean)) / den
         b = -np.sqrt(2.0 * ab_common * (a + c - acb_pythagorean)) / den

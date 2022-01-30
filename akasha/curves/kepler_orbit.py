@@ -35,6 +35,7 @@ class KeplerOrbit(Curve):
       between 0 and 1 form an elliptic orbit, 1 is a parabolic escape
       orbit, and greater than 1 is a hyperbola.
     """
+
     def __init__(
         self,
         perihelion,
@@ -43,7 +44,7 @@ class KeplerOrbit(Curve):
         period=1,
         newton=True,
         name='',
-        ph=0
+        ph=0,
     ):
         self.name = name
         # Distance from sun (origin) to perihelion (closest) point
@@ -55,12 +56,14 @@ class KeplerOrbit(Curve):
         self.ph = 0  # Time of perihelion passage
 
     def __repr__(self):
-        return f'{class_name(self)}(' + \
-            f'{self.perihelion!r}, ' + \
-            f'{self.a!r}, ' + \
-            f'eccentricity={self.eccentricity!r}, ' + \
-            f'period={self.period!r}, ' + \
-            f'name={self.name!r})'
+        return (
+            f'{class_name(self)}('
+            + f'{self.perihelion!r}, '
+            + f'{self.a!r}, '
+            + f'eccentricity={self.eccentricity!r}, '
+            + f'period={self.period!r}, '
+            + f'name={self.name!r})'
+        )
 
     @property
     def mean_motion(self):
@@ -93,10 +96,7 @@ class KeplerOrbit(Curve):
         def ke_prime(e):
             return 1 - ecc * np.cos(e)
 
-        return newton(
-            kepler_equation, ma, ke_prime,
-            tol=1.48e-08, maxiter=50
-        )
+        return newton(kepler_equation, ma, ke_prime, tol=1.48e-08, maxiter=50)
 
     def true_anomaly(self, t):
         """
@@ -121,10 +121,12 @@ class KeplerOrbit(Curve):
 
         # Approximation through Fourier expansion, fails
         # on large eccentricity!
-        ta = ma + \
-             (2 * ecc - (1 / 4) * ecc ** 3) * np.sin(ma) + \
-             (5 / 4) * ecc ** 2 * np.sin(2 * ma) + \
-             (13 / 12) * ecc ** 3 * np.sin(3 * ma)
+        ta = (
+            ma
+            + (2 * ecc - (1 / 4) * ecc ** 3) * np.sin(ma)
+            + (5 / 4) * ecc ** 2 * np.sin(2 * ma)
+            + (13 / 12) * ecc ** 3 * np.sin(3 * ma)
+        )
 
         return ta
 

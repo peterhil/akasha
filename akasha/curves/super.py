@@ -53,7 +53,7 @@ class Super(Curve):
         """
         if is_sequence(m):
             superness = np.repeat(None, 6)
-            superness[:min(len(m), 6)] = np.array(m[:6], dtype=np.float64)
+            superness[: min(len(m), 6)] = np.array(m[:6], dtype=np.float64)
             # length = len(superness)
             # if lenth < 6:
             #     if length < 4:
@@ -62,14 +62,17 @@ class Super(Curve):
             # return superness
             (m, n, p, q, a, b) = superness
 
-        return np.array([
-            m or 4.0,
-            n or 2.0,
-            p or n or 2.0,
-            q or p or n or 2.0,
-            a or 1.0,
-            b or a or 1.0,
-        ], dtype=np.float64)
+        return np.array(
+            [
+                m or 4.0,
+                n or 2.0,
+                p or n or 2.0,
+                q or p or n or 2.0,
+                a or 1.0,
+                b or a or 1.0,
+            ],
+            dtype=np.float64,
+        )
 
     def at(self, points):
         """Superformula curve at points."""
