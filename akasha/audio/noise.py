@@ -71,6 +71,7 @@ class ColouredNoise(Generator):
     By default uses standard normal distribution, also known as
     the Gaussian distribution.
     """
+
     # TODO Make this into a filter for jittering a frequency
     # TODO Examine using other distributions
 
@@ -100,7 +101,7 @@ class ColouredNoise(Generator):
             signal = np.interp(
                 np.arange(length),
                 np.arange(0, length, self.step),
-                signal[:length]
+                signal[:length],
             )
 
         return c.at(np.cumsum(signal))
@@ -123,6 +124,7 @@ class Rustle(Generator):
 
     See: http://en.wikipedia.org/wiki/Rustle_noise
     """
+
     def __init__(self, expected=1, frequency=1, envelope=Exponential(0)):
         self.frequency = Frequency(frequency)
         self.expected = expected
@@ -145,6 +147,7 @@ class Mandelbrot(Generator):
     The regular Mandelbrot set is slightly different from this:
     The iterator is always kept inside the unit disc.
     """
+
     def __init__(self, z=None, c=None, random=False):
         _super(self).__init__()
 
@@ -165,8 +168,7 @@ class Mandelbrot(Generator):
         self.z = self.poly(self.z)
         if np.abs(self.z) > 1.0:
             self.z = np.array(
-                rect(1.0 / np.abs(self.z), np.angle(self.z)),
-                dtype=complex
+                rect(1.0 / np.abs(self.z), np.angle(self.z)), dtype=complex
             )
         return self.z
 
@@ -193,6 +195,7 @@ class Chaos(Generator):
     """
     Chaos ensues.
     """
+
     # TODO: Make into generic iterator using Generator
 
     def __init__(
@@ -220,15 +223,16 @@ class Chaos(Generator):
 def random_frequencies(
     n,
     low=20,
-    high=sampler.rate/2.0,
+    high=sampler.rate / 2.0,
     t=4,
     window=2,
     smoothing='exponential',
 ):
     signal = np.repeat(
-        np.random.random_integers(
-            low, high, np.ceil(float(n) / float(t))) / float(sampler.rate),
-        t)
+        np.random.random_integers(low, high, np.ceil(float(n) / float(t)))
+        / float(sampler.rate),
+        t,
+    )
     if smoothing == 'exponential':
         signal = pd.ewma(signal, span=window, min_periods=1)
     elif smoothing:

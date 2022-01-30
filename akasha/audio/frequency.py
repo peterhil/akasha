@@ -29,8 +29,7 @@ from akasha.settings import config
 
 
 def is_audible(frequency):
-    """Is the frequency audible?
-    """
+    """Is the frequency audible?"""
     audible_min = config.frequency.AUDIBLE_MIN
     audible_max = config.frequency.AUDIBLE_MAX
 
@@ -38,23 +37,25 @@ def is_audible(frequency):
 
 
 def octaves():
-    """Audible octaves based on config.frequency.BASE
-    """
+    """Audible octaves based on config.frequency.BASE"""
     frequencies = config.frequency.BASE * 2.0 ** np.arange(-10, 15)
     return np.fromiter(filter(is_audible, frequencies), dtype=np.float64)
 
 
-class FrequencyRatioMixin():
+class FrequencyRatioMixin:
     """Mixin to enable memoization of sound objects with Frequency
     through rational approximation.
     """
+
     # FIXME: Basically this should be replaced with RationalUnit or at least
     # inherit from it.
 
     _hz = 0.0
 
     @classmethod
-    def from_ratio(cls, ratio, den=False, *args, **kwargs):  # pylint: disable=W1113
+    def from_ratio(
+        cls, ratio, den=False, *args, **kwargs
+    ):  # pylint: disable=W1113
         """
         New instance from fractional ratio.
         """
@@ -116,8 +117,9 @@ class FrequencyRatioMixin():
         """
         # TODO: Investigate the right limit, take beating tones into account!
         # TODO: Check whether memoizing this is of any value.
-        ratio = Fraction.from_float(float(freq) / sampler.rate) \
-            .limit_denominator(limit)
+        ratio = Fraction.from_float(
+            float(freq) / sampler.rate
+        ).limit_denominator(limit)
         if ratio != 0:
             approx = sampler.rate * ratio
             deviation = cents_diff(freq, approx)
@@ -125,8 +127,10 @@ class FrequencyRatioMixin():
                 logger.warning(
                     "Frequency approx %f for ratio %s deviates from "
                     "%.3f by %.16f%% cents",
-                    approx, ratio,
-                    freq, deviation
+                    approx,
+                    ratio,
+                    freq,
+                    deviation,
                 )
         return ratio
 
@@ -151,13 +155,11 @@ class FrequencyRatioMixin():
         return ratio % 1
 
     def __nonzero__(self):
-        """Zero frequency should be considered False.
-        """
+        """Zero frequency should be considered False."""
         return self.ratio != 0
 
     def _cmp(op):  # pylint: disable=E0213
-        """Generate comparison methods.
-        """
+        """Generate comparison methods."""
 
         def comparison(self, other):
             # pylint: disable=C0111,E1102
@@ -186,8 +188,8 @@ class FrequencyRatioMixin():
 
 
 class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
-    """Frequency class
-    """
+    """Frequency class"""
+
     def __init__(self, hz, unwrapped=False):
         _super(self).__init__()
         if not isinstance(hz, Real):
@@ -221,8 +223,7 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
 
     @property
     def cycle(self):
-        """Frequency cycle of one period
-        """
+        """Frequency cycle of one period"""
         return self.angles(self.ratio)
 
     def at(self, t):

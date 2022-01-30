@@ -19,6 +19,7 @@ class Osc(FrequencyRatioMixin, PeriodicGenerator):
     """
     Generic oscillator which has a closed curve and a frequency.
     """
+
     def __init__(self, freq, curve=Circle()):
         _super(self).__init__()
         if not isinstance(freq, Real):
@@ -40,9 +41,13 @@ class Osc(FrequencyRatioMixin, PeriodicGenerator):
         return self.curve.at(Frequency.angles(self.ratio))
 
     def __repr__(self):
-        return f'{class_name(self)}({self.frequency._hz!r}, ' + \
-            f'curve={self.curve!r})'
+        return (
+            f'{class_name(self)}({self.frequency._hz!r}, '
+            + f'curve={self.curve!r})'
+        )
 
     def __str__(self):
-        return f'<{class_name(self)}: {self.frequency!s}, ' + \
-           f'curve={self.curve!s}>'
+        return (
+            f'<{class_name(self)}: {self.frequency!s}, '
+            + f'curve={self.curve!s}>'
+        )

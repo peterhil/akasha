@@ -18,10 +18,11 @@ from akasha.timing import sampler
 from akasha.utils.python import class_name
 
 
-class Generator():
+class Generator:
     """
     Sound generator base class.
     """
+
     def __getitem__(self, item):
         """
         Slicing support.
@@ -80,6 +81,7 @@ class PeriodicGenerator(Generator):
     """
     Sound objects with some repeating period.
     """
+
     def __getitem__(self, item):
         """
         Slicing support.
@@ -95,8 +97,8 @@ class PeriodicGenerator(Generator):
         number of elements for different step values.
         """
         if isinstance(item, slice):
-            step = ((item.step or 1) % self.period or 1)
-            start = ((item.start or 0) % self.period)
+            step = (item.step or 1) % self.period or 1
+            start = (item.start or 0) % self.period
             element_count = abs(
                 (item.stop or self.period) - (item.start or 0)
             )
@@ -108,8 +110,7 @@ class PeriodicGenerator(Generator):
             return self.cycle[np.fromiter(item, dtype=np.int64) % self.period]
 
     def at(self, t):
-        f"""Sample {class_name(self)} at times (t).
-        """
+        f"""Sample {class_name(self)} at times (t)."""
         return self.sample(t % self.period)
 
     # Disabled because Numpy gets clever (and slow) when a sound objects

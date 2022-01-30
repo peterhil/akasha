@@ -8,8 +8,9 @@ Dual-tone Multifrequency Tones
 import sys
 
 from builtins import range
+
 if sys.version_info <= (3, 0):
-    from string import maketrans # pylint: disable=W0402
+    from string import maketrans  # pylint: disable=W0402
 else:
     from bytes import maketrans
 
@@ -72,14 +73,12 @@ class DTMF(Generator):
     * = (gsm: +)
     # = (gsm: shift)
     """
-    sp = [350,  440,  480,  620]
-    lo = [697,  770,  852,  941]
+
+    sp = [350, 440, 480, 620]
+    lo = [697, 770, 852, 941]
     hi = [1209, 1336, 1477, 1633]
 
-    nkeys = '123A' + \
-            '456B' + \
-            '789C' + \
-            '*0#D'
+    nkeys = '123A' + '456B' + '789C' + '*0#D'
 
     table = dict()
 
@@ -87,12 +86,34 @@ class DTMF(Generator):
         l, h = divmod(i, 4)
         table[nkeys[i]] = (lo[l], hi[h])
 
-    keys = ''.join([
-        'ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PQRS', 'TUV', 'WXYZ', ' ', '-'
-    ]),
-    digits = ''.join([
-        '222', '333', '444', '555', '666', '7777', '888', '9999', '0', '-'
-    ])
+    keys = ''.join(
+        [
+            'ABC',
+            'DEF',
+            'GHI',
+            'JKL',
+            'MNO',
+            'PQRS',
+            'TUV',
+            'WXYZ',
+            ' ',
+            '-',
+        ]
+    )
+    digits = ''.join(
+        [
+            '222',
+            '333',
+            '444',
+            '555',
+            '666',
+            '7777',
+            '888',
+            '9999',
+            '0',
+            '-',
+        ]
+    )
     alphabet_trans = maketrans(keys, digits)
 
     def __init__(self, sequence, pulselength=0.07, pause=0.05):

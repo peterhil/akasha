@@ -24,8 +24,7 @@ from akasha.math import normalize, random_phasor
 from akasha.utils.python import class_name
 
 
-class GaussianCurve():
-
+class GaussianCurve:
     def __init__(self, frequency, sigma, scale=1.0, base=0.0):
         self.frequency = frequency
         self.sigma = sigma
@@ -37,12 +36,13 @@ class GaussianCurve():
         return self.scale * np.exp(gaussian) + self.base
 
     def __repr__(self):
-        return f'{class_name(self)}({self.frequency!r}, {self.sigma!r}, ' + \
-            f'{self.scale!r}, {self.base!r})'
+        return (
+            f'{class_name(self)}({self.frequency!r}, {self.sigma!r}, '
+            + f'{self.scale!r}, {self.base!r})'
+        )
 
 
-class GaussianFrequencyCurve():
-
+class GaussianFrequencyCurve:
     def __init__(self, freqs, sigmas):
         self.gaussians = [GaussianCurve(f, s) for f, s in zip(freqs, sigmas)]
 
@@ -58,8 +58,7 @@ def random_phases(reals):
     return reals * random_phasor(len(reals), 1)
 
 
-class Padsynth():
-
+class Padsynth:
     def __init__(self, freqs, sigmas):
         self.curve = GaussianFrequencyCurve(freqs, sigmas)
 

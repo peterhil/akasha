@@ -14,7 +14,7 @@ from __future__ import division
 from akasha.math.functions import fixnans
 
 
-class Delay():
+class Delay:
     """
     Delay (shift) a sound object in time.
     """

@@ -52,9 +52,11 @@ class Chrono(RealUnit):
         """Add a derived time unit with a name, prefixed symbol
         and a factor to multiply seconds.
         """
+
         def derived(secs):
             # pylint: disable=C0111
             return cls(secs * factor)
+
         derived.__doc__ = f'Chrono time as {name}.'
         derived.__name__ = name
         setattr(cls, name, staticmethod(derived))

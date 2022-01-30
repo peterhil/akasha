@@ -33,7 +33,8 @@ class Resample(FrequencyRatioMixin, Generator):
     """PCM (pulse-code modulated aka sampled) sound sample that is
     resampled when played.
     """
-    def __init__(self, snd, base = 441):
+
+    def __init__(self, snd, base=441):
         _super(self).__init__()
         self._hz = Frequency(base)
         self.base_freq = Frequency(base)
@@ -46,9 +47,14 @@ class Resample(FrequencyRatioMixin, Generator):
         if self.frequency == 0:
             return 1
         else:
-            return int(np.floor(float(
-                len(self.snd) * (self.base_freq.ratio / self.frequency.ratio)
-            )))
+            return int(
+                np.floor(
+                    float(
+                        len(self.snd)
+                        * (self.base_freq.ratio / self.frequency.ratio)
+                    )
+                )
+            )
 
     @staticmethod
     def resample(signal, ratio, window='linear'):
@@ -56,9 +62,9 @@ class Resample(FrequencyRatioMixin, Generator):
         Resample the PCM sound with a new normalized frequency (ratio).
         """
         logger.info(
-            'Resample at %r (%.3f).'
-            'Hilbert transform may cause clipping!',
-            ratio, float(ratio),
+            'Resample at %r (%.3f).' 'Hilbert transform may cause clipping!',
+            ratio,
+            float(ratio),
         )
         orig_state = sampler.paused
         sampler.paused = True
@@ -88,7 +94,7 @@ class Resample(FrequencyRatioMixin, Generator):
         """
         if items is None:
             items = slice(0, len(self))
-        ratio = (self.base_freq.ratio / self.frequency.ratio)
+        ratio = self.base_freq.ratio / self.frequency.ratio
         if ratio == 0:
             return np.array([0j])
         elif ratio == 1:
@@ -96,7 +102,9 @@ class Resample(FrequencyRatioMixin, Generator):
         else:
             if isinstance(items, slice) and items.stop >= len(self):
                 logger.warning(
-                    'Normalising %r for length %d', items, len(items),
+                    'Normalising %r for length %d',
+                    items,
+                    len(items),
                 )
                 stop = min(items.stop, len(self))
                 items = slice(items.start, stop, items.step)
