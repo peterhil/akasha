@@ -97,10 +97,14 @@ logging.addLevelName(logging.BORING, 'BORING')
 logger = logging.getLogger('Akasha')
 
 absformatter = ColorFormatter(
-    "%(color)s%(asctime)s %(name)s: [%(levelname)s]\t%(message)s" + ansi.END)
+    "%(color)s%(asctime)s %(name)s: [%(levelname)s]\t%(message)s" + \
+    ansi.END
+)
 
 relformatter = ColorFormatter(
-    "%(color)s%(relativeCreated)12.4f %(name)s: [%(levelname)s]\t%(message)s" + ansi.END)
+    "%(color)s%(relativeCreated)12.4f %(name)s: "
+    "[%(levelname)s]\t%(message)s" + ansi.END
+)
 
 handler = logging.StreamHandler(sys.stderr)
 #handler = logging.FileHandler('/var/log/akasha.log')

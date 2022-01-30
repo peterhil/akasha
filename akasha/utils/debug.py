@@ -12,6 +12,7 @@ def trace_c(frame, event, arg):
 
     Usage: sys.settrace(trace_c)
     """
-    if event == 'c_call' or arg is not None and 'IPython' not in frame.f_code.co_filename:
-        print("%s, %s: %d" % (event, frame.f_code.co_filename, frame.f_lineno))
+    if event == 'c_call' \
+      or arg is not None and 'IPython' not in frame.f_code.co_filename:
+        print(f'{event}, {frame.f_code.co_filename}: {frame.f_lineno!d}')
     return trace

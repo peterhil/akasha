@@ -42,7 +42,8 @@ class IntervalTree():
     """
     Interval tree.
 
-    This is a modified port of this BSD Licensed Ruby implementation of augmented interval tree:
+    This is a modified port of this BSD Licensed Ruby implementation of
+    augmented interval tree:
     https://github.com/misshie/interval-tree/blob/master/lib/interval_tree.rb
 
     The code this is modified from a Python port by Tyler Kahn:
@@ -72,7 +73,10 @@ class IntervalTree():
             else:
                 s_center.append(k)
 
-        return Node(x_center, s_center, self.divide_intervals(s_left), self.divide_intervals(s_right))
+        return Node(
+            x_center, s_center,
+            self.divide_intervals(s_left), self.divide_intervals(s_right)
+        )
 
     def center(self, intervals):
         """
