@@ -5,8 +5,6 @@
 Akasha test assertion utilities.
 """
 
-import numpy as np
-
 from builtins import zip
 from numpy.testing import assert_array_equal
 

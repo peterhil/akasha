@@ -21,7 +21,6 @@ from akasha.math.geometry import \
      circumcircle_radius_alt, \
      midpoint
 from numpy.testing import assert_array_almost_equal
-from akasha.math import all_equal
 
 
 class TestGeometryFunctions():

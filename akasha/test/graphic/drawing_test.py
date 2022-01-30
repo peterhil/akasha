@@ -15,8 +15,15 @@ import numpy as np
 import pytest
 
 from akasha.audio.oscillator import Osc
-from akasha.graphic.drawing import *
-from akasha.utils.log import logger
+from akasha.graphic.drawing import (
+    add_alpha,
+    clip_samples,
+    draw,
+    draw_axis,
+    draw_points,
+    draw_points_aa,
+    get_canvas,
+)
 from akasha.test.utils.assertions import assert_equal_image
 
 from mock import patch

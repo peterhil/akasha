@@ -11,11 +11,6 @@
 Unit tests for graphics output
 """
 
-import numpy as np
-import pytest
-
-from akasha.graphic.output import *
-
 
 class TestOutput():
     """

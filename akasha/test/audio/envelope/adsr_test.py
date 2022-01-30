@@ -16,7 +16,7 @@ import pytest
 
 from numpy.testing import assert_array_almost_equal
 
-from akasha.audio import Delay, Scalar, Sum
+from akasha.audio import Delay, Scalar
 from akasha.audio.envelope import Adsr, Beta, InverseBeta
 
 

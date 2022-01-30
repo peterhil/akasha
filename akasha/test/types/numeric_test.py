@@ -19,7 +19,7 @@ import itertools
 import operator
 import pytest
 
-from abc import ABCMeta, abstractproperty
+# from abc import ABCMeta, abstractproperty
 from fractions import Fraction
 
 from akasha.types.numeric import \

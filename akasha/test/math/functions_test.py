@@ -17,7 +17,14 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 from akasha.funct.itertools import pairwise
-from akasha.math import *
+from akasha.math import (
+    db_fs,
+    distances,
+    pi2,
+    primes,
+    rms,
+    sampler,
+)
 
 
 class TestMath():

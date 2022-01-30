@@ -11,8 +11,6 @@
 Unit tests for Overtones
 """
 
-import numpy as np
-
 from numpy.testing import assert_array_almost_equal
 
 from akasha.audio.mix import Mix

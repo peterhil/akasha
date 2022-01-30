@@ -11,7 +11,6 @@
 Unit tests for Mix
 """
 
-import numpy as np
 import pytest
 
 from numpy.testing import assert_array_equal, assert_array_almost_equal
@@ -21,8 +20,6 @@ from akasha.audio.harmonics import Harmonics
 from akasha.audio.mix import Mix
 from akasha.audio.oscillator import Osc
 from akasha.audio.overtones import Overtones
-from akasha.audio.scalar import Scalar
-from akasha.audio.sum import Sum
 from akasha.curves import Super
 from akasha.timing import sampler
 
@@ -45,7 +42,7 @@ class TestMix():
 
     def test_init_assertion(self):
         with pytest.raises(RuntimeError):
-            m = Mix(Osc(436), None, [])
+            Mix(Osc(436), None, [])
 
     def test_at(self):
         times = sampler.slice(10000) * sampler.rate
@@ -84,7 +81,6 @@ class TestReplacingHarmonics():
     def test_mix_overtones(self):
         s = Super(3, 3, 3, 3)
         o = Osc(120, curve=s)
-        base = s
         kwargs = dict(
             n=3,
             func=lambda x: x + 1,

@@ -14,8 +14,7 @@ Unit tests for z-transform
 import pytest
 import numpy as np
 
-from numpy.testing import assert_array_equal, assert_array_almost_equal, \
-     assert_array_almost_equal_nulp
+from numpy.testing import assert_array_almost_equal
 
 from akasha.dsp.z_transform import czt, iczt, czt_naive
 

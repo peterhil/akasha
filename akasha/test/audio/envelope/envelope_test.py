@@ -15,7 +15,6 @@ import numpy as np
 import pytest
 
 from numpy.testing import assert_array_almost_equal
-from numpy.testing import assert_array_almost_equal_nulp as assert_nulp_diff
 
 from akasha.audio.envelope import Exponential
 from akasha.timing import sampler

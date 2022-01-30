@@ -11,9 +11,6 @@
 Unit tests for clothoid splines
 """
 
-import numpy as np
-import pytest
-
 
 class TestClothoidSplines():
     """
