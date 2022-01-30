@@ -16,6 +16,7 @@ import scipy as sc
 import sys
 
 from builtins import range, zip
+
 if sys.version_info >= (2, 7):
     from collections import OrderedDict
 else:
@@ -32,7 +33,7 @@ pi2 = np.pi * 2.0
 cartesian = np.vectorize(
     rect,
     doc="""Return cartesian points from polar coordinate
-radiuses and angles."""
+radiuses and angles.""",
 )
 
 
@@ -195,8 +196,8 @@ def roots_periods(base, limit=44100.0):
     """
     # FIXME What this really does?
     # TODO Write a test to ensure it does it right!
-    if (base <= 1):
-        raise(ValueError("Base can not be less than or equal to one."))
+    if base <= 1:
+        raise (ValueError("Base can not be less than or equal to one."))
     ex = np.ceil(logn(limit, base))
     return base ** np.arange(ex)
 
@@ -227,6 +228,7 @@ def roots_counts(base, limit=44100.0):
 
 # Floats
 
+
 def minfloat(guess=1.0):
     """
     >>> minfloat(1.0)   # minimum positive value of a float
@@ -239,7 +241,7 @@ def minfloat(guess=1.0):
     http://seun-python.blogspot.com/2009/06/floating-point-min-max.html
     """
     i = 0
-    while(guess * 0.5 != 0):
+    while guess * 0.5 != 0:
         guess = guess * 0.5
         i += 1
     return guess, i
@@ -258,13 +260,14 @@ def maxfloat(guess=1.0):
     """
     guess = float(guess)
     i = 0
-    while(guess * 2 != guess):
+    while guess * 2 != guess:
         guess = guess * 2
         i += 1
     return guess, i
 
 
 # Arrays
+
 
 def map_array(func, arr, method='vec', dtype=None):
     """
@@ -293,9 +296,7 @@ def map_array(func, arr, method='vec', dtype=None):
     elif method == 'map':
         res = np.array(map(func, arr.flat))  # pylint: disable=W0141
     else:
-        raise NotImplementedError(
-            f"map_array(): method '{method}' missing."
-        )
+        raise NotImplementedError(f"map_array(): method '{method}' missing.")
 
     if dtype is not None:
         res = res.astype(dtype)
@@ -345,6 +346,7 @@ def find_closest_index(arr, target):
 
 # Random
 
+
 def rand_between(inf, sup, n=1, random=np.random.random):
     """Generate n random numbers using given function(defaults to
     np.random.random()) on the half open interval [inf, sup).
@@ -380,27 +382,26 @@ def random_phasor(n=1, amp=1.0, random=np.random.random):
     graph(snd)  # or anim(Pcm(snd))
     """
     if np.isscalar(amp):
-        return np.array([
-            rect(a, b)
-            for a, b in
-            zip(np.repeat(amp, n), pi2 * random(n) - np.pi)
-        ])
+        return np.array(
+            [
+                rect(a, b)
+                for a, b in zip(np.repeat(amp, n), pi2 * random(n) - np.pi)
+            ]
+        )
     elif callable(amp):
-        return np.array(map(
-            rect,
-            *np.array([amp(n), pi2 * random(n) - np.pi])
-        ))
+        return np.array(
+            map(rect, *np.array([amp(n), pi2 * random(n) - np.pi]))
+        )
     else:
-        assert n == len(amp), \
-            'Arguments (n, amp) should have the same length, got:' + \
-            f'({n}, {len(amp)})'
-        return np.array(map(
-            rect,
-            *np.array([amp, pi2 * random(n) - np.pi])
-        ))
+        assert n == len(amp), (
+            'Arguments (n, amp) should have the same length, got:'
+            + f'({n}, {len(amp)})'
+        )
+        return np.array(map(rect, *np.array([amp, pi2 * random(n) - np.pi])))
 
 
 # Primes
+
 
 def primes(inf, sup, dtype=np.uint64):
     """
@@ -427,7 +428,7 @@ def pascal_line(n):
     Line of Pascal's triangle using binomial coefficients
     """
     line = [1]
-    [line.append(line[k] * (n-k) / (k+1)) for k in range(n)]
+    [line.append(line[k] * (n - k) / (k + 1)) for k in range(n)]
     return line
 
 
@@ -442,7 +443,7 @@ def isprime_pascal(n):
     See also: Number theory - geometrical connection
     https://www.youtube.com/watch?v=sbjPwyPT1AI
     """
-    p = np.array(pascal_line(n))[1:int(np.floor(n / 2. + 1))]
+    p = np.array(pascal_line(n))[1 : int(np.floor(n / 2.0 + 1))]
     return not np.any(p % n)
 
 
@@ -464,12 +465,12 @@ def lcm(a, b):
 
 # Vectorized functions
 
-np.gcd = lambda a, axis = None: reduce(gcd, a)
-np.lcm = lambda a, axis = None: reduce(lcm, a)
+np.gcd = lambda a, axis=None: reduce(gcd, a)
+np.lcm = lambda a, axis=None: reduce(lcm, a)
 
 np.getattr = np.vectorize(
     lambda x, attr: getattr(x, attr),  # pylint: disable=W0108
-    otypes=['object']
+    otypes=['object'],
 )
 
 
@@ -498,14 +499,17 @@ def as_fractions(arr, limit=1000000):
     """
     Return array as Fractions with denominators up to the limit given.
     """
+
     def fractionalise(y):
         return Fraction.from_float(y).limit_denominator(limit)
+
     from_float = np.vectorize(fractionalise)
 
     return from_float(arr)
 
 
 # Factors
+
 
 def sq_factors(n):
     """Find factors of integer n, by trying to divide with integers
@@ -526,8 +530,9 @@ def factors(n):
     """
     Return factors of integer n.
     """
-    assert np.all(np.equal(np.mod(n, 1), 0)), \
-        f'Value {n!s} is not an integer!'
+    assert np.all(
+        np.equal(np.mod(n, 1), 0)
+    ), f'Value {n!s} is not an integer!'
     f = sq_factors(n)
 
     return np.unique(np.append(f, np.array(n, dtype=np.int) / f[::-1]))
@@ -575,11 +580,9 @@ def factor_supersets(factors_in, redundant=None, limit=None):
     lim = limit if limit else len(factors_in) - 1
     length_of_value = lambda x: len(x[1])
 
-    ess = OrderedDict(sorted(
-        factors_in.items(),
-        key=length_of_value,
-        reverse=True
-    ))
+    ess = OrderedDict(
+        sorted(factors_in.items(), key=length_of_value, reverse=True)
+    )
     red = redundant if redundant else OrderedDict()
     # logger.info(
     #     "STARTING\tEssential keys: %s redundant keys: %s",
@@ -591,11 +594,15 @@ def factor_supersets(factors_in, redundant=None, limit=None):
         ind = (lim, j)
         logger.debug("\t#%s", ind)
         if fset.issubset(factors_in[lim]):
-            msg = "\t#%s:\tSet %s is subset of %s, will add missing " + \
-                "factors of %s to redundant"
+            msg = (
+                "\t#%s:\tSet %s is subset of %s, will add missing "
+                + "factors of %s to redundant"
+            )
             logger.info(msg, ind, fset, factors_in[lim], j)
-            msg = "#%s:\tMoving %s from essential to redundant. " + \
-                "(factors in %s)"
+            msg = (
+                "#%s:\tMoving %s from essential to redundant. "
+                + "(factors in %s)"
+            )
             logger.warning(msg, ind, j, factors_in[j])
             if j in ess:
                 red[j] = ess.pop(j)
@@ -616,19 +623,22 @@ def factor_supersets(factors_in, redundant=None, limit=None):
     #     ind, ess.keys(), red.keys()
     # )
 
-    assert set(ess).isdisjoint(red), \
-        f'Redundant values {set(ess).intersection(red)} ' + \
-        'contained in essential'
+    assert set(ess).isdisjoint(red), (
+        f'Redundant values {set(ess).intersection(red)} '
+        + 'contained in essential'
+    )
     (ess, red) = factor_supersets(ess, red, limit=lim - 1)
-    assert set(ess).isdisjoint(red), \
-        f'Redundant values {set(ess).intersection(red)} ' + \
-        'contained in essential'
-    logger.debug("This should be empty set: %r". set(ess).intersection(red))
+    assert set(ess).isdisjoint(red), (
+        f'Redundant values {set(ess).intersection(red)} '
+        + 'contained in essential'
+    )
+    logger.debug("This should be empty set: %r".set(ess).intersection(red))
 
     return (ess, red)
 
 
 # Signal processing utils
+
 
 def identity(x):
     """Identity function - return the argument unchagned.
@@ -669,7 +679,7 @@ def rms(signal):
     signal = signal[np.isfinite(signal) == True]
     if len(signal) == 0:
         raise ValueError("RMS of empty signal")
-    norm = (1.0 / len(signal))
+    norm = 1.0 / len(signal)
     squares = np.power(signal, 2)
 
     return np.sqrt(norm * np.sum(squares, axis=0))
@@ -768,12 +778,10 @@ def pad(signal, index=-1, count=1, value=None):
     signal = np.asarray([signal]).flatten()
     length = len(signal)
     space = index % (length + 1)
-    value = (value if value is not None else signal[index])
-    padded = np.concatenate((
-        signal[0:space],
-        repeat(value, count),
-        signal[space:length]
-    ))
+    value = value if value is not None else signal[index]
+    padded = np.concatenate(
+        (signal[0:space], repeat(value, count), signal[space:length])
+    )
     return padded
 
 
@@ -814,19 +822,18 @@ def pad_right(signal, padding, minlength):
 
 
 def pad_ends(signal, start, end):
-    """Pad a signal with start and end value
-    """
+    """Pad a signal with start and end value"""
     return np.append(np.append(start, signal), end)
 
 
 def overlap(signal, n):
-    """Split the 1-d signal into n overlapping parts.
-    """
-    return np.array([
-        signal[p : len(signal) - q]
-        for p, q in
-        enumerate(reversed(range(n)))
-    ])
+    """Split the 1-d signal into n overlapping parts."""
+    return np.array(
+        [
+            signal[p : len(signal) - q]
+            for p, q in enumerate(reversed(range(n)))
+        ]
+    )
 
 
 def distances(signal, start=None, end=None):
@@ -839,8 +846,7 @@ def distances(signal, start=None, end=None):
 
 
 def get_points(signal, size=1000, dtype=np.float64):
-    """Get coordinate points from a complex signal.
-    """
+    """Get coordinate points from a complex signal."""
     return complex_as_reals(scale(np.atleast_1d(signal), size), dtype)
 
 
@@ -859,16 +865,13 @@ def get_pixels(signal, size):
 
 
 def roundcast(signal, precision=0, dtype=np.int64):
-    """Round float valued signal and cast into give data type.
-    """
+    """Round float valued signal and cast into give data type."""
     return np.round(signal, decimals=precision).astype(dtype)
 
 
 def as_pixels(values, channels=4):
-    """Repeat values for image channels.
-    """
-    return np.repeat(values, channels) \
-      .reshape(len(values), channels)
+    """Repeat values for image channels."""
+    return np.repeat(values, channels).reshape(len(values), channels)
 
 
 def scale(signal, size):
@@ -878,7 +881,7 @@ def scale(signal, size):
     Range of the coordinates will be from 0.5 to size - 0.5.
     """
     # TODO: Move to math or dsp module
-    return ((clip(signal) + 1 + 1j) / 2.0 * (size - 1) + (0.5 + 0.5j))
+    return (clip(signal) + 1 + 1j) / 2.0 * (size - 1) + (0.5 + 0.5j)
 
 
 def scaleto(arr, magnitude=1, inplace=False):
@@ -890,7 +893,7 @@ def scaleto(arr, magnitude=1, inplace=False):
         arr *= magnitude / np.abs(arr[-1])
         return arr
     else:
-        return ((arr - arr[0]) * (magnitude / np.abs(arr[-1] - arr[0])))
+        return (arr - arr[0]) * (magnitude / np.abs(arr[-1] - arr[0]))
 
 
 def abspowersign(base, exponent):

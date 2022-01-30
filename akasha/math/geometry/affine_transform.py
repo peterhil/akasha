@@ -28,6 +28,7 @@ class AffineTransform(skt.AffineTransform):
     "4.3.3 Matrix Representation and Manipulation"
     http://www.adobe.com/products/postscript/pdfs/PLRM.pdf
     """
+
     def __call__(self, signal):
         """
         Apply the affine transformation onto a signal on the complex plane.
@@ -51,8 +52,10 @@ class AffineTransform(skt.AffineTransform):
         return as_complex(_super(self).inverse(coords).T)
 
     def __repr__(self):
-        return f'{class_name(self)}(' + \
-            f'scale={self.scale!r}, ' + \
-            f'rotation={self.rotation!r}, ' + \
-            f'shear={self.shear!r}, ' + \
-            f'translation={self.translation!r})'
+        return (
+            f'{class_name(self)}('
+            + f'scale={self.scale!r}, '
+            + f'rotation={self.rotation!r}, '
+            + f'shear={self.shear!r}, '
+            + f'translation={self.translation!r})'
+        )

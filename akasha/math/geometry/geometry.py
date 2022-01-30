@@ -14,8 +14,15 @@ from __future__ import division
 import numpy as np
 
 from akasha.funct.itertools import consecutive
-from akasha.math import cartesian, distances, normalize, overlap, \
-     pad_left, pi2, repeat
+from akasha.math import (
+    cartesian,
+    distances,
+    normalize,
+    overlap,
+    pad_left,
+    pi2,
+    repeat,
+)
 
 
 def angle_between(a, b, c=None):
@@ -92,10 +99,12 @@ def turtle_turns(points):
 
     array([ 0.25,  0.25])
     """
-    return np.array([
-        np.ediff1d(directions(seg / vectors(seg)[1])) for seg in
-        consecutive(points, 3)
-    ]).flatten()
+    return np.array(
+        [
+            np.ediff1d(directions(seg / vectors(seg)[1]))
+            for seg in consecutive(points, 3)
+        ]
+    ).flatten()
 
 
 def circumcircle_radius(a, b, c):
@@ -133,27 +142,19 @@ def closed(signal):
 
 
 def wrap_ends(signal, n=1):
-    return np.concatenate([
-        signal[-n:],
-        np.asanyarray(signal),
-        signal[:n]
-    ])
+    return np.concatenate([signal[-n:], np.asanyarray(signal), signal[:n]])
 
 
 def pad_ends(signal, value=0, n=1):
-    return np.concatenate((
-        repeat(value, n),
-        np.asanyarray(signal),
-        repeat(value, n)
-    ))
+    return np.concatenate(
+        (repeat(value, n), np.asanyarray(signal), repeat(value, n))
+    )
 
 
 def repeat_ends(signal, n=1):
-    return np.concatenate([
-        repeat(signal[:1], n),
-        np.asanyarray(signal),
-        repeat(signal[-1:], n)
-    ])
+    return np.concatenate(
+        [repeat(signal[:1], n), np.asanyarray(signal), repeat(signal[-1:], n)]
+    )
 
 
 def is_collinear(a, b, c):
@@ -175,8 +176,7 @@ def is_orthogonal(a, b, c=0):
 
 
 def midpoint(a, b):
-    """Midpoint is the middle point of a line segment.
-    """
+    """Midpoint is the middle point of a line segment."""
     return ((a - b) / 2.0) + b
 
 
@@ -189,7 +189,7 @@ def orient(arr, end=1 + 0j, inplace=False):
         arr *= end / arr[-1]
         return arr
     else:
-        return ((arr - arr[0]) * (end / (arr[-1] - arr[0])))
+        return (arr - arr[0]) * (end / (arr[-1] - arr[0]))
 
 
 def parallelogram_point(a, b, c):
