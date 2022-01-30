@@ -11,10 +11,11 @@ Functional timing module.
 import numpy as np
 
 
-class sampler():
+class sampler:
     """
     Sampler.
     """
+
     rate = 44100
 
 

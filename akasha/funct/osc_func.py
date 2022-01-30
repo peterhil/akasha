@@ -14,6 +14,7 @@ import numpy as np
 from cmath import phase, pi
 from datetime import timedelta
 from fractions import Fraction
+
 # from funckit.xoltar import Functor
 from itertools import imap, islice
 
@@ -27,16 +28,19 @@ from itertools import imap, islice
 
 ### Time related functions ###
 
-class sampler():
+
+class sampler:
     """
     Sampler.
     """
+
     rate = 44100
+
 
 td = np.timedelta64
 
-us = td            # µs, microseconds
-ms = lambda t: us(t * 10 ** 3)    # milliseconds
+us = td  # µs, microseconds
+ms = lambda t: us(t * 10 ** 3)  # milliseconds
 sec = lambda t: timedelta(seconds=t)
 minutes = lambda t: td(timedelta(minutes=t))
 
@@ -69,14 +73,13 @@ def frames(iterable):
 
 ### Sampling ###
 
+
 def sample(iterable, *times):
     """
     Sample iterable at times.
     """
-    return np.fromiter(
-        islice(iterable, *(frames(times))),
-        dtype=np.complex64
-    )
+    return np.fromiter(islice(iterable, *(frames(times))), dtype=np.complex64)
+
 
 ### Generating functions ###
 

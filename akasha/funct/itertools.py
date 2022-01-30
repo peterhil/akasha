@@ -53,6 +53,7 @@ def consume(iterator, n=None):
 
 # Other iterators and generators
 
+
 def count_step(start=0, step=1):
     """
     Get an iterator that advances from start with step at a time.
@@ -104,16 +105,16 @@ def blockwise(iterable, step=1, start=0):
             break
 
         if len(block) > 0:
-            val = (yield block)  # sending values into generator with send
+            val = yield block  # sending values into generator with send
             while val is not None:
                 if val == 'current':
-                    val = (yield indices)
+                    val = yield indices
                 if val == 'reset':
                     blocks = reset()
                     indices = next(blocks)
                     sl = slice(*np.append(indices, np.sign(step)))
                     block = iterable[sl]
-                    val = (yield block)
+                    val = yield block
         else:
             raise StopIteration
 
