@@ -23,12 +23,13 @@ from akasha.utils.log import logger, logging
 from akasha.math import map_array, normalize, as_polar, as_rect
 
 
-class Magnet():
+class Magnet:
     """Model magnetization direction of particles.
 
     Vary m between 0 and 1, and return signal (s) with value
     between -1 and 1 depending on the current magnetization (m) level.
     """
+
     def __init__(self, m=0.5):
         self.m = np.clip(m, 0, 1)
 
@@ -42,9 +43,10 @@ class Magnet():
 
     def demagnetize(self, m=0.5):
         self.m = m
+
     def __call__(self, s):
         m = self.m = self.hysteresis(s)
-        s = (m * 2 - 1)
+        s = m * 2 - 1
         return s
 
 
@@ -86,7 +88,7 @@ def mag2(x0, x1, m, norm_level=0.95):
     """
     d_in = x1 - x0
 
-    permeability = (norm_level - m)
+    permeability = norm_level - m
     if np.sign(d_in) == -1:
         permeability = 1 - permeability
     # Should d_in be abs(d_in)?
@@ -110,9 +112,8 @@ def mag(x, m, norm_level=1.0):
 
 
 def tape_compress(signal, norm_level=0.95):
-    """Model tape compression hysteresis.
-    """
-    if (signal[0] == complex):
+    """Model tape compression hysteresis."""
+    if signal[0] == complex:
         amp = np.abs(signal)
     else:
         amp = signal
@@ -126,8 +127,7 @@ def tape_compress(signal, norm_level=0.95):
 
 
 def cx_tape_compress(signal, norm_level=0.95):
-    """Model tape compression hysteresis on a complex analytic signal.
-    """
+    """Model tape compression hysteresis on a complex analytic signal."""
     angles = np.exp(np.angle(signal) * 1j)
     compressed = tape_compress(np.abs(signal), norm_level)
 
@@ -135,8 +135,7 @@ def cx_tape_compress(signal, norm_level=0.95):
 
 
 def gamma(g, amp, signal):
-    """Calculate the gamma curve.
-    """
+    """Calculate the gamma curve."""
     return signal ** g * amp
 
 
