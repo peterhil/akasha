@@ -16,21 +16,19 @@ class Tuneable(Composite):
     """Mixin to create playable composite sound object that has a
     tuneable frequency.
     """
+
     def _frequency_components(self):
-        """Return components which have a frequency.
-        """
+        """Return components which have a frequency."""
         return self._components_with_attribute('frequency')
 
     @property
     def frequency(self):
-        """Frequency getter.
-        """
+        """Frequency getter."""
         return np.min([c.frequency for c in self._frequency_components()])
 
     @frequency.setter
     def frequency(self, hz):
-        """Frequency setter.
-        """
+        """Frequency setter."""
         old_frequency = np.min(self._frequency_components()).frequency
         change = float(hz) / old_frequency
         for component in self._frequency_components():

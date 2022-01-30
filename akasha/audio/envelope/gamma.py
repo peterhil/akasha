@@ -35,7 +35,7 @@ class Gamma(Generator):
         """
         Sample the gamma exponential.
         """
-        rate = (1.0 / max(self.scale, 1e-06))
+        rate = 1.0 / max(self.scale, 1e-06)
         frames = (np.array(iterable) / float(sampler.rate)) * rate
         return sc.gammaincc(self.shape, frames)
 
@@ -43,5 +43,7 @@ class Gamma(Generator):
         return f'{class_name(self)}({self.shape!r}, {self.scale!r})'
 
     def __str__(self):
-        return f'<{class_name(self)}: shape={self.shape!s}, ' + \
-            f'scale={self.scale!s}>'
+        return (
+            f'<{class_name(self)}: shape={self.shape!s}, '
+            + f'scale={self.scale!s}>'
+        )
