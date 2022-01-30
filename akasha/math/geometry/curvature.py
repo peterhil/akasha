@@ -16,7 +16,7 @@ import numpy as np
 from akasha.curves import Ellipse
 from akasha.funct.itertools import consecutive
 from akasha.math.geometry import (
-    circumcircle_radius,
+    # circumcircle_radius,
     circumcircle_radius_alt,
     is_collinear,
 )
