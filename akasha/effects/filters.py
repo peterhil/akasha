@@ -13,7 +13,6 @@ import numpy as np
 import scipy as sc
 
 from akasha.audio.oscillator import Osc
-from akasha.audio.frequency import Frequency, Fraction
 from akasha.dsp import unit_step
 from akasha.dsp.z_transform import czt, iczt
 from akasha.timing import sampler

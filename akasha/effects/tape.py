@@ -13,14 +13,13 @@
 Tape compression module.
 """
 
-import cmath
 import funcy
 import numpy as np
 
 from builtins import range
 
-from akasha.utils.log import logger, logging
-from akasha.math import map_array, normalize, as_polar, as_rect
+# from akasha.utils.log import logger, logging
+from akasha.math import normalize, as_polar, as_rect
 
 
 class Magnet:
