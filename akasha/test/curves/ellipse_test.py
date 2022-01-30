@@ -67,7 +67,8 @@ class TestEllipse():
         ])
     def test_init_angle(self, angle):
         ell = Ellipse(2, 1, angle)
-        assert ell.angle == (angle % pi2), 'Ellipse angle should be modulo pi2!'
+        assert ell.angle == (angle % pi2), \
+          'Ellipse angle should be modulo pi2!'
 
     @pytest.mark.parametrize(('ab', 'majmin'), [
         [( 2,  1), (2, 1)],
@@ -77,7 +78,8 @@ class TestEllipse():
         ])
     def test_major_minor_axes(self, ab, majmin):
         ell = Ellipse(*ab)
-        assert ell.major > ell.minor > 0, 'The semi-major axis should be greater than the semi-minor axis!'
+        assert ell.major > ell.minor > 0, \
+          'The semi-major axis should be greater than the semi-minor axis!'
         assert (ell.major, ell.minor) == majmin
 
     def test_at(self):
@@ -100,8 +102,10 @@ class TestEllipse():
         ell = Ellipse(1, 0.707, 0)
         assert_array_almost_equal(
             np.array([
-                2.0006041824631042,  0.9778297511146608,  0.7341007514023552,  1.5443093080698087,
-                1.5443093080698089,  0.7341007514023554,  0.9778297511146605,  2.0006041824631042
+                2.0006041824631042,  0.9778297511146608,
+                0.7341007514023552,  1.5443093080698087,
+                1.5443093080698089,  0.7341007514023554,
+                0.9778297511146605,  2.0006041824631042
             ]),
             ell.curvature(np.linspace(0, 1, 8))
         )
@@ -110,8 +114,10 @@ class TestEllipse():
         ell = Ellipse(1, 0.707, pi2 * 1/8)
         assert_array_almost_equal(
             np.array([
-                1.0886620913508018,  0.7137017414039344,  1.3762738179669729,  1.7126777269878259,
-                0.7690728693063869,  0.8889215911627909,  1.9635436556069104,  1.0886620913508018
+                1.0886620913508018,  0.7137017414039344,
+                1.3762738179669729,  1.7126777269878259,
+                0.7690728693063869,  0.8889215911627909,
+                1.9635436556069104,  1.0886620913508018
             ]),
             ell.curvature(np.linspace(0, 1, 8))
         )
@@ -120,8 +126,10 @@ class TestEllipse():
         ell = Ellipse(1, 0.707, 0)
         assert_array_almost_equal(
             np.array([
-                0.4998489999999999,  1.0226729130097203,  1.3622108383484099,  0.6475386729682239,
-                0.6475386729682238,  1.3622108383484095,  1.0226729130097205,  0.4998489999999999
+                0.4998489999999999,  1.0226729130097203,
+                1.3622108383484099,  0.6475386729682239,
+                0.6475386729682238,  1.3622108383484095,
+                1.0226729130097205,  0.4998489999999999
             ]),
             ell.roc(np.linspace(0, 1, 8))
         )
@@ -130,18 +138,20 @@ class TestEllipse():
         ell = Ellipse(1, 0.707, pi2 * 1/8)
         assert_array_almost_equal(
             np.array([
-                0.9185586675101447,  1.4011455233847177,  0.7265995959126772,  0.5838810093938404,
-                1.3002669056599048,  1.1249586127072337,  0.509283303757721 ,  0.9185586675101447
+                0.9185586675101447,  1.4011455233847177,
+                0.7265995959126772,  0.5838810093938404,
+                1.3002669056599048,  1.1249586127072337,
+                0.509283303757721 ,  0.9185586675101447
             ]),
             ell.roc(np.linspace(0, 1, 8))
         )
 
     def test_form_conjugate_diameters(self):
         para = np.array([
-            0.21972613654798550664182243963296+0.05592349761197702023851618946537j,
-            0.06351890232019029303156543164732+0.72144561730157619194869766943157j,
-            0.64242622053932740833204206865048+0.76634753941247535369285515116644j,
-            0.79863345476712266357566250007949+0.10082541972287623055493099855084j
+            0.2197261365479855+0.055923497611977j ,
+            0.0635189023201903+0.7214456173015762j,
+            0.6424262205393274+0.7663475394124754j,
+            0.7986334547671227+0.1008254197228762j,
         ])
         ell = Ellipse.from_conjugate_diameters(para)
         exp = Ellipse(
@@ -205,8 +215,13 @@ class TestEllipse():
 
     @pytest.mark.xfail()
     def test_general_coefficients_cycle(self):
-        ell = Ellipse(0.514256, 0.375, angle=-1.353736, origin=-0.207206-0.156022j)
+        ell = Ellipse(
+            0.514256, 0.375,
+            angle=-1.353736, origin=-0.207206-0.156022j
+        )
         assert_array_almost_equal(
             ell.general_coefficients,
-            Ellipse.from_general_coefficients(*ell.general_coefficients).general_coefficients
+            Ellipse.from_general_coefficients(
+                *ell.general_coefficients
+            ).general_coefficients
         )

@@ -52,7 +52,10 @@ class TestFrequencyRatioMixin():
 
     def test_from_ratio(self):
         """It should initialize correctly from ratio."""
-        f = Frequency.from_ratio(self.ratio.numerator, self.ratio.denominator)
+        f = Frequency.from_ratio(
+            self.ratio.numerator,
+            self.ratio.denominator
+        )
         assert isinstance(f, Frequency)
         assert self.ratio == f.ratio
 
@@ -96,8 +99,12 @@ class TestFrequencyRatioMixin():
 
     def test_cmp(self):
         """It should compare correctly."""
-        assert Frequency(self.a4) == Frequency(self.a4) > Frequency(self.a2) < Frequency(self.a3)
-        assert Frequency(self.a4) == Osc(self.a4) > Osc(self.a2) < Osc(self.a3)
+        assert Frequency(self.a4) == \
+            Frequency(self.a4) > Frequency(self.a2) < Frequency(self.a3)
+
+        assert Frequency(self.a4) == \
+            Osc(self.a4) > Osc(self.a2) < Osc(self.a3)
+
         assert Frequency(self.a4) == self.a4
 
         assert Frequency(self.a4) > Frequency(self.a2)
@@ -116,8 +123,8 @@ class TestFrequencyRatioMixin():
 
 
 class TestFrequencyAliasing():
-    """
-    Test (preventing the) aliasing of frequencies out of range 0 to sample rate.
+    """Test (preventing the) aliasing of frequencies out of range 0
+    to sample rate.
     """
     silence = Frequency(0)
     negative = Fraction(-1, 7)
@@ -130,7 +137,8 @@ class TestFrequencyAliasing():
 
     @pytest.mark.filterwarnings("ignore:invalid value encountered in log2")
     def testPreventAliasing(self):
-        """It should prevent aliasing when given a ratio out of range 0 to 1/2."""
+        """It should prevent aliasing when given a ratio out of
+        range 0 to 1/2."""
         sampler.prevent_aliasing = True
         sampler.negative_frequencies = False
 
@@ -207,10 +215,12 @@ class TestFrequency():
         [20000.1]
     ])
     def test_rounding_frequencies(self, hz):
-        """It should not exceed the just noticeable difference for hearing of frequencies."""
+        """It should not exceed the just noticeable difference
+        for hearing of frequencies."""
         # Just noticeable difference allowance for Frequency rounding
-        # See http://en.wikipedia.org/wiki/Cent_(music)#Human_perception
-        # This should probably be much smaller than the suggested 3-6 cents...
+        #
+        # See: https://en.wikipedia.org/wiki/Cent_(music)#Human_perception
+        # Probably should be much smaller than the suggested 3-6 cents...
         JND_CENTS_EPSILON = 1.0e-02
         assert cents_diff(hz, Frequency(hz)) <= JND_CENTS_EPSILON
 
@@ -229,7 +239,10 @@ class TestFrequency():
         """Is should calculate the frequency angles correctly."""
         assert np.array([0.]) == Frequency.angles(0)
         assert_nulp_diff(
-            np.array([0., 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875], dtype=np.float64),
+            np.array(
+                [0., 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875],
+                dtype=np.float64
+            ),
             Frequency.angles(Fraction(1, 8)),
             1
         )

@@ -22,7 +22,12 @@ import pytest
 from abc import ABCMeta, abstractproperty
 from fractions import Fraction
 
-from akasha.types.numeric import NumericUnit, ComplexUnit, RationalUnit, RealUnit, IntegralUnit
+from akasha.types.numeric import \
+     NumericUnit, \
+     ComplexUnit, \
+     RationalUnit, \
+     RealUnit, \
+     IntegralUnit
 
 
 class Numeric(NumericUnit):
@@ -87,14 +92,16 @@ class TestComplexUnit():
         list(itertools.product(operations, types.keys())))
     def test_ops_self(self, operation, field):
         a, b, op, cls = self.op_params(operation, field)
-        assert op(cls(a), cls(b)) == op(self.unit(cls(a)), self.unit(cls(b)))  # Self
+        assert op(cls(a), cls(b)) == \
+          op(self.unit(cls(a)), self.unit(cls(b)))  # Self
 
     @pytest.mark.parametrize(
         ['operation', 'field'],
         list(itertools.product(operations, types.keys())))
     def test_ops_forward(self, operation, field):
         a, b, op, cls = self.op_params(operation, field)
-        assert op(cls(a), cls(b)) == op(self.unit(cls(a)), cls(b))  # Forward
+        assert op(cls(a), cls(b)) == \
+          op(self.unit(cls(a)), cls(b))  # Forward
 
     @pytest.mark.parametrize(
         ['operation', 'field'],

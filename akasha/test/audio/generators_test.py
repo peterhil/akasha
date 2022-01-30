@@ -15,7 +15,8 @@ import numpy as np
 
 from fractions import Fraction
 from numpy.testing import assert_array_equal
-from numpy.testing import assert_array_almost_equal_nulp as assert_nulp_diff
+from numpy.testing import \
+     assert_array_almost_equal_nulp as assert_nulp_diff
 
 from akasha.audio.generators import Generator
 from akasha.audio.oscillator import Osc
@@ -28,7 +29,8 @@ class LinearGenerator(Generator):
 
     def __init__(self, rate=1):
         _super(self).__init__()
-        self.ratio = Fraction.from_float(rate).limit_denominator(sampler.rate)
+        self.ratio = Fraction.from_float(rate) \
+            .limit_denominator(sampler.rate)
 
     def sample(self, iterable):
         return np.array(iterable) * float(self.ratio)
@@ -50,7 +52,8 @@ class TestGenerator():
         pass
 
 
-# TODO: Check slicing for differences, when given slices or other sampleable object:
+# TODO: Check slicing for differences, when given slices or other
+# sampleable object:
 
 # In [37]: r = LinearGenerator(0.5)
 
@@ -67,7 +70,8 @@ class TestGenerator():
 # Out[43]: -3.0
 
 # In [44]: r[np.arange(-6,6)]
-# Out[44]: array([-3. , -2.5, -2. , -1.5, -1. , -0.5,  0. ,  0.5,  1. ,  1.5,  2. ,  2.5])
+# Out[44]: array([-3. , -2.5, -2. , -1.5, -1. , -0.5,
+#                  0. ,  0.5,  1. ,  1.5,  2. ,  2.5])
 
 # TODO: Enable real based slicing? === Sampling with intervals!
 # Works when sample (at) uses a continuous function...

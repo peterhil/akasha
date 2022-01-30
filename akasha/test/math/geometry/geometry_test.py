@@ -15,7 +15,11 @@ import numpy as np
 import pytest
 
 from akasha.curves import Circle
-from akasha.math.geometry import angle_between, circumcircle_radius, circumcircle_radius_alt, midpoint
+from akasha.math.geometry import \
+     angle_between, \
+     circumcircle_radius, \
+     circumcircle_radius_alt, \
+     midpoint
 from numpy.testing import assert_array_almost_equal
 from akasha.math import all_equal
 
@@ -69,8 +73,14 @@ class TestCircumcircleRadius():
 
     @pytest.mark.parametrize(('points', 'expected'), circumcircle_dataset)
     def test_circumcircle_radius(self, points, expected):
-        assert_array_almost_equal(circumcircle_radius(*points[:3]), expected)
+        assert_array_almost_equal(
+            circumcircle_radius(*points[:3]),
+            expected
+        )
 
     @pytest.mark.parametrize(('points', 'expected'), circumcircle_dataset)
     def test_circumcircle_radius_alt(self, points, expected):
-        assert_array_almost_equal(circumcircle_radius_alt(*points[:3]), expected)
+        assert_array_almost_equal(
+            circumcircle_radius_alt(*points[:3]),
+            expected
+        )

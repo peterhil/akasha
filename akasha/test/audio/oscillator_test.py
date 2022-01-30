@@ -60,7 +60,8 @@ class TestOscillator():
 
     def test_cycle(self):
         o, p = 1, sampler.rate
-        expected = np.exp(1j * pi2 * o * np.arange(0, 1.0, 1.0 / p, dtype=np.float64))
+        freqs = np.arange(0, 1.0, 1.0 / p, dtype=np.float64)
+        expected = np.exp(1j * pi2 * o * freqs)
         assert_nulp_diff(
             Osc.from_ratio(o, p).cycle,
             expected,
@@ -97,7 +98,9 @@ class TestOscRoots():
 
         assert_nulp_diff(a, b, nulp=1)
 
-    @pytest.mark.filterwarnings("ignore:Fraction.__float__ returned non-float")
+    @pytest.mark.filterwarnings(
+        "ignore:Fraction.__float__ returned non-float"
+    )
     def test_phasors(self):
         """It should be accurate.
         Uses angles to make testing easier.
@@ -105,12 +108,19 @@ class TestOscRoots():
         for period in (5, 7, 8, 23):
             o = Osc.from_ratio(1, period)
 
-            fractional_angle = lambda n: float(Fraction(n, period) % 1) * 360
-            angles = map_array(fractional_angle, np.arange(0, period), method='vec')
+            fractional_angle = lambda n: 360 * float(
+                Fraction(n, period) % 1
+            )
+            angles = map_array(
+                fractional_angle,
+                np.arange(0, period),
+                method='vec'
+            )
             angles = 180 - ((180 - angles) % 360)  # wrap 'em to -180..180!
 
             a = to_phasor(o.cycle)
             b = np.array(list(zip([1] * period, angles)))
 
-            assert_nulp_diff(a.real, b.real, nulp=25)  # FIXME: nulp should be smaller!
+            # FIXME: nulp should be smaller!
+            assert_nulp_diff(a.real, b.real, nulp=25)
             assert_nulp_diff(a.imag, b.imag, nulp=1)

@@ -77,6 +77,7 @@ class TestMix():
         assert m.frequency == 420
 
 
+# TODO Investigate this more
 class TestReplacingHarmonics():
     """Test replacing Harmonics class with Mix objects"""
 
@@ -84,7 +85,12 @@ class TestReplacingHarmonics():
         s = Super(3, 3, 3, 3)
         o = Osc(120, curve=s)
         base = s
-        kwargs = dict(n=3, func=lambda x: x + 1, rand_phase=False, damping='sine')
+        kwargs = dict(
+            n=3,
+            func=lambda x: x + 1,
+            rand_phase=False,
+            damping='sine'
+        )
         h = Harmonics(o, **kwargs)
         overtones = Overtones(o, **kwargs)
         times = sampler.times(1)
