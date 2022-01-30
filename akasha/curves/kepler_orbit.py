@@ -119,7 +119,8 @@ class KeplerOrbit(Curve):
         ma = self.mean_anomaly(t)
         ecc = self.eccentricity
 
-        # Approximation through Fourier expansion, fails on large eccentricity!
+        # Approximation through Fourier expansion, fails
+        # on large eccentricity!
         ta = ma + \
              (2 * ecc - (1 / 4) * ecc ** 3) * np.sin(ma) + \
              (5 / 4) * ecc ** 2 * np.sin(2 * ma) + \

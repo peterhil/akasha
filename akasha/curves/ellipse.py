@@ -123,7 +123,10 @@ class Ellipse(Curve):
         http://mathworld.wolfram.com/Ellipse.html formula 59
         """
         t = np.asanyarray(tau) * pi2 + self.angle
-        return (self.a * self.b) / (self.b ** 2 * np.cos(t) ** 2 + self.a ** 2 * np.sin(t) ** 2) ** (3 / 2)
+        b_cos = self.b ** 2 * np.cos(t) ** 2
+        a_sin = self.a ** 2 * np.sin(t) ** 2
+
+        return (self.a * self.b) / (b_cos + a_sin) ** (3 / 2)
 
     def roc(self, tau):
         """Radius of curvature.
@@ -219,8 +222,8 @@ class Ellipse(Curve):
 
     @classmethod
     def fit_points(cls, points, method='halir'):
-        """
-        Make an ellipse by fitting a set of points using algorithm from Fitzgibbon.
+        """Make an ellipse by fitting a set of points using
+        algorithm from Fitzgibbon.
         """
         if method == 'halir':
             fit_method = ellipse_fit_fitzgibbon
@@ -232,8 +235,7 @@ class Ellipse(Curve):
 
     @property
     def general_coefficients(self):
-        """
-        The general form coefficients on an ellipse.
+        """The general form coefficients on an ellipse.
         https://en.wikipedia.org/wiki/Ellipse#General_ellipse
         """
         # Helpers

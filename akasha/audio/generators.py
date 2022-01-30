@@ -59,12 +59,13 @@ class Generator():
         if isinstance(frames, slice):
             frames = np.arange(*frames.indices(frames.stop))
 
+        fs = float(sampler.rate)
         if isinstance(frames, np.ndarray):
-            return self.at(np.asarray(frames, dtype=np.int64) / float(sampler.rate))
+            return self.at(np.asarray(frames, dtype=np.int64) / fs)
         elif np.iterable(frames):
-            return self.at(np.fromiter(frames, dtype=np.int64) / float(sampler.rate))
+            return self.at(np.fromiter(frames, dtype=np.int64) / fs)
         elif np.isreal(frames):
-            return self.at(frames / float(sampler.rate))
+            return self.at(frames / fs)
         else:
             raise NotImplementedError(
                 f"Sampling generators with type '{type(frames)}' "
@@ -96,7 +97,9 @@ class PeriodicGenerator(Generator):
         if isinstance(item, slice):
             step = ((item.step or 1) % self.period or 1)
             start = ((item.start or 0) % self.period)
-            element_count = abs((item.stop or self.period) - (item.start or 0))
+            element_count = abs(
+                (item.stop or self.period) - (item.start or 0)
+            )
             stop = start + (element_count * step)
             item = np.arange(*(slice(start, stop, step).indices(stop)))
         if np.isscalar(item):
@@ -109,7 +112,7 @@ class PeriodicGenerator(Generator):
         """
         return self.sample(t % self.period)
 
-    # Disabled because Numpy gets clever (and slow) when a sound objects have length and
-    # they're made into an object array...
+    # Disabled because Numpy gets clever (and slow) when a sound objects
+    # have length and they're made into an object array...
     # def __len__(self):
     #     return self.period

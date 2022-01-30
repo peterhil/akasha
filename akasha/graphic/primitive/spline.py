@@ -433,7 +433,15 @@ def clothoid_angle(s):
     return np.sign(s) * ((a * s) ** 2.0) * np.pi
 
 
-def cl_piece(start, stop, n, endpoint=False, scale=1, norm=False, fn=clothoid_windings):
+def cl_piece(
+    start,
+    stop,
+    n,
+    endpoint=False,
+    scale=1,
+    norm=False,
+    fn=clothoid_windings
+):
     """
     Takes a piece of clothoid and rotates and translates it to unit vector.
     """
