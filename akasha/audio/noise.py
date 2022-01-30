@@ -75,7 +75,14 @@ class ColouredNoise(Generator):
     # TODO Make this into a filter for jittering a frequency
     # TODO Examine using other distributions
 
-    def __init__(self, frequency, deviation=0.1, step=1, log=True):
+    def __init__(
+        self,
+        frequency,
+        deviation=0.1,
+        step=1,
+        curve=Circle(),
+        log=True
+    ):
         """== Parameters ==
         frequency: The center of the distribution (mu).
         deviation: The standard deviation (sigma).
@@ -83,6 +90,7 @@ class ColouredNoise(Generator):
         Example:
         >>> cn = ColouredNoise(0.01, 0.1)
         """
+        self.curve = curve
         self.frequency = Frequency(frequency)
         self.sigma = deviation
         self.step = step
@@ -94,7 +102,7 @@ class ColouredNoise(Generator):
 
     def sample(self, iterable):
         length = len(iterable)
-        num = np.ceil(length / float(self.step))
+        num = int(np.ceil(length / float(self.step)))
         signal = self.randomizer(self.mu, self.sigma, num)
 
         if self.step != 1:
@@ -103,8 +111,9 @@ class ColouredNoise(Generator):
                 np.arange(0, length, self.step),
                 signal[:length],
             )
+        w = self.frequency.at(np.cumsum(signal))
 
-        return c.at(np.cumsum(signal))
+        return self.curve.at(w)
 
 
 class Rustle(Generator):
