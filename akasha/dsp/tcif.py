@@ -33,14 +33,14 @@ def tcif(signal, window_size=1901, hop=None, method='kodera'):
     # TODO Maybe use np.roll?
     delayed_signal = pad(signal[1:-1], index=0, count=1, value=0)
     # TODO Try other windows than hamming
-    args = {
+    args = dict(
         n_fft=n_fft,
         frame_size=window_size,
         hop=hop,
         window=sc.signal.hamming,
         roll=False,
         normalize=True,
-    }
+    )
     s = stft(signal, **args)
     s_delayed = stft(delayed_signal, **args)
     # TODO Check that frequencies are rolled up by one!
