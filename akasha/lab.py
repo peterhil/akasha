@@ -11,21 +11,12 @@ import funcy
 import numpy as np
 import sys
 
-# Workaround for a Virtualenv bug from year 2011!
-# https://github.com/pypa/virtualenv/issues/54
-if sys.version_info < (3, 0, 0):
-    import matplotlib
-
-    matplotlib.use('TkAgg')
-
 import pylab as lab
-
-lab.interactive(True)
-
-import akasha
 
 from cmath import rect, pi, exp, phase
 from scipy.signal import hilbert
+
+import akasha
 
 from akasha.audio.delay import Delay
 
@@ -73,3 +64,12 @@ from akasha.timing import sampler
 from akasha.tunings import WickiLayout
 
 from akasha.math import *
+
+
+# Workaround for a Virtualenv bug from year 2011!
+# https://github.com/pypa/virtualenv/issues/54
+if sys.version_info < (3, 0, 0):
+    import matplotlib
+    matplotlib.use('TkAgg')
+
+lab.interactive(True)
