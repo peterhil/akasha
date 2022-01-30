@@ -12,8 +12,7 @@ import pygame
 import numpy as np
 
 from PIL import Image
-from builtins import range
-from scipy import sparse
+# from builtins import range
 from skimage import draw as skdraw
 
 from akasha.funct.itertools import pairwise

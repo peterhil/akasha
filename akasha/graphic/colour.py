@@ -13,7 +13,7 @@ import numpy as np
 
 from akasha.timing import sampler
 from akasha.utils.decorators import memoized
-from akasha.utils.log import logger
+# from akasha.utils.log import logger
 from akasha.math import (
     fixnans,
     distances,

@@ -28,9 +28,9 @@ from akasha.math import (
     lambertw,
     map_array,
     overlap,
+    pad,
     pi2,
     rect,
-    repeat,
 )
 
 
