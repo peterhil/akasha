@@ -39,7 +39,7 @@ def user_agent(req):
         browser_platform,
         system,
         product + ' (' + url + ')',
-        python_version
+        python_version,
     )
 
 
@@ -54,7 +54,7 @@ def get_interval_list():
         'titles': 'List of pitch intervals',
         'rvprop': 'content',
         'rvsection': '1',
-        'format': 'json'
+        'format': 'json',
     }
     req = api.APIRequest(site, params)
     req.headers['User-agent'] = user_agent(req)  # Customize User Agent
@@ -66,12 +66,14 @@ def replacement(groups, template=u'', func=identity):
     """Apply a function to matched regexp and format the results
     using a template.
     """
+
     def repl(match):
         # pylint: disable=C0111
         if isinstance(groups, (list, tuple)):
             return template.format(*func(match.group(*groups)))
         else:
             return template.format(func(match.group(groups)))
+
     return repl
 
 
@@ -198,17 +200,22 @@ def parse_wiki(res, loglevel=logging.ANIMA):
             if cts != 0 or rec[0] == 0:
                 logger.log(loglevel, "Parsed cents: %s", cts)
                 rec[0] = cts
-                err = (cts - rec[0])
+                err = cts - rec[0]
                 if np.abs(err) >= 0.005:
                     logger.warning(
                         "%s '%s' has a too big error %.5f with it's "
                         "cents %.5f != %.5f",
-                        rec[2], rec[1], err, rec[0], cts
+                        rec[2],
+                        rec[1],
+                        err,
+                        rec[0],
+                        cts,
                     )
             else:
                 logger.warning(
                     "Parsed cents is %s for record:\n\t\t%s",
-                    cts, rec,
+                    cts,
+                    rec,
                 )
         out.append(rec)
     return (out, legend)
