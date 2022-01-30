@@ -19,7 +19,7 @@ from akasha.timing import sampler
 from akasha.math import pi2
 
 
-### Limiter functions
+# Limiter functions
 
 
 def step_function(op=operator.le, limit=0, default=0):
@@ -100,7 +100,7 @@ def wrap(f, modulo=1):
     return f % modulo
 
 
-### Frequencies
+# Frequencies
 
 
 def limit_resolution(freq, limit=sampler.rate):
@@ -140,7 +140,7 @@ def hz(f, fs=sampler.rate, rounding='native'):
     return np.array(ratio)
 
 
-### Generators
+# Generators
 
 
 def accumulator(n):

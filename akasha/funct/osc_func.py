@@ -26,8 +26,7 @@ from itertools import imap, islice
 # 4. ?
 
 
-### Time related functions ###
-
+# Time related functions
 
 class sampler:
     """
@@ -38,13 +37,23 @@ class sampler:
 
 
 td = np.timedelta64
-
 us = td  # µs, microseconds
-ms = lambda t: us(t * 10 ** 3)  # milliseconds
-sec = lambda t: timedelta(seconds=t)
-minutes = lambda t: td(timedelta(minutes=t))
 
-Hz = lambda x: Fraction(1, x)
+
+def ms(t):
+    return us(t * 10 ** 3)  # milliseconds
+
+
+def sec(t):
+    return timedelta(seconds=t)
+
+
+def minutes(t):
+    return td(timedelta(minutes=t))
+
+
+def Hz(x):
+    return Fraction(1, x)
 
 
 def timeslice(iterable, unit=sec):
@@ -71,7 +80,7 @@ def frames(iterable):
     return np.cast['uint64'](np.round(result))
 
 
-### Sampling ###
+# Sampling
 
 
 def sample(iterable, *times):
@@ -81,7 +90,8 @@ def sample(iterable, *times):
     return np.fromiter(islice(iterable, *(frames(times))), dtype=np.complex64)
 
 
-### Generating functions ###
+# Generating functions
+
 
 # In [69]: v_root = np.frompyfunc(nth_root, 1,1)
 # In [70]: l = nth_root(np.arange(1,20))
