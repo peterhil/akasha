@@ -166,7 +166,7 @@ def parse_freq_ratio(string):
     out = re.sub(re_mul, u' * ', out, re.UNICODE)
     out = re.sub(re_div, u' / ', out, re.UNICODE)
     out = filter_tags(out, tag='sup', template=u' ** {0!r}', func=Fraction)
-    return unicode(out.encode('iso-8859-1'))
+    return str(out.encode('iso-8859-1'))
 
 
 def parse_wiki(res, loglevel=logging.ANIMA):
