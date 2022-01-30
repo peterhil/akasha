@@ -18,18 +18,18 @@ from akasha.utils.python import class_name
 
 
 def ops(op):
-    """
-    Return forward and backward operator functions.
+    """Return forward and backward operator functions.
     Usage: __add__, __radd__ = ops(operator.add)
 
-    This function is borrowed and modified from fractions.Fraction.operator_fallbacks(),
-    which generates forward and backward operator functions automagically.
+    This function is borrowed and modified from
+    fractions.Fraction.operator_fallbacks(), which generates forward
+    and backward operator functions automagically.
     """
     # pylint: disable=C0111,R0911,R0912
 
     def calc(self, other, cls):
-        """
-        Closure to calculate the operation with other and return results as instances of cls.
+        """Closure to calculate the operation with other and
+        return results as instances of cls.
         """
         return cls(op(self, other))
 
@@ -74,8 +74,11 @@ class NumericUnit():
     """
     # References
     # ----------
-    # PEP 3141 -- A Type Hierarchy for Numbers: http://www.python.org/dev/peps/pep-3141/
-    # Python Docs: Data Model -- http://docs.python.org/2/reference/datamodel.html
+    # PEP 3141 -- A Type Hierarchy for Numbers:
+    # http://www.python.org/dev/peps/pep-3141/
+    #
+    # Python Docs: Data Model:
+    # http://docs.python.org/2/reference/datamodel.html
 
     __metaclass__ = ABCMeta
 
@@ -90,7 +93,8 @@ class NumericUnit():
         return getattr(self, self._unit)
 
     def _normalize_value(self, value):
-        """Prevents type errors by normalising the value to the non-unit value."""
+        """Prevents type errors by normalising the value to the
+        non-unit value."""
         return value.value if isinstance(value, type(self)) else value
 
     def __hash__(self):
@@ -103,7 +107,8 @@ class NumericUnit():
         return f'{class_name(self)}({self.value!r})'
 
     def __str__(self):
-        return "<{class_name(self)}: {self.value!s}, {self._unit.strip('_')}>"
+        return f'<{class_name(self)}: ' + \
+          f'{self.value!s}, {self._unit.strip('_')}>'
 
 
 class ComplexUnit(NumericUnit):
