@@ -443,7 +443,8 @@ def isprime_pascal(n):
     See also: Number theory - geometrical connection
     https://www.youtube.com/watch?v=sbjPwyPT1AI
     """
-    p = np.array(pascal_line(n))[1 : int(np.floor(n / 2.0 + 1))]
+    end = int(np.floor(n / 2.0 + 1))
+    p = np.array(pascal_line(n))[1:end]
     return not np.any(p % n)
 
 
@@ -545,11 +546,17 @@ def arr_factors(arr, method='map'):
     return map_array(factors, arr, method=method, dtype=object)
 
 
+def factor_set(x):
+    """
+    Return set of factors.
+    """
+    return set(factors(x))
+
+
 def get_factorsets(n):
     """
     Get a dict of factors from 0 to integer n as sets.
     """
-    factor_set = lambda x: set(factors(x))
     return dict(enumerate(map(factor_set, np.arange(n + 1))))
 
 
@@ -578,7 +585,9 @@ def factor_supersets(factors_in, redundant=None, limit=None):
 
     # Change if factors_in doesn't include n + 1!
     lim = limit if limit else len(factors_in) - 1
-    length_of_value = lambda x: len(x[1])
+
+    def length_of_value(x):
+        return len(x[1])
 
     ess = OrderedDict(
         sorted(factors_in.items(), key=length_of_value, reverse=True)
@@ -676,7 +685,7 @@ def rms(signal):
     Root mean square of a signal.
     https://en.wikipedia.org/wiki/Root_mean_square
     """
-    signal = signal[np.isfinite(signal) == True]
+    signal = signal[np.isfinite(signal)]
     if len(signal) == 0:
         raise ValueError("RMS of empty signal")
     norm = 1.0 / len(signal)
@@ -830,7 +839,7 @@ def overlap(signal, n):
     """Split the 1-d signal into n overlapping parts."""
     return np.array(
         [
-            signal[p : len(signal) - q]
+            signal[p:len(signal) - q]
             for p, q in enumerate(reversed(range(n)))
         ]
     )
