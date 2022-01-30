@@ -8,7 +8,7 @@ from timeit import default_timer as timer
 from akasha.utils.array import is_empty
 
 
-class Watch():
+class Watch:
     def __init__(self, maxstops=5):
         self.paused = 0
         self.maxstops = maxstops
@@ -34,7 +34,7 @@ class Watch():
         if not self.paused:
             self.lasttime = self.time()
             self.timings.append(self.lasttime)
-            self.timings = self.timings[-self.maxstops:]
+            self.timings = self.timings[-self.maxstops :]
         return self.lasttime
 
     def pause(self):
@@ -53,6 +53,7 @@ class Watch():
 
         # print('timings:', ts)
         ts = ts[ts >= 2e-3]  # Filter trash values after reset
-        if is_empty(ts): return 0
+        if is_empty(ts):
+            return 0
 
         return np.median(1.0 / ts)

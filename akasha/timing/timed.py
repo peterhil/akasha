@@ -4,10 +4,11 @@
 from timeit import default_timer as timer
 
 
-class Timed():
+class Timed:
     """
     Time some code using with statement.
     """
+
     elapsed = 0
 
     def __enter__(self):

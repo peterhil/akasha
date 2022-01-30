@@ -8,8 +8,7 @@ def time_slice(dur, start=0, time=False):
     """
     start *= sampler.rate
     time = time or slice(
-        int(round(0 + start)),
-        int(round(dur * sampler.rate + start))
+        int(round(0 + start)), int(round(dur * sampler.rate + start))
     )
     if not isinstance(time, slice):
         raise TypeError(

@@ -17,7 +17,7 @@ from akasha.settings import config
 from akasha.utils.log import logger
 
 
-class Sampler():
+class Sampler:
     """
     A sampler object, providing parameters for sampling.
     """
@@ -28,7 +28,7 @@ class Sampler():
         frametime=config.sampling.FRAMETIME,
         antialias=config.sampling.ANTIALIAS,
         allow_negative=config.sampling.NEGATIVE,
-        ):
+    ):
         """
         Parameters:
         -----------
@@ -69,8 +69,7 @@ class Sampler():
         # Limit to mintime (1000 / 16 = 62.5 Hz)
         ms = max(int(round(ms + rel)), mintime)
         logger.info(
-            "Changing video FRAME TIME to %d ms (%1:.3f FPS)",
-            ms, 1000 / ms
+            "Changing video FRAME TIME to %d ms (%1:.3f FPS)", ms, 1000 / ms
         )
         self.frametime = ms
         return ms
@@ -92,7 +91,8 @@ class Sampler():
         Return times from slice of frame numbers (which can be floats).
         """
         if end is None:
-            end = start; start = 0
+            end = start
+            start = 0
         return self.times(start, end, step) / self.rate
 
     def times(self, start, end=None, step=None):
@@ -100,7 +100,8 @@ class Sampler():
         Return an array of sample times from time slice parameters.
         """
         if end is None:
-            end = start; start = 0
+            end = start
+            start = 0
         if step is None:
             step = 1.0 / self.rate
         return np.arange(start, end, step, dtype=np.float64)
