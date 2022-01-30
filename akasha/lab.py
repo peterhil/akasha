@@ -15,6 +15,7 @@ import sys
 # https://github.com/pypa/virtualenv/issues/54
 if sys.version_info < (3, 0, 0):
     import matplotlib
+
     matplotlib.use('TkAgg')
 
 import pylab as lab
@@ -27,6 +28,7 @@ from cmath import rect, pi, exp, phase
 from scipy.signal import hilbert
 
 from akasha.audio.delay import Delay
+
 # from akasha.audio.dtmf import DTMF
 from akasha.audio.envelope import Adsr, Exponential, Gamma
 from akasha.audio.envelope.beta import Beta, InverseBeta
@@ -37,6 +39,7 @@ from akasha.audio.noise import *
 from akasha.audio.oscillator import *
 from akasha.audio.overtones import Overtones
 from akasha.audio.scalar import Scalar
+
 # from akasha.audio.resample import Resample
 from akasha.audio.sum import Sum
 from akasha.audio.padsynth import *

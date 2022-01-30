@@ -27,24 +27,23 @@ from akasha.utils.python import class_name
 from akasha.math import pi2, find_closest_index, map_array
 
 
-class EqualTemperament():
+class EqualTemperament:
     """Equal temperament tuning:
     http://en.wikipedia.org/wiki/Equal_temperament
     """
+
     def __init__(self, n=12, scale=2.0):
         self.n = n
         self.__scale = scale
 
     @property
     def generators(self):
-        """Get the generators for the lattice.
-        """
+        """Get the generators for the lattice."""
         return tuple(self.get_generators(self.octave(self.n, self.__scale)))
 
     @property
     def scale(self):
-        """Get the interval ratios for one octave.
-        """
+        """Get the interval ratios for one octave."""
         return self.octave(self.n, self.__scale)
 
     @staticmethod
@@ -52,10 +51,9 @@ class EqualTemperament():
         """Find the generators for the lattice from the scale
         closest to the large and the small base interval.
         """
-        return scale[map(
-            lambda x: find_closest_index(scale, x),
-            [large, small]
-        )]
+        return scale[
+            map(lambda x: find_closest_index(scale, x), [large, small])
+        ]
 
     @staticmethod
     def octave(n, scale=2.0):
@@ -76,7 +74,7 @@ class EqualTemperament():
         return f'<{class_name(self)}: {self.n}>'
 
 
-class LucyTuning():
+class LucyTuning:
     """Lucy tuning:
     http://www.lucytune.com/
 
@@ -106,6 +104,7 @@ class LucyTuning():
     http://www.lucytune.com/midi_and_keyboard/frequency_ratios.html
     http://www.lucytune.com/new_to_lt/pitch_04.html
     """
+
     @classmethod
     def L(cls, n):
         """Large base interval."""
@@ -117,25 +116,25 @@ class LucyTuning():
         return (2.0 / cls.L(5)) ** (n / 2.0)
 
 
+class AbstractLayout:
+    """Abstract base class for musical keyboard layouts."""
 
-class AbstractLayout():
-    """Abstract base class for musical keyboard layouts.
-    """
     def move(self, *pos):
         """
         Move the placement of keys (or origo) on the generator lattice.
         """
-        assert len(pos) == 2, \
-          "Expected two arguments or tuple of length two."
+        assert len(pos) == 2, "Expected two arguments or tuple of length two."
         self.origo = (self.origo[0] + pos[0], self.origo[1] + pos[1])
 
     def get_frequency(self, key):
         return self.get(*(pos.get(key, pos[None])))
 
+
 class WickiLayout(AbstractLayout):
     """Wicki-Hayden note layout:
     http://en.wikipedia.org/wiki/Wicki-Hayden_note_layout
     """
+
     # Why 432 Hz?
     #
     # > factors(432)
@@ -162,11 +161,15 @@ class WickiLayout(AbstractLayout):
         origo=(1, 5),
         generators=(
             # LucyTuning.L(3) * LucyTuning.s(1), LucyTuning.s(1)
-            (Fraction(3,2), Fraction(9,8)) # Pyth. / Just intonation (3-limit)
+            (
+                Fraction(3, 2),
+                Fraction(9, 8),
+            )  # Pyth. / Just intonation (3-limit)
             # EqualTemperament(5).generators
             # EqualTemperament(12).generators
             # EqualTemperament(19).generators
-    )):
+        ),
+    ):
         """Wicki keyboard layout. Generators are given in (y, x) order.
 
         Origo defaults to 'C' key, being on the position
@@ -182,19 +185,20 @@ class WickiLayout(AbstractLayout):
             )
 
     def get(self, *pos):
-        """Get a frequency on key position.
-        """
+        """Get a frequency on key position."""
         if pos == kb.shape:
             return Frequency(0.0)
         else:
-            return self.base * \
-                (self.gen[0] ** (pos[0] - self.origo[0])) * \
-                (self.gen[1] ** (pos[1] - self.origo[1]))
+            return (
+                self.base
+                * (self.gen[0] ** (pos[0] - self.origo[0]))
+                * (self.gen[1] ** (pos[1] - self.origo[1]))
+            )
 
 
 class PianoLayout(AbstractLayout):
-    """Classical piano layout.
-    """
+    """Classical piano layout."""
+
     def __init__(self, base=Frequency(config.frequency.BASE), origo=(1, 5)):
         self.base = base
         self.origo = origo
@@ -203,31 +207,38 @@ class PianoLayout(AbstractLayout):
     @property
     def halftones(self):
         return {
-            'C': 0, 'C#': 1,
-            'D': 2, 'D#': 3,
+            'C': 0,
+            'C#': 1,
+            'D': 2,
+            'D#': 3,
             'E': 4,
-            'F': 5, 'F#': 6,
-            'G': 7, 'G#': 8,
-            'A': 9, 'A#': 10,
+            'F': 5,
+            'F#': 6,
+            'G': 7,
+            'G#': 8,
+            'A': 9,
+            'A#': 10,
             'B': 11,
             '_': -1,
         }
 
     @property
     def lattice(self):
-        return np.array([
-            ['C', 'C#'],
-            ['D', 'D#'],
-            ['E', '_'],
-            ['F', 'F#'],
-            ['G', 'G#'],
-            ['A', 'A#'],
-            ['B', '_'],
-        ], dtype='|S2').T
+        return np.array(
+            [
+                ['C', 'C#'],
+                ['D', 'D#'],
+                ['E', '_'],
+                ['F', 'F#'],
+                ['G', 'G#'],
+                ['A', 'A#'],
+                ['B', '_'],
+            ],
+            dtype='|S2',
+        ).T
 
     def get(self, *pos):
-        """Get a frequency on key position.
-        """
+        """Get a frequency on key position."""
         pos = np.subtract(pos, np.array(self.origo))
         key = self.lattice[tuple(np.mod(pos, self.lattice.shape))]
         octave_block = np.floor_divide(pos, self.lattice.shape)
@@ -248,6 +259,6 @@ class PianoLayout(AbstractLayout):
             freq,
             tuple(pos),
             octave_block,
-            )
+        )
 
         return freq
