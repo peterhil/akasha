@@ -108,7 +108,7 @@ class NumericUnit():
 
     def __str__(self):
         return f'<{class_name(self)}: ' + \
-          f'{self.value!s}, {self._unit.strip('_')}>'
+          f'{self.value!s}, {self._unit.strip("_")}>'
 
 
 class ComplexUnit(NumericUnit):
