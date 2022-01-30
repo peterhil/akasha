@@ -14,13 +14,15 @@ import numpy as np
 
 from akasha.audio.frequency import Frequency, octaves
 from akasha.audio.mixins.releasable import Releasable
-from akasha.graphic.drawing import get_canvas
 from akasha.gui.widgets import ComplexView, VideoTransferView
 from akasha.gui.pygame_adapter import PygameGui
-from akasha.math import div_safe_zero, pcm, minfloat
+from akasha.math import div_safe_zero, minfloat
 from akasha.settings import config
 from akasha.timing import sampler, Timed, Watch
-from akasha.tunings import PianoLayout, WickiLayout
+from akasha.tunings import (
+    # PianoLayout,
+    WickiLayout,
+)
 from akasha.utils.log import logger
 
 keyboard = WickiLayout()
