@@ -62,7 +62,11 @@ class TestDrawing():
     ])
     def test_get_canvas(self, width, height, channels):
         assert_array_equal(
-            np.zeros([height if height is not None else width, width, channels]),
+            np.zeros([
+                height if height is not None else width,
+                width,
+                channels
+            ]),
             get_canvas(width, height, channels)
         )
 
@@ -107,12 +111,17 @@ class TestDrawing():
             with patch('akasha.graphic.drawing.' + func) as mock:
                 draw(signal, **d)
                 assert clip_mock.called_once_with(signal)
-                assert mock.called_once_with(signal, d['screen'], d['size'], d['colours'])
+                assert mock.called_once_with(
+                    signal,
+                    d['screen'], d['size'], d['colours']
+                )
 
     def test_clip_samples(self):
         with patch('akasha.utils.log.logger.warning') as log:
             assert -1+1j == clip_samples(-3+4j)
-            assert log.called_once_with("Clipping signal -- maximum magnitude was: 5.000000")
+            assert log.called_once_with(
+                "Clipping signal -- maximum magnitude was: 5.000000"
+            )
 
     def test_clip_cycle_noop(self):
         o = Osc.from_ratio(1, 16)
@@ -187,8 +196,8 @@ class TestDrawing():
         # draw_points_aa_old,
     ])
     def test_draw_points_coordinates_should_match(self, draw_func):
-        """
-        Test that coordinates and origin are headed in the right orientation.
+        """Test that coordinates and origin are headed in the
+        right orientation.
         """
         size = 9
         channels = 4
@@ -217,7 +226,9 @@ class TestDrawing():
 
     @pytest.mark.parametrize(('palette'), [
         # [[255], [0], [42]],
-        [[255, 255, 255, 255], [  0,   0,   0,   0], [ 127,  127,  127, 127]],
+        [[255, 255, 255, 255],
+         [  0,   0,   0,   0],
+         [ 127,  127,  127, 127]],
     ])
     @pytest.mark.parametrize(('draw_func'), [
         draw_points_aa,
@@ -231,18 +242,28 @@ class TestDrawing():
         size = 9
         x, _, a = palette
         l = np.repeat(np.arange(256)[..., np.newaxis], len(palette[2]), 1)
+        [
+            p0, p1, p2, p3, p4, p5, p6, p7,
+            p8, p9, pa, pb, pc, pd, pe, pf
+        ] = l[
+            [
+             16, 23, 25, 31, 46, 48, 54, 71,
+             102, 107, 125, 128, 143, 152, 229, 255
+            ],
+            ...
+        ]
 
         assert_equal_image(
             np.transpose(np.array([
-                [  l[23],  l[54],      _,      _,      a,      _,      _,      _,      _],
-                [  l[54], l[125],      _,      _,      a,  l[48],  l[16],      _,      _],
-                [      _,      _,      _,  l[25], l[152],  l[143], l[48],      _,      _],
-                [      _,      _,      _, l[102], l[229],      _,      _, l[128],      _],
-                [      a,      a,      a,      a,      a,      a,      a, l[255],      a],
-                [      _,      _,      _,      _,      a,      _,      _,      _,      _],
-                [      _, l[107],  l[71],      _,      a,      _,      _,      _,      _],
-                [      _,  l[46],  l[31],      _,      a,      _,      _,      _,      _],
-                [      _,      _,      _,      _,      a,      _,      _,      _,      _],
+                [ p1, p6,  _,  _,  a,  _,  _,  _,  _],
+                [ p6, pa,  _,  _,  a, p5, p0,  _,  _],
+                [  _,  _,  _, p2, pd, pc, p5,  _,  _],
+                [  _,  _,  _, p8, pe,  _,  _, pb,  _],
+                [  a,  a,  a,  a,  a,  a,  a, pf,  a],
+                [  _,  _,  _,  _,  a,  _,  _,  _,  _],
+                [  _, p9, p7,  _,  a,  _,  _,  _,  _],
+                [  _, p4, p3,  _,  a,  _,  _,  _,  _],
+                [  _,  _,  _,  _,  a,  _,  _,  _,  _],
                 ], dtype=np.uint8), (1, 0, 2)),
             draw_func(
                 np.array([1, 0.5+0.5j, 0.2j, -0.8+0.8j, -0.6-0.8j]),
