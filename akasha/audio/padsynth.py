@@ -19,7 +19,6 @@ import scipy as sc
 
 from builtins import zip
 
-from akasha.audio.frequency import Frequency
 from akasha.math import normalize, random_phasor
 from akasha.utils.python import class_name
 
