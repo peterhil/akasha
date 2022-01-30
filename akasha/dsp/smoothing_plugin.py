@@ -12,7 +12,6 @@ Smoothing plugins
 from __future__ import division
 
 import numpy as np
-import scipy as sc
 
 from akasha.funct.itertools import consecutive
 from akasha.math import pad_ends, pi2

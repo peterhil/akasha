@@ -12,7 +12,7 @@ Time corrected instantaneous frequency (TCIF) algorithms module.
 import numpy as np
 import scipy as sc
 
-from akasha.dsp.fft import windowed_frames, stft
+from akasha.dsp.fft import stft
 from akasha.math.functions import pad, pi2, power_limit
 from akasha.timing import sampler
 
