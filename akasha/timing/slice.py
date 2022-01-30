@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from akasha.timing.sampler import sampler
+
 
 def time_slice(dur, start=0, time=False):
     """Use a time slice argument or the provided attributes 'dur'
