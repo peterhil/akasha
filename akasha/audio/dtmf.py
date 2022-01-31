@@ -75,9 +75,9 @@ class DTMF(Generator):
 
     table = {}
 
-    for i in range(len(nkeys)):
+    for i, key in enumerate(nkeys):
         l, h = divmod(i, 4)
-        table[nkeys[i]] = (lo[l], hi[h])
+        table[key] = (lo[l], hi[h])
 
     keys = b''.join(
         [
