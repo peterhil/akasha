@@ -9,9 +9,9 @@
 Overtones module
 """
 
-import numpy as np
-
 from builtins import zip
+
+import numpy as np
 
 from akasha.audio.envelope import Exponential
 from akasha.audio.frequency import FrequencyRatioMixin
