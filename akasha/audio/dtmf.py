@@ -5,8 +5,6 @@
 Dual-tone Multifrequency Tones
 """
 
-from builtins import range
-
 from akasha.audio.generators import Generator
 from akasha.timing import sampler
 from akasha.utils.python import _super
@@ -121,9 +119,8 @@ class DTMF(Generator):
         """The number to dial."""
         return self.sequence.upper().translate(self.alphabet_trans)
 
-    def sample(self, iterable):
-        """Make DTML dialing tone."""
-        pass
+    def sample(self, frames):
+        """Make DTMF dialing tone."""
 
     def __len__(self):
         pulselengths = len(self.number) * (self.pulselength + self.pause)
