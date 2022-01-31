@@ -50,12 +50,8 @@ class Beta:
 
 
 class InverseBeta(Beta):
-    (
-        """Inverse (1.0 - Beta.at(t)) of Beta. See their documentation
-    below.
     """
-        + Beta.__doc__
-    )
-
+    Inverse of Beta. That is: 1.0 - Beta.at(t).
+    """
     def at(self, times):
         return 1.0 - _super(self).at(times)
