@@ -11,11 +11,11 @@ Noise and chaos module.
 
 from __future__ import division
 
+from cmath import rect
+
 import funcy
 import numpy as np
 import pandas as pd
-
-from cmath import rect
 
 from akasha.curves import Circle
 from akasha.audio.envelope import Exponential
@@ -57,11 +57,11 @@ class Noise(Generator):
         noise = x + y
         return noise
 
-    def sample(self, iterable):
+    def sample(self, frames):
         """
         Commence noise.
         """
-        return self.function(iterable, self.randomizer)
+        return self.function(frames, self.randomizer)
 
 
 class ColouredNoise(Generator):
@@ -98,10 +98,13 @@ class ColouredNoise(Generator):
 
     @property
     def mu(self):
+        """
+        Center of the distribution.
+        """
         return self.frequency.ratio
 
-    def sample(self, iterable):
-        length = len(iterable)
+    def sample(self, frames):
+        length = len(frames)
         num = int(np.ceil(length / float(self.step)))
         signal = self.randomizer(self.mu, self.sigma, num)
 
@@ -140,12 +143,12 @@ class Rustle(Generator):
         self.gen = funcy.curry(np.random.poisson, 2)(self.expected)
         self.envelope = envelope
 
-    def at(self, times):
+    def at(self, t):
         """
         Let it rumble and rustle.
         """
-        return self.envelope.at(times) * normalize(
-            self.gen(numberof(times)) * Circle.at(self.frequency.at(times))
+        return self.envelope.at(t) * normalize(
+            self.gen(numberof(t)) * Circle.at(self.frequency.at(t))
         )
 
 
@@ -190,11 +193,11 @@ class Mandelbrot(Generator):
         # mandel = np.poly1d([1, 0, self.c])
         return z ** 2 + self.c
 
-    def sample(self, items):
+    def sample(self, frames):
         """
         Chaos reigns.
         """
-        return np.fromiter(self, count=numberof(items), dtype=complex)
+        return np.fromiter(self, count=numberof(frames), dtype=complex)
 
     def __repr__(self):
         return f'{class_name(self)}(z={self.z!r}, z={self.c!r})'
@@ -217,13 +220,13 @@ class Chaos(Generator):
         # TODO: Leave envelope out of sound objects & compose when sampling?
         self.envelope = envelope
 
-    def sample(self, iterable):
+    def sample(self, frames):
         """
         Chaos reigns.
         """
-        print(self.gen, len(iterable))
-        chaos = np.fromiter(self.gen, count=len(iterable), dtype=complex)
-        return chaos[iterable] * self.envelope[iterable]
+        print(self.gen, len(frames))
+        chaos = np.fromiter(self.gen, count=len(frames), dtype=complex)
+        return chaos[frames] * self.envelope[frames]
 
     def __repr__(self):
         return f'{class_name(self)}(gen={self.gen!r})'
@@ -237,6 +240,9 @@ def random_frequencies(
     window=2,
     smoothing='exponential',
 ):
+    """
+    Generate random varying frequencies using window functions.
+    """
     signal = np.repeat(
         np.random.random_integers(low, high, np.ceil(float(n) / float(t)))
         / float(sampler.rate),
