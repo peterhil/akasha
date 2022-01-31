@@ -11,8 +11,6 @@ Sound generating objects’ base classes.
 
 import numpy as np
 
-from builtins import range
-
 from akasha.funct.itertools import blockwise
 from akasha.timing import sampler
 from akasha.utils.python import class_name
@@ -35,9 +33,9 @@ class Generator:
                     a_min=None,
                     a_max=len(self),
                 )
-                for i in range(len(res)):
-                    if res[i] is not None and np.sign(res[i]) == -1:
-                        res[i] = max(-len(self) - 1, res[i])
+                for i, index in enumerate(res):
+                    if index is not None and np.sign(index) == -1:
+                        res[i] = max(-len(self) - 1, index)
                 item = slice(res[0], res[1], item.step)
                 stop = item.stop or (len(self) - 1)
                 item = np.arange(*(item.indices(stop)))
@@ -62,16 +60,18 @@ class Generator:
 
         fs = float(sampler.rate)
         if isinstance(frames, np.ndarray):
-            return self.at(np.asarray(frames, dtype=np.int64) / fs)
+            times = np.asarray(frames, dtype=np.int64) / fs
         elif np.iterable(frames):
-            return self.at(np.fromiter(frames, dtype=np.int64) / fs)
+            times = np.fromiter(frames, dtype=np.int64) / fs
         elif np.isreal(frames):
-            return self.at(frames / fs)
+            times = frames / fs
         else:
             raise NotImplementedError(
                 f"Sampling generators with type '{type(frames)}' "
                 "not implemented yet."
             )
+
+        return self.at(times)
 
     def __iter__(self):
         return blockwise(self, sampler.blocksize())
@@ -104,10 +104,10 @@ class PeriodicGenerator(Generator):
             )
             stop = start + (element_count * step)
             item = np.arange(*(slice(start, stop, step).indices(stop)))
+
         if np.isscalar(item):
             return self.cycle[np.array(item, dtype=np.int64) % self.period]
-        else:
-            return self.cycle[np.fromiter(item, dtype=np.int64) % self.period]
+        return self.cycle[np.fromiter(item, dtype=np.int64) % self.period]
 
     def at(self, t):
         f"""Sample {class_name(self)} at times (t)."""
