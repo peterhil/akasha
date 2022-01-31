@@ -43,8 +43,8 @@ class Exponential(Generator):
         """
         if np.inf == np.abs(time):
             return cls(rate=0.0, amp=amp)
-        else:
-            return cls(rate=np.log(2.0) / -time, amp=amp)
+
+        return cls(rate=np.log(2.0) / -time, amp=amp)
 
     @property
     def scale(self):
@@ -73,12 +73,12 @@ class Exponential(Generator):
 
         return self.at(times)
 
-    def at(self, times):
+    def at(self, t):
         """
         Sample the exponential at sample times.
         """
         return np.clip(
-            self.amp * np.exp(self.rate * times),
+            self.amp * np.exp(self.rate * t),
             a_min=0.0,
             a_max=1.0,
         )
