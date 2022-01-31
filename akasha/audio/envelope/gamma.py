@@ -31,13 +31,25 @@ class Gamma(Generator):
             self.shape = shape
             self.scale = scale  # Inverse rate
 
-    def sample(self, iterable):
+    @property
+    def rate(self):
+        """
+        Rate, inverse of scale.
+        """
+        return 1.0 / max(self.scale, 1e-06)  # prevent ZeroDivisionError
+
+    def at(self, t):
+        """
+        Sample the gamma exponential at times (t).
+        """
+        return sc.gammaincc(self.shape, t * self.rate)
+
+    def sample(self, frames):
         """
         Sample the gamma exponential.
         """
-        rate = 1.0 / max(self.scale, 1e-06)
-        frames = (np.array(iterable) / float(sampler.rate)) * rate
-        return sc.gammaincc(self.shape, frames)
+        times = (np.array(frames) / float(sampler.rate)) * self.rate
+        return sc.gammaincc(self.shape, times)
 
     def __repr__(self):
         return f'{class_name(self)}({self.shape!r}, {self.scale!r})'
