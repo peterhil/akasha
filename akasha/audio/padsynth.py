@@ -14,10 +14,10 @@ http://zynaddsubfx.sourceforge.net/doc_0.html
 
 from __future__ import division
 
+from builtins import zip
+
 import numpy as np
 import scipy as sc
-
-from builtins import zip
 
 from akasha.math import normalize, random_phasor
 from akasha.utils.python import class_name
