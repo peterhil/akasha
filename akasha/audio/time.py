@@ -7,15 +7,15 @@ High precision time module
 
 import sys
 
+from timeit import default_timer as timer
+
+from akasha.types.numeric import RealUnit
+from akasha.utils.python import _super
+
 if sys.version_info >= (3, 3, 0):
     from decimal import Decimal, getcontext
 else:
     from cdecimal import Decimal, getcontext
-
-from timeit import default_timer as clock
-
-from akasha.types.numeric import RealUnit
-from akasha.utils.python import _super
 
 
 getcontext().prec = 32
@@ -45,7 +45,7 @@ class Chrono(RealUnit):
         Convert to datetime: datetime.fromtimestamp(Chrono.now())
         datetime.datetime(2012, 12, 27, 3, 41, 9, 206083)
         """
-        return cls(clock())
+        return cls(timer())
 
     @classmethod
     def add_prefix(cls, factor, name, symbol=None):
