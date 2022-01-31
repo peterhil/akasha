@@ -27,7 +27,7 @@ class Releasable(Composite):
         """
         Set release time for components.
         """
-        if np.isreal(time):
-            return [c.release_at(time) for c in self._releasable_components()]
-        else:
+        if not np.isreal(time):
             raise ValueError("Release time should be a real number!")
+
+        return [c.release_at(time) for c in self._releasable_components()]

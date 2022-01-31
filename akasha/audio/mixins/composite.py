@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+"""
+Composite sound object mixin.
+"""
+
 import numpy as np
 
 

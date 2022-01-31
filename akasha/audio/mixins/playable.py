@@ -13,5 +13,3 @@ class Playable(Tuneable, Releasable):
     """
     Mixin to create playable composite sound object.
     """
-
-    pass
