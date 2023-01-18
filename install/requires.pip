@@ -10,4 +10,4 @@ pygame>=1.9.6
 scipy>=1.2.3
 six>=1.10.0
 wikitools==1.1.1
-# scikit-image==0.14.5
+scikit-image>=0.19.3
