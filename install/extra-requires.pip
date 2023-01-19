@@ -1,4 +1,4 @@
--r dev-requires.pip
+# Experimental stuff
 
 # Cython==0.21.2
 # Louie==1.1
