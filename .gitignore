@@ -1,32 +1,37 @@
+# Python
+*.egg-info/
 *.pyc
-*~
-*,cover
-*.cover
-.coverage
-.figleaf
-TAGS
-.cache/
+MANIFEST
+build/
+dist/
+src/
 
+# Doc generation
 doc/
 html/
 htmlcov/
 
-\#*\#
+# Test tools
+*,cover
+*.cover
+.cache/
+.coverage
+.figleaf
+.tox/
+
+# Emacs
+*~
 .\#*
+TAGS
+\#*\#
+
+# Environments
+.direnv/
+venv/
+
+# System specific cruft
+*.core
 .DS_Store
 
-py2.7/
-venv/
-virtualenvs/
-
-.tox/
-MANIFEST
-akasha.egg-info/
-build/
-dist/
-
+# Akasha
 debug_*.py
-src/
-
-.direnv/
-*.core
