@@ -77,7 +77,7 @@ def frames(iterable):
     # iterable = (imap(sec, iterable))
     result = np.multiply(np.array(iterable), sampler.rate)
     result = np.fromiter(imap(sec, result), dtype=np.float64)
-    return np.cast['uint64'](np.round(result))
+    return np.asarray(np.round(result), dtype=np.uint64)
 
 
 # Sampling

@@ -672,11 +672,14 @@ def pcm(signal, bits=16, axis='imag'):
     # Pygame mixer uses negative ints to indicate uint type
     abs_bits = np.abs(bits)
     if isinstance(bits, np.floating):
-        return np.cast['float' + str(int(abs_bits))](real)
+        scale = 1
+        sample_type = 'float' + str(int(abs_bits))
     else:
         scale = 2 ** (abs_bits - 1) - 1
-        int_type = 'uint' if bits < 0 else 'int'
-        return np.cast[int_type + str(abs_bits)](real * scale)
+        sample_type = ('uint' if bits < 0 else 'int') + str(abs_bits)
+    dtype = getattr(np, sample_type)
+
+    return np.asarray(real * scale, dtype=dtype)
 
 
 def rms(signal):

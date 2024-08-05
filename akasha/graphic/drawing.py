@@ -213,11 +213,12 @@ def draw_points_np_aa(signal, img, size=1000, colours=True):
 
     # TODO: Should these offsets to deltas vary?
     offset = -0.5 - 0.5j
-    cast = np.cast['int32']
-    img[:-1, :-1, :] = cast(complex_as_reals(deltas + offset)) * color
-    img[:-1, :-1, :] = cast(complex_as_reals(deltas + offset)) * color
-    img[:-1, :-1, :] = cast(complex_as_reals(deltas + offset)) * color
-    img[:-1, :-1, :] = cast(complex_as_reals(deltas + offset)) * color
+    ints = np.asarray(complex_as_reals(deltas + offset), dtype=np.int32) * color
+
+    img[:-1, :-1, :] = ints
+    img[:-1, :-1, :] = ints
+    img[:-1, :-1, :] = ints
+    img[:-1, :-1, :] = ints
 
     return img
 
