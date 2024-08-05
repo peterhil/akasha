@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Portaudio
+port install portaudio
 # Pillow depends
 port install freetype
 # Pygame depends
