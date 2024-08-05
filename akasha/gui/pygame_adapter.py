@@ -78,7 +78,7 @@ class PygameGui:
             pg.mixer.get_init()
         )
 
-        return pg.mixer.find_channel(force=True)
+        return pg.mixer.find_channel()
 
     def cleanup(self):
         """
