@@ -38,7 +38,7 @@ def czt(signal, m=None, w=None, a=1.0, normalize=False):
 
     http://cronos.rutgers.edu/~lrr/Reprints/015_czt.pdf
     """
-    signal = np.atleast_1d(signal).astype(np.complex)
+    signal = np.atleast_1d(signal).astype(np.complex128)
     length = len(signal)
     if m is None:
         m = length
@@ -66,7 +66,7 @@ def iczt(signal, m=None, w=None, a=1.0, normalize=False):
 
     Uses the conjugation property of Z-transforms to get the inverse.
     """
-    signal = np.atleast_1d(signal).astype(np.complex)
+    signal = np.atleast_1d(signal).astype(np.complex128)
     length = len(signal)
     if normalize:
         signal *= length ** 2
@@ -90,13 +90,13 @@ def czt_naive(signal, m=None, w=None, a=1.0):
     """Naive and slow O(n**2) implementation of Rader's chirp
     z-transform. For testing, do not use!
     """
-    signal = np.atleast_1d(signal).astype(np.complex)
+    signal = np.atleast_1d(signal).astype(np.complex128)
     length = len(signal)
     if m is None:
         m = length
     if w is None:
         w = np.exp(-1j * pi2 / m)
-    z = np.zeros(m, dtype=np.complex)
+    z = np.zeros(m, dtype=np.complex128)
 
     for k in range(m):
         for n in range(length):
