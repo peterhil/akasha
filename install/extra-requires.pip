@@ -12,8 +12,6 @@
 
 ## Alternative audio IO libraries
 
-PyAudio>=0.2.11  # portaudio bindings
-
 scikits.audiolab>=0.11.0
 
 -e git+https://github.com/cournape/samplerate#egg=scikits.samplerate
