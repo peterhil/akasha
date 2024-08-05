@@ -317,7 +317,7 @@ def complex_as_reals(signal, dtype=np.float64):
     signal = np.asanyarray(signal, dtype=np.complex128)
     if signal.ndim < 1:
         signal = np.atleast_1d(signal)
-    return signal.view(dtype).reshape(len(signal), 2).transpose()
+    return np.ascontiguousarray(signal).view(dtype).reshape(len(signal), 2).transpose()
 
 
 def as_polar(signal, dtype=np.complex128):
