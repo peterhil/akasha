@@ -671,7 +671,7 @@ def pcm(signal, bits=16, axis='imag'):
     real = getattr(signal, axis)
     # Pygame mixer uses negative ints to indicate uint type
     abs_bits = np.abs(bits)
-    if isinstance(bits, np.float):
+    if isinstance(bits, np.floating):
         return np.cast['float' + str(int(abs_bits))](real)
     else:
         scale = 2 ** (abs_bits - 1) - 1
@@ -759,7 +759,7 @@ def clip(signal, limit=1.0, inplace=False):
     if not inplace:
         signal = signal.copy()
 
-    reals = signal.view(np.float)
+    reals = signal.view(np.float64)
     # Do clipping in-place!
     np.clip(reals, a_min=-limit, a_max=limit, out=reals)
 

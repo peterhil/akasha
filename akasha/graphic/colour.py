@@ -301,4 +301,4 @@ def colorize(signal, steps=6 * 255, use_chords=True):
     """
     colourizer = chords_to_hues if use_chords else angles2hues
     colours = fixnans(colourizer(signal))
-    return get_huemap(steps)[(colours * (steps / 360.0)).astype(np.int)]
+    return get_huemap(steps)[(colours * (steps / 360.0)).astype(np.int32)]
