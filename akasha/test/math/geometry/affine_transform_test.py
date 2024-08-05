@@ -12,14 +12,13 @@ Unit tests for AffineTransform class
 """
 
 import numpy as np
-import pytest
 
 from akasha.curves import Square
 from akasha.math.geometry.affine_transform import AffineTransform
 from numpy.testing import assert_array_almost_equal
 
 
-class TestAffineTransform(object):
+class TestAffineTransform():
     """
     Unit tests for AffineTransform class.
     """

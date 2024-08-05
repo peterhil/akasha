@@ -11,32 +11,51 @@ What's the frequency Kenneth?
 
 from __future__ import division
 
-import numpy as np
 import operator
 
 from fractions import Fraction
 from numbers import Number, Real
 
+import numpy as np
+
 from akasha.audio.generators import PeriodicGenerator
 from akasha.timing import sampler
 from akasha.types.numeric import RealUnit
-from akasha.utils import _super
+from akasha.utils.python import _super
 from akasha.utils.decorators import memoized
 from akasha.utils.log import logger
 from akasha.math import cents_diff
 from akasha.settings import config
 
 
-class FrequencyRatioMixin(object):
+def is_audible(frequency):
+    """Is the frequency audible?"""
+    audible_min = config.frequency.AUDIBLE_MIN
+    audible_max = config.frequency.AUDIBLE_MAX
+
+    return audible_min < frequency < audible_max
+
+
+def octaves():
+    """Audible octaves based on config.frequency.BASE"""
+    frequencies = config.frequency.BASE * 2.0 ** np.arange(-10, 15)
+    return np.fromiter(filter(is_audible, frequencies), dtype=np.float64)
+
+
+class FrequencyRatioMixin:
+    """Mixin to enable memoization of sound objects with Frequency
+    through rational approximation.
     """
-    Mixin to enable memoization of sound objects with Frequency through rational approximation.
-    """
-    # FIXME: Basically this should be replaced with RationalUnit or at least inherit from it.
+
+    # FIXME: Basically this should be replaced with RationalUnit or at least
+    # inherit from it.
 
     _hz = 0.0
 
     @classmethod
-    def from_ratio(cls, ratio, den=False, *args, **kwargs):
+    def from_ratio(
+        cls, ratio, den=False, *args, **kwargs
+    ):  # pylint: disable=W1113
         """
         New instance from fractional ratio.
         """
@@ -61,16 +80,18 @@ class FrequencyRatioMixin(object):
 
     @property
     def ratio(self):
+        """The wrapped and antialised rational approximation of
+        self's frequency. This should be used when sampling the signal.
         """
-        The wrapped and antialised rational approximation of self's frequency.
-        This should be used when sampling the signal.
-        """
-        return self.wrap(self.antialias(self.to_ratio(self._hz)))
+        ratio = self.antialias(self.to_ratio(self._hz))
+        if not sampler.prevent_aliasing or sampler.negative_frequencies:
+            return self.wrap(ratio)
+        return ratio
 
     @property
     def hz(self):
-        """
-        Hz depends on original frequency's rational approximation and sampling rate.
+        """Hz depends on original frequency's rational
+        approximation and sampling rate.
         """
         return float(self.ratio * sampler.rate)
 
@@ -91,59 +112,62 @@ class FrequencyRatioMixin(object):
     @staticmethod
     @memoized
     def to_ratio(freq, limit=sampler.rate * 2):
+        """Returns a rationally approximated ratio (a Fraction)
+        corresponding to the frequency.
         """
-        Returns a rationally approximated ratio (a Fraction) corresponding to the frequency.
-        """
-        # TODO: Investigate what is the right limit, and take beating tones into account!
+        # TODO: Investigate the right limit, take beating tones into account!
         # TODO: Check whether memoizing this is of any value.
-        ratio = Fraction.from_float(float(freq) / sampler.rate).limit_denominator(limit)
+        ratio = Fraction.from_float(
+            float(freq) / sampler.rate
+        ).limit_denominator(limit)
         if ratio != 0:
             approx = sampler.rate * ratio
             deviation = cents_diff(freq, approx)
             if deviation > config.logging_limits.FREQUENCY_DEVIATION_CENTS:
-                logger.warning("Frequency approx %f for ratio %s deviates from %.3f by %.16f%% cents" % \
-                            (approx, ratio, freq, deviation))
+                logger.warning(
+                    "Frequency approx %f for ratio %s deviates from "
+                    "%.3f by %.16f%% cents",
+                    approx,
+                    ratio,
+                    freq,
+                    deviation,
+                )
         return ratio
 
     @staticmethod
     def antialias(ratio):
+        """Prevent antialiasing by producing silence (Zero frequency),
+        if ratio is over 1/2 (Nyquist Frequency) or it is negative
+        according to sampler settings.
         """
-        Prevent antialiasing by producing silence (Zero frequency), if ratio is
-        over 1/2 (Nyquist Frequency) or it is negative according to sampler settings.
-        """
-        if sampler.prevent_aliasing and abs(ratio) > Fraction(1, 2):
-            return Fraction(0, 1)
-        if sampler.prevent_aliasing and not sampler.negative_frequencies and ratio < 0:
-            return Fraction(0, 1)
+        if sampler.prevent_aliasing:
+            if abs(ratio) > Fraction(1, 2):
+                return Fraction(0, 1)
+            if ratio < 0 and not sampler.negative_frequencies:
+                return Fraction(0, 1)
         return ratio
 
     @staticmethod
     def wrap(ratio):
+        """Wrap ratio modulo one, so Frequency.ratio of 9/8
+        becomes 1/8 in Osc. This helps with numeric accuracy.
         """
-        Wrap ratio modulo one.
-        """
-        # Wrap roots: 9/8 == 1/8 in Osc! This also helps with numeric accuracy.
         return ratio % 1
 
     def __nonzero__(self):
-        """
-        Zero frequency should be considered False.
-        """
+        """Zero frequency should be considered False."""
         return self.ratio != 0
 
     def _cmp(op):  # pylint: disable=E0213
-        """
-        Generate comparison methods.
-        """
+        """Generate comparison methods."""
 
         def comparison(self, other):
             # pylint: disable=C0111,E1102
             if isinstance(other, FrequencyRatioMixin):
                 return op(self.ratio, other.ratio)
-            elif isinstance(other, Number):
+            if isinstance(other, Number):
                 return op(float(self), float(other))
-            else:
-                return NotImplemented
+            return NotImplemented
 
         comparison.__name__ = '__' + op.__name__ + '__'
         comparison.__doc__ = op.__doc__
@@ -164,14 +188,14 @@ class FrequencyRatioMixin(object):
 
 
 class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
-    """
-    Frequency class
-    """
+    """Frequency class"""
+
     def __init__(self, hz, unwrapped=False):
-        super(self.__class__, self).__init__()
+        _super(self).__init__()
         if not isinstance(hz, Real):
             raise TypeError("Argument 'hz' must be a real number.")
-        self._hz = float(hz)  # Original frequency, independent of sampling rate or optimizations
+        # Original frequency, independent of sampling rate or optimizations
+        self._hz = float(hz)
         self.unwrapped = unwrapped
 
     @property
@@ -187,44 +211,38 @@ class Frequency(FrequencyRatioMixin, RealUnit, PeriodicGenerator):
     @staticmethod
     @memoized
     def angles(ratio):
-        """
-        Normalized frequency (Tau) angles for one full period at ratio.
+        """Normalized frequency (Tau) angles for one full period
+        at ratio.
         """
         # TODO: Could be optimized by using conjugate for half of the samples.
         zero = np.zeros(1, dtype=np.float64)
         if np.all(zero == ratio):
             return zero
-        return ratio.numerator * np.arange(0, 1, 1.0 / ratio.denominator, dtype=np.float64)
+        step = 1.0 / ratio.denominator
+        return ratio.numerator * np.arange(0, 1, step, dtype=np.float64)
 
     @property
-    def sample(self):
-        """
-        Sample one period of the Frequency
-        """
+    def cycle(self):
+        """Frequency cycle of one period"""
         return self.angles(self.ratio)
 
     def at(self, t):
         return self._hz * t
 
     def __repr__(self):
-        return "Frequency(%s)" % self._hz
+        return f'Frequency({self._hz})'
 
     def __str__(self):
-        return "<Frequency: %s hz>" % self.hz
+        return f'<Frequency: {self._hz} hz>'
 
     def __hash__(self):
-        """hash(self), takes into account any rounding done on Frequency's initialisation."""
+        """hash(self), takes into account any rounding done on
+        Frequency's initialisation."""
         return hash(self.ratio)
 
     def __eq__(self, other):
-        """a == b, takes into account any rounding done on Frequency's initialisation."""
+        """a == b, takes into account any rounding done on
+        Frequency's initialisation."""
         if isinstance(other, Real):
             return self.ratio == Frequency(float(other)).ratio
-        else:
-            return NotImplemented
-
-    # TODO: Implement pickling
-    # http://docs.python.org/library/pickle.html#the-pickle-protocol
-
-    # __reduce__
-    # __copy__, __deepcopy__
+        return NotImplemented

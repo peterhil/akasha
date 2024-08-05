@@ -13,17 +13,29 @@ from __future__ import division
 
 import numpy as np
 
-from akasha.funct import consecutive
-from akasha.math import cartesian, distances, normalize, overlap, pad_left, pi2, repeat
+from akasha.funct.itertools import consecutive
+from akasha.math import (
+    cartesian,
+    distances,
+    normalize,
+    overlap,
+    pad_left,
+    pi2,
+    repeat,
+)
 
 
 def angle_between(a, b, c=None):
-    """
-    Angle between two points (a and c though b) in radians.
-    If only a and b is given, will give the angle between (a and b through 0).
+    """Angle between two points (a and c though b) in radians.
 
-    Dot Product & Angle Between Vectors: http://www.youtube.com/watch?v=p8BZTFNSKIw
-    Also see: https://en.wikipedia.org/wiki/Vector_dot_product#Geometric_definition
+    If only a and b is given, will give the angle between
+    (a and b through 0).
+
+    Dot Product & Angle Between Vectors:
+    http://www.youtube.com/watch?v=p8BZTFNSKIw
+
+    Also see:
+    https://en.wikipedia.org/wiki/Vector_dot_product#Geometric_definition
     """
     if c is None:
         b, c = 0, b
@@ -31,9 +43,11 @@ def angle_between(a, b, c=None):
 
 
 def angles_between(points, *rest):
-    """
-    Angles between each three consecutive points on the complex plane in radians.
-    If given less than three points, the input is padded from the start with the first value.
+    """Angles between each three consecutive points on the complex
+    plane in radians.
+
+    If given less than three points, the input is padded from
+    the start with the first value.
 
     For example:
     >>> angles_between([3j, 0])
@@ -47,11 +61,13 @@ def angles_between(points, *rest):
 
 
 def triangle_incenter(a, b, c):
-    """
-    Calculate the coordinate of the incenter point on a triangle given vertices a, b, and c (as complex numbers).
+    """Calculate the coordinate of the incenter point on a triangle
+    given vertices a, b, and c (as complex numbers).
+
     https://en.wikipedia.org/wiki/Incenter#Cartesian_coordinates
     """
-    a_side, b_side, c_side = distances(np.array([b, c, a, b], dtype=np.complex128))
+    edges = np.array([b, c, a, b], dtype=np.complex128)
+    a_side, b_side, c_side = distances(edges)
     perimeter = a_side + b_side + c_side
 
     x = (a_side * a.real + b_side * b.real + c_side * c.real) / perimeter
@@ -61,29 +77,41 @@ def triangle_incenter(a, b, c):
 
 
 def directions(points):
-    """
-    Get direction angles (as in compass directions) for navigating through a set of points.
+    """Get direction angles (as in compass directions) for
+    navigating through a set of points.
+
     https://en.wikipedia.org/wiki/Direction_(geometry)
     """
     return np.angle(vectors(points))
 
 
 def turtle_turns(points):
-    """
-    Changes in orientation angle on a path formed by points (like in turtle graphics).
-    This differs from turns, in that the changes are relative to previous path segment.
+    """Changes in orientation angle on a path formed by points (like
+    in turtle graphics).
 
-    >>> o = np.array([0.5+0.5j, -0.5+0.5j, -0.5-0.5j, 0.5-0.5j])
+    This differs from turns, in that the changes are relative to
+    previous path segment.
+
+    >>> o = np.array([0.5+0.5j, -0.5+0.5j, -0.5-0.5j,
+    0.5-0.5j])
+
     >>> turtle_turns(o) / pi2
+
     array([ 0.25,  0.25])
     """
-    return np.array([np.ediff1d(directions(seg / vectors(seg)[1])) for seg in consecutive(points, 3)]).flatten()
+    return np.array(
+        [
+            np.ediff1d(directions(seg / vectors(seg)[1]))
+            for seg in consecutive(points, 3)
+        ]
+    ).flatten()
 
 
 def circumcircle_radius(a, b, c):
-    """
-    Find the circumcircle of three points.
-    Takes into account the counterclockwise (positive radius) or clockwise (negative radius) direction, that the points represent.
+    """Find the circumcircle of three points.
+
+    Takes into account the counterclockwise (positive radius)
+    or clockwise (negative radius) direction, that the points represent.
     """
     if a == b == c:
         return 0
@@ -95,9 +123,10 @@ def circumcircle_radius(a, b, c):
 
 
 def circumcircle_radius_alt(a, b, c):
-    """
-    Find the circumcircle of three points.
-    Takes into account the counterclockwise (positive radius) or clockwise (negative radius) direction, that the points represent.
+    """Find the circumcircle of three points.
+
+    Takes into account the counterclockwise (positive radius) or
+    clockwise (negative radius) direction, that the points represent.
     """
     if a == b == c:
         return 0
@@ -117,16 +146,19 @@ def wrap_ends(signal, n=1):
 
 
 def pad_ends(signal, value=0, n=1):
-    return np.concatenate((repeat(value, n), np.asanyarray(signal), repeat(value, n)))
+    return np.concatenate(
+        (repeat(value, n), np.asanyarray(signal), repeat(value, n))
+    )
 
 
 def repeat_ends(signal, n=1):
-    return np.concatenate([repeat(signal[:1], n), np.asanyarray(signal), repeat(signal[-1:], n)])
+    return np.concatenate(
+        [repeat(signal[:1], n), np.asanyarray(signal), repeat(signal[-1:], n)]
+    )
 
 
 def is_collinear(a, b, c):
-    """
-    Return true if the three points are collinear.
+    """Return true if the three points are collinear.
 
     For other methods, see:
     https://en.wikipedia.org/wiki/Collinearity#Collinearity_of_points_whose_coordinates_are_given
@@ -137,36 +169,34 @@ def is_collinear(a, b, c):
 
 
 def is_orthogonal(a, b, c=0):
-    """
-    Return true if two complex points (a, b) are orthogonal from center point (c).
+    """Return true if two complex points (a, b) are orthogonal from
+    center point (c).
     """
     return np.abs(angle_between(a, c, b)) == np.pi / 2
 
 
 def midpoint(a, b):
-    """
-    Midpoint is the middle point of a line segment.
-    """
+    """Midpoint is the middle point of a line segment."""
     return ((a - b) / 2.0) + b
 
 
 def orient(arr, end=1 + 0j, inplace=False):
-    """
-    Orientates (or normalizes) an array by translating startpoint to the origo,
-    and scales and rotates endpoint to the parameter 'end'.
+    """Orientates (or normalizes) an array by translating startpoint
+    to the origo, and scales and rotates endpoint to the parameter 'end'.
     """
     if inplace:
         arr -= arr[0]
         arr *= end / arr[-1]
         return arr
     else:
-        return ((arr - arr[0]) * (end / (arr[-1] - arr[0])))
+        return (arr - arr[0]) * (end / (arr[-1] - arr[0]))
 
 
 def parallelogram_point(a, b, c):
-    """
-    Make a parallelogram out of a triangle.
-    In other words, rotate point b pi degrees around midpoint of line form a to c.
+    """Make a parallelogram out of a triangle.
+
+    In other words, rotate point b pi degrees around midpoint of
+    line form a to c.
     """
     m = midpoint(a, c)
     return m - (b - m)
@@ -204,9 +234,11 @@ def vectors_from_origo(points, origo=0):
 
 
 def vectors(points, *rest):
-    """
-    Get the vectors that give directions on how to move through some points.
-    You could use this to move something in way the turtle graphics in the Logo programming language works.
+    """Get the vectors that give directions on how to move through
+    some points.
+
+    You could use this to move something in way the turtle
+    graphics in the Logo programming language works.
 
     https://en.wikipedia.org/wiki/Logo_(programming_language)
     https://en.wikipedia.org/wiki/Turtle_graphics

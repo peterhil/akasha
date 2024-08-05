@@ -13,12 +13,15 @@ import numpy as np
 
 from akasha.audio.oscillator import Osc
 
+
 def take(n, iterable):
     "Return first n items of the iterable as a list"
     return np.fromiter(it.islice(iterable, n), np.complex128)
 
+
 def recycle(n, iterable):
     return take(n, it.cycle(iterable))
+
 
 def combine_oscs(o1, o2):
     """
@@ -32,7 +35,4 @@ def combine_oscs(o1, o2):
     d1 = np.ediff1d(o1[::])
     d2 = np.ediff1d(o2[::])
 
-    return np.cumsum(
-        recycle(period, d1) *
-        recycle(period, d2)
-        )
+    return np.cumsum(recycle(period, d1) * recycle(period, d2))

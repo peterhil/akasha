@@ -11,10 +11,11 @@ Functional timing module.
 import numpy as np
 
 
-class sampler(object):
+class sampler:
     """
     Sampler.
     """
+
     rate = 44100
 
 
@@ -22,7 +23,10 @@ def samples(start, end, rate=sampler.rate):
     """
     Sample frame indices from start to end at rate.
     """
-    return np.arange(int(np.ceil(start * rate)), int(round(np.floor(end * rate))))
+    start = int(np.ceil(start * rate))
+    stop = int(round(np.floor(end * rate)))
+
+    return np.arange(start, stop)
 
 
 def times(start, end, rate=sampler.rate):

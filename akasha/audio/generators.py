@@ -11,16 +11,16 @@ Sound generating objects’ base classes.
 
 import numpy as np
 
-from builtins import range
-
-from akasha.funct import blockwise
+from akasha.funct.itertools import blockwise
 from akasha.timing import sampler
+from akasha.utils.python import class_name
 
 
-class Generator(object):
+class Generator:
     """
     Sound generator base class.
     """
+
     def __getitem__(self, item):
         """
         Slicing support.
@@ -28,12 +28,17 @@ class Generator(object):
         if isinstance(item, slice):
             if hasattr(self, '__len__'):
                 # Mimick ndarray slicing, ie. clip the slice indices
-                res = np.clip(np.array([item.start, item.stop]), a_min=None, a_max=len(self))
-                for i in range(len(res)):
-                    if res[i] is not None and np.sign(res[i]) == -1:
-                        res[i] = max(-len(self) - 1, res[i])
+                res = np.clip(
+                    np.array([item.start, item.stop]),
+                    a_min=None,
+                    a_max=len(self),
+                )
+                for i, index in enumerate(res):
+                    if index is not None and np.sign(index) == -1:
+                        res[i] = max(-len(self) - 1, index)
                 item = slice(res[0], res[1], item.step)
-                item = np.arange(*(item.indices(item.stop or (len(self) - 1))))
+                stop = item.stop or (len(self) - 1)
+                item = np.arange(*(item.indices(stop)))
             else:
                 item = np.arange(*(item.indices(item.stop)))
         return self.sample(item)
@@ -42,7 +47,9 @@ class Generator(object):
         """
         Sample sound generator at times (t).
         """
-        raise NotImplementedError("Please implement method at() in a subclass.")
+        raise NotImplementedError(
+            "Please implement method at() in a subclass."
+        )
 
     def sample(self, frames):
         """
@@ -51,16 +58,20 @@ class Generator(object):
         if isinstance(frames, slice):
             frames = np.arange(*frames.indices(frames.stop))
 
+        fs = float(sampler.rate)
         if isinstance(frames, np.ndarray):
-            return self.at(np.asarray(frames, dtype=np.int64) / float(sampler.rate))
+            times = np.asarray(frames, dtype=np.int64) / fs
         elif np.iterable(frames):
-            return self.at(np.fromiter(frames, dtype=np.int64) / float(sampler.rate))
+            times = np.fromiter(frames, dtype=np.int64) / fs
         elif np.isreal(frames):
-            return self.at(frames / float(sampler.rate))
+            times = frames / fs
         else:
             raise NotImplementedError(
-                "Sampling generators with objects of type %s not implemented yet." % type(frames)
+                f"Sampling generators with type '{type(frames)}' "
+                "not implemented yet."
             )
+
+        return self.at(times)
 
     def __iter__(self):
         return blockwise(self, sampler.blocksize())
@@ -70,6 +81,7 @@ class PeriodicGenerator(Generator):
     """
     Sound objects with some repeating period.
     """
+
     def __getitem__(self, item):
         """
         Slicing support.
@@ -85,23 +97,23 @@ class PeriodicGenerator(Generator):
         number of elements for different step values.
         """
         if isinstance(item, slice):
-            step = ((item.step or 1) % self.period or 1)
-            start = ((item.start or 0) % self.period)
-            element_count = abs((item.stop or self.period) - (item.start or 0))
+            step = (item.step or 1) % self.period or 1
+            start = (item.start or 0) % self.period
+            element_count = abs(
+                (item.stop or self.period) - (item.start or 0)
+            )
             stop = start + (element_count * step)
             item = np.arange(*(slice(start, stop, step).indices(stop)))
+
         if np.isscalar(item):
-            return self.sample[np.array(item, dtype=np.int64) % self.period]
-        else:
-            return self.sample[np.fromiter(item, dtype=np.int64) % self.period]
+            return self.cycle[np.array(item, dtype=np.int64) % self.period]
+        return self.cycle[np.fromiter(item, dtype=np.int64) % self.period]
 
     def at(self, t):
-        """
-        Sample {} at times (t).
-        """.format(self.__class__.__name__)
+        f"""Sample {class_name(self)} at times (t)."""
         return self.sample(t % self.period)
 
-    # Disabled because Numpy gets clever (and slow) when a sound objects have length and
-    # they're made into an object array...
+    # Disabled because Numpy gets clever (and slow) when a sound objects
+    # have length and they're made into an object array...
     # def __len__(self):
     #     return self.period

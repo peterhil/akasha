@@ -15,25 +15,28 @@ import numpy as np
 
 from fractions import Fraction
 from numpy.testing import assert_array_equal
-from numpy.testing import assert_array_almost_equal_nulp as assert_nulp_diff
+from numpy.testing import \
+     assert_array_almost_equal_nulp as assert_nulp_diff
 
 from akasha.audio.generators import Generator
 from akasha.audio.oscillator import Osc
 from akasha.timing import sampler
+from akasha.utils.python import _super
 
 
 class LinearGenerator(Generator):
     """Simple generator for testing."""
 
     def __init__(self, rate=1):
-        super(self.__class__, self).__init__()
-        self.ratio = Fraction.from_float(rate).limit_denominator(sampler.rate)
+        _super(self).__init__()
+        self.ratio = Fraction.from_float(rate) \
+            .limit_denominator(sampler.rate)
 
     def sample(self, iterable):
         return np.array(iterable) * float(self.ratio)
 
 
-class TestGenerator(object):
+class TestGenerator():
     """Test generator"""
 
     def test_class(self):
@@ -49,7 +52,8 @@ class TestGenerator(object):
         pass
 
 
-# TODO: Check slicing for differences, when given slices or other sampleable object:
+# TODO: Check slicing for differences, when given slices or other
+# sampleable object:
 
 # In [37]: r = LinearGenerator(0.5)
 
@@ -66,7 +70,8 @@ class TestGenerator(object):
 # Out[43]: -3.0
 
 # In [44]: r[np.arange(-6,6)]
-# Out[44]: array([-3. , -2.5, -2. , -1.5, -1. , -0.5,  0. ,  0.5,  1. ,  1.5,  2. ,  2.5])
+# Out[44]: array([-3. , -2.5, -2. , -1.5, -1. , -0.5,
+#                  0. ,  0.5,  1. ,  1.5,  2. ,  2.5])
 
 # TODO: Enable real based slicing? === Sampling with intervals!
 # Works when sample (at) uses a continuous function...
@@ -78,7 +83,7 @@ class TestGenerator(object):
 # Out[54]: [array([10, 11, 12])] <-- SHOULD be array(11, 12)!!!
 
 
-class TestPeriodicGenerator(object):
+class TestPeriodicGenerator():
     """Test periodic generator"""
 
     @classmethod
@@ -92,11 +97,11 @@ class TestPeriodicGenerator(object):
 
     def test_getitem_with_slice(self):
         assert_array_equal(
-            self.o.sample,
+            self.o.cycle,
             self.o[::]
         )
         assert_array_equal(
-            Osc.from_ratio(1, 3).sample,
+            Osc.from_ratio(1, 3).cycle,
             self.o[:3:2]
         )
         assert_array_equal(

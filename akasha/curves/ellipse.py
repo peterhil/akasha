@@ -12,17 +12,20 @@ Ellipses module
 from __future__ import division
 
 import numpy as np
-import numpy.linalg as la
 import scipy as sc
 
 from cmath import rect
 
 from akasha.curves.curve import Curve
-from akasha.curves.ellipse_fit import ellipse_fit_fitzgibbon, ellipse_fit_halir
-from akasha.math import complex_as_reals
+from akasha.curves.ellipse_fit import (
+    ellipse_fit_fitzgibbon,
+    ellipse_fit_halir,
+)
+from akasha.math import as_complex
 from akasha.math.geometry import is_orthogonal, midpoint, rotate_towards
 from akasha.math.geometry.affine_transform import AffineTransform
 from akasha.math import pi2
+from akasha.utils.python import class_name
 
 
 __all__ = ['Ellipse']
@@ -43,14 +46,18 @@ class Ellipse(Curve):
     Ellipse curve
 
     Parameters are normalised so that:
-    - Parameter `a` always determines the direction (given by the `angle` parameter)
+    - Parameter `a` always determines the direction
+      (given by the `angle` parameter)
     - Both `a` and `b` are >= 0
-    - Parameter `b` can be greater than `a`, so use Ellipse#major if you need the major axis length
+    - Parameter `b` can be greater than `a`, so use Ellipse#major
+      if you need the major axis length
     """
+
     def __init__(self, a, b, angle=0, origin=0):
         # Note! If thinking of making a always the semi-major axis,
         # the angle needs to be rotated plus or minus 90 degrees or so.
-        # It is not as easy as it sounds, and care needs to be taken to make it correct!
+        # It is not as easy as it sounds, and care needs to be taken
+        # to make it correct!
         (a, b, angle) = ellipse_axes_normalised(a, b, angle)
         self.a = a
         self.b = b
@@ -68,7 +75,10 @@ class Ellipse(Curve):
         return b if a > b else a
 
     def __repr__(self):
-        return "%s(%r, %r, %r, %r)" % (self.__class__.__name__, self.a, self.b, self.angle, self.origin)
+        return (
+            f'{class_name(self)}({self.a}, {self.b}, '
+            + f'{self.angle}, {self.origin})'
+        )
 
     def __hash__(self):
         return hash((self.a, self.b, self.angle, self.origin))
@@ -86,39 +96,49 @@ class Ellipse(Curve):
         """
         cos = self.a * np.cos(points)
         sin = self.b * np.sin(points)
-        x = self.origin.real + cos * np.cos(self.angle) - sin * np.sin(self.angle)
-        y = self.origin.imag + cos * np.sin(self.angle) + sin * np.cos(self.angle)
+        cos_angle = np.cos(self.angle)
+        sin_angle = np.sin(self.angle)
+        x = self.origin.real + cos * cos_angle - sin * sin_angle
+        y = self.origin.imag + cos * sin_angle + sin * cos_angle
+
         return as_complex(np.array([np.asanyarray(x), np.asanyarray(y)]))
 
     def at(self, tau):
-        """
-        Polar form of ellipse relative to center, translated and rotated to origin and angle.
+        """Polar form of ellipse relative to center, translated
+        and rotated to origin and angle.
         https://en.wikipedia.org/wiki/Ellipse#Polar_form_relative_to_center
         """
         thetas = np.asanyarray(tau) * pi2
-        radius = self.a * self.b / np.sqrt((self.b * np.cos(thetas)) ** 2 + (self.a * np.sin(thetas)) ** 2)
-        return radius * np.exp((thetas + self.angle) * 1j) + self.origin
+        b_cos = self.b * np.cos(thetas)
+        a_sin = self.a * np.sin(thetas)
+
+        radius = self.a * self.b / np.sqrt(b_cos ** 2 + a_sin ** 2)
+        angles = thetas + self.angle
+        signal = radius * np.exp(angles * 1j) + self.origin
+
+        return signal
 
     def curvature(self, tau):
-        """
-        Curvature of an ellipse.
+        """Curvature of an ellipse.
         http://mathworld.wolfram.com/Ellipse.html formula 59
         """
         t = np.asanyarray(tau) * pi2 + self.angle
-        return (self.a * self.b) / (self.b ** 2 * np.cos(t) ** 2 + self.a ** 2 * np.sin(t) ** 2) ** (3 / 2)
+        b_cos = self.b ** 2 * np.cos(t) ** 2
+        a_sin = self.a ** 2 * np.sin(t) ** 2
+
+        return (self.a * self.b) / (b_cos + a_sin) ** (3 / 2)
 
     def roc(self, tau):
-        """
-        Radius of curvature.
-        """
+        """Radius of curvature."""
         return 1.0 / self.curvature(tau)
 
     def arc_length(self, tau):
+        """Arc length of the ellipse.
+        Formula (4) from:
+        http://paulbourke.net/geometry/ellipsecirc/Abbott.pdf
         """
-        Arc length of the ellipse.
-        Formula (4) from: http://paulbourke.net/geometry/ellipsecirc/Abbott.pdf
-        """
-        rad = np.fmod(np.asarray(tau) * pi2 - self.angle, np.pi)  # TODO is substracting self.angle necessary?
+        # TODO is substracting self.angle necessary?
+        rad = np.fmod(np.asarray(tau) * pi2 - self.angle, np.pi)
         return self.a * sc.special.ellipeinc(rad, self.eccentricity ** 2)
 
     @property
@@ -127,45 +147,51 @@ class Ellipse(Curve):
 
     @property
     def eccentricity(self):
-        """
-        Eccentricity of the ellipse: https://en.wikipedia.org/wiki/Ellipse#Eccentricity
+        """Eccentricity of the ellipse:
+        https://en.wikipedia.org/wiki/Ellipse#Eccentricity
         """
         return np.sqrt(1.0 - (self.minor / self.major) ** 2)
 
     @classmethod
     def from_rhombus(cls, para):
         a, b, c, d = para
-        para_origin =  para - midpoint(a, c)
-        k, l = np.abs(para_origin)[:2]
-        return cls(l, k, np.angle(para_origin)[3], midpoint(a, c))
+        para_origin = para - midpoint(a, c)
+        k, m = np.abs(para_origin)[:2]
+        return cls(m, k, np.angle(para_origin)[3], midpoint(a, c))
 
     @classmethod
     def from_parallelogram(cls, para):
         dia = np.array([1, 1j, -1, -1j])
-        sq = np.array([1+1j, -1+1j, -1-1j, 1-1j])
+        sq = np.array([1 + 1j, -1 + 1j, -1 - 1j, 1 - 1j])
         center = midpoint(para[0], para[2])
         para_at_origin = para - center
 
         tr = AffineTransform()
         tr.estimate(dia, para_at_origin)
 
-        u, s, v = np.linalg.svd(tr.params[:2, :2], full_matrices=False, compute_uv=True)
+        u, s, v = np.linalg.svd(
+            tr.params[:2, :2], full_matrices=False, compute_uv=True
+        )
         a, b = s[:2]
 
-        uv = np.eye(3); uv[:2, :2] = u * np.diag(s) * v
+        uv = np.eye(3)
+        uv[:2, :2] = u * np.diag(s) * v
         uv = AffineTransform(uv)
 
-        return cls(a, b,
-                   # np.angle(uv(dia[0])),
-                   # np.angle(tr.inverse(dia))[0],
-                   # pi2 / 4 + tr.rotation + np.tan(tr.shear),
-                   np.angle(tr(sq)[1]),
-                   center)
+        return cls(
+            a,
+            b,
+            # np.angle(uv(dia[0])),
+            # np.angle(tr.inverse(dia))[0],
+            # pi2 / 4 + tr.rotation + np.tan(tr.shear),
+            np.angle(tr(sq)[1]),
+            center,
+        )
 
     @classmethod
     def from_conjugate_diameters(cls, para):
-        """
-        Find the major and minor axes of an ellipse from a parallelogram determining the conjugate diameters.
+        """Find the major and minor axes of an ellipse from a parallelogram
+        determining the conjugate diameters.
 
         Uses Rytz's construction for algorithm:
         http://de.wikipedia.org/wiki/Rytzsche_Achsenkonstruktion#Konstruktion
@@ -183,35 +209,34 @@ class Ellipse(Curve):
 
         # Step 2
         r = rect(np.abs(s), np.angle(ur - s)) + s
-        l = rect(np.abs(s), np.angle(v - s)) + s
+        m = rect(np.abs(s), np.angle(v - s)) + s
 
         a = np.abs(v - r)
-        b = np.abs(v - l)
+        b = np.abs(v - m)
 
         # graph(np.concatenate([
         #     closed(para + c),
-        #     np.array([u, c, v, ur, 0, s, r, c, l]),
+        #     np.array([u, c, v, ur, 0, s, r, c, m]),
         #     Circle.at(np.linspace(0, 1, 500)) * np.abs(s) + s
         #     ]), lines=True)
-        return cls(a, b, np.angle(l), c)
+        return cls(a, b, np.angle(m), c)
 
     @classmethod
     def fit_points(cls, points, method='halir'):
-        """
-        Make an ellipse by fitting a set of points using algorithm from Fitzgibbon.
+        """Make an ellipse by fitting a set of points using
+        algorithm from Fitzgibbon.
         """
         if method == 'halir':
             fit_method = ellipse_fit_fitzgibbon
         elif method == 'fitzgibbon':
             fit_method = ellipse_fit_halir
         else:
-            raise NotImplementedError("Method '{}' not implemented.".format(method))
+            raise NotImplementedError(f"Method '{method}' not implemented.")
         return cls.from_general_coefficients(*fit_method(points))
 
     @property
     def general_coefficients(self):
-        """
-        The general form coefficients on an ellipse.
+        """The general form coefficients on an ellipse.
         https://en.wikipedia.org/wiki/Ellipse#General_ellipse
         """
         # Helpers
@@ -240,9 +265,9 @@ class Ellipse(Curve):
         """
         # TODO Check for degenerate cases described here:
         # https://en.wikipedia.org/wiki/Ellipse#General_ellipse
-        den = (b ** 2 - 4.0 * a * c)
+        den = b ** 2 - 4.0 * a * c
         acb_pythagorean = np.sqrt(((a - c) ** 2) + b ** 2)
-        ab_common = (a * (e ** 2) + c * (d ** 2) - b * d * e + den * f)
+        ab_common = a * (e ** 2) + c * (d ** 2) - b * d * e + den * f
 
         a = -np.sqrt(2.0 * ab_common * (a + c + acb_pythagorean)) / den
         b = -np.sqrt(2.0 * ab_common * (a + c - acb_pythagorean)) / den

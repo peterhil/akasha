@@ -16,11 +16,11 @@ from __future__ import division
 
 import json
 import numpy as np
+import sys
 
 from builtins import range
 
-from akasha import settings
-from akasha.io import relative_path
+from akasha.io.path import relative_path
 
 
 #  E1234567890123 456 789E
@@ -42,13 +42,16 @@ from akasha.io import relative_path
 # - Mapping from key to position
 # - Mapping from position to frequency (by index)
 
-
 def get_layout(path='settings/keymaps/fi.json'):
     with open(relative_path(path)) as keymap:
-        return json.load(keymap, encoding='utf-8')
+        if sys.version_info >= (3, 9, 0):
+            return json.load(keymap)
+        else:
+            return json.load(keymap, encoding='utf-8')
 
-
-def get_mapping(layout, section='main', mapping=np.empty([6, 25], dtype=object)):
+def get_mapping(
+    layout, section='main', mapping=np.empty([6, 25], dtype=object)
+):
     if section == 'main':
         basecol = 0
     elif section == 'arrows':
@@ -62,7 +65,7 @@ def get_mapping(layout, section='main', mapping=np.empty([6, 25], dtype=object))
         for col in range(len(kbsect[row])):
             key = kbsect[row][col]
             mapping[row, col + basecol] = key
-            #print("({0:d}, {1:d}) = {2!s}".format(row, col+basecol, key))
+            # print("({0:d}, {1:d}) = {2!s}".format(row, col+basecol, key))
     return mapping
 
 
@@ -85,6 +88,7 @@ def get_map(kb, key='key'):
         else:
             mp[code] = kb.shape  # Key disabled
     return mp
+
 
 kb = get_keyboard()
 pos = get_map(kb, 'key')

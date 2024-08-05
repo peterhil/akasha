@@ -107,7 +107,9 @@ Use graphically installed [Framework Python] or some other backend than `macosx`
 
 ## 5. Install the Python libraries using Pip
 
-	pip install -r install/requires.pip  # Or
+    pip install -r install/requires.pip
+
+    # Install development dependencies:
 	pip install -r install/dev-requires.pip  # For development
 	pip install -r install/extra-requires.pip  # For development extras
 

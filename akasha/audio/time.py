@@ -7,14 +7,15 @@ High precision time module
 
 import sys
 
+from timeit import default_timer as timer
+
+from akasha.types.numeric import RealUnit
+from akasha.utils.python import _super
+
 if sys.version_info >= (3, 3, 0):
     from decimal import Decimal, getcontext
 else:
     from cdecimal import Decimal, getcontext
-
-from timeit import default_timer as clock
-
-from akasha.types.numeric import RealUnit
 
 
 getcontext().prec = 32
@@ -30,7 +31,7 @@ class Chrono(RealUnit):
     """
 
     def __init__(self, secs):
-        super(self.__class__, self).__init__()
+        _super(self).__init__()
         self._sec = Decimal(float(secs))
 
     @property
@@ -39,23 +40,24 @@ class Chrono(RealUnit):
 
     @classmethod
     def now(cls):
-        """
-        Current time as unix timestamp.
+        """Current time as unix timestamp.
 
         Convert to datetime: datetime.fromtimestamp(Chrono.now())
         datetime.datetime(2012, 12, 27, 3, 41, 9, 206083)
         """
-        return cls(clock())
+        return cls(timer())
 
     @classmethod
     def add_prefix(cls, factor, name, symbol=None):
+        """Add a derived time unit with a name, prefixed symbol
+        and a factor to multiply seconds.
         """
-        Add a derived time unit with a name, prefixed symbol and a factor to multiply seconds.
-        """
+
         def derived(secs):
             # pylint: disable=C0111
             return cls(secs * factor)
-        derived.__doc__ = "Chrono time as {0}.".format(name)
+
+        derived.__doc__ = f'Chrono time as {name}.'
         derived.__name__ = name
         setattr(cls, name, staticmethod(derived))
         if symbol:
@@ -72,5 +74,7 @@ minutes = Chrono.add_prefix(60, 'minutes', symbol='min')
 hours = Chrono.add_prefix(3600, 'hours', symbol='h')
 days = Chrono.add_prefix(86400, 'days', symbol='d')
 weeks = Chrono.add_prefix(7 * 86400, 'weeks', symbol='w')
-months = Chrono.add_prefix(27.321661569284 * 86400, 'months', symbol='m')  # sidereal month
-years = Chrono.add_prefix(365.24219265 * 86400, 'years', symbol='a')  # Annum = avg. tropical year
+# sidereal month
+months = Chrono.add_prefix(27.321661569284 * 86400, 'months', symbol='m')
+# Annum = avg. tropical year
+years = Chrono.add_prefix(365.24219265 * 86400, 'years', symbol='a')

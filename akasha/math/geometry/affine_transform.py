@@ -9,7 +9,7 @@ from __future__ import division
 
 import skimage.transform as skt
 
-from akasha.utils import _super
+from akasha.utils.python import class_name, _super
 from akasha.math import as_complex, complex_as_reals
 
 
@@ -23,10 +23,12 @@ class AffineTransform(skt.AffineTransform):
     Adds complex_plane method to transform comples signals.
 
     References:
-    Postscript Language Reference Manual, 3rd edition, chapters "4.3.2 Transformations" and
+    Postscript Language Reference Manual, 3rd edition, chapters:
+    "4.3.2 Transformations" and
     "4.3.3 Matrix Representation and Manipulation"
     http://www.adobe.com/products/postscript/pdfs/PLRM.pdf
     """
+
     def __call__(self, signal):
         """
         Apply the affine transformation onto a signal on the complex plane.
@@ -35,25 +37,25 @@ class AffineTransform(skt.AffineTransform):
         return as_complex(_super(self).__call__(coords).T)
 
     def estimate(self, src, dst):
-        """
-        Estimate the required affine transformation on a complex plane from src to dst.
+        """Estimate the required affine transformation on a
+        complex plane from src to dst.
         """
         src = complex_as_reals(src).T
         dst = complex_as_reals(dst).T
         _super(self).estimate(src, dst)
 
     def inverse(self, signal):
-        """
-        Apply the inverse affine transformation onto a signal on the complex plane.
+        """Apply the inverse affine transformation onto a signal
+        on the complex plane.
         """
         coords = complex_as_reals(signal).T
         return as_complex(_super(self).inverse(coords).T)
 
     def __repr__(self):
-        return "{}(scale={}, rotation={}, shear={}, translation={})".format(
-            self.__class__.__name__,
-            tuple(self.scale),
-            float(self.rotation),
-            float(self.shear),
-            tuple(self.translation),
+        return (
+            f'{class_name(self)}('
+            + f'scale={self.scale!r}, '
+            + f'rotation={self.rotation!r}, '
+            + f'shear={self.shear!r}, '
+            + f'translation={self.translation!r})'
         )

@@ -16,11 +16,18 @@ import numpy as np
 
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
-from akasha.funct import pairwise
-from akasha.math import *
+from akasha.funct.itertools import pairwise
+from akasha.math import (
+    db_fs,
+    distances,
+    pi2,
+    primes,
+    rms,
+    sampler,
+)
 
 
-class TestMath(object):
+class TestMath():
     """
     Test math functions.
     """
@@ -48,27 +55,27 @@ class TestMath(object):
         assert np.round(db_fs(amplitude), 2) == expected
 
 
-class TestPrimes(object):
+class TestPrimes():
     """
     Test prime functions.
     """
 
     @pytest.mark.parametrize(('interval', 'expected'), [
         [
-            [0, 100],
-            [
-                2,   3,   5,   7,  11,  13,  17,  19,  23,  29,  31, 37,  41,
-                43, 47,  53,  59,  61,  67,  71,  73,  79,  83,  89,  97,
-            ],
+         [0, 100],
+         [
+          2,   3,   5,   7,  11,  13,  17,  19,  23,  29,  31, 37,  41,
+          43, 47,  53,  59,  61,  67,  71,  73,  79,  83,  89,  97,
+          ],
         ],
         [
-            [100, 350],
-            [
-                101, 103, 107,
-                109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181,
-                191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263,
-                269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349,
-            ],
+         [100, 350],
+         [
+          101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163,
+          167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233,
+          239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311,
+          313, 317, 331, 337, 347, 349,
+          ],
         ]
     ])
     def test_primes(self, interval, expected):
@@ -89,6 +96,9 @@ class TestPrimes(object):
 
     def test_primes_from_nonzero_lower_limit(self):
         assert_array_equal(
-            np.array([7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47], dtype=np.uint64),
+            np.array(
+                [7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47],
+                dtype=np.uint64
+            ),
             primes(7, 47)
         )

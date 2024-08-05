@@ -15,14 +15,13 @@ import numpy as np
 import pytest
 
 from numpy.testing import assert_array_almost_equal
-from numpy.testing import assert_array_almost_equal_nulp as assert_nulp_diff
 
 from akasha.audio.envelope import Exponential
 from akasha.timing import sampler
 from akasha.math import minfloat
 
 
-class TestExponential(object):
+class TestExponential():
     """
     Tests for Exponential envelope curves.
     """
@@ -94,21 +93,22 @@ class TestExponential(object):
 
         # There should be at least one non-zero item
         non_zero_before_end = False
-        end = ex[index - window : index - 1]
+        end = ex[index - window: index - 1]
         if np.not_equal(0, end).any():
             non_zero_before_end = True
             msg = "too long: Only zeroes found before end."
 
         # Every item after end should be zero
         all_zero_after_end = False
-        after_end = ex[index : index + window]
+        after_end = ex[index: index + window]
 
         if np.equal(0, after_end).all():
             all_zero_after_end = True
             msg = "too short: Not all zero after end."
 
         assert (all_zero_after_end or non_zero_before_end), \
-            "%s\nLength %d %s\nBefore:\n%s\nAfter:\n%s" % (ex, index, msg, end, after_end)
+            f"{ex}\nLength {index} {msg}\n" + \
+            f"Before:\n{end}\nAfter:\n{after_end}"
 
     def test_from_scale(self):
         expected = Exponential(-0.5)

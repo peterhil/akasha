@@ -11,31 +11,32 @@ Harmonics module
 
 import numpy as np
 
-from akasha.audio.envelope import Exponential, Gamma
-from akasha.audio.frequency import Frequency, FrequencyRatioMixin
+from akasha.audio.envelope import Exponential
+from akasha.audio.frequency import FrequencyRatioMixin
 from akasha.audio.generators import Generator
 from akasha.audio.oscillator import Osc
 
-from akasha.timing import sampler
-from akasha.utils.decorators import memoized
-from akasha.math import random_phasor, map_array, normalize, pi2
+from akasha.utils.python import class_name, _super
+from akasha.math import random_phasor, map_array
 
 
-# TODO Eventually compose overtones of Mix objects and use Playable, and drop FrequencyRatioMixin
+# TODO Eventually compose overtones of Mix objects and use Playable,
+# and drop FrequencyRatioMixin
 class Harmonics(FrequencyRatioMixin, Generator):
     """Harmonical overtones for a sound object having a frequency"""
 
     def __init__(
-            self,
-            sndobj=Osc(216.0),
-            n=8,
-            func=lambda x: 1 + x,
-            damping=None,
-            rand_phase=False):
-        super(self.__class__, self).__init__()
+        self,
+        sndobj=Osc(216.0),
+        n=8,
+        func=lambda x: 1 + x,
+        damping=None,
+        rand_phase=False,
+    ):
+        _super(self).__init__()
         self.base = sndobj
-        # TODO Setting ovt.frequency (ovt._hz) leaves ovt.base.frequency (ovt.base._hz)
-        # where it was -- is this the desired behaviour?
+        # TODO Setting ovt.frequency (ovt._hz) leaves ovt.base.frequency
+        # (ovt.base._hz) where it was -- is this the desired behaviour?
         self._hz = self.base.frequency
         self.n = n
         self.func = func
@@ -43,7 +44,7 @@ class Harmonics(FrequencyRatioMixin, Generator):
             # Sine waves FIXME: separate freq. damping from rate
             self.damping = lambda f, a=1.0: (
                 -5 * np.log2(float(f)) / (10.0),
-                a * float(self.frequency)/float(f)
+                a * float(self.frequency) / float(f),
             )
         elif damping == 'default':
             self.damping = lambda f, a=1.0: -5 * np.log2(float(f)) / 1000.0
@@ -75,23 +76,26 @@ class Harmonics(FrequencyRatioMixin, Generator):
         """
         partials = []
         oscs = np.array([Osc(f, self.base.curve) for f in self.frequencies])
+        # freq = self.frequency
 
         for o in oscs:
             out = o.at(t)
 
+            # TODO: Move phases to Osc/Frequency?
             if self.rand_phase:
-                out *= np.array(random_phasor(1))  # TODO: Move phases to Osc/Frequency?
+                out *= np.array(random_phasor(1))
 
             if self.damping:
                 e = Exponential(self.damping(o.frequency))
-                # e = Gamma(-self.damping(o.frequency)[0], 1.0 / max(float(o.frequency) / 100.0, 1.0))
+                # scale = 1.0 / max(float(o.frequency) / 100.0, 1.0)
+                # e = Gamma(-self.damping(o.frequency)[0], scale)
 
                 # square waves
-                # amplitude = float(self.frequency / o.frequency * float(self.frequency))
+                # amplitude = float(freq / o.frequency * freq)
                 # e = Exponential(0, amp=amplitude)
 
                 # triangle waves
-                # amplitude = float(self.frequency ** 2 / o.frequency ** 2 * float(self.frequency))
+                # amplitude = float(freq ** 2 / o.frequency ** 2 * freq)
                 # e = Exponential(0, amp=amplitude)
 
                 # sine waves
@@ -105,10 +109,20 @@ class Harmonics(FrequencyRatioMixin, Generator):
         return np.sum(partials, axis=0, dtype=np.complex128) / len(partials)
 
     def __repr__(self):
-        return "%s(sndobj=%r, n=%r, func=%r, damping=%r, rand_phase=%r>" % \
-            (self.__class__.__name__, self.base, self.n, self.func, self.damping, self.rand_phase)
+        return (
+            f'{class_name(self)}(sndobj={self.base!r}, '
+            + f'n={self.n!r}, '
+            + f'func={self.func!r}, '
+            + f'damping={self.damping!r}, '
+            + f'rand_phase={self.rand_phase!r}>'
+        )
 
     def __str__(self):
-        return "<%s: sndobj=%s, n=%s, frequency=%s, frequencies=%s, func=%s, damping=%s>" % \
-            (self.__class__.__name__, self.base, self.n, self.frequency,
-             self.frequencies, self.func, self.damping)
+        return (
+            f'{class_name(self)}: sndobj={self.base!s}, '
+            + f'n={self.n!s}, '
+            + f'frequency={self.frequency!s}, '
+            + f'frequencies={self.frequencies!s}, '
+            + f'func={self.func!s}, '
+            + f'damping={self.damping!s}>'
+        )

@@ -5,16 +5,9 @@
 Dual-tone Multifrequency Tones
 """
 
-import sys
-
-from builtins import range
-if sys.version_info <= (3, 0):
-    from string import maketrans # pylint: disable=W0402
-else:
-    from bytes import maketrans
-
 from akasha.audio.generators import Generator
 from akasha.timing import sampler
+from akasha.utils.python import _super
 
 
 class DTMF(Generator):
@@ -71,43 +64,65 @@ class DTMF(Generator):
     * = (gsm: +)
     # = (gsm: shift)
     """
-    sp = [350,  440,  480,  620]
-    lo = [697,  770,  852,  941]
+
+    sp = [350, 440, 480, 620]
+    lo = [697, 770, 852, 941]
     hi = [1209, 1336, 1477, 1633]
 
-    nkeys = '123A' + \
-            '456B' + \
-            '789C' + \
-            '*0#D'
+    nkeys = '123A' + '456B' + '789C' + '*0#D'
 
-    table = dict()
+    table = {}
 
-    for i in range(len(nkeys)):
+    for i, key in enumerate(nkeys):
         l, h = divmod(i, 4)
-        table[nkeys[i]] = (lo[l], hi[h])
+        table[key] = (lo[l], hi[h])
 
-    alphabet_trans = maketrans(
-        ''.join(['ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PQRS', 'TUV', 'WXYZ', ' ', '-']),
-        ''.join(['222', '333', '444', '555', '666', '7777', '888', '9999', '0', '-'])
+    keys = b''.join(
+        [
+            b'ABC',
+            b'DEF',
+            b'GHI',
+            b'JKL',
+            b'MNO',
+            b'PQRS',
+            b'TUV',
+            b'WXYZ',
+            b' ',
+            b'-',
+        ]
     )
+    digits = b''.join(
+        [
+            b'222',
+            b'333',
+            b'444',
+            b'555',
+            b'666',
+            b'7777',
+            b'888',
+            b'9999',
+            b'0',
+            b'-',
+        ]
+    )
+    alphabet_trans = bytes.maketrans(keys, digits)
 
     def __init__(self, sequence, pulselength=0.07, pause=0.05):
-        super(self.__class__, self).__init__()
+        _super(self).__init__()
 
         self.sequence = sequence.upper()
         self.pulselength = pulselength
         self.pause = pause
-
-        return None
 
     @property
     def number(self):
         """The number to dial."""
         return self.sequence.upper().translate(self.alphabet_trans)
 
-    def sample(self, iterable):
-        """Make DTML dialing tone."""
-        pass
+    def sample(self, frames):
+        """Make DTMF dialing tone."""
 
     def __len__(self):
-        int(round(len(self.number) * (self.pulselength + self.pause) * sampler.rate - self.pause))
+        pulselengths = len(self.number) * (self.pulselength + self.pause)
+        length = pulselengths * sampler.rate - self.pause
+        return int(round(length))

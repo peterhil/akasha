@@ -6,22 +6,22 @@
 # pylint: disable=E1101
 
 import numpy as np
-import os
 import scikits.audiolab as audiolab
 
 from builtins import range
 from scipy.signal import hilbert
-from scikits.audiolab import Format, Sndfile, available_file_formats, available_encodings
+from scikits.audiolab import (
+    Format,
+    Sndfile,
+    available_file_formats,
+    available_encodings,
+)
 
 from akasha.timing import sampler, time_slice
-from akasha.io import file_extension, relative_path
+from akasha.io.path import file_extension, relative_path
 
 
-defaults = {
-    'type': 'aiff',
-    'encoding': 'pcm16',
-    'endianness': 'file'
-}
+defaults = {'type': 'aiff', 'encoding': 'pcm16', 'endianness': 'file'}
 
 default_format = Format(**defaults)
 
@@ -31,7 +31,7 @@ def get_format(*args, **kwargs):
     Get a audiolab.Format object from a string, or from the parameters
     accepted by Format(type=wav, encoding=pcm16, endianness=file)
     """
-    if (args and isinstance(args[0], Format)):
+    if args and isinstance(args[0], Format):
         res = args[0]
     else:
         params = defaults.copy()
@@ -44,13 +44,8 @@ def get_format(*args, **kwargs):
 
 # Audiolab read, write and play
 
-def play(
-        sndobj,
-        dur=5.0,
-        start=0,
-        axis='imag',
-        fs=sampler.rate
-    ):
+
+def play(sndobj, dur=5.0, start=0, axis='imag', fs=sampler.rate):
     """
     Play out a sound.
     """
@@ -61,17 +56,17 @@ def play(
 
 
 def write(
-        sndobj,
-        filename='test_sound',
-        fmt=default_format,
-        dur=5.0,
-        start=0,
-        axis='imag',
-        fs=sampler.rate,
-        sdir=relative_path('../../Sounds/Out/'),
-    ):
-    """
-    Write a sound file.
+    sndobj,
+    filename='test_sound',
+    fmt=default_format,
+    dur=5.0,
+    start=0,
+    axis='imag',
+    fs=sampler.rate,
+    sdir=relative_path('../../Sounds/Out/'),
+):
+    f"""Write a sound file.
+    Available file formats are: {available_file_formats()}.
     """
     fmt = get_format(fmt)
 
@@ -98,15 +93,15 @@ def write(
 
 
 def read(
-        filename,
-        dur=5.0,
-        start=0,
-        fs=sampler.rate,
-        complex=True,
-        sdir=relative_path('../../Sounds/_Music samples/'),
-    ):
-    """
-    Read a sound file in.
+    filename,
+    dur=5.0,
+    start=0,
+    fs=sampler.rate,
+    complex=True,
+    sdir=relative_path('../../Sounds/_Music samples/'),
+):
+    f"""Read a sound file in.
+    Available file formats are: {available_file_formats()}.
     """
     # TODO:
     # - Factor out the real->complex conversion out.
@@ -134,23 +129,20 @@ def read(
         return data
 
 
-write.__doc__ += "Available file formats are: {0}.".format(', '.join(
-    [f for f in available_file_formats()]
-))
-
-read.__doc__ += "Available file formats are: {0}.".format(', '.join(
-    [f for f in available_file_formats()]
-))
-
-
 def check_format(format):
     """Checks that a requested format is available (in libsndfile)."""
     available = available_file_formats()
     if format not in available:
-        raise ValueError("File format '%s' not available. Try one of: %s" % (format, available))
+        raise ValueError(
+            f"File format '{format!s}' not available. "
+            f"Try one of: {available}"
+        )
 
 
 def check_encoding(encoding):
     available = available_encodings()
     if encoding not in available:
-        raise ValueError("Encoding '%s' not available. Try one of: %s" % (encoding, available))
+        raise ValueError(
+            f"Encoding '{encoding}' not available. "
+            f"Try one of: {available}"
+        )

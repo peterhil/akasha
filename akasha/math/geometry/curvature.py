@@ -14,8 +14,12 @@ from __future__ import division
 import numpy as np
 
 from akasha.curves import Ellipse
-from akasha.funct import consecutive
-from akasha.math.geometry import circumcircle_radius, circumcircle_radius_alt, is_collinear
+from akasha.funct.itertools import consecutive
+from akasha.math.geometry import (
+    # circumcircle_radius,
+    circumcircle_radius_alt,
+    is_collinear,
+)
 from akasha.math import all_equal, complex_as_reals, div_safe_zero, pi2
 
 
@@ -30,7 +34,9 @@ def circle_curvature(a, b, c):
 
 
 def estimate_curvature(signal):
-    return np.array([circle_curvature(*points) for points in consecutive(signal, 3)])
+    return np.array(
+        [circle_curvature(*points) for points in consecutive(signal, 3)]
+    )
 
 
 def ellipse_curvature(para, debug=False):
@@ -57,7 +63,12 @@ def ellipse_curvature(para, debug=False):
 
 
 def estimate_curvature_with_ellipses(signal, debug=False):
-    res = np.array([ellipse_curvature(points, debug) for points in consecutive(signal, 3)])
+    res = np.array(
+        [
+            ellipse_curvature(points, debug)
+            for points in consecutive(signal, 3)
+        ]
+    )
 
     if debug:
         import pylab as lab

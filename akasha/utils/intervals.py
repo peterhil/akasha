@@ -9,11 +9,14 @@ from __future__ import absolute_import
 
 from builtins import range
 
+from akasha.utils.python import class_name
 
-class Interval(object):
+
+class Interval:
     """
     Interval.
     """
+
     def __init__(self, inf, sup):
         self._inf = inf
         self._sup = sup
@@ -33,19 +36,21 @@ class Interval(object):
         return self._sup
 
     def __repr__(self):
-        return "%s(%s, %s)" % (self.__class__.__name__, self.inf, self.sup)
+        return f'{class_name(self)}({self.inf}, {self.sup})'
 
 
-class IntervalTree(object):
+class IntervalTree:
     """
     Interval tree.
 
-    This is a modified port of this BSD Licensed Ruby implementation of augmented interval tree:
+    This is a modified port of this BSD Licensed Ruby implementation of
+    augmented interval tree:
     https://github.com/misshie/interval-tree/blob/master/lib/interval_tree.rb
 
     The code this is modified from a Python port by Tyler Kahn:
     http://forrst.com/posts/Interval_Tree_implementation_in_python-e0K
     """
+
     def __init__(self, intervals):
         self.top_node = self.divide_intervals(intervals)
 
@@ -70,22 +75,25 @@ class IntervalTree(object):
             else:
                 s_center.append(k)
 
-        return Node(x_center, s_center, self.divide_intervals(s_left), self.divide_intervals(s_right))
+        return Node(
+            x_center,
+            s_center,
+            self.divide_intervals(s_left),
+            self.divide_intervals(s_right),
+        )
 
     def center(self, intervals):
-        """
-        """
+        """ """
         fs = self.sort_by_inf(intervals)
 
-        return fs[int(len(fs)/2)].inf
+        return fs[int(len(fs) / 2)].inf
 
     def search(self, begin, end=None):
-        """
-        """
+        """ """
         if end:
             result = []
 
-            for j in range(begin, end+1):
+            for j in range(begin, end + 1):
                 for k in self.search(j):
                     result.append(k)
                 result = list(set(result))
@@ -94,8 +102,7 @@ class IntervalTree(object):
             return self._search(self.top_node, begin, [])
 
     def _search(self, node, point, result):
-        """
-        """
+        """ """
         for k in node.s_center:
             if k.inf <= point <= k.sup:
                 result.append(k)
@@ -116,10 +123,11 @@ class IntervalTree(object):
         return sorted(intervals, key=lambda x: x.inf)
 
 
-class Node(object):
+class Node:
     """
     Interval tree node.
     """
+
     def __init__(self, x_center, s_center, left_node, right_node):
         self.x_center = x_center
         self.s_center = IntervalTree.sort_by_inf(s_center)

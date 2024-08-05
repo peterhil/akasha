@@ -16,6 +16,7 @@ from scipy.optimize import newton
 
 from akasha.curves.curve import Curve
 from akasha.math import pi2
+from akasha.utils.python import class_name
 
 
 class KeplerOrbit(Curve):
@@ -34,9 +35,20 @@ class KeplerOrbit(Curve):
       between 0 and 1 form an elliptic orbit, 1 is a parabolic escape
       orbit, and greater than 1 is a hyperbola.
     """
-    def __init__(self, perihelion, semimajor, eccentricity=0.85, period=1, newton=True, name='', ph=0):
+
+    def __init__(
+        self,
+        perihelion,
+        semimajor,
+        eccentricity=0.85,
+        period=1,
+        newton=True,
+        name='',
+        ph=0,
+    ):
         self.name = name
-        self.perihelion = perihelion  # Distance from sun (origin) to perihelion (closest) point
+        # Distance from sun (origin) to perihelion (closest) point
+        self.perihelion = perihelion
         self.a = semimajor
         self.period = period
         self.eccentricity = eccentricity
@@ -44,8 +56,13 @@ class KeplerOrbit(Curve):
         self.ph = 0  # Time of perihelion passage
 
     def __repr__(self):
-        return "%s(%r, %r, eccentricity=%r, period=%r, name=%r)" % (
-            self.__class__.__name__, self.perihelion, self.a, self.eccentricity, self.period, self.name
+        return (
+            f'{class_name(self)}('
+            + f'{self.perihelion!r}, '
+            + f'{self.a!r}, '
+            + f'eccentricity={self.eccentricity!r}, '
+            + f'period={self.period!r}, '
+            + f'name={self.name!r})'
         )
 
     @property
@@ -88,8 +105,10 @@ class KeplerOrbit(Curve):
         """
         ea = self.eccentric_anomaly(t)
         ecc = self.eccentricity
-        nu = np.arctan2(np.sqrt(1 - ecc ** 2) * np.sin(ea), np.cos(ea) - ecc)
-
+        nu = np.arctan2(
+            np.sqrt(1 - ecc ** 2) * np.sin(ea),
+            np.cos(ea) - ecc,
+        )
         return nu
 
     def true_anomaly_fourier(self, t):
@@ -100,11 +119,14 @@ class KeplerOrbit(Curve):
         ma = self.mean_anomaly(t)
         ecc = self.eccentricity
 
-        # Approximation through Fourier expansion, fails on large eccentricity!
-        ta = ma + \
-             (2 * ecc - (1 / 4) * ecc ** 3) * np.sin(ma) + \
-             (5 / 4) * ecc ** 2 * np.sin(2 * ma) + \
-             (13 / 12) * ecc ** 3 * np.sin(3 * ma)
+        # Approximation through Fourier expansion, fails
+        # on large eccentricity!
+        ta = (
+            ma
+            + (2 * ecc - (1 / 4) * ecc ** 3) * np.sin(ma)
+            + (5 / 4) * ecc ** 2 * np.sin(2 * ma)
+            + (13 / 12) * ecc ** 3 * np.sin(3 * ma)
+        )
 
         return ta
 

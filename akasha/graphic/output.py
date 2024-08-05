@@ -35,19 +35,20 @@ def show(img, plot=False, use_open=False):
     elif use_open:
         try:
             tmp = tempfile.NamedTemporaryFile(
-                dir='/var/tmp',
-                prefix='akasha_',
-                suffix='.png',
-                delete=False
+                dir='/var/tmp', prefix='akasha_', suffix='.png', delete=False
             )
             logger.debug("Tempfile: %s", tmp.name)
             image = Image.fromarray(img)
             image.save(tmp.name, 'png')
             os.system(' '.join([open_cmd, tmp.name]))
         except IOError as err:
-            logger.error("Failed to open a temporary file and save the image: %s", err)
+            logger.error(
+                "Failed to open a temporary file and save the image: %s", err
+            )
         except OSError as err:
-            logger.error("Failed to open the image with a default app: %s", err)
+            logger.error(
+                "Failed to open the image with a default app: %s", err
+            )
         finally:
             tmp.close()
     else:
@@ -64,7 +65,11 @@ def imsave(img, filename):
         image = Image.fromarray(img)
         image.save(filename, 'png')
     except IOError as err:
-        logger.error("Failed to save image into file: '%s'\n\nError was: %s", filename, err)
+        logger.error(
+            "Failed to save image into file: '%s'\n\nError was: %s",
+            filename,
+            err,
+        )
     except OSError as err:
         logger.error("OS error when saving image: %s", err)
     finally:

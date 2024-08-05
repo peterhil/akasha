@@ -20,7 +20,8 @@ from akasha.math import normalize
 def chirp_zeta(z1=-0.5 - 100j, z2=0.5 + 100j, dur=10):
     """
     Chirp sound made by sampling a line z (z1 -> z2) from the complex plane,
-    and using the function (k ** -z, k = 0..n) used for summation in the Riemann Zeta function.
+    and using the function (k ** -z, k = 0..n) used for summation in
+    the Riemann Zeta function.
 
     Other interesting values to try:
     chirp_zeta(-10.5-1000j, 1.5-10000j)
