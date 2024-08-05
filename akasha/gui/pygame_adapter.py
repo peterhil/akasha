@@ -33,7 +33,7 @@ class PygameGui:
 
         return screen
 
-    def init_display(self, name, size):
+    def init_display(self, name="Resonance", size=800):
         """
         Initialize Pygame display and surface arrays.
         Returns Pygame screen.
