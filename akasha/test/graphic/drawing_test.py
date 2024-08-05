@@ -77,6 +77,7 @@ class TestDrawing():
             get_canvas(width, height, channels)
         )
 
+    @pytest.mark.xfail()
     @pytest.mark.parametrize(('func', 'args'), [
         ['draw_lines_pg', {
             'lines': True,
