@@ -1,7 +1,7 @@
 # Pillow>=6.2.0
 funcy>=1.17.0
 matplotlib>=1.4.2
-numpy>=1.20.2,<2  # TODO Check deprecations and update
+numpy>=1.20.2
 pandas>=2.2.2
 pyaudio>=0.2.14  # portaudio bindings
 pygame>=2.0.1

@@ -52,8 +52,10 @@ class Super(Curve):
         filled from the left.
         """
         if is_sequence(m):
+            m = np.atleast_1d(m)
             superness = np.repeat(None, 6)
-            superness[: min(len(m), 6)] = np.array(m[:6], dtype=np.float64)
+            length = min(len(m), 6)
+            superness[:length] = np.array(m[:length], dtype=np.float64)
             # length = len(superness)
             # if lenth < 6:
             #     if length < 4:
