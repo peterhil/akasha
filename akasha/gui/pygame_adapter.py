@@ -28,15 +28,15 @@ class PygameGui:
             "Pygame initialized with %s loaded modules (%s failed)." % pg.init()
         )
 
-        screen = self.init_display(name, size)
-        logger.info("Inited display %s with flags: %s", screen, screen.get_flags())
+        surface = self.init_display(name, size)
+        logger.info("Inited display %s with flags: %s", surface, surface.get_flags())
 
-        return screen
+        return surface
 
     def init_display(self, name="Resonance", size=800):
         """
         Initialize Pygame display and surface arrays.
-        Returns Pygame screen.
+        Returns a Pygame surface.
         """
         pg.display.quit()
 
@@ -52,11 +52,11 @@ class PygameGui:
             raise ImportError('Numpy array package is not installed')
 
         # FIXME get resolution some other way.
-        mode = pg.display.set_mode((size, size), flags, 32 if flags & pg.SRCALPHA else 24)
+        surface = pg.display.set_mode((size, size), flags, 32 if flags & pg.SRCALPHA else 24)
         pg.display.set_caption(name)
         pg.display.init()
 
-        return mode
+        return surface
 
     def init_mixer(self, *args):
         """
