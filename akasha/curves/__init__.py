@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 """
 Curves for oscillators
 """
-
-from __future__ import division
 
 from akasha.curves.circle import Circle
 from akasha.curves.curve import Curve

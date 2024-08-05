@@ -10,7 +10,7 @@ import pygame as pg
 from akasha.math import pcm
 from akasha.settings import config
 from akasha.timing import sampler
-from akasha.utils import issequence
+from akasha.utils.array import is_sequence
 from akasha.utils.log import logger
 
 
@@ -23,13 +23,19 @@ class PygameGui:
         Initialize Pygame and return a surface.
         """
         pg.quit()
-
+        loaded, failed = pg.init()
         logger.info(
-            "Pygame initialized with %s loaded modules (%s failed)." % pg.init()
+            'Pygame initialized with %s loaded modules ' '(%s failed).',
+            loaded,
+            failed,
         )
 
         screen = self.init_display(name, size)
-        logger.info("Inited display %s with flags: %s", screen, screen.get_flags())
+        logger.info(
+            'Inited display %s with flags: %s',
+            screen,
+            screen.get_flags(),
+        )
 
         return screen
 
@@ -51,8 +57,8 @@ class PygameGui:
         else:
             raise ImportError('Numpy array package is not installed')
 
-        # FIXME get resolution some other way.
-        mode = pg.display.set_mode((size, size), flags, 32 if flags & pg.SRCALPHA else 24)
+        bitdepth = 32 if flags & pg.SRCALPHA else 24
+        mode = pg.display.set_mode((size, size), flags, bitdepth)
         pg.display.set_caption(name)
         pg.display.init()
 
@@ -64,18 +70,25 @@ class PygameGui:
         """
         pg.mixer.quit()
 
-        # Set mixer defaults: sample rate, sample size, number of channels, buffer size
-        if issequence(args) and 0 < len(args) <= 3:
+        # Set mixer defaults: sample rate, sample size,
+        # number of channels, buffer size
+        if is_sequence(args) and 0 < len(args) <= 3:
             pg.mixer.init(*args)
         else:
-            pg.mixer.init(frequency=sampler.rate,
-                          size=config.audio.SAMPLETYPE,
-                          channels=config.audio.CHANNELS,
-                          buffer=config.audio.BUFFERSIZE)
+            pg.mixer.init(
+                frequency=sampler.rate,
+                size=config.audio.SAMPLETYPE,
+                channels=config.audio.CHANNELS,
+                buffer=config.audio.BUFFERSIZE,
+            )
 
+        fs, size, channels = pg.mixer.get_init()
         logger.info(
-            "Mixer has %s Hz sample rate with %s size samples and %s channels." %
-            pg.mixer.get_init()
+            "Mixer has %s Hz sample rate with %s size samples and "
+            "%s channels.",
+            fs,
+            size,
+            channels,
         )
 
         return pg.mixer.find_channel()
@@ -109,16 +122,20 @@ class PygameGui:
         """
         Queue samples into a mixer channel.
         """
-        return channel.queue(pg.sndarray.make_sound(pcm(samples, bits=config.audio.SAMPLETYPE)))
+        waveform = pcm(samples, bits=config.audio.SAMPLETYPE)
+        return channel.queue(pg.sndarray.make_sound(waveform))
 
     @staticmethod
     def key_pause(event):
-        return (event.type == pg.KEYDOWN and event.key == pg.K_F8) \
-          or (event.type == pg.ACTIVEEVENT and event.state == 3)
+        return (event.type == pg.KEYDOWN and event.key == pg.K_F8) or (
+            event.type == pg.ACTIVEEVENT and event.state == 3
+        )
 
     @staticmethod
     def key_escape(event):
-        return event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE)
+        return event.type == pg.QUIT or (
+            event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE
+        )
 
     @staticmethod
     def keydown(event):
@@ -152,7 +169,6 @@ class PygameGui:
     def key_down(event):
         return pg.K_DOWN == event.key
 
-
     @staticmethod
     def key_left(event):
         return pg.K_LEFT == event.key
@@ -170,7 +186,7 @@ class PygameGui:
         return event.type in (
             pg.MOUSEBUTTONDOWN,
             pg.MOUSEBUTTONUP,
-            pg.MOUSEMOTION
+            pg.MOUSEMOTION,
         )
 
     @staticmethod

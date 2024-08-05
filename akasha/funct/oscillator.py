@@ -19,19 +19,22 @@ from akasha.timing import sampler
 from akasha.math import pi2
 
 
-### Limiter functions
+# Limiter functions
+
 
 def step_function(op=operator.le, limit=0, default=0):
     """
     Limit the range of the function with an operator function and
     a limit (number or callable). Return the default value outside the range.
     """
+
     def fn(value):
         """
         Calculate the result from step_function().
         """
         other = limit() if callable(limit) else limit
         return value if op(value, other) else default
+
     return fn
 
 
@@ -60,7 +63,8 @@ def limit_negative(f):
 
 def nyquist(ratio):
     """
-    Limit ratio on the normalized Nyquist Frequency band: Fraction(-1, 2)..Fraction(1, 2)
+    Limit ratio on the normalized Nyquist Frequency band:
+    Fraction(-1, 2)..Fraction(1, 2)
 
     >>> nyquist(Fraction(22050, 44100))
     Fraction(1, 2)
@@ -71,9 +75,12 @@ def nyquist(ratio):
     >>> nyquist(Fraction(-5, 8))
     Fraction(0, 1)
     """
-    assert isinstance(ratio, Fraction), \
-        'Ratio should be a Fraction, got {0}'.format(type(ratio).__name__)
-    fn = step_function(operator.le, limit=Fraction(1, 2), default=Fraction(0, 1))
+    assert isinstance(
+        ratio, Fraction
+    ), f'Ratio should be a Fraction, got {type(ratio).__name__}'
+    fn = step_function(
+        operator.le, limit=Fraction(1, 2), default=Fraction(0, 1)
+    )
     return fn(np.abs(ratio))
 
 
@@ -93,7 +100,8 @@ def wrap(f, modulo=1):
     return f % modulo
 
 
-### Frequencies
+# Frequencies
+
 
 def limit_resolution(freq, limit=sampler.rate):
     """
@@ -132,19 +140,22 @@ def hz(f, fs=sampler.rate, rounding='native'):
     return np.array(ratio)
 
 
-### Generators
+# Generators
+
 
 def accumulator(n):
     """
     Function object using closure, see:
     http://en.wikipedia.org/wiki/Function_object#In_Python
     """
+
     def inc(x):
         """
         Increment accumulator.
         """
         inc.n += x
         return inc.n
+
     inc.n = n
     return inc
 
@@ -153,11 +164,13 @@ def osc(freq):
     """
     Oscillator functor.
     """
+
     def at(times):
         """
         Sample oscillator at times.
         """
         return np.exp(1j * pi2 * freq * (times % 1.0))
+
     at.freq = freq
 
     def ratio():
@@ -165,6 +178,7 @@ def osc(freq):
         The frequency ratio of the oscillator.
         """
         return freq / float(sampler.rate)
+
     at.ratio = ratio
     return at
 
@@ -173,15 +187,18 @@ def exp(rate):
     """
     Exponential envelope for a rate.
     """
+
     def at(times):
         """
         Sample exponential at times.
         """
         return np.exp(rate * times)
+
     at.rate = rate
     return at
 
 
 if __name__ == '__main__':
     import doctest
+
     doctest.testmod()

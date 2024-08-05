@@ -29,7 +29,7 @@ from akasha.types.numeric import NumericUnit, ComplexUnit, RealUnit
 from akasha.math import cents_diff
 
 
-class TestFrequencyRatioMixin(object):
+class TestFrequencyRatioMixin():
     """
     Test Frequency ratios.
     """
@@ -52,7 +52,10 @@ class TestFrequencyRatioMixin(object):
 
     def test_from_ratio(self):
         """It should initialize correctly from ratio."""
-        f = Frequency.from_ratio(self.ratio.numerator, self.ratio.denominator)
+        f = Frequency.from_ratio(
+            self.ratio.numerator,
+            self.ratio.denominator
+        )
         assert isinstance(f, Frequency)
         assert self.ratio == f.ratio
 
@@ -92,12 +95,16 @@ class TestFrequencyRatioMixin(object):
 
     def test_nonzero(self):
         assert Frequency(self.a4)
-        assert Frequency(self.silence) == False
+        assert Frequency(self.silence) == False  # noqa: E712
 
     def test_cmp(self):
         """It should compare correctly."""
-        assert Frequency(self.a4) == Frequency(self.a4) > Frequency(self.a2) < Frequency(self.a3)
-        assert Frequency(self.a4) == Osc(self.a4) > Osc(self.a2) < Osc(self.a3)
+        assert Frequency(self.a4) == \
+            Frequency(self.a4) > Frequency(self.a2) < Frequency(self.a3)
+
+        assert Frequency(self.a4) == \
+            Osc(self.a4) > Osc(self.a2) < Osc(self.a3)
+
         assert Frequency(self.a4) == self.a4
 
         assert Frequency(self.a4) > Frequency(self.a2)
@@ -115,9 +122,9 @@ class TestFrequencyRatioMixin(object):
         assert int(self.hz) == int(Frequency(self.hz))
 
 
-class TestFrequencyAliasing(object):
-    """
-    Test (preventing the) aliasing of frequencies out of range 0 to sample rate.
+class TestFrequencyAliasing():
+    """Test (preventing the) aliasing of frequencies out of range 0
+    to sample rate.
     """
     silence = Frequency(0)
     negative = Fraction(-1, 7)
@@ -130,7 +137,8 @@ class TestFrequencyAliasing(object):
 
     @pytest.mark.filterwarnings("ignore:invalid value encountered in log2")
     def testPreventAliasing(self):
-        """It should prevent aliasing when given a ratio out of range 0 to 1/2."""
+        """It should prevent aliasing when given a ratio out of
+        range 0 to 1/2."""
         sampler.prevent_aliasing = True
         sampler.negative_frequencies = False
 
@@ -159,7 +167,7 @@ class TestFrequencyAliasing(object):
         assert self.freq(self.negative).ratio == self.negative % 1
 
 
-class TestFrequency(object):
+class TestFrequency():
     """
     Test frequencies
     """
@@ -178,7 +186,7 @@ class TestFrequency(object):
 
     def test_meta(self):
         assert issubclass(Frequency, numbers.Real)
-        assert Frequency.__metaclass__ ==  abc.ABCMeta
+        assert Frequency.__metaclass__ == abc.ABCMeta
 
     def test_class(self):
         assert issubclass(Frequency, RealUnit)
@@ -207,10 +215,12 @@ class TestFrequency(object):
         [20000.1]
     ])
     def test_rounding_frequencies(self, hz):
-        """It should not exceed the just noticeable difference for hearing of frequencies."""
+        """It should not exceed the just noticeable difference
+        for hearing of frequencies."""
         # Just noticeable difference allowance for Frequency rounding
-        # See http://en.wikipedia.org/wiki/Cent_(music)#Human_perception
-        # This should probably be much smaller than the suggested 3-6 cents...
+        #
+        # See: https://en.wikipedia.org/wiki/Cent_(music)#Human_perception
+        # Probably should be much smaller than the suggested 3-6 cents...
         JND_CENTS_EPSILON = 1.0e-02
         assert cents_diff(hz, Frequency(hz)) <= JND_CENTS_EPSILON
 
@@ -229,16 +239,19 @@ class TestFrequency(object):
         """Is should calculate the frequency angles correctly."""
         assert np.array([0.]) == Frequency.angles(0)
         assert_nulp_diff(
-            np.array([0., 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875], dtype=np.float64),
+            np.array(
+                [0., 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875],
+                dtype=np.float64
+            ),
             Frequency.angles(Fraction(1, 8)),
             1
         )
 
-    def test_sample(self):
+    def test_cycle(self):
         ratio = Fraction(3, 17)
         assert_array_equal(
             Frequency.angles(ratio),
-            Frequency.from_ratio(ratio).sample
+            Frequency.from_ratio(ratio).cycle
         )
 
     def test_repr(self):

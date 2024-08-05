@@ -20,11 +20,13 @@ if sys.version_info >= (3, 3, 0):
 else:
     from cdecimal import Decimal, getcontext
 
-from akasha.audio.time import Chrono, ps, ns, us, ms, seconds, minutes, hours, days, months, years
+from akasha.audio.time import Chrono, \
+     ps, ns, us, ms, \
+     seconds, minutes, hours, days, months, years
 from akasha.types.numeric import RealUnit
 
 
-class TestChrono(object):
+class TestChrono():
     """
     Tests of time
     """
@@ -60,7 +62,8 @@ class TestChrono(object):
     ])
     def test_prefix(self, prefix, factor):
         value = 500
-        assert (value * factor) == prefix(value) == getattr(Chrono, prefix.__name__)(value)
+        assert (value * factor) == prefix(value) == \
+            getattr(Chrono, prefix.__name__)(value)
 
     def test_now(self):
         latency = timeit.timeit(Chrono.now, number=3)

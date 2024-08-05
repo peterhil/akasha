@@ -28,7 +28,7 @@ from numpy.testing import assert_array_almost_equal
 from numpy.testing import assert_array_almost_equal_nulp as assert_nulp_diff
 
 
-class TestOscillator(object):
+class TestOscillator():
     """Test oscillator"""
 
     def test_class(self):
@@ -58,11 +58,12 @@ class TestOscillator(object):
         expected = Circle.roots_of_unity(7)
         assert_array_almost_equal(o[iter(range(0, 44100, 6300))], expected)
 
-    def test_sample(self):
+    def test_cycle(self):
         o, p = 1, sampler.rate
-        expected = np.exp(1j * pi2 * o * np.arange(0, 1.0, 1.0 / p, dtype=np.float64))
+        freqs = np.arange(0, 1.0, 1.0 / p, dtype=np.float64)
+        expected = np.exp(1j * pi2 * o * freqs)
         assert_nulp_diff(
-            Osc.from_ratio(o, p).sample,
+            Osc.from_ratio(o, p).cycle,
             expected,
             1
         )
@@ -76,13 +77,13 @@ class TestOscillator(object):
         assert o == eval(repr(o))
 
 
-class TestOscRoots(object):
+class TestOscRoots():
     """Test root generating functions."""
 
     def test_root_func_sanity(self):
         """It should give sane values."""
         wi = 2 * np.pi * 1j
-        a = Osc.from_ratio(1, 8).sample
+        a = Osc.from_ratio(1, 8).cycle
         b = np.array([
             +1 + 0j, np.exp(wi * 1 / 8),
             +0 + 1j, np.exp(wi * 3 / 8),
@@ -91,13 +92,15 @@ class TestOscRoots(object):
         ], dtype=np.complex128)
 
         assert np.allclose(a.real, b.real, atol=1e-13), \
-            "real \n%s\nis not close to\n%s" % (a, b)
+            f"real {a!r}n\nis not close to\n{b!r}"
         assert np.allclose(a.imag, b.imag, atol=1e-13), \
-            "imag \n%s\nis not close to\n%s" % (a, b)
+            f"imag n{a!r}\nis not close to\n{b!r}"
 
         assert_nulp_diff(a, b, nulp=1)
 
-    @pytest.mark.filterwarnings("ignore:Fraction.__float__ returned non-float")
+    @pytest.mark.filterwarnings(
+        "ignore:Fraction.__float__ returned non-float"
+    )
     def test_phasors(self):
         """It should be accurate.
         Uses angles to make testing easier.
@@ -105,12 +108,19 @@ class TestOscRoots(object):
         for period in (5, 7, 8, 23):
             o = Osc.from_ratio(1, period)
 
-            fractional_angle = lambda n: float(Fraction(n, period) % 1) * 360
-            angles = map_array(fractional_angle, np.arange(0, period), method='vec')
+            def fractional_angle(n):
+                return 360 * float(Fraction(n, period) % 1)
+
+            angles = map_array(
+                fractional_angle,
+                np.arange(0, period),
+                method='vec'
+            )
             angles = 180 - ((180 - angles) % 360)  # wrap 'em to -180..180!
 
-            a = to_phasor(o.sample)
+            a = to_phasor(o.cycle)
             b = np.array(list(zip([1] * period, angles)))
 
-            assert_nulp_diff(a.real, b.real, nulp=25)  # FIXME: nulp should be smaller!
+            # FIXME: nulp should be smaller!
+            assert_nulp_diff(a.real, b.real, nulp=25)
             assert_nulp_diff(a.imag, b.imag, nulp=1)

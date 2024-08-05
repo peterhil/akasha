@@ -18,7 +18,7 @@ from akasha.curves import Curve
 from akasha.utils.patterns import Singleton
 
 
-class TestCurve(object):
+class TestCurve():
 
     def test_super(self):
         assert issubclass(Curve, PeriodicGenerator)

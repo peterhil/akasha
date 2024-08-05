@@ -19,7 +19,7 @@ from akasha.curves import Curve, Square
 from akasha.utils.patterns import Singleton
 
 
-class TestSquare(object):
+class TestSquare():
 
     pts = np.arange(0, 1, 1.0 / 8, dtype=np.float64)
 

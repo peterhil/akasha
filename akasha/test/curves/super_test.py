@@ -22,7 +22,7 @@ from akasha.math import normalize
 from akasha.utils.patterns import Singleton
 
 
-class TestSuper(object):
+class TestSuper():
 
     pts = np.arange(0, 1, 1.0 / 8, dtype=np.float64)
 
@@ -32,7 +32,10 @@ class TestSuper(object):
 
     def test_init(self):
         s = Super()
-        assert_array_equal(s.superness, np.array([4, 2, 2, 2, 1.0, 1.0], dtype=np.float64))
+        assert_array_equal(
+            s.superness,
+            np.array([4, 2, 2, 2, 1.0, 1.0], dtype=np.float64)
+        )
         assert isinstance(s, Super)
 
     superness_params = [

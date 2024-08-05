@@ -20,7 +20,7 @@ from akasha.audio.oscillator import Osc
 from akasha.timing import sampler
 
 
-class TestHarmonics(object):
+class TestHarmonics():
     """
     Tests for Harmonics
     """

@@ -11,11 +11,11 @@ Noise and chaos module.
 
 from __future__ import division
 
+from cmath import rect
+
 import funcy
 import numpy as np
 import pandas as pd
-
-from cmath import rect
 
 from akasha.curves import Circle
 from akasha.audio.envelope import Exponential
@@ -23,6 +23,7 @@ from akasha.audio.frequency import Frequency
 from akasha.audio.generators import Generator
 from akasha.math import normalize, numberof, pi2, random_phasor
 from akasha.timing import sampler
+from akasha.utils.python import class_name, _super
 
 
 class Noise(Generator):
@@ -31,7 +32,7 @@ class Noise(Generator):
     """
 
     def __init__(self, domain_fn=None, random_fn=np.random.random):
-        super(self.__class__, self).__init__()
+        _super(self).__init__()
         self.function = domain_fn or self.unit_disc
         self.randomizer = random_fn
 
@@ -56,30 +57,40 @@ class Noise(Generator):
         noise = x + y
         return noise
 
-    def sample(self, iterable):
+    def sample(self, frames):
         """
         Commence noise.
         """
-        return self.function(iterable, self.randomizer)
+        return self.function(frames, self.randomizer)
 
 
 class ColouredNoise(Generator):
+    """Generate coloured noise, with instantaneous frequency
+    differences having some distribution.
+
+    By default uses standard normal distribution, also known as
+    the Gaussian distribution.
     """
-    Generate coloured noise, with instantaneous frequency differences having some distribution.
-    By default uses standard normal distribution, also known as the Gaussian distribution.
-    """
+
     # TODO Make this into a filter for jittering a frequency
     # TODO Examine using other distributions
 
-    def __init__(self, frequency, deviation=0.1, step=1, log=True):
-        """
-        == Parameters ==
+    def __init__(
+        self,
+        frequency,
+        deviation=0.1,
+        step=1,
+        curve=Circle(),
+        log=True
+    ):
+        """== Parameters ==
         frequency: The center of the distribution (mu).
         deviation: The standard deviation (sigma).
 
         Example:
         >>> cn = ColouredNoise(0.01, 0.1)
         """
+        self.curve = curve
         self.frequency = Frequency(frequency)
         self.sigma = deviation
         self.step = step
@@ -87,14 +98,25 @@ class ColouredNoise(Generator):
 
     @property
     def mu(self):
+        """
+        Center of the distribution.
+        """
         return self.frequency.ratio
 
-    def sample(self, iterable):
-        length = len(iterable)
-        s = self.randomizer(self.mu, self.sigma, np.ceil(length / float(self.step)))
+    def sample(self, frames):
+        length = len(frames)
+        num = int(np.ceil(length / float(self.step)))
+        signal = self.randomizer(self.mu, self.sigma, num)
+
         if self.step != 1:
-            s = np.interp(np.arange(length), np.arange(0, length, self.step), s[:length])
-        return c.at(np.cumsum(s))
+            signal = np.interp(
+                np.arange(length),
+                np.arange(0, length, self.step),
+                signal[:length],
+            )
+        w = self.frequency.at(np.cumsum(signal))
+
+        return self.curve.at(w)
 
 
 class Rustle(Generator):
@@ -114,18 +136,19 @@ class Rustle(Generator):
 
     See: http://en.wikipedia.org/wiki/Rustle_noise
     """
+
     def __init__(self, expected=1, frequency=1, envelope=Exponential(0)):
         self.frequency = Frequency(frequency)
         self.expected = expected
         self.gen = funcy.curry(np.random.poisson, 2)(self.expected)
         self.envelope = envelope
 
-    def at(self, times):
+    def at(self, t):
         """
         Let it rumble and rustle.
         """
-        return self.envelope.at(times) * normalize(
-            self.gen(numberof(times)) * Circle.at(self.frequency.at(times))
+        return self.envelope.at(t) * normalize(
+            self.gen(numberof(t)) * Circle.at(self.frequency.at(t))
         )
 
 
@@ -136,8 +159,9 @@ class Mandelbrot(Generator):
     The regular Mandelbrot set is slightly different from this:
     The iterator is always kept inside the unit disc.
     """
+
     def __init__(self, z=None, c=None, random=False):
-        super(self.__class__, self).__init__()
+        _super(self).__init__()
 
         if random:
             self.z = random_phasor()[0]
@@ -155,7 +179,9 @@ class Mandelbrot(Generator):
         """
         self.z = self.poly(self.z)
         if np.abs(self.z) > 1.0:
-            self.z = np.array(rect(1.0 / np.abs(self.z), np.angle(self.z)), dtype=complex)
+            self.z = np.array(
+                rect(1.0 / np.abs(self.z), np.angle(self.z)), dtype=complex
+            )
         return self.z
 
     def poly(self, z):
@@ -167,44 +193,61 @@ class Mandelbrot(Generator):
         # mandel = np.poly1d([1, 0, self.c])
         return z ** 2 + self.c
 
-    def sample(self, items):
+    def sample(self, frames):
         """
         Chaos reigns.
         """
-        return np.fromiter(self, count=numberof(items), dtype=complex)
+        return np.fromiter(self, count=numberof(frames), dtype=complex)
 
     def __repr__(self):
-        return "%s(z=%s, c=%s)" % (self.__class__.__name__, self.c, self.z)
+        return f'{class_name(self)}(z={self.z!r}, z={self.c!r})'
 
 
 class Chaos(Generator):
     """
     Chaos ensues.
     """
+
     # TODO: Make into generic iterator using Generator
 
-    def __init__(self, gen=Mandelbrot(random=True), envelope=Exponential(0, amp=0.5)):
-        super(self.__class__, self).__init__()
+    def __init__(
+        self,
+        gen=Mandelbrot(random=True),
+        envelope=Exponential(0, amp=0.5),
+    ):
+        _super(self).__init__()
         self.gen = gen
-        self.envelope = envelope  # TODO: Leave out of sound objects, and compose when sampling?
+        # TODO: Leave envelope out of sound objects & compose when sampling?
+        self.envelope = envelope
 
-    def sample(self, iterable):
+    def sample(self, frames):
         """
         Chaos reigns.
         """
-        print(self.gen, len(iterable))
-        chaos = np.fromiter(self.gen, count=len(iterable), dtype=complex)
-        return chaos[iterable] * self.envelope[iterable]
+        print(self.gen, len(frames))
+        chaos = np.fromiter(self.gen, count=len(frames), dtype=complex)
+        return chaos[frames] * self.envelope[frames]
 
     def __repr__(self):
-        return "%s(gen=%s)" % (self.__class__.__name__, repr(self.gen))
+        return f'{class_name(self)}(gen={self.gen!r})'
 
 
-def random_frequencies(n, low=20, high=sampler.rate/2.0, t=4, window=2, smoothing='exponential'):
+def random_frequencies(
+    n,
+    low=20,
+    high=sampler.rate / 2.0,
+    t=4,
+    window=2,
+    smoothing='exponential',
+):
+    """
+    Generate random varying frequencies using window functions.
+    """
     signal = np.repeat(
-        np.random.random_integers(
-            low, high, np.ceil(float(n) / float(t))) / float(sampler.rate),
-        t)
+        np.random.random_integers(low, high, np.ceil(float(n) / float(t)))
+        / float(sampler.rate),
+        t,
+    )
     if smoothing == 'exponential':
         signal = pd.ewma(signal, span=window, min_periods=1)
     elif smoothing:

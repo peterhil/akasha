@@ -28,13 +28,19 @@ def user_agent(req):
     """
     Return the user agent string.
     """
-    product = 'Akasha-Resonance'
-    url = 'http://composed.nu/peterhil/'
+    product = 'Akasha Resonance'
+    url = 'https://composed.nu/peterhil/'
     platform = '; '.join(np.array(os.uname())[[0, 2, 4]])
     system = '(' + platform + '; ' + funcy.first(locale.getlocale()) + ')'
     browser_platform = req.headers['User-agent'][0]
     python_version = 'Python/' + funcy.first(os.sys.version.split(' '))
-    return (browser_platform, system, product + ' (' + url + ')', python_version)
+
+    return (
+        browser_platform,
+        system,
+        product + ' (' + url + ')',
+        python_version,
+    )
 
 
 def get_interval_list():
@@ -48,7 +54,7 @@ def get_interval_list():
         'titles': 'List of pitch intervals',
         'rvprop': 'content',
         'rvsection': '1',
-        'format': 'json'
+        'format': 'json',
     }
     req = api.APIRequest(site, params)
     req.headers['User-agent'] = user_agent(req)  # Customize User Agent
@@ -57,15 +63,17 @@ def get_interval_list():
 
 
 def replacement(groups, template=u'', func=identity):
+    """Apply a function to matched regexp and format the results
+    using a template.
     """
-    Apply a function to matched regexp and format the results using a template.
-    """
+
     def repl(match):
         # pylint: disable=C0111
         if isinstance(groups, (list, tuple)):
             return template.format(*func(match.group(*groups)))
         else:
             return template.format(func(match.group(groups)))
+
     return repl
 
 
@@ -87,14 +95,14 @@ def filter_tags(string, tag, template=u'', func=identity):
     Filter out html tags and change their values by calling replacement()
     with a function and a template.
     """
-    wiki_tag = re.compile(r"<{0}( name=\"[^\"]+\")?(/>|>([^<]*?)</{0}>)".format(tag))
+    regex = r"<{0}( name=\"[^\"]+\")?(/>|>([^<]*?)</{0}>)"
+    wiki_tag = re.compile(regex.format(tag))  # pylint: disable=C0209
     return re.sub(wiki_tag, replacement(3, template, func), string)
 
 
 def remove_templates(string, tags=None):
-    """
-    Replaces all template tags (or just named tags) of the type '{{tag|value|other}}'
-    with 'value|other' from the string.
+    """Replaces all template tags (or just named tags) of the type
+    '{{tag|value|other}}' with 'value|other' from the string.
     """
     wiki_template = re.compile(r"{{([A-Za-z]+)\|(.*?)}}")
 
@@ -139,13 +147,13 @@ def parse_interval_name(string, only_first=False):
             pass
         return (name, funcy.first(audio))
     except KeyError:
-        logger.error("KeyError for string: %s" % string)
+        logger.error("KeyError for string: %s", string)
         return (name, "")
 
 
 def parse_freq_ratio(string):
-    """
-    Parse frequency ratio from the expression in the factors column of the table.
+    """Parse frequency ratio from the expression in the factors column
+    of the table.
 
     Example
     -------
@@ -158,16 +166,17 @@ def parse_freq_ratio(string):
     out = re.sub(re_mul, u' * ', out, re.UNICODE)
     out = re.sub(re_div, u' / ', out, re.UNICODE)
     out = filter_tags(out, tag='sup', template=u' ** {0!r}', func=Fraction)
-    return unicode(out.encode('iso-8859-1'))
+    return str(out.encode('iso-8859-1'))
 
 
 def parse_wiki(res, loglevel=logging.ANIMA):
-    """
-    Parse the interval dictionary from the fetched wikipedia page in the wiki syntax.
+    """Parse the interval dictionary from the fetched wikipedia page
+    in the wiki syntax.
     """
     pgs = res['query']['pages']
     content = pgs[pgs.keys()[0]]['revisions'][0]['*']
-    table = remove_wiki_links(filter_tags(content, 'ref')).split('|+')[1].split('\n|-\n|')[:-1]
+    links_removed = remove_wiki_links(filter_tags(content, 'ref'))
+    table = links_removed.split('|+')[1].split('\n|-\n|')[:-1]
     legend, table = funcy.first(table), funcy.rest(table)
     out = []
     for row in table:
@@ -189,15 +198,24 @@ def parse_wiki(res, loglevel=logging.ANIMA):
             rec[2] = parse_freq_ratio(rec[2])
             cts = float(cents(eval(compile(rec[2], __name__, 'eval'))))
             if cts != 0 or rec[0] == 0:
-                logger.log(loglevel, "Parsed cents: %s" % cts)
+                logger.log(loglevel, "Parsed cents: %s", cts)
                 rec[0] = cts
-                err = (cts - rec[0])
+                err = cts - rec[0]
                 if np.abs(err) >= 0.005:
                     logger.warning(
-                        "%s '%s' has a too big error %.5f with it's cents %.5f != %.5f" %
-                        (rec[2], rec[1], err, rec[0], cts)
+                        "%s '%s' has a too big error %.5f with it's "
+                        "cents %.5f != %.5f",
+                        rec[2],
+                        rec[1],
+                        err,
+                        rec[0],
+                        cts,
                     )
             else:
-                logger.warning("Parsed cents is %s for record:\n\t\t%s" % (cts, rec))
+                logger.warning(
+                    "Parsed cents is %s for record:\n\t\t%s",
+                    cts,
+                    rec,
+                )
         out.append(rec)
     return (out, legend)

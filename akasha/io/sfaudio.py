@@ -8,20 +8,14 @@ import soundfile as sf
 from scipy.signal import hilbert
 
 from akasha.audio.channels import num_channels
-from akasha.funct import blockwise
-from akasha.io import file_extension, relative_path
+from akasha.funct.itertools import blockwise
+from akasha.io.path import file_extension, relative_path
 from akasha.timing import sampler, time_slice
-from akasha.utils.log import logger
 
 
 def play(
-        sndobj,
-        dur=5.0,
-        start=0,
-        axis='real',
-        fs=sampler.rate,
-        buffer_size=512
-    ):
+    sndobj, dur=5.0, start=0, axis='real', fs=sampler.rate, buffer_size=512
+):
     """
     Play a sound using PyAudio bindings for portaudio.
     """
@@ -33,8 +27,11 @@ def play(
 
     n_channels = num_channels(data)
     if n_channels > 2:
-        # TODO Use mapping argument with python-sounddevice library to overcome this or DIY?
-        raise NotImplementedError("Only mono and stereo sounds are supported for now")
+        # TODO Use mapping argument with python-sounddevice library
+        # to overcome this or DIY?
+        raise NotImplementedError(
+            'Only mono and stereo sounds are supported for now'
+        )
 
     stream = pa.open(
         format=pyaudio.paFloat32,
@@ -51,13 +48,13 @@ def play(
 
 
 def read(
-        filename,
-        dur=5.0,
-        start=0,
-        fs=sampler.rate,
-        complex=True,
-        sdir=relative_path('../../Sounds/_Music samples/'),
-    ):
+    filename,
+    dur=5.0,
+    start=0,
+    fs=sampler.rate,
+    complex=True,
+    sdir=relative_path('../../Sounds/_Music samples/'),
+):
     """
     Read a sound file.
     """
@@ -69,7 +66,7 @@ def read(
     extension = file_extension(filename)
     check_format(extension)
 
-    time = time_slice(dur, start)
+    # time = time_slice(dur, start)
 
     # Read data
     data, samplerate = sf.read(
@@ -86,17 +83,17 @@ def read(
 
 
 def write(
-        sndobj,
-        filename='test_sound',
-        dur=5.0,
-        start=0,
-        axis='real',
-        fs=sampler.rate,
-        fmt='WAV',
-        subtype=None,
-        endian=None,
-        sdir=relative_path('../../Sounds/Out/'),
-    ):
+    sndobj,
+    filename='test_sound',
+    dur=5.0,
+    start=0,
+    axis='real',
+    fs=sampler.rate,
+    fmt='WAV',
+    subtype=None,
+    endian=None,
+    sdir=relative_path('../../Sounds/Out/'),
+):
     """
     Write a sound file.
 
@@ -139,4 +136,6 @@ def check_format(format):
     """Checks that a requested format is available (in libsndfile)."""
     available = sf.available_formats().keys()
     if format.upper() not in available:
-        raise ValueError("File format '%s' not available. Try one of: %s" % (format, available))
+        raise ValueError(
+            f"File format '{format!s}' not available. Try one of: {available}"
+        )

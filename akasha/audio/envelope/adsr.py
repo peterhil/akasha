@@ -13,11 +13,9 @@ import numpy as np
 
 from akasha.audio.delay import Delay
 from akasha.audio.envelope.beta import Beta, InverseBeta
-from akasha.audio.envelope.exponential import Exponential
 from akasha.audio.generators import Generator
 from akasha.audio.mix import Mix
 from akasha.audio.scalar import Scalar
-from akasha.audio.sum import Sum
 
 
 def iter_param(param):
@@ -28,7 +26,16 @@ class Adsr(Generator):
     """
     Adsr envelopes with beta distrubution cdf curves.
     """
-    def __init__(self, attack=(0.15,), decay=(0.25,), sustain=0.5, release=(0.2,), released_at=None, decay_overlap=0):
+
+    def __init__(
+        self,
+        attack=(0.15,),
+        decay=(0.25,),
+        sustain=0.5,
+        release=(0.2,),
+        released_at=None,
+        decay_overlap=0,
+    ):
         self.released_at = released_at
         self.sustain = Scalar(float(sustain), dtype=np.float64)
         self.decay_overlap = decay_overlap
@@ -41,7 +48,9 @@ class Adsr(Generator):
     def decay(self):
         return Delay(
             self.attack.time - self.decay_overlap,
-            InverseBeta(*iter_param(self.decay_params), amp=1.0 - self.sustain_level)
+            InverseBeta(
+                *iter_param(self.decay_params), amp=1.0 - self.sustain_level
+            ),
         )
 
     @property
@@ -64,16 +73,7 @@ class Adsr(Generator):
         """
         Sample adsr envelope at times.
         """
-        adsr = Mix(
-            self.attack,
-            self.decay
-        )
+        adsr = Mix(self.attack, self.decay)
         if self.released_at is not None:
-            adsr = Mix(
-                adsr,
-                Delay(
-                    float(self.released_at),
-                    self.release
-                )
-            )
+            adsr = Mix(adsr, Delay(float(self.released_at), self.release))
         return adsr.at(t)

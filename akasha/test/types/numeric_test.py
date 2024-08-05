@@ -19,10 +19,15 @@ import itertools
 import operator
 import pytest
 
-from abc import ABCMeta, abstractproperty
+# from abc import ABCMeta, abstractproperty
 from fractions import Fraction
 
-from akasha.types.numeric import NumericUnit, ComplexUnit, RationalUnit, RealUnit, IntegralUnit
+from akasha.types.numeric import \
+     NumericUnit, \
+     ComplexUnit, \
+     RationalUnit, \
+     RealUnit, \
+     IntegralUnit
 
 
 class Numeric(NumericUnit):
@@ -35,10 +40,21 @@ class Numeric(NumericUnit):
     def _unit(self):
         return '_value'
 
-class Complex(ComplexUnit, Numeric): pass
-class Real(RealUnit, Complex): pass
-class Rational(RationalUnit, Real): pass
-class Integral(IntegralUnit, Rational): pass
+
+class Complex(ComplexUnit, Numeric):
+    pass
+
+
+class Real(RealUnit, Complex):
+    pass
+
+
+class Rational(RationalUnit, Real):
+    pass
+
+
+class Integral(IntegralUnit, Rational):
+    pass
 
 
 complex_operations = [
@@ -65,7 +81,7 @@ integral_operations = real_operations + [
 ]
 
 
-class TestComplexUnit(object):
+class TestComplexUnit():
     """Test algebraic field mixin."""
 
     unit = Complex
@@ -87,14 +103,16 @@ class TestComplexUnit(object):
         list(itertools.product(operations, types.keys())))
     def test_ops_self(self, operation, field):
         a, b, op, cls = self.op_params(operation, field)
-        assert op(cls(a), cls(b)) == op(self.unit(cls(a)), self.unit(cls(b)))  # Self
+        assert op(cls(a), cls(b)) == \
+            op(self.unit(cls(a)), self.unit(cls(b)))  # Self
 
     @pytest.mark.parametrize(
         ['operation', 'field'],
         list(itertools.product(operations, types.keys())))
     def test_ops_forward(self, operation, field):
         a, b, op, cls = self.op_params(operation, field)
-        assert op(cls(a), cls(b)) == op(self.unit(cls(a)), cls(b))  # Forward
+        assert op(cls(a), cls(b)) == \
+            op(self.unit(cls(a)), cls(b))  # Forward
 
     @pytest.mark.parametrize(
         ['operation', 'field'],

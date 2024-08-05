@@ -38,14 +38,16 @@ def ellipse_fit_fitzgibbon(points):
     size = len(x)
 
     # Build design matrix
-    design = np.array([
-        x * x,
-        x * y,
-        y * y,
-        x,
-        y,
-        np.ones(size),
-    ]).T
+    design = np.array(
+        [
+            x * x,
+            x * y,
+            y * y,
+            x,
+            y,
+            np.ones(size),
+        ]
+    ).T
 
     # Build scatter matrix
     scatter = np.dot(design.T, design)
@@ -60,7 +62,9 @@ def ellipse_fit_fitzgibbon(points):
     gevalues = np.diag(gevalues)
 
     # Find positive eigenvalue
-    [pos_row, pos_column] = np.where((gevalues > 0) & (np.bitwise_not(np.isinf(gevalues))))
+    [pos_row, pos_column] = np.where(
+        (gevalues > 0) & (np.bitwise_not(np.isinf(gevalues)))
+    )
 
     # Extract eigenvector corresponding to positive eigenvalue.
     # These are the general form of coefficients for ellipse (A..F).
@@ -75,16 +79,14 @@ def ellipse_fit_halir(points):
     x, y = complex_as_reals(points)
 
     # Build design matrices
-    design_quadratic = np.array([
-        x ** 2.0,
-        x * y,
-        y ** 2.0
-    ]).T
-    design_linear = np.array([
-        x,
-        y,
-        np.ones(len(points)),
-    ]).T
+    design_quadratic = np.array([x ** 2.0, x * y, y ** 2.0]).T
+    design_linear = np.array(
+        [
+            x,
+            y,
+            np.ones(len(points)),
+        ]
+    ).T
 
     # Build scatter matrices
     scatter_quadratic = np.dot(design_quadratic.T, design_quadratic)
@@ -94,18 +96,24 @@ def ellipse_fit_halir(points):
     # Inverse and reduce matrices
     t_inverse = np.dot(-la.inv(scatter_linear), scatter_combined.T)
     reduced_scatter = scatter_quadratic + np.dot(scatter_combined, t_inverse)
-    premultiplied_inverse_c1 = np.array([
-        reduced_scatter[2, :] / 2.0,
-        -reduced_scatter[1, :],
-        reduced_scatter[0, :] / 2.0
-    ])
+    premultiplied_inverse_c1 = np.array(
+        [
+            reduced_scatter[2, :] / 2.0,
+            -reduced_scatter[1, :],
+            reduced_scatter[0, :] / 2.0,
+        ]
+    )
 
     # Solve eigensystem
     [gevalues, gevector] = la.eig(premultiplied_inverse_c1)
 
     # Find positive eigenvalue
-    condition = np.dot(4.0, gevector[0, :]) * gevector[2, :] - gevector[1, :] ** 2.0  # evaluate a’Ca
-    a1 = np.squeeze(gevector.T[np.where(condition > 0)])  # eigenvector for minimum positive eigenvalue
+    # evaluate a’Ca
+    condition = (
+        np.dot(4.0, gevector[0, :]) * gevector[2, :] - gevector[1, :] ** 2.0
+    )
+    # eigenvector for minimum positive eigenvalue
+    a1 = np.squeeze(gevector.T[np.where(condition > 0)])
 
     # Extract eigenvector corresponding to positive eigenvalue.
     # These are the general form of coefficients for ellipse (A..F).

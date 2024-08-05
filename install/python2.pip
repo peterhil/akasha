@@ -1,0 +1,4 @@
+# Required only on Python2
+
+m3-cdecimal>=2.3
+future>=0.17.1  # used for: from builtins import zip

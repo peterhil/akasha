@@ -20,7 +20,7 @@ from akasha.math import pi2
 from akasha.utils.patterns import Singleton
 
 
-class TestCircle(object):
+class TestCircle():
 
     def test_super(self):
         assert issubclass(Circle, Curve)

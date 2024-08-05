@@ -14,20 +14,22 @@ import six
 from abc import ABCMeta, abstractproperty
 from fractions import Fraction
 
+from akasha.utils.python import class_name
+
 
 def ops(op):
-    """
-    Return forward and backward operator functions.
+    """Return forward and backward operator functions.
     Usage: __add__, __radd__ = ops(operator.add)
 
-    This function is borrowed and modified from fractions.Fraction.operator_fallbacks(),
-    which generates forward and backward operator functions automagically.
+    This function is borrowed and modified from
+    fractions.Fraction.operator_fallbacks(), which generates forward
+    and backward operator functions automagically.
     """
     # pylint: disable=C0111,R0911,R0912
 
     def calc(self, other, cls):
-        """
-        Closure to calculate the operation with other and return results as instances of cls.
+        """Closure to calculate the operation with other and
+        return results as instances of cls.
         """
         return cls(op(self, other))
 
@@ -47,6 +49,7 @@ def ops(op):
             return calc(complex(self), complex(other), cls)
         else:
             return NotImplemented
+
     forward.__name__ = '__' + op.__name__ + '__'
     forward.__doc__ = op.__doc__
 
@@ -60,20 +63,25 @@ def ops(op):
             return calc(other, self.value, cls)
         else:
             return NotImplemented
+
     reverse.__name__ = '__r' + op.__name__ + '__'
     reverse.__doc__ = op.__doc__
 
     return forward, reverse
 
 
-class NumericUnit(object):
+class NumericUnit:
     """
     Base numeric unit mixin for automatic arithmetic operations.
     """
+
     # References
     # ----------
-    # PEP 3141 -- A Type Hierarchy for Numbers: http://www.python.org/dev/peps/pep-3141/
-    # Python Docs: Data Model -- http://docs.python.org/2/reference/datamodel.html
+    # PEP 3141 -- A Type Hierarchy for Numbers:
+    # http://www.python.org/dev/peps/pep-3141/
+    #
+    # Python Docs: Data Model:
+    # http://docs.python.org/2/reference/datamodel.html
 
     __metaclass__ = ABCMeta
 
@@ -88,7 +96,8 @@ class NumericUnit(object):
         return getattr(self, self._unit)
 
     def _normalize_value(self, value):
-        """Prevents type errors by normalising the value to the non-unit value."""
+        """Prevents type errors by normalising the value to the
+        non-unit value."""
         return value.value if isinstance(value, type(self)) else value
 
     def __hash__(self):
@@ -98,16 +107,20 @@ class NumericUnit(object):
         return hash(self) == hash(other)
 
     def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__, self.value)
+        return f'{class_name(self)}({self.value!r})'
 
     def __str__(self):
-        return "<%s: %s %s>" % (self.__class__.__name__, self.value, self._unit.strip('_'))
+        return (
+            f'<{class_name(self)}: '
+            + f'{self.value!s}, {self._unit.strip("_")}>'
+        )
 
 
 class ComplexUnit(NumericUnit):
     """
     Complex valued unit mixin for automatic arithmetic operations.
     """
+
     def __complex__(self):
         return complex(self.value)
 
@@ -148,6 +161,7 @@ class RealUnit(ComplexUnit):
     """
     Real valued unit mixin for automatic arithmetic operations.
     """
+
     def __float__(self):
         return float(self.value)
 
@@ -167,6 +181,7 @@ class RationalUnit(RealUnit):
     """
     Rational valued unit mixin for automatic arithmetic operations.
     """
+
     @property
     def numerator(self):
         """Numerator property."""
@@ -182,6 +197,7 @@ class IntegralUnit(RationalUnit):
     """
     Integral valued unit mixin for automatic arithmetic operations.
     """
+
     def __long__(self):
         return long(self.value)
 
