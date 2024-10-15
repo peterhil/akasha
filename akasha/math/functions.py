@@ -317,7 +317,7 @@ def complex_as_reals(signal, dtype=np.float64):
     signal = np.asanyarray(signal, dtype=np.complex128)
     if signal.ndim < 1:
         signal = np.atleast_1d(signal)
-    return signal.view(dtype).reshape(len(signal), 2).transpose()
+    return np.ascontiguousarray(signal).view(dtype).reshape(len(signal), 2).transpose()
 
 
 def as_polar(signal, dtype=np.complex128):
@@ -671,12 +671,15 @@ def pcm(signal, bits=16, axis='imag'):
     real = getattr(signal, axis)
     # Pygame mixer uses negative ints to indicate uint type
     abs_bits = np.abs(bits)
-    if isinstance(bits, np.float):
-        return np.cast['float' + str(int(abs_bits))](real)
+    if isinstance(bits, np.floating):
+        scale = 1
+        sample_type = 'float' + str(int(abs_bits))
     else:
         scale = 2 ** (abs_bits - 1) - 1
-        int_type = 'uint' if bits < 0 else 'int'
-        return np.cast[int_type + str(abs_bits)](real * scale)
+        sample_type = ('uint' if bits < 0 else 'int') + str(abs_bits)
+    dtype = getattr(np, sample_type)
+
+    return np.asarray(real * scale, dtype=dtype)
 
 
 def rms(signal):
@@ -759,7 +762,7 @@ def clip(signal, limit=1.0, inplace=False):
     if not inplace:
         signal = signal.copy()
 
-    reals = signal.view(np.float)
+    reals = signal.view(np.float64)
     # Do clipping in-place!
     np.clip(reals, a_min=-limit, a_max=limit, out=reals)
 

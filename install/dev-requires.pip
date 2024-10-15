@@ -1,8 +1,5 @@
 pyflakes>=1.6.0
 pycodestyle>=2.5.0
 pylint>=1.7.2
-bpython>=0.24
 ipdb>=0.10.3
-ipython>=6  # IPython 6 dropped support for Python 2.7
-sphinx>=4.5.0
-pygments>=2.6.0
+ipython  # IPython 6 dropped support for Python 2.7

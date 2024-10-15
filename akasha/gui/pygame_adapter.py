@@ -56,11 +56,6 @@ class PygameGui:
         # flags |= pg.OPENGL
         flags |= pg.DOUBLEBUF
 
-        if 'numpy' in pg.surfarray.get_arraytypes():
-            pg.surfarray.use_arraytype('numpy')
-        else:
-            raise ImportError('Numpy array package is not installed')
-
         bitdepth = 32 if flags & pg.SRCALPHA else 24
         mode = pg.display.set_mode((size, size), flags, bitdepth)
         pg.display.set_caption(name)
@@ -95,7 +90,7 @@ class PygameGui:
             channels,
         )
 
-        return pg.mixer.find_channel(force=True)
+        return pg.mixer.find_channel()
 
     def cleanup(self):
         """

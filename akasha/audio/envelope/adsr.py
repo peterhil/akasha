@@ -19,7 +19,7 @@ from akasha.audio.scalar import Scalar
 
 
 def iter_param(param):
-    return iter(np.asarray([param], dtype=np.float).flatten())
+    return iter(np.asarray([param], dtype=np.float64).flatten())
 
 
 class Adsr(Generator):

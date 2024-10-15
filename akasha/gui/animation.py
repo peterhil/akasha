@@ -103,7 +103,7 @@ def loop(gui, snd, channel, widget):
                 if not sampler.paused:
                     current = watch.next()
                     current_slice = slice(
-                        sampler.at(last, np.int), sampler.at(current, np.int)
+                        sampler.at(last, np.int64), sampler.at(current, np.int64)
                     )
                     samples = snd[current_slice]
 
