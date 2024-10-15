@@ -1,21 +1,6 @@
-#!/usr/bin/env python
-#
-# E1101: Module 'x' has no 'y' member
-#
-# pylint: disable=E1101
-
-"""
-Copyright (c) 2011 Peter Hillerström. All rights reserved.
-
-Author: Peter Hillerström
-Date: 2011-12-06
-"""
-
-
 import json
 import numpy as np
 import sys
-
 
 from akasha.io.path import relative_path
 
@@ -38,6 +23,7 @@ from akasha.io.path import relative_path
 # Defined by:
 # - Mapping from key to position
 # - Mapping from position to frequency (by index)
+
 
 def get_layout(path='settings/keymaps/fi.json'):
     with open(relative_path(path)) as keymap:

@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from timeit import default_timer as timer
 
 

@@ -1,10 +1,7 @@
-#!/usr/bin/env python
-#
 # C0111: Missing docstring
 # R0201: Method could be a function
-# E1101: Module 'x' has no 'y' member
 #
-# pylint: disable=C0111,R0201,E1101
+# pylint: disable=C0111,R0201
 
 """
 Unit tests for Circle

@@ -1,17 +1,9 @@
-#!/usr/bin/env python
-#
-# E1101: Module 'x' has no 'y' member
-#
-# pylint: disable=E1101
-
 """
 The public domain PADsynth algorithm from ZynAddSubFx
 
 http://zynaddsubfx.sourceforge.net/doc/PADsynth/PADsynth.htm
 http://zynaddsubfx.sourceforge.net/doc_0.html
 """
-
-
 
 import numpy as np
 import scipy as sc

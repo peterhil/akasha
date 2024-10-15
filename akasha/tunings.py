@@ -1,16 +1,9 @@
-#!/usr/bin/env python
-#
-# E1101: Module 'x' has no 'y' member
-#
-# pylint: disable=E1101
-
 """
 Musical tuning systems module.
 
 See "Pitch Systems in Tonal Music" series on YouTube:
 http://www.youtube.com/watch?v=0j-YXgXTpoA
 """
-
 
 import numpy as np
 

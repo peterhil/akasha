@@ -1,12 +1,7 @@
-#!/usr/bin/env python
-#
 # Copyright (c) 2011 Peter Hillerström. All rights reserved.
 #
 # Author: Peter Hillerström
 # Date: 2011-12-11
-#
-# E1101: Module 'x' has no 'y' member
-# pylint: disable=E1101
 
 """
 Tape compression module.

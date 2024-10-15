@@ -1,9 +1,6 @@
-#!/usr/bin/env python
-
 """
 The oscillating module.
 """
-
 
 from numbers import Real
 

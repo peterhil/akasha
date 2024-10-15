@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from akasha.timing.sampler import sampler
 
 

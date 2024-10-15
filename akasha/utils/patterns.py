@@ -1,9 +1,6 @@
-#!/usr/bin/env python
-
 """
 Oop design patterns module
 """
-
 
 class Singleton:
     """

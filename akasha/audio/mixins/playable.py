@@ -1,7 +1,5 @@
-#!/usr/bin/env python
-
 """
-Releasable mixin module
+Playable mixin module
 """
 
 from akasha.audio.mixins.releasable import Releasable

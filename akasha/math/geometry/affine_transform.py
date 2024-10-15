@@ -1,9 +1,6 @@
-#!/usr/bin/env python
-
 """
 Affine Transform module
 """
-
 
 import skimage.transform as skt
 

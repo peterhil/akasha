@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import os
 
 from akasha.settings import config

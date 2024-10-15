@@ -1,9 +1,6 @@
-#!/usr/bin/python
-
 """
 Numeric types
 """
-
 
 import numbers
 import operator

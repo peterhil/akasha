@@ -1,10 +1,6 @@
-#!/usr/bin/env python
-#
-# E1101: Module 'x' has no 'y' member
-#
-# pylint: disable=E1101
-
-"""Tuneable mixin module"""
+"""
+Tuneable mixin module
+"""
 
 import numpy as np
 

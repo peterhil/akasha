@@ -1,9 +1,6 @@
-#!/usr/bin/env python
-
 """
 Square curve
 """
-
 
 from akasha.curves.circle import Circle
 from akasha.curves.curve import Curve

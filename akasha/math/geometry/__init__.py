@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-#
 # W0401: Wildcard import
 #
 # pylint: disable=W0401

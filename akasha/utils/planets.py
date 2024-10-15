@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from akasha.curves.kepler_orbit import KeplerOrbit
 
 

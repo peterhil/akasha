@@ -1,13 +1,7 @@
-#!/usr/bin/env python
-#
-# E1101: Module 'x' has no 'y' member
-# pylint: disable=E1101
-
 """
 Clothoid splines.
 http://www.dgp.toronto.edu/~karan/papers/sbim2008mccrae.pdf
 """
-
 
 import numpy as np
 import scipy as sc

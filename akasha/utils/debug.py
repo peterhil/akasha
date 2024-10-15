@@ -1,9 +1,6 @@
-#!/usr/bin/env python
-
 """
 Debug utilities
 """
-
 
 def trace_c(frame, event, arg):
     """

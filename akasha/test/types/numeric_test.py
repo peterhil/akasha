@@ -1,12 +1,10 @@
-#!/usr/bin/env python
-#
 # C0111: Missing docstring
 # R0201: Method could be a function
-# E1101: Module 'x' has no 'y' member
+#
 # R0901: Too many ancestors (n/k)
 # C0321: More than one statement on a single line
 #
-# pylint: disable=C0111,R0201,E1101,R0901,C0321
+# pylint: disable=C0111,R0201,R0901,C0321
 
 """
 Unit tests for numeric types

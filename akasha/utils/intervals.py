@@ -1,10 +1,6 @@
-#!/usr/bin/env python
-
 """
 Interval tree module.
 """
-
-
 
 from akasha.utils.python import class_name
 

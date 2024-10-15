@@ -1,9 +1,6 @@
-#!/usr/bin/env python
-
 """
 Base periodic curve module
 """
-
 
 from akasha.audio.generators import PeriodicGenerator
 from akasha.utils.python import class_name

@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """
 Composite sound object mixin.
 """
