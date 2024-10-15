@@ -4,7 +4,6 @@ Numpy setup
 
 import locale
 import numpy as np
-import six
 import sys
 
 
@@ -31,9 +30,3 @@ def np_setup():
     assert locale.getlocale()[1] in ('UTF8', 'UTF-8'), (
         'Unicode not enabled! Current locale is: ' + current_locale
     )
-
-    if six.PY2 and isinstance(sys.stdin, file):
-        assert sys.stdin.encoding == 'UTF-8', (
-            'Unicode input not enabled! Current input encoding is: '
-            + sys.stdin.encoding
-        )
