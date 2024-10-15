@@ -100,7 +100,7 @@ def remove_templates(string, tags=None):
 
     def repl(m):
         # pylint: disable=C0111
-        if tags and not m.group(1) in tags:
+        if tags and m.group(1) not in tags:
             return m.group(0)  # Do not replace
         return m.group(2)
 

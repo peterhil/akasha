@@ -4,8 +4,6 @@ Z-transform
 
 
 import numpy as np
-import scipy as sc
-import sys
 
 from scipy.fft import fft, ifft
 

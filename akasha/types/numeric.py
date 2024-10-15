@@ -4,7 +4,6 @@ Numeric types
 
 import numbers
 import operator
-import six
 
 from abc import ABCMeta, abstractproperty
 from fractions import Fraction

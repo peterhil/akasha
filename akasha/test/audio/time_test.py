@@ -8,7 +8,6 @@ Unit tests for time
 """
 
 import pytest
-import sys
 import timeit
 
 from decimal import Decimal, getcontext
