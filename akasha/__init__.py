@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """
 Akasha audio program suite
 """

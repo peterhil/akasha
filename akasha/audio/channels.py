@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """
 Audio channels module
 """

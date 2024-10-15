@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """
 Dual-tone Multifrequency Tones
 """
