@@ -13,10 +13,7 @@ import numpy as np
 import scipy as sc
 import sys
 
-if sys.version_info >= (3, 5):
-    from scipy.fft import fft, ifft
-else:
-    [fft, ifft] = sc.fft, sc.ifft
+from scipy.fft import fft, ifft
 
 from akasha.math import pi2, power_limit
 

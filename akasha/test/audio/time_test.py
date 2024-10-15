@@ -14,10 +14,7 @@ import pytest
 import sys
 import timeit
 
-if sys.version_info >= (3, 3, 0):
-    from decimal import Decimal, getcontext
-else:
-    from cdecimal import Decimal, getcontext
+from decimal import Decimal, getcontext
 
 from akasha.audio.time import Chrono, \
      ps, ns, us, ms, \

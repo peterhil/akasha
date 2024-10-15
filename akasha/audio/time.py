@@ -11,10 +11,7 @@ from timeit import default_timer as timer
 from akasha.types.numeric import RealUnit
 from akasha.utils.python import _super
 
-if sys.version_info >= (3, 3, 0):
-    from decimal import Decimal, getcontext
-else:
-    from cdecimal import Decimal, getcontext
+from decimal import Decimal, getcontext
 
 
 getcontext().prec = 32
