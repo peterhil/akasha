@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Akasha audio program suite
 """
 
-from __future__ import absolute_import
 
 import os
 

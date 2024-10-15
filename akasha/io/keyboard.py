@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# encoding: utf-8
 #
 # E1101: Module 'x' has no 'y' member
 #
@@ -12,13 +11,11 @@ Author: Peter Hillerström
 Date: 2011-12-06
 """
 
-from __future__ import division
 
 import json
 import numpy as np
 import sys
 
-from builtins import range
 
 from akasha.io.path import relative_path
 

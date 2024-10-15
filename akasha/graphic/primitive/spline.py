@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # E1101: Module 'x' has no 'y' member
 # pylint: disable=E1101
@@ -9,7 +8,6 @@ Clothoid splines.
 http://www.dgp.toronto.edu/~karan/papers/sbim2008mccrae.pdf
 """
 
-from __future__ import division
 
 import numpy as np
 import scipy as sc

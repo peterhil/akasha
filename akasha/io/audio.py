@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # E1101: Module 'x' has no 'y' member
 #
@@ -8,7 +7,6 @@
 import numpy as np
 import scikits.audiolab as audiolab
 
-from builtins import range
 from scipy.signal import hilbert
 from scikits.audiolab import (
     Format,

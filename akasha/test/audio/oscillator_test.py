@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # C0111: Missing docstring
 # R0201: Method could be a function
@@ -14,7 +13,6 @@ Unit tests for oscillator.py
 import numpy as np
 import pytest
 
-from builtins import range, zip
 
 from akasha.audio.frequency import Frequency, FrequencyRatioMixin
 from akasha.audio.generators import PeriodicGenerator

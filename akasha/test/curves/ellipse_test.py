@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # C0111: Missing docstring
 # R0201: Method could be a function
@@ -11,7 +10,6 @@
 Unit tests for Ellipse
 """
 
-from __future__ import division
 
 import pytest
 import numpy as np

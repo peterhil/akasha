@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # C0111: Missing docstring
 # R0201: Method could be a function
@@ -26,7 +25,7 @@ from akasha.graphic.drawing import (
 )
 from akasha.test.utils.assertions import assert_equal_image
 
-from mock import patch
+from unittest.mock import patch
 from numpy.testing import assert_array_equal
 
 

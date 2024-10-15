@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# encoding: utf-8
 #
 # Copyright (c) 2011 Peter Hillerström. All rights reserved.
 #
@@ -16,7 +15,6 @@ Tape compression module.
 import funcy
 import numpy as np
 
-from builtins import range
 
 # from akasha.utils.log import logger, logging
 from akasha.math import normalize, as_polar, as_rect

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # E1101: Module 'x' has no 'y' member
 # pylint: disable=E1101
@@ -41,7 +40,7 @@ def show(img, plot=False, use_open=False):
             image = Image.fromarray(img)
             image.save(tmp.name, 'png')
             os.system(' '.join([open_cmd, tmp.name]))
-        except IOError as err:
+        except OSError as err:
             logger.error(
                 "Failed to open a temporary file and save the image: %s", err
             )
@@ -64,7 +63,7 @@ def imsave(img, filename):
         img = img.transpose((1, 0, 2))
         image = Image.fromarray(img)
         image.save(filename, 'png')
-    except IOError as err:
+    except OSError as err:
         logger.error(
             "Failed to save image into file: '%s'\n\nError was: %s",
             filename,

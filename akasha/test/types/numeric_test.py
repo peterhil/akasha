@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # C0111: Missing docstring
 # R0201: Method could be a function
@@ -13,7 +12,6 @@
 Unit tests for numeric types
 """
 
-from __future__ import division
 
 import itertools
 import operator

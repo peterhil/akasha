@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# encoding: utf-8
 
 """
 Logging for Akasha.
@@ -88,7 +87,7 @@ class ColorFormatter(logging.Formatter):
 
     def format(self, record):
         record.color = ansi.color(record.__dict__['levelname'])
-        return super(ColorFormatter, self).format(record)
+        return super().format(record)
 
 
 logging.ANIMA = 4

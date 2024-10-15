@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # E1101: Module 'x' has no 'y' member
 #
@@ -9,13 +8,11 @@
 Mathematical utility functions module.
 """
 
-from __future__ import division
 
 import numpy as np
 import scipy as sc
 import sys
 
-from builtins import range, zip
 
 if sys.version_info >= (2, 7):
     from collections import OrderedDict
@@ -961,10 +958,10 @@ def get_impulses(signal, tau=False):
     """
     if tau:
         peaks = pad(distances(np.angle(signal) / np.pi % 2), 0)
-        res = np.fmax(np.sign((peaks - 1)) * 2, 0)
+        res = np.fmax(np.sign(peaks - 1) * 2, 0)
     else:
         peaks = pad(distances(np.angle(signal) % pi2), 0)
-        res = np.fmax(np.sign((peaks - np.pi)) * pi2, 0)
+        res = np.fmax(np.sign(peaks - np.pi) * pi2, 0)
     return res
 
 

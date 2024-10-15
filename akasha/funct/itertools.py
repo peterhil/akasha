@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # E1101: Module 'x' has no 'y' member
 # pylint: disable=E1101
@@ -14,7 +13,6 @@ http://docs.python.org/library/itertools.html#recipes
 import collections
 import numpy as np
 
-from builtins import range, zip
 from itertools import count, islice, tee
 
 from akasha.utils.log import logger

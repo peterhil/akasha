@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Affine Transform module
 """
 
-from __future__ import division
 
 import skimage.transform as skt
 

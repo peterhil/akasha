@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 The oscillating module.
 """
 
-from __future__ import division
 
 from numbers import Real
 

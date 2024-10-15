@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # E1101: Module 'x' has no 'y' member
 #
@@ -12,7 +11,6 @@ See "Pitch Systems in Tonal Music" series on YouTube:
 http://www.youtube.com/watch?v=0j-YXgXTpoA
 """
 
-from __future__ import division
 
 import numpy as np
 

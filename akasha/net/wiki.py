@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # E1101: Module 'x' has no 'y' member
 # pylint: disable=E1101
@@ -8,7 +7,6 @@
 Wikipedia API client module.
 """
 
-from __future__ import division
 
 import funcy
 import locale
@@ -62,7 +60,7 @@ def get_interval_list():
     return res
 
 
-def replacement(groups, template=u'', func=identity):
+def replacement(groups, template='', func=identity):
     """Apply a function to matched regexp and format the results
     using a template.
     """
@@ -90,7 +88,7 @@ def remove_wiki_links(string):
     return re.sub(wiki_link_tag, repl, string)
 
 
-def filter_tags(string, tag, template=u'', func=identity):
+def filter_tags(string, tag, template='', func=identity):
     """
     Filter out html tags and change their values by calling replacement()
     with a function and a template.
@@ -112,7 +110,7 @@ def remove_templates(string, tags=None):
             return m.group(0)  # Do not replace
         return m.group(2)
 
-    return re.sub(wiki_template, repl, string) or u''
+    return re.sub(wiki_template, repl, string) or ''
 
 
 def template_items(string):
@@ -121,7 +119,7 @@ def template_items(string):
     """
     wiki_template = re.compile(r"{{([A-Za-z]+)\|(.*)}}")
     res = re.findall(wiki_template, string)
-    return funcy.first(res) if res else (u'', u'')
+    return funcy.first(res) if res else ('', '')
 
 
 def template_value(string):
@@ -163,9 +161,9 @@ def parse_freq_ratio(string):
     re_div = re.compile(r" ?(:|÷|\xf7) ?", re.UNICODE)
     re_mul = re.compile(r" ?(·|\xc2\xb7|\xb7|&middot;) ?", re.UNICODE)
     out = remove_templates(string)
-    out = re.sub(re_mul, u' * ', out, re.UNICODE)
-    out = re.sub(re_div, u' / ', out, re.UNICODE)
-    out = filter_tags(out, tag='sup', template=u' ** {0!r}', func=Fraction)
+    out = re.sub(re_mul, ' * ', out, re.UNICODE)
+    out = re.sub(re_div, ' / ', out, re.UNICODE)
+    out = filter_tags(out, tag='sup', template=' ** {0!r}', func=Fraction)
     return str(out.encode('iso-8859-1'))
 
 

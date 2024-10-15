@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from akasha.curves.kepler_orbit import KeplerOrbit
 

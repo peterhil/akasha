@@ -1,13 +1,10 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Interval tree module.
 """
 
-from __future__ import absolute_import
 
-from builtins import range
 
 from akasha.utils.python import class_name
 

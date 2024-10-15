@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Akasha test assertion utilities.
 """
 
-from builtins import zip
 from numpy.testing import assert_array_equal
 
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # E1101: Module 'x' has no 'y' member
 #
@@ -12,9 +11,7 @@ http://zynaddsubfx.sourceforge.net/doc/PADsynth/PADsynth.htm
 http://zynaddsubfx.sourceforge.net/doc_0.html
 """
 
-from __future__ import division
 
-from builtins import zip
 
 import numpy as np
 import scipy as sc

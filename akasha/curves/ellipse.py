@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # E1101: Module 'x' has no 'y' member
 #
@@ -9,7 +8,6 @@
 Ellipses module
 """
 
-from __future__ import division
 
 import numpy as np
 import scipy as sc

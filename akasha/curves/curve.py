@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Base periodic curve module
 """
 
-from __future__ import division
 
 from akasha.audio.generators import PeriodicGenerator
 from akasha.utils.python import class_name
