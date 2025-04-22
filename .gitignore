@@ -28,6 +28,7 @@ TAGS
 # Environments
 .direnv/
 venv/
+.pdm-python
 
 # System specific cruft
 *.core
